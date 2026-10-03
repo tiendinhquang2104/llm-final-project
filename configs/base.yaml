@@ -1,0 +1,13 @@
+# Base experiment configuration
+seed: 42
+project_name: "llm-grading-challenge"
+
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  splits_dir: "data/splits"
+
+artifacts:
+  experiments_registry: "experiments/registry.csv"
+  checkpoints_dir: "checkpoints"
+  outputs_dir: "outputs"
