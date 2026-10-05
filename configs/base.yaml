@@ -3,9 +3,13 @@ seed: 42
 project_name: "llm-grading-challenge"
 
 data:
+  # Local defaults. On Colab, override to the mounted Drive folder:
+  #   https://drive.google.com/drive/folders/1P31-GtTh5GHcUxO7TJhftSONuBTvvKwI
+  # e.g. /content/drive/MyDrive/data/{raw,processed,splits}
   raw_dir: "data/raw"
   processed_dir: "data/processed"
   splits_dir: "data/splits"
+  drive_folder_id: "1P31-GtTh5GHcUxO7TJhftSONuBTvvKwI"
 
 artifacts:
   experiments_registry: "experiments/registry.csv"

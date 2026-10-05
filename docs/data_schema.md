@@ -1,60 +1,60 @@
-# Data Schema Specification
+# Data Schema — Unified Multi-Task C++ Grading
 
-This document details the standardized schema and data contracts utilized across all tasks in the LLM Grading Challenge repository.
+Schema mirrors the official challenge `sample_dataset` layout. Code never lives inside JSON;
+JSON only references `code_file`.
 
-## Overview
+## Raw inputs
 
-All datasets ingested or emitted by the system adhere to strongly typed Pydantic models. Data is stored on disk primarily as JSON Lines (`.jsonl`) to support streaming, robust parsing, and scalability.
+| File | Role |
+|---|---|
+| `exams.json` | Exam statements + `exam_type` (`multi_problem` / `single_problem`) + grading policy |
+| `task1_grading.json` | Rubric 6-dim + `total_score` |
+| `task2_error_taxonomy.json` | Multi-label `taxonomy_error` (10 labels; `[]` = no error) |
+| `task3_feedback.json` | `target_feedback_level` + gold `feedback` |
+| `label_space.json` | Rubric ranges, taxonomy, feedback-level definitions |
+| `submissions/<exam_id>/<sample_id>.cpp` | Student code |
 
-## Core Schema Models
+Shared `sample_id` across all three task files.
 
-### GradingSample
+## Joined sample (`UnifiedSample`)
 
-The primary data entity representing an individual problem, student submission, and associated rubric metadata.
+Produced as `data/processed/unified_samples.jsonl`.
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `sample_id` | string | Yes | Unique identifier for each submission item. |
-| `question` | string | Yes | The prompt, question, or problem instruction. |
-| `student_response` | string | Yes | The student's written response to be evaluated. |
-| `reference_answer` | string | No | Authoritative reference answer or solution. |
-| `rubric` | dictionary | No | Grading criteria, weights, and scoring rules. |
-| `ground_truth_score` | float | No | Target score used for training or evaluation. |
-| `metadata` | dictionary | No | Auxiliary constraints, tags, or split labels. |
+| Field | Description |
+|---|---|
+| `sample_id`, `exam_id`, `exam_type`, `language` | Identifiers |
+| `code`, `code_file` | Loaded C++ source |
+| `exam_statement`, `grading_policy` | From `exams.json` |
+| `compile_log`, `test_report` | Auxiliary signals (not ground truth) |
+| `rubric`, `total_score` | Task 1 labels |
+| `taxonomy_error` | Task 2 labels |
+| `target_feedback_level`, `feedback` | Task 3 input level + gold text |
 
-### PrerequisiteResult
+## ChatML training record (`ChatMLRecord`)
 
-Output of deterministic heuristic and rule-based screening before LLM inference.
+Each sample expands into **3** records (`task1`, `task2`, `task3`) in:
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `passed` | boolean | Yes | True if all prerequisite rules are met. |
-| `reason` | string | Yes | Description of failure reason if rejected. |
-| `rule_details` | dictionary | No | Key-value breakdown per rule condition. |
+- `train_unified.jsonl` / `val_unified.jsonl`
+- plus per-task `task{1,2,3}_{train,val}.jsonl`
 
-### ScoreResult
+```json
+{
+  "sample_id": "EX02-S204",
+  "task": "task1",
+  "exam_id": "EX02",
+  "split": "train",
+  "messages": [
+    {"role": "system", "content": "..."},
+    {"role": "user", "content": "..."},
+    {"role": "assistant", "content": "{\"rubric\":{...},\"total_score\":10}"}
+  ],
+  "text": "<|im_start|>system\\n...<|im_end|>\\n...",
+  "target": "..."
+}
+```
 
-Unified output format for scoring and evaluation.
+### Leakage rule (hard)
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `sample_id` | string | Yes | ID corresponding to the evaluated sample. |
-| `final_score` | float | Yes | Final normalized numeric score. |
-| `subscores` | dictionary | No | Breakdown of scores across specific rubric criteria. |
-| `reasoning` | string | Yes | Explanation or justification for awarded score. |
-| `passed_prerequisites` | boolean | Yes | Indicates whether prerequisites passed. |
-| `metadata` | dictionary | No | Execution metadata and runtime diagnostics. |
-
-### SubmissionFormat
-
-Official structure for final challenge output submissions.
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `sample_id` | string | Yes | Sample identifier matching evaluation dataset. |
-| `predicted_score` | float | Yes | Continuous or discrete grade awarded. |
-| `explanation` | string | No | Optional rationalization for auditability. |
-
-## Data Serialization Standards
-
-All files in `data/processed/` must be formatted in UTF-8 encoded JSON Lines where every line is a self-contained, valid JSON object conforming to `GradingSample`.
+Teacher `feedback` must **never** appear in Task 1 / Task 2 user or system prompts.
+Task 3 may use `taxonomy_error` + `target_feedback_level` as inputs; `feedback` is the assistant target only.
+Enforced by `src/data/leakage_guard.py` inside `prepare_data.py`.
