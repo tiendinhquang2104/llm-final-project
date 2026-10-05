@@ -16,21 +16,42 @@ def _read_json(path: Path) -> Any:
 
 def resolve_dataset_root(data_dir: str | Path) -> Path:
     """
-    Accept either:
-      - .../sample_dataset/sample_dataset  (inner folder with exams.json)
-      - .../sample_dataset                 (outer zip folder)
-      - .../data/raw                       (project copy)
+    Accept common layouts:
+      - <root>/exams.json
+      - <root>/sample_dataset/exams.json
+      - <root>/sample_dataset/sample_dataset/exams.json  (zip-extracted)
+      - any nested folder under <root> containing exams.json (depth <= 4)
     """
     root = Path(data_dir).resolve()
-    if (root / "exams.json").exists():
-        return root
-    nested = root / "sample_dataset"
-    if (nested / "exams.json").exists():
-        return nested
+    if not root.exists():
+        raise FileNotFoundError(f"data_dir does not exist: {root}")
+
+    direct_candidates = [
+        root,
+        root / "sample_dataset",
+        root / "sample_dataset" / "sample_dataset",
+    ]
+    for c in direct_candidates:
+        if (c / "exams.json").exists():
+            return c
+
+    # Fallback: shallow search for exams.json
+    matches = [
+        p.parent
+        for p in root.rglob("exams.json")
+        if len(p.relative_to(root).parts) <= 5
+    ]
+    # Prefer a folder that also has submissions/ and a task1 file
+    for m in matches:
+        if (m / "submissions").is_dir() and (m / "task1_grading.json").exists():
+            return m
+    if matches:
+        return matches[0]
+
     raise FileNotFoundError(
         f"Cannot find exams.json under {root}. "
-        "Point --data_dir at the folder that contains exams.json, "
-        "task1_grading.json, and submissions/."
+        "Expected layout like raw/sample_dataset/sample_dataset/exams.json "
+        "(or exams.json directly in raw/). Also need task1_grading.json and submissions/."
     )
 
 
