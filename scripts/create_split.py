@@ -1,4 +1,4 @@
-"""CLI: (re)create train/val sample_id splits. Prefer prepare_data.py for full pipeline."""
+"""Create the canonical 26/6 split shared by all tasks (seed 42, validation ratio 0.2)."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from src.data.preprocess import make_split  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Create deterministic train/val sample_id splits.")
-    p.add_argument("--data_dir", type=str, required=True, help="Dataset root with exams.json")
+    p.add_argument("--data_dir", type=str, default="data/raw/sample_dataset")
     p.add_argument("--output_dir", type=str, default="data/splits")
     p.add_argument("--ratio", type=float, default=0.2, help="Validation ratio (default 0.2)")
     p.add_argument("--seed", type=int, default=42)
@@ -27,11 +27,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     samples = load_dataset(args.data_dir)
-    train_ids, val_ids = make_split(
-        [s.sample_id for s in samples],
-        val_ratio=args.ratio,
-        seed=args.seed,
-    )
+    train_ids, val_ids = make_split([s.sample_id for s in samples], val_ratio=args.ratio, seed=args.seed)
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
     (out / "train_ids.json").write_text(json.dumps(train_ids, ensure_ascii=False, indent=2), encoding="utf-8")

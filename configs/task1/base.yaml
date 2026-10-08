@@ -1,0 +1,28 @@
+# Task 1 defaults (rubric grading). Experiment configs extend this file.
+extends: ../base.yaml
+data:
+  root: data/raw/sample_dataset
+  task_file: task1_grading.json
+  eval_on: val
+seed: 42
+prompt:
+  template: structured
+  few_shot_k: 0
+  demo_strategy: spread
+  policy_in_prompt: false
+  use_test_report: true
+  max_code_chars: 12000
+  demo_max_code_chars: 4000
+generation:
+  temperature: 0.0
+  max_new_tokens: 8192
+  enable_thinking: false
+  n: 1
+rules:
+  clamp: true
+  prerequisite: true
+  compile_gate: true
+  derive_logic: false
+  prereq_strict: false
+retry_on_parse_fail: 1
+analysis_threshold: 2

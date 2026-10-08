@@ -1,0 +1,4 @@
+extends: e3_few_shot_structured.yaml
+name: task1_final
+description: Final Task 1 pipeline = best prompt on validation + deterministic policy rules + evaluator. Update
+  'extends' after comparing runs.

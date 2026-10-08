@@ -1,0 +1,30 @@
+# Runtime settings for scripts/run_task1.py. The API key is NOT here: put GEMINI_API_KEY in .env (see .env.example).
+
+gemini:
+  # Model served by the Gemini API: gemma-4-26b-a4b-it, gemma-4-31b-it, gemini-3.1-flash-lite, gemini-3.8-flash, ...
+  model: gemma-4-26b-a4b-it
+  # Client-side throttling — keep below the model's limits in AI Studio (https://aistudio.google.com/rate-limit).
+  #   gemma-4-*:              30 RPM / 16K TPM / 14.4K RPD  -> rpm 25, tpm 15000 (TPM is the bottleneck)
+  #   gemini-3.x-flash-lite:  15 RPM / 250K TPM / 500 RPD   -> rpm 12, tpm 0
+  #   gemini-3.x-flash:        5 RPM / 250K TPM / 20 RPD    -> rpm 4,  tpm 0
+  rpm: 8
+  tpm: 15000                  # input tokens/minute, estimated client-side (0 = off)
+  max_requests_per_run: 150   # hard cap per invocation
+  concurrency: 2
+  timeout: 180
+  json_mode: true             # auto-disabled if the model rejects it
+  # thinking_off / thinking_on: optional thinkingConfig overrides; default is chosen per model family
+  # (Gemini 3: low/high, Gemma 4: minimal/high, Gemini 2.5: thinkingBudget 0/-1).
+
+run:
+  test_mode: false            # true: only test_sample_ids (quick code check); false: whole validation split
+  test_sample_ids: [EX01-S105, EX02-S204]
+  experiments:                # file names in configs/task1/ (without .yaml)
+    - e1_zero_shot_plain
+    - e3_few_shot_structured
+  run_final: true             # also run the final pipeline (configs/task1/final.yaml)
+  predict_file: null          # e.g. task1_grading.json -> outputs/task1/predictions/task1_predictions.json
+  predict_root: null          # folder of the dev/test set (exams.json + submissions/); null = training data folder
+  use_cache: true             # reuse raw model outputs already obtained (no new API calls)
+
+output_dir: outputs/task1

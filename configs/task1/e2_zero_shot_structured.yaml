@@ -1,0 +1,6 @@
+extends: base.yaml
+name: e2_zero_shot_structured
+description: Zero-shot, detailed rubric + JSON schema (rationale, per-problem status, rubric).
+prompt:
+  template: structured
+  few_shot_k: 0

@@ -1,0 +1,11 @@
+extends: base.yaml
+name: e5_policy_in_prompt
+description: 'Ablation: grading policy stated in the prompt, NO code rules. Compare with e3 (policy enforced in
+  code).'
+prompt:
+  template: structured
+  few_shot_k: 3
+  policy_in_prompt: true
+rules:
+  prerequisite: false
+  compile_gate: false
