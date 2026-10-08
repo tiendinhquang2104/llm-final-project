@@ -11,6 +11,10 @@ Never commit raw competition or student evaluation datasets to version control. 
 ### data/raw/
 Place all incoming raw files (e.g. CSV, JSON, Parquet files provided by the competition organizers) into this folder.
 
+Current layout (official sample dataset, extracted as-is):
+- `data/raw/sample_dataset/` — `exams.json`, `label_space.json`, `task1_grading.json`, `task2_error_taxonomy.json`,
+  `task3_feedback.json`, `submissions/<exam_id>/<sample_id>.cpp`. Task 1 reads it directly (see `configs/task1/base.yaml`).
+
 Expected naming convention:
 - `train_raw.json` or `train_raw.csv`
 - `test_raw.json` or `test_raw.csv`
@@ -27,7 +31,7 @@ Standardized JSON Lines schema:
 
 ### data/splits/
 Stores reproducible identifier lists for validation splits to prevent data leakage and ensure fair comparison across models:
-- `train_ids.json`: List of sample IDs reserved for training.
+- `train_ids.json`: List of sample IDs reserved for training (and few-shot demos).
 - `val_ids.json`: List of sample IDs reserved for validation/checkpoint selection.
 
 ## Preprocessing Pipeline
@@ -36,5 +40,5 @@ To convert raw inputs into processed datasets and splits, execute:
 
 ```bash
 python scripts/prepare_data.py --input_dir data/raw --output_dir data/processed
-python scripts/create_split.py --data_path data/processed/dataset.jsonl --ratio 0.8 --seed 42
+python scripts/create_split.py --val-frac 0.6 --seed 42   # stratified by exam + score; run once, keep fixed
 ```

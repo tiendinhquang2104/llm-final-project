@@ -1,0 +1,12 @@
+extends: base.yaml
+name: e4_few_shot_thinking
+description: Few-shot structured + Gemini thinking mode (chain-of-thought, settings gemini.thinking_on).
+prompt:
+  template: structured
+  few_shot_k: 3
+generation:
+  enable_thinking: true
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  max_new_tokens: 16384

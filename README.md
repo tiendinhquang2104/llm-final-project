@@ -24,7 +24,7 @@ llm-grading-challenge/
 ├── run.sh
 ├── configs/
 │   ├── base.yaml
-│   ├── task1/ (baseline_api.yaml, prompt_exp.yaml)
+│   ├── task1/ (base.yaml, e1..e6 experiments, final.yaml, run.yaml)
 │   ├── task2/ (baseline_api.yaml, lora.yaml)
 │   └── task3/ (baseline_api.yaml, lora.yaml)
 ├── data/
@@ -34,17 +34,17 @@ llm-grading-challenge/
 │   └── README.md
 ├── src/
 │   ├── data/ (loader, schema, preprocessing, validation)
-│   ├── task1/ (prompts, scorer, prerequisite_rules, evaluator, pipeline)
+│   ├── task1/ (prompts, scorer, prerequisite_rules, evaluator, pipeline, experiment)
 │   ├── task2/ (prompts, dataset, model, train, inference, threshold, evaluator)
 │   ├── task3/ (prompts, dataset, model, train, inference, compliance, evaluator)
-│   ├── llm/ (api_client, local_model, generation)
+│   ├── llm/ (api_client: Gemini API; local_model, generation)
 │   ├── training/ (lora, trainer, reproducibility)
-│   ├── evaluation/ (metrics, error_analysis)
-│   └── utils/ (logger, config, seed)
+│   ├── evaluation/ (metrics: QWK/MAE, error_analysis)
+│   └── utils/ (config, seed, json_extractor, logger)
 ├── scripts/
 │   ├── prepare_data.py
 │   ├── create_split.py
-│   ├── run_task1.py
+│   ├── run_task1.py           (+ audit_task1_labels.py, compare_task1_runs.py)
 │   ├── run_task2.py
 │   ├── run_task3.py
 │   ├── evaluate.py
@@ -91,8 +91,9 @@ python scripts/create_split.py --data_path data/processed/dataset.jsonl --ratio 
 Execute baseline and fine-tuned experiments via dedicated runner scripts:
 
 ```bash
-# Run Task 1 (Rule-based and LLM baseline)
-python scripts/run_task1.py --config configs/task1/baseline_api.yaml
+# Run Task 1 (prompting via Gemini API + prerequisite rules); settings in configs/task1/run.yaml,
+# GEMINI_API_KEY in .env, data in data/raw/sample_dataset/. Details: docs/task1.md
+python scripts/run_task1.py
 
 # Run Task 2 (LoRA training & inference)
 python scripts/run_task2.py --config configs/task2/lora.yaml

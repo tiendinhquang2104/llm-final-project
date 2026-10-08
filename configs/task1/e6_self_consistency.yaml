@@ -1,0 +1,11 @@
+extends: base.yaml
+name: e6_self_consistency
+description: Few-shot structured, n=5 samples at T=0.7, per-dim median + majority status.
+prompt:
+  template: structured
+  few_shot_k: 3
+generation:
+  n: 5
+  temperature: 0.7
+  top_p: 0.95
+  top_k: 20

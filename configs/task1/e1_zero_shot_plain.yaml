@@ -1,0 +1,6 @@
+extends: base.yaml
+name: e1_zero_shot_plain
+description: 'Baseline: zero-shot, minimal prompt, 6 numbers only (no per-problem status => prereq rule cannot fire).'
+prompt:
+  template: plain
+  few_shot_k: 0
