@@ -8,8 +8,8 @@
 ## Task 1 API baseline
 
 1. Notebook 02 tự clone/cập nhật branch `task-1` trong `/content/llm-final-project-task1/`. Giữ dữ liệu ở `MyDrive/LLM/Final Project/data/` như notebook 01. Repo trên Drive có thể tiếp tục ở branch khác.
-2. Trong Colab Secrets, thêm `GEMINI_API_KEY` và `OPENAI_API_KEY`, bật quyền truy cập của notebook.
-3. Mở notebook 02, chạy preflight cho cả hai provider (không gọi API). Đặt `RUN_LIVE = True` để chạy smoke test một bài rồi lượt đầy đủ 6 bài validation cho zero-shot và few-shot của mỗi provider.
+2. Chọn `PROVIDERS = ('gemini', 'openai')` hoặc chỉ một provider. Notebook lấy khóa từ biến môi trường, rồi Colab Secrets; nếu Secrets không phản hồi, notebook hỏi qua ô nhập ẩn. Không nhập khóa trực tiếp vào cell hoặc chat.
+3. Mở notebook 02, chạy preflight cho cả hai provider (không gọi API). Đặt `RUN_LIVE = True` để chạy smoke test một bài rồi lượt đầy đủ 6 bài validation cho zero-shot và few-shot của provider đã chọn.
    Lượt đầy đủ dùng lại bài smoke test hợp lệ nếu model, prompt và cấu hình tạo sinh giống nhau.
 
 Notebook 02 đồng bộ split 26/6 đã commit sang Drive. Nếu Drive có split khác, notebook lưu bản cũ ở `data/splits/history_before_26_6/` trước khi thay thế.
