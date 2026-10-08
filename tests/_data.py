@@ -4,6 +4,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "raw" / "sample_dataset"
+if not (DATA / "exams.json").exists():
+    sibling = ROOT.parent / "sample_dataset" / "sample_dataset"
+    if (sibling / "exams.json").exists():
+        DATA = sibling
 HAS_DATA = (DATA / "exams.json").exists()
 
 

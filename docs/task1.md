@@ -1,13 +1,15 @@
 # Task 1 — Chấm điểm theo rubric (Hướng 1: Prompting qua API)
 
 Chấm 6 chiều rubric (`compilable 0-1, io_format 0-1, logic 0-4, edge_case 0-2, complexity 0-1, code_quality 0-1`,
-tổng 0–10) cho bài C++ bằng LLM gọi qua **Gemini API** (Gemma 4 / Gemini), kèm rule chính sách đề viết bằng code.
+tổng 0–10) cho bài C++ bằng **Gemini API hoặc OpenAI Responses API** qua cùng một prompt, rule và evaluator.
+
+Split mặc định hiện tại là **26 train / 6 validation** (seed 42). Kết quả Gemini ở phần lịch sử bên dưới được đo trên split cũ **13/19**; các số đó không so sánh trực tiếp với kết quả mới. ID của split cũ nằm trong `data/splits/history_13_19/`.
 
 ```
 đề + code + compile_log + test_report
         │
         ▼
- src/task1/prompts.py ──► src/llm/api_client.py (Gemini) ──► src/task1/scorer.py (JSON robust, retry)
+ src/task1/prompts.py ──► Gemini hoặc OpenAI backend ──► src/task1/scorer.py (JSON, retry)
                                                                 │  rubric + trạng thái từng câu P1..Pn
                                                                 ▼
                                           src/task1/prerequisite_rules.py (chính sách đề, code thuần)
@@ -23,7 +25,7 @@ tổng 0–10) cho bài C++ bằng LLM gọi qua **Gemini API** (Gemma 4 / Gemin
 |---|---|
 | `src/data/loader.py` | load đề / sample / code, split train/val cố định (seed) |
 | `src/task1/prompts.py` | template `plain` (zero-shot tối giản) và `structured` (rubric chi tiết + JSON + trạng thái từng câu), chọn few-shot demo |
-| `src/llm/api_client.py` | client Gemini `generateContent`: giới hạn RPM/TPM, chặn số request/run, retry 429/503 theo `retryDelay`, dừng khi hết quota ngày, tự tắt tính năng model không hỗ trợ, đếm token |
+| `src/llm/api_client.py`, `openai_client.py` | Gemini `generateContent` và OpenAI Responses API; OpenAI dùng Structured Outputs, đếm token/USD và giới hạn chi phí |
 | `src/utils/json_extractor.py` | tách JSON từ output LLM (bỏ `<think>`, code fence, dấu phẩy thừa) — dùng chung cho mọi task |
 | `src/task1/scorer.py` | output → rubric + trạng thái câu; gộp self-consistency (median / bỏ phiếu) |
 | `src/task1/prerequisite_rules.py` | **rule câu tiên quyết + compile gate**, độc lập với prompt, hàm thuần |
@@ -37,20 +39,23 @@ tổng 0–10) cho bài C++ bằng LLM gọi qua **Gemini API** (Gemma 4 / Gemin
 ## Cách chạy
 
 1. Dữ liệu: giải nén bộ dữ liệu vào `data/raw/sample_dataset/` (`exams.json`, `task1_grading.json`, `submissions/...`).
-2. API key (https://aistudio.google.com/apikey) vào `.env`: `GEMINI_API_KEY=...` (xem `.env.example`).
-3. Chỉnh `configs/task1/run.yaml` (model, `rpm`/`tpm`, `test_mode`, danh sách experiment), rồi:
+2. Đặt `GEMINI_API_KEY` hoặc `OPENAI_API_KEY` trong môi trường / Colab Secrets.
+3. Chỉnh `configs/task1/run.yaml` (model, giới hạn chi phí, danh sách experiment), rồi:
 
 ```bash
-pip install pyyaml        # Task 1 chỉ cần pyyaml (gọi API bằng thư viện chuẩn)
-python scripts/run_task1.py
+pip install pyyaml openai
+python scripts/run_task1.py --provider gemini --preflight
+python scripts/run_task1.py --provider openai --preflight
+python scripts/run_task1.py --provider gemini
+python scripts/run_task1.py --provider openai
 ```
 
 - `test_mode: true` chỉ chạy `test_sample_ids` (kiểm tra code, vài request); `false` chạy toàn bộ validation.
 - Mỗi bài = 1 request (+ tối đa 1 retry khi JSON lỗi). Rule và metric chạy local, không tốn request.
-- Output: `outputs/task1/<config>[_test]__<model>/` gồm `prompt.md` (prompt thật), `config.json` (config, model
+- Output: `outputs/task1/<config>[_test]__<provider>__<model>/` gồm `prompt.md` (hash prompt và system, không có mã sinh viên), `config.json` (config, model
   phục vụ, token đã dùng `model_info.inference`), `raw_outputs.jsonl`, `predictions.json` (định dạng nộp),
   `predictions_full.json`, `metrics.json` (main / LLM-only / rule ablation), `error_analysis.md`.
-- Cache theo nội dung request: chạy lại không gọi API lại; run bị ngắt chạy tiếp từ chỗ dở (checkpoint mỗi 4 bài).
+- Cache tách theo provider/model và nội dung request: chạy lại không gọi API lại; run bị ngắt chạy tiếp từ chỗ dở (checkpoint mỗi 4 bài). `usage.jsonl` và `config.json` ghi token, USD và bảng giá cấu hình cho OpenAI.
 - Test: `pytest tests/ -q` (không gọi mạng; test cần dữ liệu tự bỏ qua nếu thiếu `data/raw/sample_dataset`).
 
 ### Hạn mức free tier (AI Studio, 10/2026 — có thể thay đổi)
@@ -64,7 +69,7 @@ python scripts/run_task1.py
 **Lưu ý dữ liệu:** free tier của Gemini được Google dùng nội dung để cải thiện sản phẩm — code sinh viên (đã ẩn danh)
 được gửi cho Google. Cần xác nhận với giảng viên trước khi dùng tập đầy đủ.
 
-## Experiment (validation cố định `data/splits/`: 13 train / 19 val)
+## Experiment (validation cố định `data/splits/`: 26 train / 6 val)
 
 | Config | Mô tả |
 |---|---|
@@ -76,7 +81,7 @@ python scripts/run_task1.py
 | `e6_self_consistency` | n=5 mẫu, T=0.7, median từng chiều + bỏ phiếu trạng thái |
 | `final` | pipeline cuối (hiện = e3 + full rules) |
 
-### Kết quả hiện có — `gemma-4-26b-a4b-it`, 19 bài val
+### Kết quả lịch sử — `gemma-4-26b-a4b-it`, 19 bài val trên split 13/19
 
 | | QWK | MAE | Bias | EM6 | QWK EX01 | QWK EX02 | QWK bỏ 2 nhãn mâu thuẫn |
 |---|---|---|---|---|---|---|---|

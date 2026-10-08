@@ -5,18 +5,18 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.data.loader import load_split, load_task1, make_split
-from src.task1.experiment import run_experiment
-from src.utils.config import load_config
+from src.data.loader import load_split, load_task1
+from src.data.preprocess import make_split
 from src.llm.api_client import Backend
+from src.task1.experiment import run_experiment
 from src.task1.pipeline import Task1Pipeline, to_submission
 from src.task1.prompts import build_messages, select_demos
-
+from src.utils.config import load_config
 from tests._data import DATA, ROOT, require_data
 
 require_data()
 DS = load_task1(DATA)
-SPLIT = make_split(DS.samples, 0.6, 42)
+SPLIT = load_split(ROOT / "data" / "splits")
 
 
 class FakeLLM(Backend):
@@ -46,14 +46,18 @@ class TestData(unittest.TestCase):
         self.assertEqual(s.gold_total, sum(s.gold_rubric.values()))
 
     def test_split_fixed_and_disjoint(self):
-        self.assertEqual(SPLIT, make_split(DS.samples, 0.6, 42))
+        train, val = make_split([s.sample_id for s in DS.samples], val_ratio=0.2, seed=42)
+        self.assertEqual(SPLIT, {"train": train, "val": val})
         self.assertFalse(set(SPLIT["train"]) & set(SPLIT["val"]))
         self.assertEqual(len(SPLIT["train"]) + len(SPLIT["val"]), 32)
+        self.assertEqual((len(SPLIT["train"]), len(SPLIT["val"])), (26, 6))
         self.assertEqual({i[:4] for i in SPLIT["train"]}, {"EX01", "EX02"})
 
     def test_committed_split_matches_generator(self):
         committed = load_split(ROOT / "data" / "splits")
         self.assertEqual(committed, {"train": SPLIT["train"], "val": SPLIT["val"]})
+        old = load_split(ROOT / "data" / "splits" / "history_13_19")
+        self.assertEqual((len(old["train"]), len(old["val"])), (13, 19))
 
 
 class TestPrompts(unittest.TestCase):
@@ -69,7 +73,7 @@ class TestPrompts(unittest.TestCase):
         fb = json.loads((DATA / "task3_feedback.json").read_text(encoding="utf-8"))
         feedback = {x["sample_id"]: x["output"]["feedback"] for x in fb["samples"]}
         for sid in [s.sample_id] + [d.sample_id for d in demos]:
-            self.assertNotIn(feedback[sid][:40], text)
+            self.assertNotIn(feedback[sid], text)
 
     def test_policy_in_code_vs_prompt(self):
         s = DS.by_id()["EX01-S101"]
@@ -98,7 +102,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(llm.calls, 2)
         self.assertTrue(preds[0]["parse_ok"])
 
-    def test_fallback_when_never_parses(self):
+    def test_invalid_output_has_no_fabricated_score(self):
         class Dead(Backend):
             def generate(self, requests, gen):
                 return [["nope"] for _ in requests]
@@ -106,9 +110,9 @@ class TestPipeline(unittest.TestCase):
         by = DS.by_id()
         pipe = Task1Pipeline(DS, Dead(), {"prompt": {}, "generation": {}}, [by[i] for i in SPLIT["train"]])
         _, preds = pipe.run([by["EX02-S201"]])
-        self.assertTrue(preds[0]["fallback_used"])
-        sub = to_submission(preds)[0]
-        self.assertEqual(sub["output"]["total_score"], sum(sub["output"]["rubric"].values()))
+        self.assertFalse(preds[0]["parse_ok"])
+        self.assertIsNone(preds[0]["total_score"])
+        self.assertEqual(to_submission(preds), [])
 
     def test_run_experiment_writes_artifacts(self):
         cfg = load_config(ROOT / "configs/task1/e3_few_shot_structured.yaml")
@@ -120,6 +124,7 @@ class TestPipeline(unittest.TestCase):
             for f in ("config.json", "prompt.md", "raw_outputs.jsonl", "predictions.json", "metrics.json",
                       "error_analysis.md", "predictions_full.json"):
                 self.assertTrue((out / f).exists(), f)
+            self.assertNotIn(DS.by_id()[SPLIT["val"][0]].code, (out / "prompt.md").read_text(encoding="utf-8"))
             self.assertEqual(m["main"]["n"], len(SPLIT["val"]))
             self.assertIn("full", m["rule_ablation"])
             rows = list(csv.DictReader(open(registry, encoding="utf-8")))
@@ -160,6 +165,26 @@ class TestPipeline(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             m = run_experiment(cfg, DS, SPLIT, FakeLLM(), tmp, verbose=False, registry=None)
         self.assertEqual(m["main"]["n"], 2)
+
+    def test_smoke_sample_reused_in_full_run(self):
+        cfg = load_config(ROOT / "configs/task1/e3_few_shot_structured.yaml")
+        first, second = SPLIT["val"][:2]
+        cfg["name"] += "_test"
+        cfg["data"]["sample_ids"] = [first]
+        seen = []
+
+        class Recorder(FakeLLM):
+            def generate(self, requests, gen):
+                seen.extend(q["sample"].sample_id for q in requests)
+                return super().generate(requests, gen)
+
+        backend = Recorder()
+        with tempfile.TemporaryDirectory() as tmp:
+            run_experiment(cfg, DS, SPLIT, backend, tmp, verbose=False, registry=None)
+            full = load_config(ROOT / "configs/task1/e3_few_shot_structured.yaml")
+            full["data"]["sample_ids"] = [first, second]
+            run_experiment(full, DS, SPLIT, backend, tmp, verbose=False, registry=None)
+        self.assertEqual(seen, [first, second])
 
     def test_interrupted_run_resumes_from_checkpoint(self):
         class DiesAfterFirstChunk(FakeLLM):

@@ -1,14 +1,51 @@
 # Colab notebooks
 
-| Notebook | Mục đích | Output trên Drive |
-|---|---|---|
-| [`01_prepare_data.ipynb`](01_prepare_data.ipynb) | Preprocess ChatML + EDA + split | [Drive `data/`](https://drive.google.com/drive/u/2/folders/1P31-GtTh5GHcUxO7TJhftSONuBTvvKwI) |
+| Notebook | Mục đích |
+|---|---|
+| [`01_prepare_data.ipynb`](01_prepare_data.ipynb) | Preprocess ChatML + EDA → Drive `data/` |
+| [`02_task1_baseline_api.ipynb`](02_task1_baseline_api.ipynb) | Task 1 Gemma 4 qua Gemini API và GPT-4o-mini qua OpenAI, cùng split 26/6 và pipeline |
 
-## Cách chạy nhanh
+## Task 1 API baseline
 
-1. Mở folder Drive → **Add shortcut to My Drive** (nếu là shared folder).
-2. Upload `sample_dataset` (hoặc full set) vào `data/raw/` trên Drive.
-3. Upload/clone repo `llm-final-project` (điền `REPO_URL` hoặc `REPO_DIR_ON_DRIVE` trong notebook).
-4. Upload `colab/01_prepare_data.ipynb` lên Colab → Run all.
+1. Đồng bộ source repo lên `MyDrive/LLM/Final Project/llm-final-project/` và giữ dữ liệu ở `MyDrive/LLM/Final Project/data/` như notebook 01.
+   Nếu notebook 01 tự clone theo `.env`, đặt `REPO_BRANCH=task-1` để có runner chung.
+2. Trong Colab Secrets, thêm `GEMINI_API_KEY` và `OPENAI_API_KEY`, bật quyền truy cập của notebook.
+3. Mở notebook 02, chạy preflight cho cả hai provider (không gọi API). Đặt `RUN_LIVE = True` để chạy smoke test một bài rồi lượt đầy đủ 6 bài validation cho zero-shot và few-shot của mỗi provider.
+   Lượt đầy đủ dùng lại bài smoke test hợp lệ nếu model, prompt và cấu hình tạo sinh giống nhau.
 
-Folder ID cố định: `1P31-GtTh5GHcUxO7TJhftSONuBTvvKwI`.
+Notebook 02 đồng bộ split 26/6 đã commit sang Drive. Nếu Drive có split khác, notebook lưu bản cũ ở `data/splits/history_before_26_6/` trước khi thay thế.
+
+Notebook ghi `predictions.json`, `predictions_full.json`, `metrics.json`, `config.json` và `usage.jsonl` vào `data/outputs/task1/<experiment>__<provider>__<model>/` trên Drive. Nhật ký không chứa API key hay toàn bộ mã C++ của sinh viên. Số USD được tính từ token usage của mọi phản hồi OpenAI, kể cả lượt sửa; giới hạn mặc định là ước tính 1 USD mỗi lần chạy. Giá tham chiếu và ngày kiểm tra được lưu trong `config.json`.
+
+Có thể chạy lại cùng pipeline bằng lệnh `python scripts/run_task1.py --provider openai --data-dir <raw-folder> --splits-dir <splits-folder> --output-dir <private-output-folder> --preflight`; đổi provider thành `gemini` hoặc bỏ `--preflight` khi muốn gọi API.
+
+## Per-person config via `.env`
+
+**Commit** `.env.example` — **không commit** `.env`.
+
+Mỗi người copy `.env.example` → `.env` (local và/hoặc Drive):
+
+```bash
+cp .env.example .env
+# sửa REPO_BRANCH=dev/process_data   # hoặc branch của bạn
+```
+
+Đặt file riêng trên Drive (khuyến nghị cho Colab):
+
+`MyDrive/LLM/Final Project/.env`
+
+```env
+REPO_URL=https://github.com/tiendinhquang2104/llm-final-project.git
+REPO_BRANCH=dev/process_data
+DRIVE_DATA_DIR=/content/drive/MyDrive/LLM/Final Project/data
+REPO_DIR_ON_DRIVE=/content/drive/MyDrive/LLM/Final Project/llm-final-project
+```
+
+Notebook sẽ `git clone --branch $REPO_BRANCH` (hoặc `checkout`/`pull` nếu repo đã có trên Drive).
+
+## Workflow
+
+1. Làm việc trên branch riêng (`dev/process_data`, …).
+2. Push branch đó khi muốn Colab lấy code mới.
+3. Merge `main` chỉ khi ổn định.
+4. Không dùng `%autoreload` trên Colab Python 3.13 (`imp` đã gỡ) — re-run cell load source.

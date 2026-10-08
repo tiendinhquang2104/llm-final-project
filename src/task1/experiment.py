@@ -16,17 +16,19 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import math
 import time
 from pathlib import Path
 
-from src.evaluation.error_analysis import error_analysis, to_markdown
 from src.data.loader import Dataset, load_task1
+from src.evaluation.error_analysis import error_analysis, to_markdown
 from src.llm.api_client import Backend
+from src.task1.evaluator import evaluate, format_metrics
+from src.task1.pipeline import Task1Pipeline, to_submission, valid_parsed
+from src.task1.prerequisite_rules import RuleConfig
+from src.task1.scorer import parse_output
 from src.utils.config import PROJECT_ROOT
 from src.utils.seed import set_seed
-from src.task1.evaluator import evaluate, format_metrics
-from src.task1.pipeline import Task1Pipeline, to_submission
-from src.task1.prerequisite_rules import RuleConfig
 
 REGISTRY = PROJECT_ROOT / "experiments" / "registry.csv"
 
@@ -49,12 +51,28 @@ def _gold(samples) -> dict:
 
 
 def _write_json(path: Path, obj) -> None:
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+    def clean(value):
+        if isinstance(value, float) and not math.isfinite(value):
+            return None
+        if isinstance(value, dict):
+            return {k: clean(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [clean(v) for v in value]
+        return value
+
+    path.write_text(json.dumps(clean(obj), ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
 
 
 def _complete(record: dict) -> bool:
     """False if any request of this record failed (empty text) — such records are re-requested next time."""
-    return bool(record["outputs"]) and all(t.strip() for t in record["outputs"])
+    outputs = record["outputs"]
+    retry = record.get("retry_outputs", [])
+    if not outputs or (len(outputs) > 1 and not all(t.strip() for t in outputs)):
+        return False
+    for text in outputs + retry:
+        if valid_parsed(parse_output(text), record.get("exam_type", "single_problem")):
+            return True
+    return False
 
 
 def _read_cache(path: Path, infer_key: str) -> tuple[list[dict], dict] | None:
@@ -134,22 +152,33 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
     out_dir.mkdir(parents=True, exist_ok=True)
     pipe = Task1Pipeline(dataset, backend, cfg, demo_pool)
 
-    # Prompt record (first eval sample) — exact text the model sees.
+    # Keep prompt provenance without copying a student's full C++ submission to artifacts.
     req = pipe.build_request(eval_samples[0])
     (out_dir / "prompt.md").write_text(
-        f"<!-- demos: {req['demos']} -->\n# SYSTEM\n\n{req['messages'][0]['content']}\n\n# USER\n\n"
-        f"{req['messages'][1]['content']}\n", encoding="utf-8")
+        f"# Prompt metadata\n\nSample: {eval_samples[0].sample_id}\n"
+        f"Demos: {', '.join(req['demos'])}\n"
+        f"Prompt SHA256: {hashlib.sha256(json.dumps(req['messages'], ensure_ascii=False).encode()).hexdigest()}\n"
+        f"\n# SYSTEM\n\n{req['messages'][0]['content']}\n", encoding="utf-8")
 
     model_info = backend.info()
+    ledger_before = len(getattr(backend, "ledger", []))
+    model_key = {k: model_info.get(k) for k in ("backend", "model", "json_mode", "thinking_off", "thinking_on")}
+    request_hashes = {s.sample_id: _hash(pipe.build_request(s)["messages"]) for s in eval_samples}
     infer_key = _hash({
         "prompt": cfg.get("prompt"), "generation": cfg.get("generation"), "retry": cfg.get("retry_on_parse_fail", 1),
-        "model": {k: model_info.get(k) for k in ("backend", "model", "json_mode", "thinking_off", "thinking_on")},
+        "model": model_key,
         "ids": eval_ids, "train": split.get("train"),
+        "requests": [request_hashes[s.sample_id] for s in eval_samples],
     })
     raw_path = out_dir / "raw_outputs.jsonl"
     # Shared cache across runs: identical prompt + generation + model + samples => identical request,
     # e.g. task1_final re-uses e3's outputs instead of calling the API again.
-    shared_path = Path(out_root) / "_cache" / f"{infer_key}.jsonl"
+    safe_model = str(model_info.get("model", "unknown")).replace("/", "-").replace("\\", "-")
+    shared_path = Path(out_root) / "_cache" / str(model_info.get("backend", "unknown")) / safe_model / f"{infer_key}.jsonl"
+    sample_dir = shared_path.parent / "samples"
+    sample_keys = {s.sample_id: _hash({"model": model_key, "prompt": request_hashes[s.sample_id],
+                                       "generation": cfg.get("generation"), "retry": cfg.get("retry_on_parse_fail", 1)})
+                   for s in eval_samples}
     t0 = time.time()
     records = None
     if use_cache:
@@ -168,11 +197,21 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
         # (quota, Ctrl+C, 503) resumes with only the missing samples on the next call.
         partial_path = out_dir / "raw_outputs.partial.jsonl"
         done = {}
+        partial_valid = False
         if use_cache and partial_path.exists():
             lines = partial_path.read_text(encoding="utf-8").splitlines()
-            if lines and json.loads(lines[0]).get("infer_key") == infer_key:
+            partial_valid = bool(lines and json.loads(lines[0]).get("infer_key") == infer_key)
+            if partial_valid:
                 done = {r["sample_id"]: r for r in map(json.loads, lines[1:]) if _complete(r)}
-        if not done:
+        if use_cache:
+            for sample in eval_samples:
+                sid = sample.sample_id
+                if sid in done:
+                    continue
+                hit = _read_cache(sample_dir / f"{sample_keys[sid]}.jsonl", sample_keys[sid])
+                if hit and len(hit[0]) == 1 and hit[0][0].get("sample_id") == sid:
+                    done[sid] = hit[0][0]
+        if not partial_valid:
             _write_cache(partial_path, infer_key, [])
         todo = [s for s in eval_samples if s.sample_id not in done]
         if verbose:
@@ -183,9 +222,18 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
         chunk = max(1, int(cfg.get("checkpoint_every", 4)))
         new: dict[str, dict] = {}
         for k in range(0, len(todo), chunk):
-            for r in pipe.infer(todo[k:k + chunk]):
+            try:
+                chunk_records = pipe.infer(todo[k:k + chunk])
+            finally:
+                if hasattr(backend, "ledger"):
+                    with (out_dir / "usage.jsonl").open("w", encoding="utf-8") as usage_file:
+                        for entry in backend.ledger[ledger_before:]:
+                            usage_file.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            for r in chunk_records:
                 new[r["sample_id"]] = r
                 if _complete(r):
+                    _write_cache(sample_dir / f"{sample_keys[r['sample_id']]}.jsonl",
+                                 sample_keys[r["sample_id"]], [r])
                     with open(partial_path, "a", encoding="utf-8") as f:
                         f.write(json.dumps(r, ensure_ascii=False) + "\n")
         records = [done.get(i) or new[i] for i in eval_ids]
@@ -193,6 +241,7 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
         inference = {  # provenance of these outputs: model version actually served + cost (tokens)
             "model": model_info.get("model"), "served_models": backend.info().get("served_models"),
             "usage": {k: usage_after[k] - usage_before.get(k, 0) for k in usage_after},
+            "reused_samples": len(done),
             "inferred_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
         model_info["inference"] = inference
@@ -202,27 +251,40 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
             partial_path.unlink(missing_ok=True)
     infer_sec = time.time() - t0
 
+    if hasattr(backend, "ledger"):
+        with (out_dir / "usage.jsonl").open("w", encoding="utf-8") as usage_file:
+            for entry in backend.ledger[ledger_before:]:
+                usage_file.write(json.dumps(entry, ensure_ascii=False) + "\n")
     gold = _gold(eval_samples)
     groups = {s.sample_id: s.exam_id for s in eval_samples}
     preds = pipe.postprocess_all(records)
-    main = evaluate(gold, {p["sample_id"]: p for p in preds}, groups)
-    llm_only = evaluate(gold, {p["sample_id"]: {"rubric": p["rubric_llm"], "total_score": p["total_llm"]}
-                               for p in preds}, groups)
+    successful = [p for p in preds if p["parse_ok"]]
+    scored_gold = {sid: row for sid, row in gold.items() if sid in {p["sample_id"] for p in successful}}
+    if scored_gold:
+        main = evaluate(scored_gold, {p["sample_id"]: p for p in successful}, groups)
+        llm_only = evaluate(scored_gold, {p["sample_id"]: {"rubric": p["rubric_llm"], "total_score": p["total_llm"]}
+                                           for p in successful}, groups)
+    else:
+        empty = {"n": 0, "qwk": float("nan"), "mae": float("nan"), "exact_total": float("nan"),
+                 "exact_match_mean": float("nan"), "within1_total": float("nan"), "bias_total": float("nan"),
+                 "exact_match": {}, "exact_match_all_dims": float("nan")}
+        main = llm_only = empty
     ablation = {}
     for vname, vcfg in RULE_VARIANTS.items():
         vp = pipe.postprocess_all(records, RuleConfig.from_dict(vcfg))
-        m = evaluate(gold, {p["sample_id"]: p for p in vp}, groups)
+        m = evaluate(scored_gold, {p["sample_id"]: p for p in vp if p["parse_ok"]}, groups) if scored_gold else main
         ablation[vname] = {"qwk": m["qwk"], "mae": m["mae"], "exact_total": m["exact_total"],
                            "exact_match_mean": m["exact_match_mean"]}
     parse_fail = sum(not p["parse_ok"] for p in preds)
 
     metrics = {"name": cfg["name"], "eval_on": eval_on, "rules": cfg.get("rules", {}), "main": main,
                "llm_only": llm_only, "rule_ablation": ablation, "parse_failures": parse_fail,
+               "n_requested": len(eval_samples), "n_success": len(successful),
                "inference_seconds": round(infer_sec, 1)}
     _write_json(out_dir / "metrics.json", metrics)
     _write_json(out_dir / "predictions_full.json", preds)
     _write_json(out_dir / "predictions.json", to_submission(preds))
-    ea = error_analysis(preds, by_id, threshold=int(cfg.get("analysis_threshold", 2)))
+    ea = error_analysis(successful, by_id, threshold=int(cfg.get("analysis_threshold", 2)))
     _write_json(out_dir / "error_analysis.json", ea)
     (out_dir / "error_analysis.md").write_text(to_markdown(ea, f"Error analysis — {cfg['name']}"), encoding="utf-8")
     _write_json(out_dir / "config.json", {
@@ -231,14 +293,19 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
         "eval_ids": eval_ids,
     })
     if registry is not None:
-        compact = {"qwk": round(main["qwk"], 4), "mae": round(main["mae"], 3),
-                   "exact_total": round(main["exact_total"], 3), "exact_match_mean": round(main["exact_match_mean"], 3),
-                   "qwk_llm_only": round(llm_only["qwk"], 4), "n_eval": len(eval_samples),
+        def finite_round(value, digits):
+            return round(value, digits) if isinstance(value, (int, float)) and math.isfinite(value) else None
+
+        compact = {"qwk": finite_round(main["qwk"], 4), "mae": finite_round(main["mae"], 3),
+                   "exact_total": finite_round(main["exact_total"], 3),
+                   "exact_match_mean": finite_round(main["exact_match_mean"], 3),
+                   "qwk_llm_only": finite_round(llm_only["qwk"], 4), "n_eval": len(eval_samples),
+                   "n_success": len(successful),
                    "parse_failures": parse_fail}
         append_registry({
             "experiment_id": cfg["name"], "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "task": "task1",
             "model": model_info.get("model", ""), "config_path": cfg.get("_config_path", ""),
-            "metrics": json.dumps(compact), "git_commit": _git_commit(),
+            "metrics": json.dumps(compact, allow_nan=False), "git_commit": _git_commit(),
             "notes": cfg.get("description", ""),
         }, registry)
     if verbose:

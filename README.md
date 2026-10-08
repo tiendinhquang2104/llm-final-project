@@ -37,7 +37,7 @@ llm-grading-challenge/
 │   ├── task1/ (prompts, scorer, prerequisite_rules, evaluator, pipeline, experiment)
 │   ├── task2/ (prompts, dataset, model, train, inference, threshold, evaluator)
 │   ├── task3/ (prompts, dataset, model, train, inference, compliance, evaluator)
-│   ├── llm/ (api_client: Gemini API; local_model, generation)
+│   ├── llm/ (Gemini and OpenAI API backends)
 │   ├── training/ (lora, trainer, reproducibility)
 │   ├── evaluation/ (metrics: QWK/MAE, error_analysis)
 │   └── utils/ (config, seed, json_extractor, logger)
@@ -82,8 +82,8 @@ cp .env.example .env
 Place the original datasets into `data/raw/`. Run the preprocessing and splitting pipeline:
 
 ```bash
-python scripts/prepare_data.py --input_dir data/raw --output_dir data/processed
-python scripts/create_split.py --data_path data/processed/dataset.jsonl --ratio 0.8 --seed 42
+python scripts/prepare_data.py --data_dir data/raw/sample_dataset --output_dir data/processed --val_ratio 0.2 --seed 42
+python scripts/create_split.py --data_dir data/raw/sample_dataset --ratio 0.2 --seed 42
 ```
 
 ### 3. Running Pipelines
@@ -91,9 +91,11 @@ python scripts/create_split.py --data_path data/processed/dataset.jsonl --ratio 
 Execute baseline and fine-tuned experiments via dedicated runner scripts:
 
 ```bash
-# Run Task 1 (prompting via Gemini API + prerequisite rules); settings in configs/task1/run.yaml,
-# GEMINI_API_KEY in .env, data in data/raw/sample_dataset/. Details: docs/task1.md
-python scripts/run_task1.py
+# Task 1: same 26/6 split, prompt and rules for both providers; check before API calls.
+python scripts/run_task1.py --provider gemini --preflight
+python scripts/run_task1.py --provider openai --preflight
+python scripts/run_task1.py --provider gemini
+python scripts/run_task1.py --provider openai
 
 # Run Task 2 (LoRA training & inference)
 python scripts/run_task2.py --config configs/task2/lora.yaml

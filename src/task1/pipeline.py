@@ -1,17 +1,30 @@
 """Task 1 pipeline: prompt -> LLM -> parse -> (aggregate) -> deterministic rules -> prediction."""
 from __future__ import annotations
 
-import statistics
+import math
 
-from src.data.loader import DIMENSIONS, Dataset, Sample
+from src.data.loader import DIM_MAX, DIMENSIONS, Dataset, Sample
 from src.task1.prerequisite_rules import RuleConfig, apply_rules, clamp_rubric, policy_from_exam
 from src.task1.prompts import build_messages, select_demos
-from src.task1.scorer import aggregate, parse_output, round_half_up
+from src.task1.scorer import aggregate, parse_output
 
 RETRY_MSG = (
     "Câu trả lời trên không phải JSON hợp lệ theo schema yêu cầu. "
     "Hãy trả về DUY NHẤT một object JSON hợp lệ, không thêm chữ nào khác."
 )
+
+
+def valid_parsed(parsed, exam_type: str) -> bool:
+    """Accept only an in-range rubric and a P1 verdict where prerequisite rules need it."""
+    if not parsed.ok or not parsed.rubric:
+        return False
+    if any(not isinstance(parsed.rubric.get(d), (int, float))
+           or isinstance(parsed.rubric[d], bool)
+           or not math.isfinite(parsed.rubric[d])
+           or int(parsed.rubric[d]) != parsed.rubric[d]
+           or not 0 <= parsed.rubric[d] <= DIM_MAX[d] for d in DIMENSIONS):
+        return False
+    return exam_type != "multi_problem" or bool(parsed.problems.get("P1"))
 
 
 class Task1Pipeline:
@@ -25,20 +38,7 @@ class Task1Pipeline:
         self.demo_pool = demo_pool or []
         self.policies = {eid: policy_from_exam(e, (cfg.get("policy_overrides") or {}).get(eid))
                          for eid, e in dataset.exams.items()}
-        self.fallback = self._fallback_rubrics()
         self._by_id = dataset.by_id()
-
-    # -- fallback when the model never produces parseable output ---------------------------------
-    def _fallback_rubrics(self) -> dict[str, dict[str, int]]:
-        out = {}
-        for eid in self.ds.exams:
-            pool = [s for s in self.demo_pool if s.exam_id == eid and s.has_gold]
-            if pool:
-                out[eid] = {d: round_half_up(statistics.median(s.gold_rubric[d] for s in pool)) for d in DIMENSIONS}
-            else:
-                out[eid] = {"compilable": 1, "io_format": 1, "logic": 2, "edge_case": 1, "complexity": 1,
-                            "code_quality": 1}
-        return out
 
     # -- inference ---------------------------------------------------------------------------------
     def build_request(self, sample: Sample) -> dict:
@@ -48,6 +48,7 @@ class Task1Pipeline:
         return {
             "sample": sample,
             "exam": exam,
+            "template": self.prompt_cfg.get("template", "structured"),
             "demos": [d.sample_id for d in demos],
             "messages": build_messages(exam, sample, demos, self.prompt_cfg),
         }
@@ -58,12 +59,14 @@ class Task1Pipeline:
         outs = self.backend.generate(reqs, self.gen_cfg)
         records = []
         for q, texts in zip(reqs, outs):
-            records.append({"sample_id": q["sample"].sample_id, "demos": q["demos"], "outputs": texts,
+            records.append({"sample_id": q["sample"].sample_id, "exam_type": q["sample"].exam_type,
+                            "demos": q["demos"], "outputs": texts,
                             "retry_outputs": []})
         n_retry = int(self.cfg.get("retry_on_parse_fail", 1))
         for _ in range(n_retry):
             bad = [i for i, r in enumerate(records)
-                   if not any(parse_output(t).ok for t in r["outputs"] + r["retry_outputs"])]
+                   if not any(self._valid(parse_output(t), reqs[i]["sample"])
+                              for t in r["outputs"] + r["retry_outputs"])]
             if not bad:
                 break
             retry_reqs = []
@@ -83,16 +86,22 @@ class Task1Pipeline:
         return records
 
     # -- post-processing (pure; can be re-run with different rule configs) -------------------------
+    def _valid(self, parsed, sample: Sample) -> bool:
+        return valid_parsed(parsed, sample.exam_type)
+
     def postprocess(self, record: dict, rule_cfg: RuleConfig | None = None) -> dict:
         rule_cfg = rule_cfg or self.rule_cfg
         sample = self._by_id[record["sample_id"]]
-        parsed = [parse_output(t) for t in record["outputs"]]
-        if not any(p.ok for p in parsed):
-            parsed += [parse_output(t) for t in record.get("retry_outputs", [])]
+        parsed = [p for t in record["outputs"] if self._valid(p := parse_output(t), sample)]
+        if not parsed:
+            parsed = [p for t in record.get("retry_outputs", []) if self._valid(p := parse_output(t), sample)]
         rubric, statuses, rationale = aggregate(parsed)
         fallback = rubric is None
         if fallback:
-            rubric = dict(self.fallback[sample.exam_id])
+            return {"sample_id": sample.sample_id, "exam_id": sample.exam_id, "parse_ok": False,
+                    "n_parsed": 0, "fallback_used": False, "error": "invalid_or_missing_grade",
+                    "problems": {}, "rationale": "", "rubric_llm": None, "total_llm": None,
+                    "rubric": None, "total_score": None, "rule_trace": []}
         rubric_llm = clamp_rubric(rubric)
         final, total, trace = apply_rules(rubric, statuses, self.policies[sample.exam_id], rule_cfg)
         return {
@@ -121,4 +130,4 @@ class Task1Pipeline:
 def to_submission(preds: list[dict]) -> list[dict]:
     """Leaderboard format: [{sample_id, output: {rubric, total_score}}]."""
     return [{"sample_id": p["sample_id"], "output": {"rubric": p["rubric"], "total_score": p["total_score"]}}
-            for p in preds]
+            for p in preds if p["parse_ok"]]

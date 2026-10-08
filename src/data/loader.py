@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import random
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -71,7 +70,13 @@ def load_code(root: Path, code_file: str) -> str:
     path = root / code_file
     if not path.exists():
         raise FileNotFoundError(f"Missing code file: {path}")
-    return path.read_text(encoding="utf-8", errors="replace")
+    raw = path.read_bytes()
+    for encoding in ("utf-8", "utf-8-sig", "cp1258", "latin-1"):
+        try:
+            return raw.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return raw.decode("utf-8", errors="replace")
 
 
 def load_dataset(data_dir: str | Path) -> list[UnifiedSample]:
@@ -95,6 +100,8 @@ def load_dataset(data_dir: str | Path) -> list[UnifiedSample]:
         if exam_id not in exams:
             raise KeyError(f"Unknown exam_id={exam_id} for {sid}")
         exam = exams[exam_id]
+        if inp["exam_type"] != exam["exam_type"]:
+            raise ValueError(f"exam_type mismatch for {sid}: {inp['exam_type']} != {exam['exam_type']}")
         code = load_code(root, inp["code_file"])
 
         # Task3 may carry taxonomy in input (gold for Task3 independence)
@@ -161,13 +168,7 @@ class Dataset:
 
 
 def read_code(root: Path, code_file: str) -> str:
-    raw = (root / code_file).read_bytes()
-    for enc in ("utf-8", "utf-8-sig", "cp1258", "latin-1"):
-        try:
-            return raw.decode(enc)
-        except UnicodeDecodeError:
-            continue
-    return raw.decode("utf-8", errors="replace")
+    return load_code(root, code_file)
 
 
 def load_task1(root: str | Path, task_file: str = "task1_grading.json") -> Dataset:
@@ -182,6 +183,10 @@ def load_task1(root: str | Path, task_file: str = "task1_grading.json") -> Datas
     samples = []
     for s in payload["samples"]:
         inp = s["input"]
+        if inp["exam_id"] not in exams:
+            raise KeyError(f"Unknown exam_id={inp['exam_id']} for {s['sample_id']}")
+        if inp.get("exam_type", exams[inp["exam_id"]]["exam_type"]) != exams[inp["exam_id"]]["exam_type"]:
+            raise ValueError(f"exam_type mismatch for {s['sample_id']}")
         out = s.get("output") or {}
         rubric = out.get("rubric")
         samples.append(
@@ -201,42 +206,7 @@ def load_task1(root: str | Path, task_file: str = "task1_grading.json") -> Datas
     return Dataset(root=root, exams=exams, label_space=label_space, samples=samples)
 
 
-def make_split(samples: list[Sample], val_frac: float = 0.2, seed: int = 42) -> dict[str, list[str]]:
-    """Stratified (by exam_id, then by total-score order) deterministic split.
-
-    Within each exam the samples are sorted by gold total, then every k-th one goes to train so that
-    the train pool (used for few-shot demos) covers the whole score range. A seeded shuffle breaks ties.
-    """
-    rng = random.Random(seed)
-    by_exam: dict[str, list[Sample]] = {}
-    for s in sorted(samples, key=lambda x: x.sample_id):
-        by_exam.setdefault(s.exam_id, []).append(s)
-    train, val = [], []
-    for exam_id in sorted(by_exam):
-        group = by_exam[exam_id][:]
-        rng.shuffle(group)
-        group.sort(key=lambda x: x.gold_total if x.gold_total is not None else 0)
-        n_train = max(1, round(len(group) * (1 - val_frac)))
-        # Spread train picks evenly over the score-sorted list.
-        step = len(group) / n_train
-        train_idx = {int(i * step + rng.random() * step) for i in range(n_train)}
-        train_idx = {min(i, len(group) - 1) for i in train_idx}
-        for i, s in enumerate(group):
-            (train if i in train_idx else val).append(s.sample_id)
-    return {"seed": seed, "val_frac": val_frac, "train": sorted(train), "val": sorted(val)}
-
-
-def save_split(split: dict, splits_dir: str | Path) -> None:
-    """Write <splits_dir>/train_ids.json and val_ids.json (plain lists of sample_id)."""
-    d = Path(splits_dir)
-    d.mkdir(parents=True, exist_ok=True)
-    for part in ("train", "val"):
-        text = json.dumps(split[part], ensure_ascii=False, indent=2) + "\n"
-        (d / f"{part}_ids.json").write_text(text, encoding="utf-8")
-
-
 def load_split(splits_dir: str | Path) -> dict:
     """Read <splits_dir>/train_ids.json and val_ids.json -> {"train": [...], "val": [...]}."""
     d = Path(splits_dir)
     return {part: _read_json(d / f"{part}_ids.json") for part in ("train", "val")}
-

@@ -1,4 +1,15 @@
-# Runtime settings for scripts/run_task1.py. The API key is NOT here: put GEMINI_API_KEY in .env (see .env.example).
+# Runtime settings for scripts/run_task1.py. Keys come from Colab Secrets or environment.
+
+provider: gemini              # override with --provider openai
+
+openai:
+  model: gpt-4o-mini
+  max_usd: 1.0                 # estimated hard stop for new requests in this invocation
+  max_requests_per_run: 150
+  input_usd_per_million: 0.15
+  cached_input_usd_per_million: 0.075
+  output_usd_per_million: 0.60
+  price_checked_date: '2026-10-08'
 
 gemini:
   # Model served by the Gemini API: gemma-4-26b-a4b-it, gemma-4-31b-it, gemini-3.1-flash-lite, gemini-3.8-flash, ...
@@ -18,11 +29,11 @@ gemini:
 
 run:
   test_mode: false            # true: only test_sample_ids (quick code check); false: whole validation split
-  test_sample_ids: [EX01-S105, EX02-S204]
+  test_sample_ids: [EX01-S106]
   experiments:                # file names in configs/task1/ (without .yaml)
     - e1_zero_shot_plain
     - e3_few_shot_structured
-  run_final: true             # also run the final pipeline (configs/task1/final.yaml)
+  run_final: false            # zero-shot and few-shot baseline only; enable for submission run
   predict_file: null          # e.g. task1_grading.json -> outputs/task1/predictions/task1_predictions.json
   predict_root: null          # folder of the dev/test set (exams.json + submissions/); null = training data folder
   use_cache: true             # reuse raw model outputs already obtained (no new API calls)
