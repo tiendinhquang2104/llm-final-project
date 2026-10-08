@@ -7,8 +7,7 @@
 
 ## Task 1 API baseline
 
-1. Đồng bộ source repo lên `MyDrive/LLM/Final Project/llm-final-project/` và giữ dữ liệu ở `MyDrive/LLM/Final Project/data/` như notebook 01.
-   Nếu notebook 01 tự clone theo `.env`, đặt `REPO_BRANCH=task-1` để có runner chung.
+1. Notebook 02 tự clone/cập nhật branch `task-1` trong `/content/llm-final-project-task1/`. Giữ dữ liệu ở `MyDrive/LLM/Final Project/data/` như notebook 01. Repo trên Drive có thể tiếp tục ở branch khác.
 2. Trong Colab Secrets, thêm `GEMINI_API_KEY` và `OPENAI_API_KEY`, bật quyền truy cập của notebook.
 3. Mở notebook 02, chạy preflight cho cả hai provider (không gọi API). Đặt `RUN_LIVE = True` để chạy smoke test một bài rồi lượt đầy đủ 6 bài validation cho zero-shot và few-shot của mỗi provider.
    Lượt đầy đủ dùng lại bài smoke test hợp lệ nếu model, prompt và cấu hình tạo sinh giống nhau.
