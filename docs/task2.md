@@ -17,6 +17,10 @@ python scripts/run_task2_api.py --provider gemini           # zero-shot + few-sh
 ```
 Gán nhãn silver: đặt `run.predict: true` trong `configs/task2/run_api.yaml` → `outputs/task2/task2_api_silver__*/`
 gồm `predictions.json` (nộp được) và `silver_labels.json`. Chi phí: `usage.jsonl`, `resources.json`.
+Demo few-shot của lượt silver chỉ lấy từ gold train (26 bài), không bao giờ từ gold val.
+`--preflight` in `approx_input_tokens` đã nhân n (mỗi request gửi lại cả prompt) và, với OpenAI, `estimated_usd`
+(silver 360×5 ≈ $0.85–1.25 với gpt-4o-mini; `openai.max_usd` = 3.0).
+Thời gian silver trên Gemma free tier: ≈1800 request, bị giới hạn TPM, vài giờ; dừng giữa chừng thì chạy lại sẽ dùng cache.
 
 ## Hướng 2 — CLM-8B
 CLM-8B = Qwen3-8B frozen (last-token pooling) + state/action head. Mỗi nhãn là một câu hỏi có/không (`noul`):
@@ -25,8 +29,13 @@ P(nhãn) = sigmoid(scale · (cos(state, "true: …") − cos(state, "false: …"
 embedding context — ablation). Ngưỡng riêng từng nhãn + sàn tỉ lệ dự đoán 2%.
 
 - Local (Mac, MLX 4-bit, tối thiểu): `python scripts/run_task2_clm.py --config configs/task2/clm_local.yaml`
-- Kaggle (T4×2, đầy đủ): `kaggle/task2_clm.ipynb` (cần Secret `PUBLIC_TEST_DRIVE_ID`).
-- Benchmark: `python scripts/task2_benchmark.py` → `outputs/task2/benchmark.md`.
+- Kaggle (T4×2, đầy đủ): `kaggle/task2_clm.ipynb` (cần Secret `PUBLIC_TEST_DRIVE_ID`). Repo, dữ liệu sinh viên
+  và cache embedding nằm trong `/kaggle/tmp` (không lưu cùng notebook version); chỉ `task2_predictions.json` và
+  `task2_benchmark.md` được copy sang `/kaggle/working`.
+- Benchmark: `python scripts/task2_benchmark.py` → `outputs/task2/benchmark.md`. Giây/bài ≈ 0 khi chạy lại hoàn toàn
+  từ cache embedding (chỉ tính thời gian encode thật).
+- Số `@tuned` và epoch dừng sớm đều được chọn trên dữ liệu tuning (gold val + silver holdout) nên lạc quan; số `@0.5`
+  không phụ thuộc ngưỡng chọn.
 
 Head chỉ hợp lệ với encoder đã sinh embedding: bản MLX 4-bit và bản HF fp16 phải train head riêng; số đo hai môi trường
 không so trực tiếp.
