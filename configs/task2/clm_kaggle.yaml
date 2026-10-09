@@ -1,0 +1,13 @@
+extends: clm_base.yaml
+name: task2_clm_kaggle
+description: Chạy đầy đủ trên Kaggle T4x2 — Qwen3-8B fp16 + head CLM gốc, 360 bài public, nhãn silver nếu có.
+encoder:
+  backend: hf
+  model: Qwen/Qwen3-8B
+  heads_repo: Contrastive-LM/CLM-v0.1-8B
+  heads_file: CLM_v0.1-8B.pt
+  dtype: float16
+  load_in_8bit: false         # set true if fp16 gives non-finite embeddings
+  batch_size: 2
+data:
+  public_per_exam: null       # all 360
