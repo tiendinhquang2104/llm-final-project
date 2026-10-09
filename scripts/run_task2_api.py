@@ -63,13 +63,17 @@ def main() -> None:
               "experiments": {}}
     for name in names + ([run["predict_config"]] if public else []):
         cfg = prepare(name, settings, provider, a.smoke)
-        samples = public.samples if (public and name == run["predict_config"]) else val
-        pipe = Task2ApiPipeline(public if samples is not val else gold, None, cfg, train_pool)
+        # Same wiring as the real run below: the silver/predict pass labels the public set and uses all gold as demos.
+        is_predict = public is not None and name == run["predict_config"]
+        samples = public.samples if is_predict else val
+        dataset = public if is_predict else gold
+        pool = gold.samples if is_predict else train_pool
+        pipe = Task2ApiPipeline(dataset, None, cfg, pool)
         chars = sum(len(m["content"]) for s in samples for m in pipe.build_request(s)["messages"])
         report["experiments"][cfg["name"]] = {
             "samples": len(samples), "requests": len(samples) * int(cfg["generation"].get("n", 1)),
             "approx_input_tokens": chars // 3,
-            "demos_first_sample": pipe.build_request(samples[0])["demos"]}
+            "demos_first_sample": pipe.build_request(samples[0])["demos"] if samples else []}
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if a.preflight:
         return

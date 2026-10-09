@@ -34,9 +34,12 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
     done: dict[str, dict] = {}
     if use_cache and cache_path.exists():
         for line in cache_path.read_text(encoding="utf-8").splitlines():
-            row = json.loads(line)
-            if keys.get(row["sample_id"]) == row["key"] and pipe.postprocess(row["record"])["parse_ok"]:
-                done[row["sample_id"]] = row["record"]
+            try:  # a line truncated by a killed run is skipped, not fatal
+                row = json.loads(line)
+                if keys.get(row["sample_id"]) == row["key"] and pipe.postprocess(row["record"])["parse_ok"]:
+                    done[row["sample_id"]] = row["record"]
+            except (json.JSONDecodeError, KeyError, TypeError):
+                continue
     todo = [s for s in samples if s.sample_id not in done]
     print(f"[{cfg['name']}] {len(done)} bài từ cache, gọi model cho {len(todo)} bài", flush=True)
 
@@ -44,6 +47,9 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
     ledger_before = len(getattr(backend, "ledger", []))
     t0 = time.time()
     chunk = max(1, int(cfg.get("checkpoint_every", 4)))
+    if todo and cache_path.exists() and cache_path.stat().st_size and not cache_path.read_bytes().endswith(b"\n"):
+        with cache_path.open("a", encoding="utf-8") as f:  # end a truncated last line so new rows stay parseable
+            f.write("\n")
     try:
         for k in range(0, len(todo), chunk):
             for r in pipe.infer(todo[k:k + chunk]):
@@ -53,7 +59,7 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
                                        ensure_ascii=False) + "\n")
     finally:
         if hasattr(backend, "ledger"):
-            with (out_dir / "usage.jsonl").open("w", encoding="utf-8") as f:
+            with (out_dir / "usage.jsonl").open("a", encoding="utf-8") as f:
                 for entry in backend.ledger[ledger_before:]:
                     f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     infer_seconds = time.time() - t0
@@ -71,10 +77,21 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
     usage_after = backend.info().get("usage") or {}
     delta = {k: usage_after[k] - usage_before.get(k, 0) for k in usage_after
              if isinstance(usage_after[k], (int, float))}
+    # Cost evidence accumulates across resumed runs: nothing inferred -> keep the previous totals as they are;
+    # otherwise add this invocation's usage to them (a missing previous value counts as 0).
+    res_path = out_dir / "resources.json"
+    prev = json.loads(res_path.read_text(encoding="utf-8")) if res_path.exists() else {}
+    if todo:
+        totals = {"tokens_in": (prev.get("tokens_in") or 0) + (delta.get("prompt_tokens") or 0),
+                  "tokens_out": (prev.get("tokens_out") or 0) + (delta.get("output_tokens") or 0),
+                  "cost_usd": (prev.get("cost_usd") or 0) + (delta.get("cost_usd") or 0)}
+        seconds = infer_seconds / len(todo)
+    else:
+        totals = {k: prev.get(k) for k in ("tokens_in", "tokens_out", "cost_usd")}
+        seconds = prev.get("seconds_per_sample")
     resources = {"backend": info.get("backend"), "model": info.get("model"), "hardware": "API",
-                 "n_samples": len(samples), "seconds_per_sample": infer_seconds / len(todo) if todo else None,
-                 "train_seconds": None, "peak_memory_gb": None, "tokens_in": delta.get("prompt_tokens"),
-                 "tokens_out": delta.get("output_tokens"), "cost_usd": delta.get("cost_usd")}
+                 "n_samples": len(samples), "seconds_per_sample": seconds,
+                 "train_seconds": None, "peak_memory_gb": None, **totals}
     _write_json(out_dir / "metrics.json", metrics)
     _write_json(out_dir / "resources.json", resources)
     _write_json(out_dir / "config.json", {"config": cfg, "model_info": backend.info(),
