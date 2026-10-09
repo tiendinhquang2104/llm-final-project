@@ -40,6 +40,30 @@ class TestRunClm(unittest.TestCase):
             self.assertEqual(res["n_samples"], 10)
             self.assertTrue((out / "clm_noul_heads.pt").exists())
 
+    def test_missing_checkpoint_fails_before_embedding(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = load_task2(make_dataset(tmp / "g", [("T1", "EXA", ["Lỗi logic"]), ("V1", "EXB", [])]))
+            fake = FakeEncoder()
+            with self.assertRaises(Exception):
+                run_clm(CFG, CachedEncoder(fake, tmp / "c"), tmp / "missing.pt", gold, None,
+                        {"train": ["T1"], "val": ["V1"]}, tmp / "o", None, registry=None)
+            self.assertEqual(fake.calls, 0)
+
+    def test_early_stopping_uses_silver_holdout_when_gold_val_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = load_task2(make_dataset(tmp / "g", [("T1", "EXA", ["Lỗi logic"]), ("T2", "EXB", [])]))
+            public = load_task2(make_dataset(tmp / "p", [("P1", "EXA", None), ("P2", "EXA", None),
+                                                         ("P3", "EXB", None), ("P4", "EXB", None)]))
+            silver = {"P1": {"Lỗi logic": 1.0}, "P2": {}, "P3": {"Lỗi hàm": 1.0}, "P4": {"Lỗi logic": 0.9}}
+            m = run_clm(CFG, CachedEncoder(FakeEncoder(), tmp / "c"), make_fake_heads(tmp / "h.pt"), gold, public,
+                        {"train": ["T1", "T2"], "val": []}, tmp / "o", silver, registry=None)
+            self.assertEqual(m["n_val_gold"], 0)
+            self.assertEqual(len(m["history"]["eval"]), CFG["train"]["epochs"])
+            self.assertIsNotNone(m["history"]["best_epoch"])
+            self.assertEqual(m["systems"], {})  # reported metrics stay gold-val only
+
     def test_public_per_exam_limit(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)

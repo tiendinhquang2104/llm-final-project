@@ -66,6 +66,10 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, split: dict, out_dir, 
     val_g = [by_id[i] for i in split["val"] if i in by_id]
     pub = _select_public(public, (cfg.get("data") or {}).get("public_per_exam")) if public else []
 
+    # 0. fail fast on a wrong / missing checkpoint, before hours of embedding
+    zero = NoulModel.from_checkpoint(heads_path)
+    model = NoulModel.from_checkpoint(heads_path)
+
     # 1. embeddings (frozen encoder, cached on disk)
     t0 = time.time()
     C = embed_candidates(encoder)
@@ -97,11 +101,20 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, split: dict, out_dir, 
         return f1_scores(gold_val, {s.sample_id: from_vector(r) for s, r in zip(val_g, pred)})
 
     # 3. learners
-    zero = NoulModel.from_checkpoint(heads_path)
-    model = NoulModel.from_checkpoint(heads_path)
     tcfg = TrainConfig(**{**(cfg.get("train") or {}), "seed": seed})
-    eval_fn = (lambda m: score(predict_noul(m, e_val["S"], C), np.full(len(LABELS), 0.5))["macro_f1"]) \
-        if n_val else None
+    default_thr = float((cfg.get("thresholds") or {}).get("default", 0.5))
+    Yb_tu = Y_tu >= 0.5
+    gold_tu = {str(k): from_vector(r) for k, r in enumerate(Yb_tu)}
+
+    def eval_fn(m) -> float:
+        """Early-stopping score: macro-F1 on the whole tuning set (gold val + silver holdout) at tuned thresholds
+        (optimistic: thresholds are fitted on the same rows)."""
+        P = predict_noul(m, S_tu, C)
+        pred = apply_thresholds(P, tune_thresholds(P, Yb_tu, default=default_thr))
+        return f1_scores(gold_tu, {str(k): from_vector(r) for k, r in enumerate(pred)})["macro_f1"]
+
+    if len(S_tu) == 0:
+        eval_fn = None
     t1 = time.time()
     history = train_noul(model, S_tr, C, Y_tr, tcfg, eval_fn)
     probe = LinearProbe(C=float((cfg.get("probe") or {}).get("C", 1.0)), seed=seed).fit(X_tr, Y_tr)
