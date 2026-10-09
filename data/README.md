@@ -1,49 +1,19 @@
-# Data Management Guidelines
+# Data
 
-This directory houses raw datasets, processed ChatML files, and reproducible train/val splits
-for the Unified Multi-Task LLM grading challenge.
+Keep the extracted sample dataset under `data/raw/sample_dataset/` (or point a command to another dataset root containing `exams.json`, `task1_grading.json`, and `submissions/`). Raw student code and processed records are excluded from Git.
 
-## Security and Privacy Notice
+The fixed Task 1 split in `data/splits/` is **26 train / 6 validation**, seed 42. Task 1 and the unified preprocessing for Tasks 1–3 use these same IDs. Historical Gemini metrics from the former 13/19 split use `data/splits/history_13_19/` and must not be compared directly with new 26/6 metrics.
 
-Never commit raw competition or student evaluation datasets to version control. The `.gitignore`
-file excludes contents inside `data/raw/` and `data/processed/` while retaining directory tracking
-via `.gitkeep`.
-
-## Expected raw layout
-
-Place the official dataset (or `sample_dataset`) so that this folder contains:
-
-```text
-data/raw/   OR   path/to/sample_dataset/
-├── exams.json
-├── label_space.json
-├── task1_grading.json
-├── task2_error_taxonomy.json
-├── task3_feedback.json
-└── submissions/<exam_id>/<sample_id>.cpp
-```
-
-## Preprocessing (required before training all 3 tasks)
+To prepare all three tasks, run:
 
 ```bash
-# From repo root — auto-detects ../sample_dataset if present
-python scripts/prepare_data.py \
-  --data_dir ../sample_dataset/sample_dataset \
-  --output_dir data/processed \
-  --val_ratio 0.2 \
-  --seed 42
-
-# Optional EDA summary
-python scripts/eda_report.py --data_dir ../sample_dataset/sample_dataset
+python scripts/prepare_data.py --data_dir data/raw/sample_dataset --output_dir data/processed --val_ratio 0.2 --seed 42
 ```
 
-Outputs:
-- `data/processed/train_unified.jsonl` — ChatML records for Task1+2+3 (train)
-- `data/processed/val_unified.jsonl` — ChatML records (val)
-- `data/processed/task{1,2,3}_{train,val}.jsonl` — per-task ablation files
-- `data/processed/unified_samples.jsonl` — joined code+labels (no ChatML)
-- `data/processed/manifest.json`
-- `data/splits/train_ids.json`, `data/splits/val_ids.json`
+To recreate only the ID split, run:
 
-Hard rule: teacher `feedback` is **never** placed in Task 1 / Task 2 user prompts
-(enforced by `src/data/leakage_guard.py` during preprocess).
+```bash
+python scripts/create_split.py --data_dir data/raw/sample_dataset --ratio 0.2 --seed 42
+```
+
+Both commands can overwrite split files; inspect existing experiments before regenerating them. Task 1 reads the raw dataset directly and never sends validation labels or Task 3 feedback to the model. The preprocessing output includes `unified_samples.jsonl`, `train_unified.jsonl`, `val_unified.jsonl`, and per-task train/validation JSONL files.

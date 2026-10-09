@@ -1,0 +1,7 @@
+extends: base.yaml
+name: e3_few_shot_structured
+description: Few-shot (k=3 teacher-graded demos of the same exam from train split, spread over score range) + structured
+  output.
+prompt:
+  template: structured
+  few_shot_k: 3

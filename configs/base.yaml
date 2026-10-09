@@ -2,10 +2,9 @@
 seed: 42
 project_name: "llm-grading-challenge"
 
+# Per-person overrides live in `.env` (see `.env.example`):
+#   REPO_URL, REPO_BRANCH, DRIVE_DATA_DIR, REPO_DIR_ON_DRIVE
 data:
-  # Local defaults. On Colab, override to the mounted Drive folder:
-  #   https://drive.google.com/drive/folders/1P31-GtTh5GHcUxO7TJhftSONuBTvvKwI
-  # e.g. /content/drive/MyDrive/data/{raw,processed,splits}
   raw_dir: "data/raw"
   processed_dir: "data/processed"
   splits_dir: "data/splits"
