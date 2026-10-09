@@ -3,7 +3,7 @@ provider: gemini              # override with --provider openai
 
 openai:
   model: gpt-4o-mini
-  max_usd: 1.0                # estimated hard stop for new requests in this invocation
+  max_usd: 3.0                # estimated hard stop for new requests in this invocation (silver 360x5 ~ $0.85-1.25 at gpt-4o-mini prices)
   max_requests_per_run: 2000  # silver labelling = 360 samples x n=5
   input_usd_per_million: 0.15
   cached_input_usd_per_million: 0.075

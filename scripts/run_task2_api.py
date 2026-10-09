@@ -33,6 +33,22 @@ def prepare(name: str, settings: dict, provider: str, smoke: bool) -> dict:
     return cfg
 
 
+def preflight_entry(pipe, samples, cfg: dict, provider: str, settings: dict) -> dict:
+    """Cost-gate numbers: every one of the n requests per sample resends the whole prompt."""
+    n = int(cfg["generation"].get("n", 1))
+    requests = len(samples) * n
+    chars = sum(len(m["content"]) for s in samples for m in pipe.build_request(s)["messages"])
+    tokens = chars // 3 * n
+    entry = {"samples": len(samples), "requests": requests, "approx_input_tokens": tokens}
+    if provider == "openai":
+        o = settings["openai"]
+        entry["estimated_usd"] = round((tokens * float(o["input_usd_per_million"])
+                                        + requests * int(cfg["generation"].get("max_new_tokens", 0))
+                                        * float(o["output_usd_per_million"])) / 1e6, 4)
+    entry["demos_first_sample"] = pipe.build_request(samples[0])["demos"] if samples else []
+    return entry
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-config", default=str(CONFIG_DIR / "run_api.yaml"))
@@ -63,17 +79,13 @@ def main() -> None:
               "experiments": {}}
     for name in names + ([run["predict_config"]] if public else []):
         cfg = prepare(name, settings, provider, a.smoke)
-        # Same wiring as the real run below: the silver/predict pass labels the public set and uses all gold as demos.
+        # Same wiring as the real run below: the silver/predict pass labels the public set;
+        # demos come from gold train ids only, so gold val never leaks into silver labels.
         is_predict = public is not None and name == run["predict_config"]
         samples = public.samples if is_predict else val
         dataset = public if is_predict else gold
-        pool = gold.samples if is_predict else train_pool
-        pipe = Task2ApiPipeline(dataset, None, cfg, pool)
-        chars = sum(len(m["content"]) for s in samples for m in pipe.build_request(s)["messages"])
-        report["experiments"][cfg["name"]] = {
-            "samples": len(samples), "requests": len(samples) * int(cfg["generation"].get("n", 1)),
-            "approx_input_tokens": chars // 3,
-            "demos_first_sample": pipe.build_request(samples[0])["demos"] if samples else []}
+        pipe = Task2ApiPipeline(dataset, None, cfg, train_pool)
+        report["experiments"][cfg["name"]] = preflight_entry(pipe, samples, cfg, provider, settings)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if a.preflight:
         return
@@ -89,7 +101,7 @@ def main() -> None:
                                            use_cache=run.get("use_cache", True))
         if public:
             cfg = prepare(run["predict_config"], settings, provider, False)
-            run_api(cfg, public, public.samples, backend, out / cfg["name"], gold.samples,
+            run_api(cfg, public, public.samples, backend, out / cfg["name"], train_pool,
                     use_cache=run.get("use_cache", True))
             print(f"silver + predictions -> {out / cfg['name']}")
     except (QuotaExhausted, CostLimitReached) as exc:
