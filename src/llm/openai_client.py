@@ -90,12 +90,13 @@ class OpenAIBackend(Backend):
             raise CostLimitReached(f"max_requests_per_run={self.max_requests} reached")
         if committed + reserve > self.max_usd:
             raise CostLimitReached(f"estimated cost would exceed max_usd={self.max_usd:.2f}")
-        schema = response_schema(request["exam"], request.get("template", "structured"))
+        schema = request.get("schema") or response_schema(request["exam"], request.get("template", "structured"))
+        schema_name = request.get("schema_name", "task1_grade")
         try:
             response = self.client.responses.create(
                 model=self.model,
                 input=messages,
-                text={"format": {"type": "json_schema", "name": "task1_grade", "strict": True, "schema": schema}},
+                text={"format": {"type": "json_schema", "name": schema_name, "strict": True, "schema": schema}},
                 temperature=float(gen.get("temperature", 0.0)),
                 max_output_tokens=max_output,
                 store=False,
