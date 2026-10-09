@@ -49,7 +49,8 @@ def main() -> None:
     ap.add_argument("--no-public", action="store_true", help="Skip public samples (gold only)")
     a = ap.parse_args()
     cfg = load_config(a.config)
-    cfg["_config_path"] = a.config
+    cfg_path = Path(a.config).resolve()
+    cfg["_config_path"] = str(cfg_path.relative_to(ROOT)) if cfg_path.is_relative_to(ROOT) else str(cfg_path)
     gold = load_task2(Path(a.gold_root) if a.gold_root else ROOT / cfg["data"]["gold_root"])
     public = None if a.no_public else load_task2(Path(a.public_root) if a.public_root
                                                  else ROOT / cfg["data"]["public_root"])

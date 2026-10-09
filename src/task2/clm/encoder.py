@@ -9,6 +9,7 @@ CachedEncoder stores every embedding on disk, so re-runs and new heads never re-
 from __future__ import annotations
 
 import hashlib
+import os
 import time
 from pathlib import Path
 
@@ -44,16 +45,26 @@ class CachedEncoder:
         key = hashlib.sha256(f"{self.encoder_id}\n{text}".encode("utf-8")).hexdigest()[:32]
         return self.cache_dir / key[:2] / f"{key}.npy"
 
+    @staticmethod
+    def _load(p: Path):
+        if not p.exists():
+            return None
+        try:
+            return np.load(p)
+        except (ValueError, OSError, EOFError):  # corrupt / truncated entry: treat as a miss
+            return None
+
     def embed(self, texts: list[str]) -> np.ndarray:
         vecs: dict[str, np.ndarray] = {}
         todo = []
         for t in dict.fromkeys(texts):
             p = self._path(t)
-            if p.exists():
-                vecs[t] = np.load(p)
-                self.n_hits += 1
-            else:
+            v = self._load(p)
+            if v is None:
                 todo.append(t)
+            else:
+                vecs[t] = v
+                self.n_hits += 1
         if todo:
             t0 = time.time()
             got = _l2(np.asarray(self.encoder.embed(todo), dtype=np.float32))
@@ -62,7 +73,10 @@ class CachedEncoder:
             for t, v in zip(todo, got):
                 p = self._path(t)
                 p.parent.mkdir(parents=True, exist_ok=True)
-                np.save(p, v)
+                tmp = p.with_name(p.name + f".{os.getpid()}.tmp")
+                with open(tmp, "wb") as f:  # atomic: a killed run never leaves a half-written .npy
+                    np.save(f, v)
+                os.replace(tmp, p)
                 vecs[t] = v
         if not texts:
             return np.zeros((0, 0), np.float32)
@@ -161,7 +175,7 @@ class HFEncoder:
                 v = h[torch.arange(len(rows), device=h.device), last].float().cpu().numpy()
                 if not np.isfinite(v).all():
                     raise RuntimeError("non-finite embeddings (fp16 overflow?) — set encoder.load_in_8bit: true "
-                                       "or dtype: bfloat16 in the config")
+                                       "in the config (T4 has no native bfloat16)")
                 for i, row in zip(idx, v):
                     out[i] = row
         return _l2(np.stack(out))

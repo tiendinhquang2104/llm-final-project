@@ -88,6 +88,8 @@ class NoulModel(nn.Module):
         return cls(h["state"], h["action"], h["logit_scale"])
 
     def scale(self):
+        """exp(logit_scale) clamped at 100. The released CLM logit_scale (~4.613, exp ~ 100.8) already sits above
+        the clamp, so the effective scale stays fixed at 100 during fine-tuning (the gradient is zero there)."""
         return self.logit_scale.exp().clamp(max=100.0)  # upstream clamps the InfoNCE scale at 100
 
     def forward(self, s, c_true, c_false):

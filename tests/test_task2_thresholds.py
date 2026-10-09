@@ -13,6 +13,12 @@ class TestThresholds(unittest.TestCase):
         self.assertEqual(best_threshold(p, np.zeros(4)), 0.5)
         self.assertEqual(best_threshold(p, np.zeros(4), default=0.7), 0.7)
 
+    def test_unreachable_positives_fall_back_to_default(self):
+        p = np.array([0.01, 0.02, 0.03, 0.04])  # below the whole grid: F1 is 0 everywhere
+        y = np.array([1, 0, 0, 1])
+        self.assertEqual(best_threshold(p, y), 0.5)
+        self.assertEqual(best_threshold(p, y, default=0.3), 0.3)
+
     def test_tune_shape(self):
         P = np.random.default_rng(0).random((8, 10))
         thr = tune_thresholds(P, P > 0.5)

@@ -7,11 +7,11 @@ GRID = np.round(np.arange(0.05, 0.951, 0.05), 2)
 
 
 def best_threshold(p, y, grid=GRID, default: float = 0.5) -> float:
-    """Smallest grid value with the best F1 on (p, y); `default` when y has no positive."""
+    """Smallest grid value with the best F1 on (p, y); `default` when y has no positive or no value scores."""
     p, y = np.asarray(p, float), np.asarray(y).astype(bool)
     if not y.any():
         return float(default)
-    best_t, best_f = float(default), -1.0
+    best_t, best_f = float(default), 0.0  # F1 == 0 everywhere keeps `default`
     for t in grid:
         pred = p >= t
         tp = int((pred & y).sum())
