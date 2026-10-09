@@ -1,0 +1,6 @@
+extends: api_few_shot.yaml
+name: task2_api_silver
+description: Gán nhãn silver cho 360 bài public — self-consistency n=5, T=0.7, P(nhãn) = tỉ lệ phiếu.
+generation:
+  temperature: 0.7
+  n: 5

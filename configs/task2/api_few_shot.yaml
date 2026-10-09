@@ -1,0 +1,5 @@
+extends: api_zero_shot.yaml
+name: task2_api_few_shot
+description: Hướng 1 few-shot, 4 demo gold chọn tham lam để phủ nhiều nhãn.
+prompt:
+  few_shot_k: 4

@@ -1,0 +1,8 @@
+# Task 2 defaults. Experiment configs extend this file.
+extends: ../base.yaml
+seed: 42
+data:
+  gold_root: data/raw/sample_dataset          # 32 labelled samples (EX01/EX02) — evaluation + demos
+  public_root: data/raw/public_test_release   # 360 unlabelled competition samples
+  task_file: task2_error_taxonomy.json
+  splits_dir: data/splits                     # 26 train / 6 val (same ids as Task 1)

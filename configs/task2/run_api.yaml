@@ -1,0 +1,31 @@
+# Runtime settings for scripts/run_task2_api.py. API keys come from the environment / Colab or Kaggle Secrets.
+provider: gemini              # override with --provider openai
+
+openai:
+  model: gpt-4o-mini
+  max_usd: 1.0                # estimated hard stop for new requests in this invocation
+  max_requests_per_run: 2000  # silver labelling = 360 samples x n=5
+  input_usd_per_million: 0.15
+  cached_input_usd_per_million: 0.075
+  output_usd_per_million: 0.60
+  price_checked_date: '2026-10-08'
+
+gemini:
+  model: gemma-4-26b-a4b-it
+  rpm: 8
+  tpm: 15000
+  max_requests_per_run: 2000
+  concurrency: 2
+  timeout: 180
+  json_mode: true
+
+run:
+  experiments:                # evaluated on the 6 gold validation samples
+    - api_zero_shot
+    - api_few_shot
+  smoke_sample_ids: [EX02-S201]
+  predict: false              # true: label the 360 public samples with predict_config
+  predict_config: api_silver  # writes predictions.json + silver_labels.json for Hướng 2
+  use_cache: true
+
+output_dir: outputs/task2

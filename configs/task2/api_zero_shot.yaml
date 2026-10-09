@@ -1,0 +1,15 @@
+extends: base.yaml
+name: task2_api_zero_shot
+description: Hướng 1 zero-shot, có mô tả 10 nhãn, không compile_log/test_report (giống điều kiện public test).
+prompt:
+  few_shot_k: 0
+  max_code_chars: 12000
+  demo_max_code_chars: 3000
+  use_aux_signals: false
+generation:
+  temperature: 0.0
+  max_new_tokens: 2048
+  enable_thinking: false
+  n: 1
+retry_on_parse_fail: 1
+checkpoint_every: 4
