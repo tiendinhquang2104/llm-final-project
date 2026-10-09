@@ -7,7 +7,7 @@ A modular, production-ready framework for automated grading, rubric scoring, fin
 This repository provides an end-to-end pipeline designed for the LLM Grading Challenge. The system is architected into three specialized tasks:
 
 - **Task 1: Automated Rule & Rubric Scoring**: Combines deterministic prerequisite rule checks with LLM prompting pipelines to evaluate responses against structured rubrics.
-- **Task 2: Model Fine-Tuning & Score Classification**: Implements Parameter-Efficient Fine-Tuning (PEFT/LoRA) and threshold calibration for granular essay/answer grading.
+- **Task 2: Multi-label Error Classification**: Hướng 1 prompts an API LLM (Gemini/OpenAI) and produces silver labels; Hướng 2 fine-tunes the CLM-8B heads (frozen Qwen3-8B, MLX locally / Kaggle GPU) with a linear-probe ablation. See `docs/task2.md`.
 - **Task 3: Compliance & Constraint Verification**: Validates adherence to complex multi-condition instructions, factual consistency, and scoring criteria.
 
 ## Repository Structure
@@ -97,8 +97,11 @@ python scripts/run_task1.py --provider openai --preflight
 python scripts/run_task1.py --provider gemini
 python scripts/run_task1.py --provider openai
 
-# Run Task 2 (LoRA training & inference)
-python scripts/run_task2.py --config configs/task2/lora.yaml
+# Task 2: data, API baseline (no call with --preflight), CLM-8B local run, benchmark table
+python scripts/unpack_data.py data/public-test --dest data/raw
+python scripts/run_task2_api.py --preflight
+python scripts/run_task2_clm.py --config configs/task2/clm_local.yaml
+python scripts/task2_benchmark.py
 
 # Run Task 3 (Compliance check)
 python scripts/run_task3.py --config configs/task3/baseline_api.yaml
