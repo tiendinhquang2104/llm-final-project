@@ -72,7 +72,9 @@ class GeminiBackend(Backend):
     def __init__(self, api_key: str = "", model: str = "gemini-3.8-flash", rpm: float = 10, tpm: float = 0,
                  max_requests_per_run: int = 200, concurrency: int = 2, timeout: float = 180.0,
                  max_retries: int = 5, json_mode: bool = True,
-                 thinking_off: dict | None = None, thinking_on: dict | None = None, **_ignored):
+                 thinking_off: dict | None = None, thinking_on: dict | None = None,
+                 input_usd_per_million: float | None = None, output_usd_per_million: float | None = None,
+                 price_checked_date: str | None = None, **_ignored):
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
         if not self.api_key or self.api_key.startswith(("PASTE", "your_")):
             raise RuntimeError("Thiếu GEMINI_API_KEY: thêm vào file .env ở thư mục gốc project (xem .env.example)")
@@ -89,6 +91,12 @@ class GeminiBackend(Backend):
         self.thinking_on = thinking_on if thinking_on is not None else auto_on
         self.usage = {"requests": 0, "failed_requests": 0, "prompt_tokens": 0, "output_tokens": 0,
                       "thinking_tokens": 0, "truncated": 0}
+        self.price = ({"input_usd_per_million": float(input_usd_per_million),
+                       "output_usd_per_million": float(output_usd_per_million),
+                       "checked_date": price_checked_date}
+                      if input_usd_per_million is not None and output_usd_per_million is not None else None)
+        self.usage["cost_usd"] = 0.0 if self.price else None
+        self.ledger: list[dict] = []
         self.served_models: set[str] = set()
         self._lock = threading.Lock()
         self._next_slot = 0.0
@@ -218,15 +226,26 @@ class GeminiBackend(Backend):
         except Exception as e:  # one failed request must not kill the run -> parse fallback
             with self._lock:
                 self.usage["failed_requests"] += 1
+                self.ledger.append({"sample_id": label, "api_error": type(e).__name__, "cost_usd": None})
             print(f"[gemini] {label} request failed: {e!r}"[:400], flush=True)
             return ""
         u = r.get("usageMetadata") or {}
         cand = (r.get("candidates") or [{}])[0]
         with self._lock:
+            in_tokens = int(u.get("promptTokenCount", 0))
+            out_tokens = int(u.get("candidatesTokenCount", 0)) + int(u.get("thoughtsTokenCount", 0))
+            cost = ((in_tokens * self.price["input_usd_per_million"]
+                     + out_tokens * self.price["output_usd_per_million"]) / 1_000_000) if self.price else None
             self.usage["requests"] += 1
-            self.usage["prompt_tokens"] += int(u.get("promptTokenCount", 0))
+            self.usage["prompt_tokens"] += in_tokens
             self.usage["output_tokens"] += int(u.get("candidatesTokenCount", 0))
             self.usage["thinking_tokens"] += int(u.get("thoughtsTokenCount", 0))
+            if cost is not None:
+                self.usage["cost_usd"] += cost
+            self.ledger.append({"sample_id": label, "input_tokens": in_tokens,
+                                "output_tokens": int(u.get("candidatesTokenCount", 0)),
+                                "thinking_tokens": int(u.get("thoughtsTokenCount", 0)),
+                                "cost_usd": cost})
             if cand.get("finishReason") == "MAX_TOKENS":
                 self.usage["truncated"] += 1
             if r.get("modelVersion"):
@@ -267,6 +286,7 @@ class GeminiBackend(Backend):
                 "no_system": self.no_system, "no_thinking": self.no_thinking,
                 "thinking_off": self.thinking_off, "thinking_on": self.thinking_on,
                 "served_models": sorted(self.served_models), "usage": dict(self.usage),
+                "price": self.price,
                 "python": platform.python_version()}
 
 

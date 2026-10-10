@@ -6,15 +6,16 @@ import statistics
 from collections import Counter
 from dataclasses import dataclass, field
 
-from src.data.loader import DIMENSIONS
+from src.data.loader import DIM_MAX, DIMENSIONS
 from src.task1.prerequisite_rules import STATUSES, normalize_status
+from src.task1.score import from_cents, to_cents
 from src.utils.json_extractor import extract_json_objects, strip_thinking
 
 
 @dataclass
 class ParsedOutput:
     ok: bool
-    rubric: dict[str, int] | None = None
+    rubric: dict[str, int | float] | None = None
     problems: dict[str, str] = field(default_factory=dict)
     problem_notes: dict[str, str] = field(default_factory=dict)
     rationale: str = ""
@@ -88,7 +89,10 @@ def aggregate(parsed: list[ParsedOutput]) -> tuple[dict | None, dict[str, str], 
     good = [p for p in parsed if p.ok and p.rubric]
     if not good:
         return None, {}, ""
-    rubric = {d: round_half_up(statistics.median(float(p.rubric[d]) for p in good)) for d in DIMENSIONS}
+    # Median on integer cents preserves valid fractional scores. A half-cent
+    # median is rounded half-up to the nearest allowed hundredth.
+    rubric = {d: from_cents(round_half_up(statistics.median(to_cents(p.rubric[d], DIM_MAX[d])
+                                                             for p in good))) for d in DIMENSIONS}
     statuses: dict[str, str] = {}
     pids = sorted({pid for p in good for pid in p.problems})
     for pid in pids:

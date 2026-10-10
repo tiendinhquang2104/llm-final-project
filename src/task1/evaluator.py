@@ -5,6 +5,14 @@ from collections import defaultdict
 
 from src.data.loader import DIM_MAX, DIMENSIONS
 from src.evaluation.metrics import mean_absolute_error, quadratic_weighted_kappa
+from src.task1.score import to_cents
+
+
+def _qwk_scores(gold: list[int | float], pred: list[int | float]) -> float:
+    if all(float(v).is_integer() for v in gold + pred):
+        return quadratic_weighted_kappa(gold, pred)
+    return quadratic_weighted_kappa([to_cents(v, 10) for v in gold],
+                                    [to_cents(v, 10) for v in pred], max_rating=1000)
 
 
 def evaluate(gold: dict[str, dict], pred: dict[str, dict], group_of: dict[str, str] | None = None) -> dict:
@@ -21,7 +29,7 @@ def evaluate(gold: dict[str, dict], pred: dict[str, dict], group_of: dict[str, s
     res = {
         "n": len(ids),
         "n_missing": n_missing,
-        "qwk": quadratic_weighted_kappa(yt, yp),
+        "qwk": _qwk_scores(yt, yp),
         "mae": mean_absolute_error(yt, yp),
         "exact_total": sum(a == b for a, b in zip(yt, yp)) / len(ids) if ids else float("nan"),
         "within1_total": sum(abs(a - b) <= 1 for a, b in zip(yt, yp)) / len(ids) if ids else float("nan"),
@@ -51,7 +59,7 @@ def evaluate(gold: dict[str, dict], pred: dict[str, dict], group_of: dict[str, s
             gp = [P[i]["total_score"] for i in gids]
             res["by_group"][g] = {
                 "n": len(gids),
-                "qwk": quadratic_weighted_kappa(gt, gp),
+                "qwk": _qwk_scores(gt, gp),
                 "mae": mean_absolute_error(gt, gp),
                 "exact_total": sum(a == b for a, b in zip(gt, gp)) / len(gids),
                 "exact_match": {
@@ -82,24 +90,40 @@ def validate_predictions(preds, expected_ids=None) -> list[str]:
     seen = set()
     for i, p in enumerate(preds):
         sid = p.get("sample_id") if isinstance(p, dict) else None
-        if not sid:
+        if not isinstance(sid, str) or not sid:
             errs.append(f"[{i}] missing sample_id")
             continue
+        if set(p) != {"sample_id", "output"}:
+            errs.append(f"{sid}: expected only sample_id and output")
         if sid in seen:
             errs.append(f"{sid}: duplicate")
         seen.add(sid)
-        out = p.get("output") or {}
+        out = p.get("output")
+        if not isinstance(out, dict) or set(out) != {"rubric", "total_score"}:
+            errs.append(f"{sid}: output must contain rubric and total_score")
+            continue
         rub = out.get("rubric")
         if not isinstance(rub, dict) or set(rub) != set(DIMENSIONS):
             errs.append(f"{sid}: rubric must have exactly {DIMENSIONS}")
             continue
+        cents = {}
         for d in DIMENSIONS:
-            if not isinstance(rub[d], int) or not 0 <= rub[d] <= DIM_MAX[d]:
-                errs.append(f"{sid}: {d}={rub[d]!r} out of range 0..{DIM_MAX[d]}")
-        if out.get("total_score") != sum(rub[d] for d in DIMENSIONS if isinstance(rub[d], int)):
-            errs.append(f"{sid}: total_score != sum(rubric)")
+            try:
+                cents[d] = to_cents(rub[d], DIM_MAX[d])
+            except ValueError:
+                errs.append(f"{sid}: {d}={rub[d]!r} must be 0..{DIM_MAX[d]} in 0.01 increments")
+        try:
+            total_cents = to_cents(out["total_score"], 10)
+        except ValueError:
+            errs.append(f"{sid}: invalid total_score")
+        else:
+            if len(cents) == len(DIMENSIONS) and total_cents != sum(cents.values()):
+                errs.append(f"{sid}: total_score != sum(rubric)")
     if expected_ids is not None:
         missing = set(expected_ids) - seen
         if missing:
             errs.append(f"missing {len(missing)} sample_ids, e.g. {sorted(missing)[:5]}")
+        extra = seen - set(expected_ids)
+        if extra:
+            errs.append(f"unexpected {len(extra)} sample_ids, e.g. {sorted(extra)[:5]}")
     return errs

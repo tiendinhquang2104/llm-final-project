@@ -7,11 +7,16 @@ from src.data.loader import DIM_MAX, DIMENSIONS, Dataset, Sample
 from src.task1.prerequisite_rules import RuleConfig, apply_rules, clamp_rubric, policy_from_exam
 from src.task1.prompts import build_messages, select_demos
 from src.task1.scorer import aggregate, parse_output
+from src.task1.score import to_cents
 
 RETRY_MSG = (
     "Câu trả lời trên không phải JSON hợp lệ theo schema yêu cầu. "
     "Hãy trả về DUY NHẤT một object JSON hợp lệ, không thêm chữ nào khác."
 )
+
+PUBLIC_CSV = {"Class01-Test1": ("generals.csv", "50-best-european-generals-cleaned-first-20.csv"),
+              "Class01-Test2": ("generals.csv", "50-best-european-generals-cleaned-first-20.csv"),
+              "Class02-Test1": ("battles.csv", "50-european-battles-first-20.csv")}
 
 
 def valid_parsed(parsed, exam_type: str) -> bool:
@@ -21,10 +26,17 @@ def valid_parsed(parsed, exam_type: str) -> bool:
     if any(not isinstance(parsed.rubric.get(d), (int, float))
            or isinstance(parsed.rubric[d], bool)
            or not math.isfinite(parsed.rubric[d])
-           or int(parsed.rubric[d]) != parsed.rubric[d]
-           or not 0 <= parsed.rubric[d] <= DIM_MAX[d] for d in DIMENSIONS):
+           or not _valid_score(parsed.rubric[d], DIM_MAX[d]) for d in DIMENSIONS):
         return False
     return exam_type != "multi_problem" or bool(parsed.problems.get("P1"))
+
+
+def _valid_score(value: object, maximum: int) -> bool:
+    try:
+        to_cents(value, maximum)
+        return True
+    except ValueError:
+        return False
 
 
 class Task1Pipeline:
@@ -40,6 +52,14 @@ class Task1Pipeline:
                          for eid, e in dataset.exams.items()}
         self._by_id = dataset.by_id()
 
+        self.csv_headers = {}
+        for exam_id, (display_name, filename) in PUBLIC_CSV.items():
+            if exam_id in dataset.exams:
+                path = dataset.root / "data_files" / filename
+                if not path.is_file():
+                    raise FileNotFoundError(f"Missing public exam data file: {path}")
+                self.csv_headers[exam_id] = f"{display_name}: {path.read_text(encoding='utf-8-sig').splitlines()[0]}"
+
     # -- inference ---------------------------------------------------------------------------------
     def build_request(self, sample: Sample) -> dict:
         exam = self.ds.exams[sample.exam_id]
@@ -50,7 +70,8 @@ class Task1Pipeline:
             "exam": exam,
             "template": self.prompt_cfg.get("template", "structured"),
             "demos": [d.sample_id for d in demos],
-            "messages": build_messages(exam, sample, demos, self.prompt_cfg),
+            "messages": build_messages(exam, sample, demos, self.prompt_cfg,
+                                        self.csv_headers.get(sample.exam_id, "")),
         }
 
     def infer(self, samples: list[Sample]) -> list[dict]:

@@ -18,6 +18,7 @@ import re
 from dataclasses import dataclass, field
 
 from src.data.loader import DIM_MAX, DIMENSIONS
+from src.task1.score import from_cents, to_cents
 
 STATUSES = ("correct", "partial", "wrong", "runtime_error", "not_attempted")
 STATUS_CREDIT = {"correct": 1.0, "partial": 0.5, "wrong": 0.0, "runtime_error": 0.0, "not_attempted": 0.0}
@@ -108,17 +109,11 @@ def normalize_status(value: object) -> str | None:
     return aliases.get(s)
 
 
-def clamp_rubric(rubric: dict) -> dict[str, int]:
+def clamp_rubric(rubric: dict) -> dict[str, int | float]:
     out = {}
     for dim in DIMENSIONS:
         v = rubric.get(dim, 0)
-        try:
-            v = float(v)
-        except (TypeError, ValueError):
-            v = 0.0
-        if math.isnan(v):
-            v = 0.0
-        out[dim] = int(min(max(math.floor(v + 0.5), 0), DIM_MAX[dim]))
+        out[dim] = from_cents(to_cents(v, DIM_MAX[dim]))
     return out
 
 
@@ -136,11 +131,11 @@ def apply_rules(
     problem_status: dict[str, str] | None,
     policy: ExamPolicy,
     cfg: RuleConfig | None = None,
-) -> tuple[dict[str, int], int, list[str]]:
+) -> tuple[dict[str, int | float], int | float, list[str]]:
     """Return (final_rubric, total_score, trace). Pure function — no I/O, no model calls."""
     cfg = cfg or RuleConfig()
     trace: list[str] = []
-    r = clamp_rubric(rubric) if cfg.clamp else {d: int(rubric.get(d, 0)) for d in DIMENSIONS}
+    r = clamp_rubric(rubric)
     statuses = {pid: s for pid, s in (problem_status or {}).items() if s is not None}
 
     if cfg.prerequisite and policy.prerequisites:
@@ -180,4 +175,4 @@ def apply_rules(
                 trace.append(f"compile_zero:{dim}:{r[dim]}->0")
                 r[dim] = 0
 
-    return r, sum(r.values()), trace
+    return r, from_cents(sum(to_cents(r[d], DIM_MAX[d]) for d in DIMENSIONS)), trace
