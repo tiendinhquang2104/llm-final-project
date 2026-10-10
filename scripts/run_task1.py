@@ -17,9 +17,9 @@ for _stream in (sys.stdout, sys.stderr):
 from src.data.loader import load_split, load_task1  # noqa: E402
 from src.llm.api_client import GeminiBackend, QuotaExhausted  # noqa: E402
 from src.llm.openai_client import CostLimitReached, OpenAIBackend  # noqa: E402
-from src.task1.evaluator import validate_predictions  # noqa: E402
-from src.task1.experiment import predict, run_experiment  # noqa: E402
+from src.task1.experiment import run_experiment  # noqa: E402
 from src.task1.pipeline import Task1Pipeline  # noqa: E402
+from src.task1.public_predict import predict_public, public_preflight  # noqa: E402
 from src.utils.config import load_config, load_dotenv  # noqa: E402
 
 CONFIG_DIR = ROOT / "configs" / "task1"
@@ -86,6 +86,10 @@ def main() -> None:
     ap.add_argument("--output-dir", help="Private output directory")
     ap.add_argument("--preflight", action="store_true", help="Check data, prompts, split and call count without API")
     ap.add_argument("--smoke", action="store_true", help="Run one validation sample per selected experiment")
+    ap.add_argument("--predict-only", action="store_true", help="Predict the unlabeled 360-sample public release")
+    ap.add_argument("--predict-root", help="Extracted public release, or its parent directory")
+    ap.add_argument("--predict-experiment", default="e2_zero_shot_structured")
+    ap.add_argument("--predict-ids", help="Comma-separated public sample IDs for a smoke run")
     a = ap.parse_args()
     load_dotenv()
     settings = load_config(a.run_config)
@@ -99,6 +103,32 @@ def main() -> None:
     data_root = Path(a.data_dir) if a.data_dir else ROOT / base["data"]["root"]
     ds = load_task1(data_root, base["data"].get("task_file", "task1_grading.json"))
     split = load_split(Path(a.splits_dir) if a.splits_dir else ROOT / base["data"]["splits_dir"])
+    validate_split(ds, split)
+    if a.predict_only:
+        if not a.predict_root:
+            ap.error("--predict-only requires --predict-root")
+        cfg = prepare(a.predict_experiment, settings, provider)
+        selected_ids = [sid.strip() for sid in a.predict_ids.split(",") if sid.strip()] if a.predict_ids else None
+        public_ds, report = public_preflight(a.predict_root, cfg, ds, split["train"], selected_ids)
+        if provider == "openai":
+            price = settings["openai"]
+            pipe = Task1Pipeline(public_ds, None, cfg)
+            rows = [public_ds.by_id()[sid] for sid in (selected_ids or sorted(public_ds.by_id()))]
+            estimate = sum((max(1, sum(len(m["content"]) for m in pipe.build_request(s)["messages"]) // 3)
+                            * price["input_usd_per_million"]
+                            + int(cfg["generation"].get("max_new_tokens", 1024))
+                            * price["output_usd_per_million"]) / 1_000_000 for s in rows)
+            report["estimated_initial_usd_excluding_repairs"] = round(estimate, 6)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        if a.preflight:
+            return
+        try:
+            backend = GeminiBackend(**settings["gemini"]) if provider == "gemini" else OpenAIBackend(**settings["openai"])
+        except RuntimeError as exc:
+            sys.exit(str(exc))
+        result = predict_public(public_ds, cfg, backend, out, ds, split["train"], selected_ids)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     names = list(run.get("experiments", []))
     if run.get("run_final"):
         names.append("final")
@@ -116,12 +146,11 @@ def main() -> None:
             cfg = prepare(name, settings, provider)
             results[cfg["name"]] = run_experiment(cfg, ds, split, backend, out, use_cache=run.get("use_cache", True))
         if run.get("predict_file") and not run.get("test_mode"):
-            cfg = prepare("final", settings, provider)
-            dest = out / "predictions" / provider / "task1_predictions.json"
+            cfg = prepare(run.get("predict_experiment", "e2_zero_shot_structured"), settings, provider)
             pred_root = Path(run["predict_root"]) if run.get("predict_root") else data_root
-            preds = predict(cfg, pred_root, run["predict_file"], ds, split["train"] + split["val"], backend, dest)
-            errors = validate_predictions(json.loads(dest.read_text(encoding="utf-8")), [p["sample_id"] for p in preds])
-            print(f"predictions -> {dest}  format: {'OK' if not errors else errors[:5]}")
+            public_ds, _ = public_preflight(pred_root, cfg, ds, split["train"])
+            result = predict_public(public_ds, cfg, backend, out, ds, split["train"])
+            print(json.dumps(result, ensure_ascii=False, indent=2))
     except (QuotaExhausted, CostLimitReached) as exc:
         print(f"DỪNG: {exc}. Các run đã xong vẫn được lưu trong {out}; chạy lại sẽ dùng cache.")
     print("\n===== Tóm tắt =====")

@@ -24,6 +24,8 @@ gemini:
   concurrency: 2
   timeout: 180
   json_mode: true             # auto-disabled if the model rejects it
+  # Optional billing estimate: set input_usd_per_million, output_usd_per_million,
+  # and price_checked_date after checking your Gemini billing tier. If omitted, USD is unknown.
   # thinking_off / thinking_on: optional thinkingConfig overrides; default is chosen per model family
   # (Gemini 3: low/high, Gemma 4: minimal/high, Gemini 2.5: thinkingBudget 0/-1).
 
@@ -34,8 +36,9 @@ run:
     - e1_zero_shot_plain
     - e3_few_shot_structured
   run_final: false            # zero-shot and few-shot baseline only; enable for submission run
-  predict_file: null          # e.g. task1_grading.json -> outputs/task1/predictions/task1_predictions.json
-  predict_root: null          # folder of the dev/test set (exams.json + submissions/); null = training data folder
+  predict_file: null          # optional legacy trigger; prefer --predict-only --predict-root
+  predict_root: null          # extracted public release root (exams.json + submissions/)
+  predict_experiment: e2_zero_shot_structured  # zero-shot structured on six unseen public exams
   use_cache: true             # reuse raw model outputs already obtained (no new API calls)
 
 output_dir: outputs/task1

@@ -20,7 +20,7 @@ import math
 import time
 from pathlib import Path
 
-from src.data.loader import Dataset, load_task1
+from src.data.loader import Dataset
 from src.evaluation.error_analysis import error_analysis, to_markdown
 from src.llm.api_client import Backend
 from src.task1.evaluator import evaluate, format_metrics
@@ -240,7 +240,9 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
         usage_after = backend.info().get("usage") or {}
         inference = {  # provenance of these outputs: model version actually served + cost (tokens)
             "model": model_info.get("model"), "served_models": backend.info().get("served_models"),
-            "usage": {k: usage_after[k] - usage_before.get(k, 0) for k in usage_after},
+            "usage": {k: (usage_after[k] - (usage_before.get(k) or 0)
+                           if isinstance(usage_after[k], (int, float)) else None)
+                      for k in usage_after},
             "reused_samples": len(done),
             "inferred_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
@@ -313,22 +315,3 @@ def run_experiment(cfg: dict, dataset: Dataset, split: dict, backend: Backend,
         print(f"   LLM-only (before rules): QWK={llm_only['qwk']:.4f} MAE={llm_only['mae']:.3f}")
         print(f"   parse failures: {parse_fail}/{len(preds)}  inference: {infer_sec:.0f}s  -> {out_dir}")
     return metrics
-
-
-def predict(cfg: dict, predict_root: str | Path, predict_file: str, demo_dataset: Dataset, demo_ids: list[str],
-            backend: Backend, out_path: str | Path) -> list[dict]:
-    """Final-pipeline inference on an (unlabelled) task file, e.g. dev/test for the leaderboard.
-
-    Few-shot demos come only from `demo_ids` of the labelled `demo_dataset` (never from the target set).
-    """
-    set_seed(int(cfg.get("seed", 42)))
-    target = load_task1(predict_root, predict_file)
-    demo_by_id = demo_dataset.by_id()
-    pool = [demo_by_id[i] for i in demo_ids if i in demo_by_id]
-    pipe = Task1Pipeline(target, backend, cfg, pool)
-    records, preds = pipe.run(target.samples)
-    out_path = Path(out_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    _write_json(out_path, to_submission(preds))
-    _write_json(out_path.with_name(out_path.stem + "_full.json"), {"records": records, "predictions": preds})
-    return preds

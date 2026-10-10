@@ -55,10 +55,10 @@ SYSTEM_STRUCTURED = (
 
 def clean_compile_log(log: str | None, max_chars: int = 2000) -> str:
     if log is None:
-        return "(không có)"
+        return "(không có thông tin biên dịch)"
     log = re.sub(r"/tmp/tmp\w+/", "", log).strip()
     if not log:
-        return "(rỗng — không có lỗi hay cảnh báo)"
+        return "(không có thông tin biên dịch)"
     return log if len(log) <= max_chars else log[:max_chars] + "\n...(cắt bớt)"
 
 
@@ -87,7 +87,7 @@ def problem_ids(exam: dict) -> list[str]:
     return [p["pid"] for p in exam.get("problems", [])] or ["P1"]
 
 
-def exam_block(exam: dict, policy_in_prompt: bool) -> str:
+def exam_block(exam: dict, policy_in_prompt: bool, csv_header: str = "") -> str:
     probs = "\n".join(
         f"- {p['pid']}: trọng số {p.get('max_score')}"
         + (f"; prototype `{p['prototype']}`" if p.get("prototype") else "")
@@ -103,6 +103,8 @@ def exam_block(exam: dict, policy_in_prompt: bool) -> str:
             s += f"\n### Chính sách chấm (BẮT BUỘC áp dụng)\n{exam['grading_policy']}\n"
         elif exam["exam_type"] == "multi_problem":
             s += f"\n### Lưu ý\n{POLICY_IN_CODE}\n"
+    if csv_header:
+        s += f"\n### Tiêu đề cột của file dữ liệu được đề tham chiếu\n{csv_header}\n"
     return s
 
 
@@ -140,7 +142,7 @@ def output_instruction(exam: dict, template: str) -> str:
     example = {
         "rationale": "<tóm tắt 1-3 câu: lỗi chính / điểm mạnh>",
         "problems": [{"pid": pid, "status": "|".join(STATUSES), "note": "<ngắn gọn>"} for pid in pids],
-        "rubric": {d: f"<int 0-{DIM_MAX[d]}>" for d in DIMENSIONS},
+        "rubric": {d: f"<số 0-{DIM_MAX[d]}, bội số 0.01>" for d in DIMENSIONS},
     }
     return (
         "## YÊU CẦU ĐẦU RA\nTrả về DUY NHẤT một object JSON đúng schema sau (problems có đủ các câu "
@@ -148,13 +150,14 @@ def output_instruction(exam: dict, template: str) -> str:
     )
 
 
-def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict) -> list[dict]:
+def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict,
+                   csv_header: str = "") -> list[dict]:
     template = cfg.get("template", "structured")
     policy_in_prompt = cfg.get("policy_in_prompt", False)
     system = SYSTEM_PLAIN if template == "plain" else SYSTEM_STRUCTURED
     user = "\n".join(
         x for x in [
-            exam_block(exam, policy_in_prompt),
+            exam_block(exam, policy_in_prompt, csv_header),
             demo_block(demos, cfg),
             submission_block(sample, cfg),
             output_instruction(exam, template),

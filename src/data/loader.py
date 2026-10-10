@@ -67,8 +67,10 @@ def load_task_samples(root: Path, filename: str) -> dict[str, dict[str, Any]]:
 
 
 def load_code(root: Path, code_file: str) -> str:
-    path = root / code_file
-    if not path.exists():
+    path = (root / code_file).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError(f"code_file escapes dataset root: {code_file}")
+    if not path.is_file():
         raise FileNotFoundError(f"Missing code file: {path}")
     raw = path.read_bytes()
     for encoding in ("utf-8", "utf-8-sig", "cp1258", "latin-1"):
@@ -148,8 +150,8 @@ class Sample:
     code: str
     compile_log: str | None
     test_report: list[dict] | None
-    gold_rubric: dict[str, int] | None = None
-    gold_total: int | None = None
+    gold_rubric: dict[str, int | float] | None = None
+    gold_total: int | float | None = None
 
     @property
     def has_gold(self) -> bool:
@@ -199,8 +201,8 @@ def load_task1(root: str | Path, task_file: str = "task1_grading.json") -> Datas
                 code=read_code(root, inp["code_file"]),
                 compile_log=inp.get("compile_log"),
                 test_report=inp.get("test_report"),
-                gold_rubric={k: int(rubric[k]) for k in DIMENSIONS} if rubric else None,
-                gold_total=int(out["total_score"]) if "total_score" in out else None,
+                gold_rubric={k: rubric[k] for k in DIMENSIONS} if rubric else None,
+                gold_total=out["total_score"] if "total_score" in out else None,
             )
         )
     return Dataset(root=root, exams=exams, label_space=label_space, samples=samples)
