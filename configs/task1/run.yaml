@@ -13,14 +13,14 @@ openai:
 
 gemini:
   # Model served by the Gemini API: gemma-4-26b-a4b-it, gemma-4-31b-it, gemini-3.1-flash-lite, gemini-3.8-flash, ...
-  model: gemma-4-26b-a4b-it
+  model: gemini-3.5-flash-lite
   # Client-side throttling — keep below the model's limits in AI Studio (https://aistudio.google.com/rate-limit).
   #   gemma-4-*:              30 RPM / 16K TPM / 14.4K RPD  -> rpm 25, tpm 15000 (TPM is the bottleneck)
   #   gemini-3.x-flash-lite:  15 RPM / 250K TPM / 500 RPD   -> rpm 12, tpm 0
   #   gemini-3.x-flash:        5 RPM / 250K TPM / 20 RPD    -> rpm 4,  tpm 0
-  rpm: 8
-  tpm: 15000                  # input tokens/minute, estimated client-side (0 = off)
-  max_requests_per_run: 150   # hard cap per invocation
+  rpm: 12
+  tpm: 0                      # input tokens/minute, estimated client-side (0 = off; RPM-only throttle)
+  max_requests_per_run: 480   # hard cap per invocation (360 public + parse-retry buffer)
   concurrency: 2
   timeout: 180
   json_mode: true             # auto-disabled if the model rejects it
