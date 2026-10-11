@@ -1,7 +1,10 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from src.task2 import compile as comp
 from src.task2.compile import CompileCache, compile_args, has_compile_error, with_compile_logs
 from src.task2.data import Task2Sample
 
@@ -56,3 +59,55 @@ class TestCompile(unittest.TestCase):
     def test_with_compile_logs_replaces_every_sample(self):
         out = with_compile_logs([s("A", "x"), s("B", "y")], {"A": "log A"})
         self.assertEqual([o.compile_log for o in out], ["log A", None])  # organizer log never kept
+
+
+LOG_HEADER = ("In file included from /tmp/tmpx/student.cpp:1:\n"
+              "/usr/local/include/c++/13.3.0/bits/stl_algo.h:12:5: error: no matching function\n")
+
+
+class TestHardening(unittest.TestCase):
+    def test_header_errors_count_linker_do_not(self):
+        self.assertTrue(comp.has_compile_error(LOG_HEADER))
+        self.assertTrue(comp.has_compile_error("/usr/include/x.h:3:1: fatal error: y.h: No such file\n"))
+        self.assertFalse(comp.has_compile_error(LOG_LINK))
+        self.assertFalse(comp.has_compile_error("/usr/include/x.h:3:1: warning: foo\n"))
+
+    def test_native_refused_on_darwin(self):
+        with mock.patch.object(comp.platform, "system", return_value="Darwin"), \
+                mock.patch.object(comp.shutil, "which", return_value=None), \
+                mock.patch.object(comp.subprocess, "run", side_effect=OSError("no docker")), \
+                mock.patch.object(comp, "NativeCompiler") as native:
+            self.assertIsNone(comp.make_compiler("native"))
+            self.assertIsNone(comp.make_compiler("auto"))
+            native.assert_not_called()
+
+    def test_native_env_and_decoding(self):
+        seen = {}
+
+        def fake_run(args, **kw):
+            if "--version" in args:
+                return mock.Mock(stdout="g++ 13", stderr="")
+            seen.update(kw)
+            return mock.Mock(stdout=b"", stderr=b"x\xff", returncode=1)
+        with mock.patch.object(comp.subprocess, "run", side_effect=fake_run):
+            c = comp.NativeCompiler()
+            out = c.run([("int main(){}", "single_problem")])
+        self.assertEqual(seen["env"]["LC_ALL"], "C")
+        self.assertNotIn("text", seen)
+        self.assertEqual(out[0][1], 1)
+        self.assertIn("x", out[0][0])
+
+    def test_cache_atomic_and_skips_timeouts(self):
+        class TC:
+            compiler_id = "t"
+
+            def run(self, jobs):
+                return [("compile timeout", 124) if "slow" in c else ("ok", 0) for c, _ in jobs]
+        with tempfile.TemporaryDirectory() as tmp:
+            cache = CompileCache(TC(), tmp)
+            logs = cache.logs([s("A", "slow"), s("B", "fine")])
+            self.assertEqual(logs, {"A": "compile timeout", "B": "ok"})
+            files = list(Path(tmp).iterdir())
+            self.assertEqual(len(files), 1)  # only the non-timeout result is cached, no stray temp files
+            self.assertEqual(json.loads(files[0].read_text())["returncode"], 0)
+            self.assertEqual(cache.logs([s("A", "slow")]), {"A": "compile timeout"})

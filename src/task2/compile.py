@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import platform
 import re
 import shutil
@@ -17,7 +18,9 @@ import tempfile
 from dataclasses import replace
 from pathlib import Path
 
-_ERROR = re.compile(r"student\.cpp:\d+:\d+: (?:fatal )?error:")
+# any compiler diagnostic "file:line:col: error:" (student.cpp or a header it pulls in); the linker's
+# "/usr/bin/ld: ..." / "collect2: error" / "undefined reference" lines have no line:col so they never match
+_ERROR = re.compile(r"^\S+:\d+:\d+: (?:fatal )?error:", re.MULTILINE)
 
 
 def compile_args(exam_type: str) -> list[str]:
@@ -27,7 +30,7 @@ def compile_args(exam_type: str) -> list[str]:
 
 
 def has_compile_error(log: str | None) -> bool:
-    """A compiler error in student.cpp (link-only errors such as a missing main do not count)."""
+    """A compiler error (in student.cpp or an included header); link-only errors such as a missing main do not count."""
     return bool(log) and bool(_ERROR.search(log))
 
 
@@ -49,8 +52,10 @@ class NativeCompiler:
                 (d / "student.cpp").write_text(code, encoding="utf-8")
                 args = [self.cxx, *compile_args(exam_type)[1:]]
                 try:
-                    p = subprocess.run(args, cwd=d, capture_output=True, text=True, timeout=self.timeout)
-                    results.append(((p.stdout or "") + (p.stderr or ""), p.returncode))
+                    p = subprocess.run(args, cwd=d, capture_output=True, timeout=self.timeout,
+                                       env={**os.environ, "LC_ALL": "C"})
+                    results.append(((p.stdout or b"").decode("utf-8", "replace")
+                                    + (p.stderr or b"").decode("utf-8", "replace"), p.returncode))
                 except subprocess.TimeoutExpired:
                     results.append((f"compile timeout after {self.timeout}s", 124))
             finally:
@@ -101,6 +106,9 @@ def make_compiler(backend: str = "auto", image: str = "gcc:13.3.0", workdir="out
     """Native g++ on Linux, Docker GCC on macOS; None (with a warning) when neither is usable."""
     system = platform.system()
     try:
+        if system == "Darwin" and backend == "native":
+            print("[compile] native backend refused on macOS (/usr/bin/g++ is Apple clang); trying Docker")
+            backend = "docker"
         if backend == "native" or (backend == "auto" and system == "Linux" and shutil.which("g++")):
             return NativeCompiler()
         if backend == "docker" or (backend == "auto" and shutil.which("docker")):
@@ -124,14 +132,21 @@ class CompileCache:
     def logs(self, samples) -> dict[str, str]:
         keys = {s.sample_id: self._key(s.code, s.exam_type) for s in samples}
         todo: dict[str, tuple[str, str]] = {}
+        fresh: dict[str, str] = {}  # results not on disk (timeouts), still returned to the caller
         for s in samples:
             if not (self.cache_dir / f"{keys[s.sample_id]}.json").exists():
                 todo.setdefault(keys[s.sample_id], (s.code, s.exam_type))
         if todo:
             print(f"[compile] {self.compiler.compiler_id}: compiling {len(todo)} submissions", flush=True)
             for key, (log, rc) in zip(todo, self.compiler.run(list(todo.values()))):
-                (self.cache_dir / f"{key}.json").write_text(json.dumps({"log": log, "returncode": rc}), encoding="utf-8")
-        return {sid: json.loads((self.cache_dir / f"{k}.json").read_text(encoding="utf-8"))["log"]
+                fresh[key] = log
+                if rc == 124:  # timeout: not a property of the code alone, retry next run
+                    continue
+                path = self.cache_dir / f"{key}.json"
+                tmp = path.with_suffix(f".{os.getpid()}.tmp")
+                tmp.write_text(json.dumps({"log": log, "returncode": rc}), encoding="utf-8")
+                os.replace(tmp, path)
+        return {sid: fresh[k] if k in fresh else json.loads((self.cache_dir / f"{k}.json").read_text(encoding="utf-8"))["log"]
                 for sid, k in keys.items()}
 
 
