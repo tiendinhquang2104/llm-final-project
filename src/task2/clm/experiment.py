@@ -81,6 +81,8 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     final_base, final_cr = (final[:-3], True) if final.endswith(CR) else (final, False)
     if final_base not in SYSTEMS:
         raise ValueError(f"final_system={final!r} not in {SYSTEMS} (optionally with the {CR!r} suffix)")
+    if final_cr and not cfg.get("_compiler_id"):
+        raise ValueError(f"final_system {final} needs compile logs; run with a compiler or drop +cr")
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     text_cfg = cfg.get("text", {})

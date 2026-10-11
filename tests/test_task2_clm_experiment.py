@@ -124,6 +124,15 @@ class TestRunClm(unittest.TestCase):
                          for s in ds.samples]
         return ds
 
+    def test_cr_without_compiler_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = load_task2(make_dataset(tmp / "g", GOLD))
+            cfg = {**CFG, "final_system": "probe_aug+cr"}
+            with self.assertRaisesRegex(ValueError, "needs compile logs"):
+                run_clm(cfg, CachedEncoder(FakeEncoder(dim=16), tmp / "c"), make_fake_heads(tmp / "h.pt"), gold,
+                        None, tmp / "out", [], registry=None)
+
     def test_compile_variant_probe_feature_and_final(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)

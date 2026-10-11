@@ -100,3 +100,21 @@ class TestOpenAISchema(unittest.TestCase):
         fmt = calls[0]["text"]["format"]
         self.assertEqual(fmt["schema"], RESPONSE_SCHEMA)
         self.assertEqual(fmt["name"], "task2_labels")
+
+
+class TestCompileBlock(unittest.TestCase):
+    def _text(self, log):
+        from src.task2.prompts import submission_text
+        s = SimpleNamespace(code="int main(){}", compile_log=log, test_report=None)
+        return submission_text(s, {"use_aux_signals": True})
+
+    def test_clean_compile_shown(self):
+        t = self._text("")
+        self.assertIn("### compile_log", t)
+        self.assertIn("rỗng", t)
+
+    def test_not_compiled_hidden(self):
+        self.assertNotIn("compile_log", self._text(None))
+
+    def test_error_log_shown(self):
+        self.assertIn("error: x", self._text("student.cpp:1: error: x"))

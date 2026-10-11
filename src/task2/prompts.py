@@ -40,7 +40,7 @@ def exam_text(exam: dict) -> str:
 def submission_text(sample, cfg: dict) -> str:
     s = f"## BÀI NỘP CẦN PHÂN LOẠI\n```cpp\n{number_lines(sample.code, cfg.get('max_code_chars', 12000))}\n```\n"
     if cfg.get("use_aux_signals", False):
-        if sample.compile_log:
+        if sample.compile_log is not None:
             s += f"\n### compile_log\n```\n{clean_compile_log(sample.compile_log)}\n```\n"
         if sample.test_report:
             s += f"\n### test_report\n{format_test_report(sample.test_report)}\n"
