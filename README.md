@@ -7,7 +7,7 @@ A modular, production-ready framework for automated grading, rubric scoring, fin
 This repository provides an end-to-end pipeline designed for the LLM Grading Challenge. The system is architected into three specialized tasks:
 
 - **Task 1: Automated Rule & Rubric Scoring**: Combines deterministic prerequisite rule checks with LLM prompting pipelines to evaluate responses against structured rubrics.
-- **Task 2: Multi-label Error Classification**: Hướng 1 prompts an API LLM (Gemini/OpenAI) and produces silver labels; Hướng 2 fine-tunes the CLM-8B heads (frozen Qwen3-8B, MLX locally / Kaggle GPU) with a linear-probe ablation. See `docs/task2.md`.
+- **Task 2: Multi-label Error Classification**: Hướng 1 prompts an API LLM (Gemini/OpenAI) for the submission; Hướng 2 fine-tunes the CLM-8B heads (frozen Qwen3-8B, MLX locally / Kaggle GPU) on the 32 labelled samples plus bug-injection augmentation, evaluated by k-fold CV, with a linear-probe ablation. No labels are derived from the test set. See `docs/task2.md`.
 - **Task 3: Compliance & Constraint Verification**: Validates adherence to complex multi-condition instructions, factual consistency, and scoring criteria.
 
 ## Repository Structure

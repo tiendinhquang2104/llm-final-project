@@ -5,8 +5,10 @@ Spec: `docs/superpowers/specs/2026-10-09-task2-design.md` · Plan: `docs/superpo
 ## Dữ liệu
 - Giải nén: `python scripts/unpack_data.py data/public-test --dest data/raw` → `data/raw/public_test_release` (360 bài,
   không nhãn, không compile_log/test_report) và `data/raw/sample_dataset` (32 bài có nhãn, đề EX01/EX02).
-- Nhãn: gold 32 bài (split 26/6 trong `data/splits/`) để đánh giá và chọn ngưỡng; silver = Hướng 1 gán nhãn 360 bài
-  public (n=5, P = tỉ lệ phiếu) để train Hướng 2; leaderboard chỉ để chọn cấu hình cuối.
+- Nhãn: 32 bài gold là nguồn nhãn duy nhất. Hướng 1 dùng split 26/6 (`data/splits/`) để chọn cấu hình API; Hướng 2
+  đánh giá bằng k-fold (4) trên cả 32 bài gold. Điểm leaderboard chỉ dùng để chọn cấu hình cuối.
+- **Không** dùng nhãn sinh trên input tập test (phán quyết giảng viên 2026-10-11). Hướng 1 dự đoán 360 bài public
+  chỉ để nộp, không đưa vào train, ngưỡng hay chọn epoch.
 - Không dùng `feedback`. Không đưa compile_log/test_report vào input (public test không có).
 
 ## Hướng 1 — API
@@ -15,32 +17,67 @@ python scripts/run_task2_api.py --preflight                 # không gọi API
 python scripts/run_task2_api.py --provider gemini --smoke    # 1 bài
 python scripts/run_task2_api.py --provider gemini           # zero-shot + few-shot trên 6 bài gold val
 ```
-Gán nhãn silver: đặt `run.predict: true` trong `configs/task2/run_api.yaml` → `outputs/task2/task2_api_silver__*/`
-gồm `predictions.json` (nộp được) và `silver_labels.json`. Chi phí: `usage.jsonl`, `resources.json`.
-Demo few-shot của lượt silver chỉ lấy từ gold train (26 bài), không bao giờ từ gold val.
+Dự đoán 360 bài public để nộp: đặt `run.predict: true` trong `configs/task2/run_api.yaml` → `outputs/task2/task2_api_predict__*/`
+gồm `predictions.json` (self-consistency n=5, nhãn = đa số phiếu) và `predictions_full.json`. Chi phí: `usage.jsonl`, `resources.json`.
+Demo few-shot của lượt dự đoán chỉ lấy từ gold train (26 bài), không bao giờ từ gold val.
 `--preflight` in `approx_input_tokens` đã nhân n (mỗi request gửi lại cả prompt) và, với OpenAI, `estimated_usd`
-(silver 360×5 ≈ $0.85–1.25 với gpt-4o-mini; `openai.max_usd` = 3.0).
-Thời gian silver trên Gemma free tier: ≈1800 request, bị giới hạn TPM, vài giờ; dừng giữa chừng thì chạy lại sẽ dùng cache.
+(lượt dự đoán 360×5 ≈ $0.85–1.25 với gpt-4o-mini; `openai.max_usd` = 3.0).
+Thời gian lượt dự đoán trên Gemma free tier: ≈1800 request, bị giới hạn TPM, vài giờ; dừng giữa chừng thì chạy lại sẽ dùng cache.
 
 ## Hướng 2 — CLM-8B
 CLM-8B = Qwen3-8B frozen (last-token pooling) + state/action head. Mỗi nhãn là một câu hỏi có/không (`noul`):
 P(nhãn) = sigmoid(scale · (cos(state, "true: …") − cos(state, "false: …"))). Hệ thống:
-`clm_zero_shot` (head gốc), `clm_noul` (fine-tune head, BCE có trọng số), `probe` (logistic regression trên
-embedding context — ablation). Ngưỡng riêng từng nhãn + sàn tỉ lệ dự đoán 2%.
+- `clm_zero_shot`: head gốc, không train.
+- `clm_noul`: fine-tune head trên 32 bài gold (BCE có trọng số).
+- `clm_noul_aug`: như `clm_noul` nhưng train thêm mẫu chèn lỗi (augmentation). Đây là `final_system` của config.
+- `probe`: logistic regression trên embedding context (ablation), không aug.
+- `probe_aug`: probe với mẫu chèn lỗi (ablation).
 
+Ngưỡng riêng từng nhãn + sàn tỉ lệ dự đoán 2%.
+
+**Đánh giá k-fold.** 4 fold trên 32 bài gold; metric và ngưỡng lấy từ out-of-fold. Mỗi fold train trên ≈75% gold;
+model cuối train trên toàn bộ gold + mẫu chèn lỗi, và ngưỡng đã chọn trên OOF được áp cho model cuối.
+Mẫu chèn lỗi của một bài chỉ đi vào fold train khi bài gốc thuộc fold train, nên không rò rỉ sang fold validation.
+
+**Augmentation (chèn lỗi vào code gold).** `src/task2/augment.py`, 9 luật; mỗi luật thêm nhãn lỗi tương ứng vào
+nhãn gốc của bài. Mẫu có `sample_id = "<id gốc>~<tên luật>"`. Không có luật cho `Lỗi thuật toán`.
+
+| Luật | Nhãn được thêm | Số mẫu (164 tổng, trên gold thật) |
+|---|---|---|
+| `drop_return_semicolon` | Lỗi biên dịch | 30 |
+| `alter_output_text` | Lỗi nhập/xuất | 16 |
+| `flip_if_comparison` | Lỗi logic | 23 |
+| `flip_loop_bound` | Lỗi vòng lặp | 24 |
+| `off_by_one_size` | Lỗi mảng/chuỗi | 2 |
+| `drop_reference_param` | Lỗi hàm | 16 |
+| `remove_edge_guard` | Lỗi edge case | 8 |
+| `hardcode_return` | Lỗi hard-code | 14 |
+| `strip_indentation` | Lỗi style | 31 |
+
+- Các luật bỏ qua code nằm trong comment (`//`, `/* */`), và bỏ qua các trường hợp không đổi gì.
+- Config local (`configs/task2/clm_local.yaml`) giới hạn 4 mẫu mỗi luật; config Kaggle dùng mọi mẫu.
+- Tuỳ chọn: chèn lỗi bằng API từ bài gold. `python scripts/augment_task2_api.py --preflight` (không gọi API), rồi
+  `python scripts/augment_task2_api.py --provider gemini` (hoặc `openai`). Kết quả là `outputs/task2/augment_api/mutants.json`
+  với `sample_id = "<id gốc>~api-<chỉ số nhãn>"`. Dùng bằng `augment.api_path` trong config hoặc `--augment-api PATH`
+  của `scripts/run_task2_clm.py`.
+
+Chạy:
 - Local (Mac, MLX 4-bit, tối thiểu): `python scripts/run_task2_clm.py --config configs/task2/clm_local.yaml`
+  (thêm `--augment-api PATH` nếu có mutants API).
 - Kaggle (T4×2, đầy đủ): `kaggle/task2_clm.ipynb` (cần Secret `PUBLIC_TEST_DRIVE_ID`). Repo, dữ liệu sinh viên
   và cache embedding nằm trong `/kaggle/tmp` (không lưu cùng notebook version); chỉ `task2_predictions.json` và
   `task2_benchmark.md` được copy sang `/kaggle/working`.
 - Benchmark: `python scripts/task2_benchmark.py` → `outputs/task2/benchmark.md`. Giây/bài ≈ 0 khi chạy lại hoàn toàn
   từ cache embedding (chỉ tính thời gian encode thật).
-- Số `@tuned` và epoch dừng sớm đều được chọn trên dữ liệu tuning (gold val + silver holdout) nên lạc quan; số `@0.5`
-  không phụ thuộc ngưỡng chọn.
+- Số `@tuned` là lạc quan: ngưỡng chọn trên OOF của các fold model (≈75% gold) rồi áp cho model cuối, nhưng
+  OOF và số đo đều dựa trên cùng 32 bài. Số `@0.5` không phụ thuộc ngưỡng chọn.
 
 Head chỉ hợp lệ với encoder đã sinh embedding: bản MLX 4-bit và bản HF fp16 phải train head riêng; số đo hai môi trường
 không so trực tiếp.
 
-## Kết quả local (Mac M3 Pro 18GB, 6 bài gold val — chỉ kiểm tra pipeline)
+## Kết quả local
+
+### Lần chạy 2026-10-09 (thiết kế cũ, 6 bài val)
 
 | Run | Hệ thống | Phần cứng | n val | macro-F1 | micro-F1 | giây/bài | train (s) | bộ nhớ đỉnh (GB) | token vào | token ra | USD |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -57,12 +94,18 @@ không so trực tiếp.
 - Cảnh báo khi đọc bảng:
   - Chỉ 6 bài gold val, khác đề thi → số rất nhiễu.
   - Ngưỡng "tuned" và epoch tốt nhất đều chọn trên chính 6 bài này → số `@tuned` lạc quan.
-  - Local chỉ train trên 26 bài gold (chưa có silver) nên fine-tune gần như chưa thay đổi head.
-  - Với ngưỡng chọn từ 6 bài, hệ thống gán "Lỗi biên dịch" cho cả 6 bài public thử. Cần silver + Kaggle để có ngưỡng đáng tin.
+  - Lần chạy này train trên 26 bài gold, chưa có mẫu chèn lỗi nên fine-tune gần như chưa thay đổi head.
+  - Với ngưỡng chọn từ 6 bài, hệ thống gán "Lỗi biên dịch" cho cả 6 bài public thử. Cần k-fold trên gold và Kaggle để có ngưỡng đáng tin.
 - Đã kiểm tra: toàn bộ 4312 state text (gold + public) ≤ 2041 token với tokenizer Qwen3, câu hỏi không bị cắt.
+
+### Lần chạy CV + augmentation
+
+<chờ kết quả Task 6>
 
 ## Rủi ro / hạn chế
 - 6 bài val, khác đề thi: số đo rất nhiễu. `Lỗi edge case` không có ví dụ dương trong gold.
-- Silver mang sai lệch của model API. Cần giảng viên xác nhận việc dùng nhãn tự động trên tập public để train.
+- Chỉ 32 bài gold để train và đánh giá: phương sai CV lớn; ngưỡng chọn trên OOF có thể không ổn định giữa các fold.
+- Lỗi chèn nhân tạo có thể khác cách giảng viên gán nhãn; so `*_aug` với bản không aug trong ablation trước khi kết luận
+  augmentation có lợi. Nên hỏi giảng viên xác nhận augmentation từ bộ mẫu.
 - MLX 4-bit là bản chuyển đổi không chính thức (~91% đồng thuận top-1 với bản gốc).
 - Macro-F1 chính theo quy ước sklearn (nhãn vắng = 0); báo cáo thêm `macro_f1_skip_absent`.
