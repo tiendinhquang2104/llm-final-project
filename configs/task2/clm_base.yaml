@@ -1,6 +1,6 @@
 extends: base.yaml
 name: task2_clm
-description: Hướng 2 — CLM-8B (Qwen3-8B frozen + head), câu hỏi noul cho từng nhãn; probe tuyến tính làm ablation.
+description: Hướng 2 — CLM-8B (Qwen3-8B frozen + head), câu hỏi noul cho từng nhãn; train trên 32 bài gold + mẫu chèn lỗi, đánh giá k-fold; probe tuyến tính làm ablation.
 text:
   max_tokens: 2048            # CLM reference encoder length
   max_statement_tokens: 512
@@ -16,8 +16,11 @@ probe:
 thresholds:
   default: 0.5
   min_rate: 0.02              # each label predicted for >= 2% of public samples
-silver:
-  path: null                  # silver_labels.json from scripts/run_task2_api.py (predict mode)
-  holdout: 0.1                # share of silver samples kept for threshold tuning
-final_system: clm_noul
+cv:
+  folds: 4                    # k-fold over the 32 gold samples (out-of-fold metrics + thresholds)
+augment:
+  rules: true                 # src/task2/augment.py bug injection on gold code (never test inputs)
+  max_per_mutator: null       # null = every applicable gold sample
+  api_path: null              # optional mutants.json from scripts/augment_task2_api.py
+final_system: clm_noul_aug
 cache_dir: outputs/task2/_emb_cache

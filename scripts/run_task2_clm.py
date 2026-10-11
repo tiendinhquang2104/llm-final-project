@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -12,7 +11,8 @@ for _stream in (sys.stdout, sys.stderr):
     if hasattr(_stream, "reconfigure"):
         _stream.reconfigure(encoding="utf-8", errors="replace")
 
-from src.data.loader import load_split  # noqa: E402
+from src.task2.augment import augment  # noqa: E402
+from src.task2.augment_api import load_mutants  # noqa: E402
 from src.task2.clm.encoder import CachedEncoder  # noqa: E402
 from src.task2.clm.experiment import run_clm  # noqa: E402
 from src.task2.data import load_task2  # noqa: E402
@@ -42,7 +42,7 @@ def build_encoder(enc_cfg: dict, max_tokens: int):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=str(ROOT / "configs" / "task2" / "clm_local.yaml"))
-    ap.add_argument("--silver", help="silver_labels.json from run_task2_api.py (overrides config)")
+    ap.add_argument("--augment-api", help="mutants.json from scripts/augment_task2_api.py (overrides config augment.api_path)")
     ap.add_argument("--gold-root")
     ap.add_argument("--public-root")
     ap.add_argument("--output-dir", default=str(ROOT / "outputs" / "task2"))
@@ -54,18 +54,20 @@ def main() -> None:
     gold = load_task2(Path(a.gold_root) if a.gold_root else ROOT / cfg["data"]["gold_root"])
     public = None if a.no_public else load_task2(Path(a.public_root) if a.public_root
                                                  else ROOT / cfg["data"]["public_root"])
-    split = load_split(ROOT / cfg["data"]["splits_dir"])
-    silver_path = a.silver or (cfg.get("silver") or {}).get("path")
-    silver = json.loads(Path(silver_path).read_text(encoding="utf-8")) if silver_path else None
-    if silver_path:
-        print(f"silver labels: {len(silver)} samples from {silver_path}")
+    aug = cfg.get("augment") or {}
+    mutants = augment(gold.samples, max_per_mutator=aug.get("max_per_mutator")) if aug.get("rules", True) else []
+    api_path = a.augment_api or aug.get("api_path")
+    if api_path:
+        api_path = Path(api_path) if Path(api_path).is_absolute() else ROOT / api_path
+        mutants += load_mutants(api_path)
+    print(f"augmentation: {len(mutants)} mutants of gold code (rules={aug.get('rules', True)}, api={api_path or '-'})")
     encoder, heads = build_encoder(cfg["encoder"], int(cfg["text"]["max_tokens"]))
     enc = CachedEncoder(encoder, ROOT / cfg.get("cache_dir", "outputs/task2/_emb_cache"))
     out_dir = Path(a.output_dir) / cfg["name"]
-    m = run_clm(cfg, enc, heads, gold, public, split, out_dir, silver)
+    m = run_clm(cfg, enc, heads, gold, public, out_dir, mutants)
     for key, v in m["systems"].items():
-        print(f"{key:22s} macro-F1={v['macro_f1']:.3f}  micro-F1={v['micro_f1']}  exact={v['exact_match']:.2f}")
-    print(f"outputs -> {out_dir}")
+        print(f"{key:24s} macro-F1={v['macro_f1']:.3f}  micro-F1={v['micro_f1']:.3f}  exact={v['exact_match']:.2f}")
+    print(f"outputs -> {out_dir}  (metrics: out-of-fold over {m['n_gold']} gold, {m['cv_folds']} folds)")
 
 
 if __name__ == "__main__":

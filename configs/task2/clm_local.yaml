@@ -1,6 +1,6 @@
 extends: clm_base.yaml
 name: task2_clm_local
-description: Chạy tối thiểu trên Mac (MLX 4-bit) — 32 bài gold + 1 bài public mỗi đề, ít epoch; chỉ kiểm tra pipeline.
+description: Chạy tối thiểu trên Mac (MLX 4-bit) — 32 bài gold + ≤4 mẫu chèn lỗi mỗi luật + 1 bài public mỗi đề, ít epoch.
 encoder:
   backend: mlx
   repo: mlx-community/CLM-v0.1-8B-MLX-4bit
@@ -10,3 +10,5 @@ data:
   public_per_exam: 1
 train:
   epochs: 5
+augment:
+  max_per_mutator: 4
