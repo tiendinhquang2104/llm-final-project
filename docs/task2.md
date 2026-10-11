@@ -1,6 +1,6 @@
 # Task 2 — Phân loại lỗi đa nhãn
 
-Spec: `docs/superpowers/specs/2026-10-09-task2-design.md` · Plan: `docs/superpowers/plans/2026-10-09-task2.md`
+Spec: `docs/superpowers/specs/2026-10-09-task2-design.md` · Plan: `docs/superpowers/plans/2026-10-09-task2.md` · Plan điều chỉnh (bỏ silver): `docs/superpowers/plans/2026-10-11-task2-no-silver.md`
 
 ## Dữ liệu
 - Giải nén: `python scripts/unpack_data.py data/public-test --dest data/raw` → `data/raw/public_test_release` (360 bài,
@@ -29,14 +29,16 @@ CLM-8B = Qwen3-8B frozen (last-token pooling) + state/action head. Mỗi nhãn l
 P(nhãn) = sigmoid(scale · (cos(state, "true: …") − cos(state, "false: …"))). Hệ thống:
 - `clm_zero_shot`: head gốc, không train.
 - `clm_noul`: fine-tune head trên 32 bài gold (BCE có trọng số).
-- `clm_noul_aug`: như `clm_noul` nhưng train thêm mẫu chèn lỗi (augmentation). Đây là `final_system` của config.
+- `clm_noul_aug`: như `clm_noul` nhưng train thêm mẫu chèn lỗi (augmentation). Một trong hai hệ thống CLM; learning rate chọn trên OOF (xem dưới).
 - `probe`: logistic regression trên embedding context (ablation), không aug.
-- `probe_aug`: probe với mẫu chèn lỗi (ablation).
+- `probe_aug`: probe với mẫu chèn lỗi. Đây là `final_system` mặc định của config (`final_system: probe_aug`), chọn chỉ dựa trên OOF trên gold: tốt nhất ở cả @0.5 (0.245) và @tuned (0.298) trong lần chạy local; không dựa trên đầu ra public.
 
-Ngưỡng riêng từng nhãn + sàn tỉ lệ dự đoán 2%.
+Ngưỡng riêng từng nhãn + sàn tỉ lệ dự đoán 2%. Sàn 2% (`thresholds.min_rate`) tính trên tập dự đoán public: đây là bước transductive, không dùng nhãn, không dùng đầu ra LLM và không fit gì; vẫn nằm trong danh sách câu hỏi cho giảng viên. Phương án dự phòng: `thresholds.min_rate: 0`.
+
+**Chọn learning rate.** `train.lr_grid` (mặc định `[1e-5, 1e-4, 1e-3]`; bỏ trống thì dùng `train.lr`). Với mỗi lr, chạy CV cho `clm_noul` và `clm_noul_aug` (probe không phụ thuộc lr, chạy một lần). Mỗi hệ thống CLM chọn lr có macro-F1 OOF cao nhất ở ngưỡng đã tune (hòa thì lr nhỏ hơn); model cuối train với lr đó. Kết quả ghi ở `metrics.json` mục `lr_selection`, lr dùng được ghi trong history từng fold. Như ngưỡng, việc chọn lr dùng chính OOF nên số @tuned lạc quan.
 
 **Đánh giá k-fold.** 4 fold trên 32 bài gold; metric và ngưỡng lấy từ out-of-fold. Mỗi fold train trên ≈75% gold;
-model cuối train trên toàn bộ gold + mẫu chèn lỗi, và ngưỡng đã chọn trên OOF được áp cho model cuối.
+model cuối train trên toàn bộ gold + mẫu chèn lỗi, và ngưỡng (cùng lr) chọn trên OOF của các model fold (≈75% gold) được áp cho model cuối train trên toàn bộ gold + mẫu chèn lỗi.
 Mẫu chèn lỗi của một bài chỉ đi vào fold train khi bài gốc thuộc fold train, nên không rò rỉ sang fold validation.
 
 **Augmentation (chèn lỗi vào code gold).** `src/task2/augment.py`, 9 luật; mỗi luật thêm nhãn lỗi tương ứng vào
@@ -118,14 +120,23 @@ Lần chạy 2026-10-11 trên Apple M3 Pro 18GB, MLX 4-bit. Tổng thời gian 3
 Nhận xét:
 - Augmentation giúp cả hai bộ học: probe 0.192 → 0.245 @0.5 và 0.261 → 0.298 @tuned; CLM noul 0.247 → 0.278 @tuned.
 - `probe_aug` tốt nhất ở cả hai ngưỡng.
-- Head CLM fine-tune gần như không đổi xác suất (lr 1e-5, 5 epoch), nên ngưỡng tuned rất thấp và `clm_noul_aug` (final_system mặc định) gán 5–8 nhãn cho mỗi bài public thử. Cần lr/epoch lớn hơn trên Kaggle, hoặc dùng `final_system: probe_aug`.
+- Head CLM fine-tune gần như không đổi xác suất (lr 1e-5, 5 epoch), nên ngưỡng tuned rất thấp và `clm_noul_aug` gán 5–8 nhãn cho mỗi bài public thử. Vì vậy `final_system` mặc định là `probe_aug` (tốt nhất trên OOF gold) và có `lr_grid` để thử lr lớn hơn trên Kaggle.
 - `Lỗi edge case` F1 = 0 ở mọi hệ thống: gold chỉ có 0 ví dụ dương, và 8 mẫu chèn lỗi.
 - Các số @tuned lạc quan vì ngưỡng được chọn trên chính OOF.
 
 ## Rủi ro / hạn chế
-- 6 bài val, khác đề thi: số đo rất nhiễu. `Lỗi edge case` không có ví dụ dương trong gold.
+- Hướng 1: 6 bài val, khác đề thi: số đo rất nhiễu (cụm "6 bài val" chỉ áp dụng cho Hướng 1).
+- CV chia theo bài, mà gold chỉ gồm đề EX01/EX02, nên OOF đánh giá quá cao khả năng tổng quát hóa sang 6 đề thi của cuộc thi.
+- Nhiễu của augmentation: `remove_edge_guard` trúng 2 nhánh không phải guard trong 8 trường hợp thật (EX01-S110, EX01-S115); `hardcode_return` cũng đổi logic (chủ ý thiết kế).
+- Ngưỡng và lr chọn trên OOF nên lạc quan; chúng đến từ model fold (~75% gold) nhưng áp cho model cuối train trên toàn bộ gold + mẫu chèn lỗi.
+- `Lỗi edge case` không có ví dụ dương trong gold.
 - Chỉ 32 bài gold để train và đánh giá: phương sai CV lớn; ngưỡng chọn trên OOF có thể không ổn định giữa các fold.
 - Lỗi chèn nhân tạo có thể khác cách giảng viên gán nhãn; so `*_aug` với bản không aug trong ablation trước khi kết luận
   augmentation có lợi. Nên hỏi giảng viên xác nhận augmentation từ bộ mẫu.
 - MLX 4-bit là bản chuyển đổi không chính thức (~91% đồng thuận top-1 với bản gốc).
 - Macro-F1 chính theo quy ước sklearn (nhãn vắng = 0); báo cáo thêm `macro_f1_skip_absent`.
+
+## Câu hỏi cho giảng viên
+- (a) Có được sinh dữ liệu augmentation từ code của các bài mẫu có nhãn (sample_dataset) không?
+- (b) Có được dùng sàn tỉ lệ dự đoán 2% tính trên tập dự đoán public (không nhãn, không đầu ra LLM) không?
+- (c) Có được chọn cấu hình cuối bằng điểm leaderboard public không?
