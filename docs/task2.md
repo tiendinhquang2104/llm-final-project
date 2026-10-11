@@ -146,7 +146,9 @@ Lr lớn hơn không cải thiện với 5 epoch và khoảng 26 bài train mỗ
 | probe_aug | .245 / .298 | .287 / .362 |
 
 - F1 nhãn `Lỗi biên dịch` @tuned: ~0.32–0.42 → 1.0.
-- `+cr` không cộng thêm khi log đã là đặc trưng; với `--no-compile` thì `+cr` làm F1 nhãn này về 0 (đã chặn bằng lỗi cấu hình).
+- `+cr` không cộng thêm khi log đã là đặc trưng với `probe`, `probe_aug`, `clm_noul_aug`; nhưng vẫn cộng ≈+0.05 macro-F1 @tuned cho `clm_zero_shot` (.304 → .357) và `clm_noul` (.296 → .350). Với `--no-compile` thì `+cr` làm F1 nhãn này về 0 (đã chặn bằng lỗi cấu hình).
+- **Rủi ro đã biết (F1 = 1.0 của `Lỗi biên dịch`).** Con số 1.0 chỉ đo trên 32 bài gold và không có ca kiểu MSVC nào. `data/raw/sample_dataset/README.md` ("Lưu ý về chất lượng dữ liệu") nói `compile_log` là tín hiệu phụ, không phải nhãn: trong bộ mẫu có 4/75 bài `EX02` và 5/46 bài `EX01` (tổng 9/121) `compiles_locally = false` nhưng giảng viên vẫn chấm `compilable = 1` vì viết theo thói quen MSVC (`void main`, dùng `pow` không `#include <cmath>`...). Trên tập public có 80/360 bài bị g++ báo lỗi; một heuristic thô cho thấy ≈13 bài chỉ có lỗi kiểu MSVC dung thứ (tham chiếu non-const tới rvalue, `'::main' must return 'int'`, `-fpermissive` return-without-value) cộng với `#include` file dữ liệu `.csv`. Vì vậy kỳ vọng F1 public của nhãn này thấp hơn 1.0. Ưu tiên `probe_aug` (hệ thống cuối, học từ log) hơn ghi đè cứng `+cr`. Không thể tinh chỉnh điều này trên dữ liệu test.
+- **Kaggle**: g++ native ở đó có thể không phải 13.3. Train và inference vẫn nhất quán (mọi mẫu compile lại bằng cùng một compiler); F1 theo nhãn `Lỗi biên dịch` trong OOF của `metrics.json` cho biết mức khớp với nhãn gold còn giữ được không.
 - `probe_aug` vẫn là hệ thống cuối (OOF tốt nhất). Số nhãn mỗi bài public thử là 3–5 (trước đây 4–8): chỉ là quan sát, không dùng để chọn.
 - **Chi phí**: compile 392 bài trong Docker (một lô); encode lại 792 văn bản ≈ 66 phút; bộ nhớ đỉnh 5.27 GB; chạy ablation không compile từ cache 57 giây.
 
