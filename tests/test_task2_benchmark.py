@@ -6,9 +6,9 @@ from pathlib import Path
 from src.task2.benchmark import collect_rows, to_markdown
 
 
-def _run(d: Path, systems: dict, res: dict) -> Path:
+def _run(d: Path, systems: dict, res: dict, evaluation: str | None = None) -> Path:
     d.mkdir(parents=True)
-    (d / "metrics.json").write_text(json.dumps({"systems": systems}))
+    (d / "metrics.json").write_text(json.dumps({"systems": systems, **({"evaluation": evaluation} if evaluation else {})}))
     (d / "resources.json").write_text(json.dumps(res))
     return d
 
@@ -20,13 +20,17 @@ class TestBenchmark(unittest.TestCase):
             f1 = {"n": 6, "macro_f1": 0.25, "micro_f1": 0.5}
             api = _run(tmp / "api", {"api": f1}, {"hardware": "API", "seconds_per_sample": 3.0, "tokens_in": 100,
                                                   "tokens_out": 10, "cost_usd": 0.01, "peak_memory_gb": None,
-                                                  "train_seconds": None})
+                                                  "train_seconds": None}, "gold val (6)")
             clm = _run(tmp / "clm", {"clm_noul@tuned": f1, "probe@0.5": f1},
                        {"hardware": "M3", "seconds_per_sample": 9.5, "peak_memory_gb": 5.5, "train_seconds": 12.0,
-                        "tokens_in": None, "tokens_out": None, "cost_usd": 0.0})
+                        "tokens_in": None, "tokens_out": None, "cost_usd": 0.0}, "out-of-fold over gold")
             rows = collect_rows([api, clm, tmp / "missing"])
             self.assertEqual([r["system"] for r in rows], ["api", "clm_noul@tuned", "probe@0.5"])
+            self.assertEqual([r["evaluation"] for r in rows],
+                             ["gold val (6)", "out-of-fold over gold", "out-of-fold over gold"])
             md = to_markdown(rows)
+            self.assertIn("Đánh giá", md)
+            self.assertIn("out-of-fold over gold", md)
             self.assertIn("| api | api |", md)
             self.assertIn("5.50", md)
             self.assertIn("0.250", md)

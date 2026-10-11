@@ -27,7 +27,7 @@ def hardware_info() -> str:
     return platform.processor() or platform.machine()
 
 
-COLUMNS = [("run", "Run"), ("system", "Hệ thống"), ("hardware", "Phần cứng"), ("n_eval", "n val"),
+COLUMNS = [("run", "Run"), ("system", "Hệ thống"), ("evaluation", "Đánh giá"), ("hardware", "Phần cứng"), ("n_eval", "n val"),
            ("macro_f1", "macro-F1"), ("micro_f1", "micro-F1"), ("seconds_per_sample", "giây/bài"),
            ("train_seconds", "train (s)"), ("peak_memory_gb", "bộ nhớ đỉnh (GB)"), ("tokens_in", "token vào"),
            ("tokens_out", "token ra"), ("cost_usd", "USD")]
@@ -41,7 +41,8 @@ def collect_rows(run_dirs) -> list[dict]:
         metrics = json.loads((d / "metrics.json").read_text(encoding="utf-8"))
         res = json.loads((d / "resources.json").read_text(encoding="utf-8"))
         for system, m in (metrics.get("systems") or {}).items():
-            rows.append({"run": d.name, "system": system, "hardware": res.get("hardware"), "n_eval": m.get("n"),
+            rows.append({"run": d.name, "system": system, "evaluation": metrics.get("evaluation"),
+                         "hardware": res.get("hardware"), "n_eval": m.get("n"),
                          "macro_f1": m.get("macro_f1"), "micro_f1": m.get("micro_f1"),
                          **{k: res.get(k) for k in ("seconds_per_sample", "train_seconds", "peak_memory_gb",
                                                     "tokens_in", "tokens_out", "cost_usd")}})

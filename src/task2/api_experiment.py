@@ -72,6 +72,7 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
     _write_json(out_dir / "predictions_full.json", preds)
     gold = {s.sample_id: s.labels for s in samples if s.has_gold}
     metrics = {"name": cfg["name"], "n": len(samples), "parse_failures": sum(not p["parse_ok"] for p in preds),
+               "evaluation": f"gold val ({len(gold)})" if gold else "public (no labels)",
                "systems": {"api": f1_scores(gold, labels)} if gold else {}}
     usage_after = backend.info().get("usage") or {}
     delta = {k: usage_after[k] - usage_before.get(k, 0) for k in usage_after

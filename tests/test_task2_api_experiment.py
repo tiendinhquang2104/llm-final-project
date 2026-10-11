@@ -24,6 +24,7 @@ class TestRunApi(unittest.TestCase):
             out = Path(tmp) / "out"
             m = run_api(CFG, ds, ds.samples, FakeBackend([ans("Lỗi logic"), ans()]), out, registry=None)
             self.assertAlmostEqual(m["systems"]["api"]["exact_match"], 1.0)
+            self.assertEqual(m["evaluation"], "gold val (2)")
             for f in ("predictions.json", "predictions_full.json", "metrics.json",
                       "resources.json", "config.json", "raw_outputs.jsonl"):
                 self.assertTrue((out / f).exists(), f)
@@ -40,6 +41,7 @@ class TestRunApi(unittest.TestCase):
             ds = load_task2(make_dataset(Path(tmp) / "d", [("P1", "EXA", None)]))
             m = run_api(CFG, ds, ds.samples, FakeBackend(["rác"]), Path(tmp) / "o", registry=None)
             self.assertEqual(m["systems"], {})
+            self.assertEqual(m["evaluation"], "public (no labels)")
             self.assertEqual(m["parse_failures"], 1)
             sub = json.loads((Path(tmp) / "o" / "predictions.json").read_text(encoding="utf-8"))
             self.assertEqual(sub, [{"sample_id": "P1", "output": {"taxonomy_error": []}}])
