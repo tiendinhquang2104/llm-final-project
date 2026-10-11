@@ -128,3 +128,23 @@ Rule chạy sau model nên mọi biến thể rule được đánh giá trên **
 - Seed 42 cho split và từng request (`generationConfig.seed`); T=0; thinking ở mức thấp nhất của model.
 - `config.json` ghi `modelVersion` Gemini trả về và số token; `experiments/registry.csv` ghi mỗi run kèm git commit.
 - `feedback` **không** bao giờ vào prompt Task 1 (có test kiểm tra); chỉ dùng trong script audit nhãn.
+
+## Hướng không API (probe trên embedding CLM, 2026-10-11)
+
+**Cách làm.** Lấy embedding context Qwen3-8B giống Task 2 và thêm cột `has_compile_error`; fit Ridge riêng cho từng chiều rubric, làm tròn và kẹp về thang điểm của chiều, rồi áp rule compile-gate của Task 1. Không có rule câu tiên quyết vì không có trạng thái từng câu. Train chỉ trên 32 bài gold; alpha chọn theo QWK out-of-fold 4-fold.
+
+**Lệnh.**
+
+- Local (chạy sau Task 2 để dùng cache embedding): `.venv/bin/python scripts/run_task1_clm.py --config configs/task2/clm_local_full.yaml`
+- Kaggle: notebook `kaggle/task2_clm.ipynb` chạy tự động sau Task 2 và xuất `task1_predictions.json`.
+
+**Kết quả local** (32 gold OOF, 4 fold, 25 giây, 0 lần encode mới nhờ cache):
+
+| | QWK | MAE |
+|---|---|---|
+| Ridge (alpha 10) | 0.479 | 2.56 |
+| Baseline trung bình | 0.000 | 3.16 |
+
+QWK của Ridge hơi lạc quan vì alpha 10 là alpha tốt nhất trong lưới trên cùng dữ liệu. Exact-match theo chiều: compilable .78, io_format .69, logic .22, edge_case .47, complexity .69, code_quality .78.
+
+**Hạn chế.** 32 bài gold thuộc 2 đề khác 6 đề thi, nên QWK trên tập thi có thể thấp hơn. Hướng API của Task 1 nhiều khả năng tốt hơn nếu có key.

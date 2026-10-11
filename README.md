@@ -102,6 +102,7 @@ docker pull gcc:13.3.0  # macOS: self-compile runs in Docker, no global g++
 python scripts/unpack_data.py data/public-test --dest data/raw
 python scripts/run_task2_api.py --preflight
 python scripts/run_task2_clm.py --config configs/task2/clm_local.yaml
+.venv/bin/python scripts/run_task1_clm.py --config configs/task2/clm_local_full.yaml  # Task 1 without API, after Task 2
 python scripts/task2_benchmark.py
 
 # Run Task 3 (Compliance check)
