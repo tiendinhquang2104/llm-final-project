@@ -120,9 +120,14 @@ Lần chạy 2026-10-11 trên Apple M3 Pro 18GB, MLX 4-bit. Tổng thời gian 3
 Nhận xét:
 - Augmentation giúp cả hai bộ học: probe 0.192 → 0.245 @0.5 và 0.261 → 0.298 @tuned; CLM noul 0.247 → 0.278 @tuned.
 - `probe_aug` tốt nhất ở cả hai ngưỡng.
-- Head CLM fine-tune gần như không đổi xác suất (lr 1e-5, 5 epoch), nên ngưỡng tuned rất thấp và `clm_noul_aug` gán 5–8 nhãn cho mỗi bài public thử. Vì vậy `final_system` mặc định là `probe_aug` (tốt nhất trên OOF gold) và có `lr_grid` để thử lr lớn hơn trên Kaggle.
+- Trong lần chạy này (trước khi có lưới lr), head CLM fine-tune gần như không đổi xác suất (lr 1e-5, 5 epoch), nên ngưỡng tuned rất thấp và `clm_noul_aug` mặc định lúc đó gán 5–8 nhãn cho mỗi bài public thử. Hệ thống cuối `final_system` mặc định là `probe_aug` (tốt nhất trên OOF gold); lưới lr đã được chạy local, xem đoạn dưới.
 - `Lỗi edge case` F1 = 0 ở mọi hệ thống: gold chỉ có 0 ví dụ dương, và 8 mẫu chèn lỗi.
 - Các số @tuned lạc quan vì ngưỡng được chọn trên chính OOF.
+
+**Lưới lr (chạy lại 2026-10-11, embedding lấy hoàn toàn từ cache: 0 lần encode mới, 57 giây tổng, CV 40.7 giây, bộ nhớ đỉnh 4.41 GB).** Macro-F1 OOF @tuned trên 32 gold:
+- `clm_noul`: lr 1e-5 → 0.247, 1e-4 → 0.225, 1e-3 → 0.230 → chọn 1e-5.
+- `clm_noul_aug`: lr 1e-5 → 0.278, 1e-4 → 0.245, 1e-3 → 0.256 → chọn 1e-5.
+Lr lớn hơn không cải thiện với 5 epoch và khoảng 26 bài train mỗi fold, nên head CLM fine-tune không vượt zero-shot (0.266) một cách đáng kể; hệ thống cuối vẫn là `probe_aug` (OOF tốt nhất). Với ngưỡng tuned từ OOF (một số nhãn có ngưỡng rất thấp, ví dụ 0.05), `probe_aug` gán 4–8 nhãn cho mỗi bài trong 6 bài public thử. Đây chỉ là quan sát, không được dùng để chọn cấu hình (quy định không dùng dữ liệu test). Giải pháp hợp lệ là chọn ngưỡng hoặc ràng buộc trên gold (ví dụ giới hạn số nhãn tối đa theo phân bố số nhãn của gold), hoặc hỏi giảng viên.
 
 ## Rủi ro / hạn chế
 - Hướng 1: 6 bài val, khác đề thi: số đo rất nhiễu (cụm "6 bài val" chỉ áp dụng cho Hướng 1).
