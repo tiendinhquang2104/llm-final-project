@@ -100,7 +100,27 @@ không so trực tiếp.
 
 ### Lần chạy CV + augmentation
 
-<chờ kết quả Task 6>
+Lần chạy 2026-10-11 trên Apple M3 Pro 18GB, MLX 4-bit. Tổng thời gian 33 phút 20 giây (374 lần encode mới, 438 lấy từ cache của lần trước). Có 34 mẫu chèn lỗi (giới hạn 4 mỗi luật). CV 4 fold mất 14.5 giây, train bản cuối 4.2 giây. Bộ nhớ đỉnh 5.29 GB. "Giây/bài" = tổng thời gian encode / 72 mẫu (32 gold + 34 chèn lỗi + 6 public).
+
+| Run | Hệ thống | Phần cứng | n val | macro-F1 | micro-F1 | giây/bài | train (s) | bộ nhớ đỉnh (GB) | token vào | token ra | USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| task2_clm_local | clm_zero_shot@0.5 | Apple M3 Pro 18GB | 32 | 0.036 | 0.069 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | clm_zero_shot@tuned | Apple M3 Pro 18GB | 32 | 0.266 | 0.254 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | clm_noul@0.5 | Apple M3 Pro 18GB | 32 | 0.045 | 0.118 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | clm_noul@tuned | Apple M3 Pro 18GB | 32 | 0.247 | 0.273 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug@0.5 | Apple M3 Pro 18GB | 32 | 0.069 | 0.087 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug@tuned | Apple M3 Pro 18GB | 32 | 0.278 | 0.266 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | probe@0.5 | Apple M3 Pro 18GB | 32 | 0.192 | 0.252 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | probe@tuned | Apple M3 Pro 18GB | 32 | 0.261 | 0.317 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | probe_aug@0.5 | Apple M3 Pro 18GB | 32 | 0.245 | 0.268 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+| task2_clm_local | probe_aug@tuned | Apple M3 Pro 18GB | 32 | 0.298 | 0.332 | 27.29 | 4.24 | 5.29 | — | — | 0.0000 |
+
+Nhận xét:
+- Augmentation giúp cả hai bộ học: probe 0.192 → 0.245 @0.5 và 0.261 → 0.298 @tuned; CLM noul 0.247 → 0.278 @tuned.
+- `probe_aug` tốt nhất ở cả hai ngưỡng.
+- Head CLM fine-tune gần như không đổi xác suất (lr 1e-5, 5 epoch), nên ngưỡng tuned rất thấp và `clm_noul_aug` (final_system mặc định) gán 5–8 nhãn cho mỗi bài public thử. Cần lr/epoch lớn hơn trên Kaggle, hoặc dùng `final_system: probe_aug`.
+- `Lỗi edge case` F1 = 0 ở mọi hệ thống: gold chỉ có 0 ví dụ dương, và 8 mẫu chèn lỗi.
+- Các số @tuned lạc quan vì ngưỡng được chọn trên chính OOF.
 
 ## Rủi ro / hạn chế
 - 6 bài val, khác đề thi: số đo rất nhiễu. `Lỗi edge case` không có ví dụ dương trong gold.
