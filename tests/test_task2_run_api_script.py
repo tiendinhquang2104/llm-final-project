@@ -25,7 +25,7 @@ run:
   experiments: []
   smoke_sample_ids: []
   predict: true
-  predict_config: api_silver
+  predict_config: api_predict
 """
 
 
@@ -53,14 +53,14 @@ class TestPreflight(unittest.TestCase):
                 SCRIPT.main()
             return json.loads(buf.getvalue())
 
-    def test_silver_demos_exclude_gold_val_and_cost_scales_with_n(self):
+    def test_predict_demos_exclude_gold_val_and_cost_scales_with_n(self):
         pools = []
         rep = self._run(pools)
         self.assertTrue(pools)
         for pool in pools:
             self.assertEqual(sorted(pool), sorted(TRAIN))
         (name, e), = rep["experiments"].items()
-        self.assertIn("api_silver", name)
+        self.assertIn("api_predict", name)
         demos = e["demos_first_sample"]
         self.assertTrue(demos)
         ids = [d["sample_id"] if isinstance(d, dict) else getattr(d, "sample_id", d) for d in demos]

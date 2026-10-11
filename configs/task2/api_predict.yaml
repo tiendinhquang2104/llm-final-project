@@ -1,0 +1,6 @@
+extends: api_few_shot.yaml
+name: task2_api_predict
+description: Dự đoán 360 bài public để nộp — self-consistency n=5, T=0.7, nhãn = đa số phiếu. Không dùng làm dữ liệu train.
+generation:
+  temperature: 0.7
+  n: 5

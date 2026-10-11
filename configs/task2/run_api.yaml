@@ -3,8 +3,8 @@ provider: gemini              # override with --provider openai
 
 openai:
   model: gpt-4o-mini
-  max_usd: 3.0                # estimated hard stop for new requests in this invocation (silver 360x5 ~ $0.85-1.25 at gpt-4o-mini prices)
-  max_requests_per_run: 2000  # silver labelling = 360 samples x n=5
+  max_usd: 3.0                # estimated hard stop for new requests in this invocation (predict pass 360x5 ~ $0.85-1.25 at gpt-4o-mini prices)
+  max_requests_per_run: 2000  # predict pass = 360 samples x n=5
   input_usd_per_million: 0.15
   cached_input_usd_per_million: 0.075
   output_usd_per_million: 0.60
@@ -25,7 +25,7 @@ run:
     - api_few_shot
   smoke_sample_ids: [EX02-S201]
   predict: false              # true: label the 360 public samples with predict_config
-  predict_config: api_silver  # writes predictions.json + silver_labels.json for Hướng 2
+  predict_config: api_predict  # writes predictions.json (+ predictions_full.json) for the 360 public samples
   use_cache: true
 
 output_dir: outputs/task2

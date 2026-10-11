@@ -1,4 +1,4 @@
-"""Run Task 2 Hướng 1 on a list of samples: cached/resumable inference, predictions, silver labels, metrics."""
+"""Run Task 2 Hướng 1 on a list of samples: cached/resumable inference, predictions, metrics."""
 from __future__ import annotations
 
 import hashlib
@@ -70,7 +70,6 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
     labels = {p["sample_id"]: p["labels"] for p in preds}
     write_submission(out_dir / "predictions.json", labels, ids)
     _write_json(out_dir / "predictions_full.json", preds)
-    _write_json(out_dir / "silver_labels.json", {p["sample_id"]: p["probs"] for p in preds if p["parse_ok"]})
     gold = {s.sample_id: s.labels for s in samples if s.has_gold}
     metrics = {"name": cfg["name"], "n": len(samples), "parse_failures": sum(not p["parse_ok"] for p in preds),
                "systems": {"api": f1_scores(gold, labels)} if gold else {}}

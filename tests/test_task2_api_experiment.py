@@ -24,11 +24,12 @@ class TestRunApi(unittest.TestCase):
             out = Path(tmp) / "out"
             m = run_api(CFG, ds, ds.samples, FakeBackend([ans("Lỗi logic"), ans()]), out, registry=None)
             self.assertAlmostEqual(m["systems"]["api"]["exact_match"], 1.0)
-            for f in ("predictions.json", "predictions_full.json", "silver_labels.json", "metrics.json",
+            for f in ("predictions.json", "predictions_full.json", "metrics.json",
                       "resources.json", "config.json", "raw_outputs.jsonl"):
                 self.assertTrue((out / f).exists(), f)
-            silver = json.loads((out / "silver_labels.json").read_text(encoding="utf-8"))
-            self.assertEqual(silver["A1"]["Lỗi logic"], 1.0)
+            self.assertFalse((out / "silver_labels.json").exists())  # no labels derived from test inputs
+            full = json.loads((out / "predictions_full.json").read_text(encoding="utf-8"))
+            self.assertEqual(full[0]["probs"]["Lỗi logic"], 1.0)
             # second run: everything cached -> backend never called
             empty = FakeBackend([])
             run_api(CFG, ds, ds.samples, empty, out, registry=None)

@@ -79,8 +79,8 @@ def main() -> None:
               "experiments": {}}
     for name in names + ([run["predict_config"]] if public else []):
         cfg = prepare(name, settings, provider, a.smoke)
-        # Same wiring as the real run below: the silver/predict pass labels the public set;
-        # demos come from gold train ids only, so gold val never leaks into silver labels.
+        # Same wiring as the real run below: the predict pass runs on the public set;
+        # demos come from gold train ids only, so gold val never leaks into the predictions.
         is_predict = public is not None and name == run["predict_config"]
         samples = public.samples if is_predict else val
         dataset = public if is_predict else gold
@@ -103,7 +103,7 @@ def main() -> None:
             cfg = prepare(run["predict_config"], settings, provider, False)
             run_api(cfg, public, public.samples, backend, out / cfg["name"], train_pool,
                     use_cache=run.get("use_cache", True))
-            print(f"silver + predictions -> {out / cfg['name']}")
+            print(f"predictions -> {out / cfg['name']}")
     except (QuotaExhausted, CostLimitReached) as exc:
         print(f"DỪNG: {exc}. Phần đã xong được lưu trong {out}; chạy lại sẽ dùng cache.")
     for name, m in results.items():
