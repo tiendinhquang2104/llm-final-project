@@ -28,6 +28,32 @@ class TestText(unittest.TestCase):
             self.assertIn("int x;", text)
         self.assertNotIn("feedback", st["context"].lower())
 
+    def test_compile_log_block(self):
+        log = "/tmp/tmpab/student.cpp:3:1: error: x"
+        sample = SimpleNamespace(code="int x;\n" * 1000, exam_id="EXA", compile_log=log)
+        st = build_state_texts(EXAM, sample, TOK, max_tokens=600, max_statement_tokens=100, use_compile_log=True)
+        for text in [st["context"], *st["questions"].values()]:
+            self.assertLessEqual(len(text), 600)
+            self.assertIn("Kết quả biên dịch", text)
+            self.assertIn("student.cpp:3:1: error: x", text)
+            self.assertNotIn("/tmp/tmpab/", text)
+            self.assertLess(text.index("Kết quả biên dịch"), text.index("int x;"))
+        long = SimpleNamespace(code="int x;\n", exam_id="EXA", compile_log="e" * 5000)
+        st = build_state_texts(EXAM, long, TOK, max_tokens=900, max_statement_tokens=100, use_compile_log=True,
+                               max_compile_tokens=50)
+        self.assertLessEqual(len(st["context"]), 900)
+        self.assertLess(st["context"].count("e"), 200)
+
+    def test_compile_log_empty_none_and_off(self):
+        clean = SimpleNamespace(code="int x;", exam_id="EXA", compile_log="")
+        st = build_state_texts(EXAM, clean, TOK, max_tokens=600, max_statement_tokens=100, use_compile_log=True)
+        self.assertIn("không có lỗi hay cảnh báo", st["context"])
+        off = build_state_texts(EXAM, clean, TOK, max_tokens=600, max_statement_tokens=100)
+        self.assertNotIn("Kết quả biên dịch", off["context"])
+        none = SimpleNamespace(code="int x;", exam_id="EXA", compile_log=None)  # no compiler: no block
+        st = build_state_texts(EXAM, none, TOK, max_tokens=600, max_statement_tokens=100, use_compile_log=True)
+        self.assertNotIn("Kết quả biên dịch", st["context"])
+
     def test_candidates(self):
         f, t = candidate_texts("Lỗi logic")
         self.assertTrue(f.startswith("false: No.") and t.startswith("true: Yes."))

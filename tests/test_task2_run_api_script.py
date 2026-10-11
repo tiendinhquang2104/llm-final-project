@@ -69,6 +69,12 @@ class TestPreflight(unittest.TestCase):
         self.assertGreater(e["estimated_usd"], 0)
         self.assertEqual(e["approx_input_tokens"] % 5, 0)
 
+    def test_preflight_never_compiles(self):
+        import src.task2.compile as comp
+        with mock.patch.object(comp, "make_compiler", side_effect=AssertionError("compiled in preflight")):
+            rep = self._run()
+        self.assertIsNone(rep["compiler"])
+
     def test_estimated_usd_formula(self):
         class Pipe:
             def build_request(self, s):

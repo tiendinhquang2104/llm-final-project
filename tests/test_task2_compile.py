@@ -111,3 +111,27 @@ class TestHardening(unittest.TestCase):
             self.assertEqual(len(files), 1)  # only the non-timeout result is cached, no stray temp files
             self.assertEqual(json.loads(files[0].read_text())["returncode"], 0)
             self.assertEqual(cache.logs([s("A", "slow")]), {"A": "compile timeout"})
+
+
+class TestAttach(unittest.TestCase):
+    def test_attach_compiles_all_lists_in_one_batch_and_clears_organizer_signals(self):
+        fake = FakeCompiler()
+        a, b = s("A", "ok"), s("B", "bad")
+        a.test_report = [{"x": 1}]
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(comp, "make_compiler", return_value=fake):
+            (la, lb), cid = comp.attach_compile_logs({"cache_dir": "c", "workdir": "w"}, [[a], [b]], root=tmp)
+        self.assertEqual(cid, "fake:g++ 13.3.0")
+        self.assertEqual(len(fake.calls), 1)
+        self.assertEqual((la[0].compile_log, lb[0].compile_log), ("single_problem", "ERR single_problem"))
+        self.assertIsNone(la[0].test_report)
+
+    def test_disabled_or_missing_compiler_gives_none_logs(self):
+        with mock.patch.object(comp, "make_compiler") as mk:
+            (out,), cid = comp.attach_compile_logs({}, [[s("A", "ok")]], enabled=False)
+            self.assertEqual((out[0].compile_log, cid), (None, None))
+            (out,), cid = comp.attach_compile_logs({"enabled": False}, [[s("A", "ok")]])
+            self.assertEqual((out[0].compile_log, cid), (None, None))
+            mk.assert_not_called()
+        with mock.patch.object(comp, "make_compiler", return_value=None):
+            (out,), cid = comp.attach_compile_logs({}, [[s("A", "ok")]])
+            self.assertEqual((out[0].compile_log, cid), (None, None))

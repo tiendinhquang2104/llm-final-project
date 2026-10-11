@@ -153,3 +153,23 @@ class CompileCache:
 def with_compile_logs(samples, logs: dict) -> list:
     """Every sample gets the self-compiled log (or None) — organizer logs are never mixed in."""
     return [replace(s, compile_log=logs.get(s.sample_id)) for s in samples]
+
+
+def attach_compile_logs(compile_cfg: dict | None, sample_lists: list[list], enabled: bool = True,
+                        root=None) -> tuple[list[list], str | None]:
+    """Self-compile every sample of every list in one batch and return (new lists, compiler_id).
+
+    Organizer logs are never kept: with `enabled` False (--no-compile / config off) or no usable compiler every
+    compile_log is None. test_report is cleared too (the public release has none, so gold must not show it)."""
+    cfg = compile_cfg or {}
+    root = Path(root) if root else Path(".")
+    comp = None
+    if enabled and cfg.get("enabled", True):
+        comp = make_compiler(cfg.get("backend", "auto"), cfg.get("image", "gcc:13.3.0"),
+                             root / cfg.get("workdir", "outputs/task2/_compile_work"))
+    logs: dict = {}
+    if comp is not None:
+        logs = CompileCache(comp, root / cfg.get("cache_dir", "outputs/task2/_compile_cache")).logs(
+            [s for lst in sample_lists for s in lst])
+    out = [[replace(s, test_report=None) for s in with_compile_logs(lst, logs)] for lst in sample_lists]
+    return out, (comp.compiler_id if comp is not None else None)

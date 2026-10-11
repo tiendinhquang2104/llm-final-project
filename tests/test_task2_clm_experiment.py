@@ -119,6 +119,43 @@ class TestRunClm(unittest.TestCase):
                 run_clm({**CFG, "final_system": "nope"}, CachedEncoder(FakeEncoder(), tmp / "c"),
                         make_fake_heads(tmp / "h.pt"), gold, None, tmp / "o", (), registry=None)
 
+    def _with_logs(self, ds, bad_ids):
+        ds.samples[:] = [replace(s, compile_log=("/tmp/tmpab/student.cpp:3:1: error: x" if s.sample_id in bad_ids else ""))
+                         for s in ds.samples]
+        return ds
+
+    def test_compile_variant_probe_feature_and_final(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = self._with_logs(load_task2(make_dataset(tmp / "g", GOLD)), {"G4"})
+            public = self._with_logs(load_task2(make_dataset(tmp / "p", [("P1", "EXA", None), ("P2", "EXB", None)])),
+                                     {"P2"})
+            cfg = {**CFG, "final_system": "probe_aug+cr", "probe": {"C": 1.0, "compile_feature": True},
+                   "text": {**CFG["text"], "use_compile_log": True, "max_compile_tokens": 64},
+                   "_compiler_id": "fake:g++ 13"}
+            m = run_clm(cfg, CachedEncoder(FakeEncoder(dim=16), tmp / "c"), make_fake_heads(tmp / "h.pt"), gold,
+                        public, tmp / "out", augment(gold.samples), registry=None)
+            for system in SYSTEMS:
+                for suffix in ("@0.5", "@tuned"):
+                    self.assertEqual(m["systems"][f"{system}+cr{suffix}"]["n"], 6)
+            for suffix in ("@0.5", "@tuned"):
+                self.assertEqual(m["systems"]["probe_aug+cr" + suffix]["per_label"]["Lỗi biên dịch"]["f1"], 1.0)
+            self.assertEqual(m["final_system"], "probe_aug+cr")
+            self.assertEqual(m["compile"], {"enabled": True, "compiler_id": "fake:g++ 13"})
+            raw = json.loads((tmp / "out" / "predictions.json").read_text(encoding="utf-8"))
+            self.assertEqual(validate_predictions(raw, ["P1", "P2"]), [])
+            sub = {r["sample_id"]: r["output"]["taxonomy_error"] if "output" in r else r["labels"] for r in raw}
+            self.assertIn("Lỗi biên dịch", sub["P2"])
+            self.assertNotIn("Lỗi biên dịch", sub["P1"])
+
+    def test_unknown_cr_final_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = load_task2(make_dataset(tmp / "g", GOLD))
+            with self.assertRaises(ValueError):
+                run_clm({**CFG, "final_system": "nope+cr"}, CachedEncoder(FakeEncoder(), tmp / "c"),
+                        make_fake_heads(tmp / "h.pt"), gold, None, tmp / "o", (), registry=None)
+
     def test_public_per_exam_limit(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)

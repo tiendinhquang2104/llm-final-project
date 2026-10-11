@@ -6,6 +6,8 @@ The encoder keeps only the first `max_tokens` tokens, so we cut the context ours
 """
 from __future__ import annotations
 
+import re
+
 from src.task2.labels import DESCRIPTIONS, LABELS
 
 CUT = "\n// ...(cắt bớt)...\n"
@@ -37,19 +39,35 @@ def middle_truncate(text: str, n: int, tok) -> str:
     return tok.decode(ids[:head]) + CUT + tok.decode(ids[len(ids) - (keep - head):])
 
 
-def context_text(exam: dict, sample, tok, budget: int, max_statement_tokens: int = 512) -> str:
-    """Exam header + (truncated) statement + student code, at most ~`budget` tokens. No compile_log/test_report:
-    the public test has neither, so training and test inputs look alike."""
+def compile_block(sample, tok, max_compile_tokens: int) -> str:
+    """Self-compiled g++ output (organizer tmp dir prefix removed). None = not compiled -> no block."""
+    log = getattr(sample, "compile_log", None)
+    if log is None:
+        return ""
+    log = re.sub(r"/tmp/tmp\w+/", "", log).strip()
+    if not log:
+        return "\n\nKết quả biên dịch: không có lỗi hay cảnh báo."
+    return "\n\nKết quả biên dịch (g++ -std=c++11):\n" + head_truncate(log, max_compile_tokens, tok)
+
+
+def context_text(exam: dict, sample, tok, budget: int, max_statement_tokens: int = 512,
+                 use_compile_log: bool = False, max_compile_tokens: int = 256) -> str:
+    """Exam header + (truncated) statement [+ self-compiled log] + student code, at most ~`budget` tokens. The
+    compile block sits before the code so the code's middle cut never removes it. No organizer compile_log/
+    test_report: with_compile_logs overwrites them, so training and test inputs look alike."""
     head = f"Đề bài {exam['exam_id']} ({exam['exam_type']}, môn {exam.get('course', '')}):\n"
     statement = head_truncate(exam.get("statement", "").strip(), max_statement_tokens, tok)
     mid = "\n\nBài nộp C++ của sinh viên:\n"
-    used = len(tok.encode(head + statement + mid))
-    return head + statement + mid + middle_truncate(sample.code, max(32, budget - used), tok)
+    block = compile_block(sample, tok, max_compile_tokens) if use_compile_log else ""
+    used = len(tok.encode(head + statement + block + mid))
+    return head + statement + block + mid + middle_truncate(sample.code, max(32, budget - used), tok)
 
 
-def build_state_texts(exam: dict, sample, tok, max_tokens: int = 2048, max_statement_tokens: int = 512) -> dict:
+def build_state_texts(exam: dict, sample, tok, max_tokens: int = 2048, max_statement_tokens: int = 512,
+                      use_compile_log: bool = False, max_compile_tokens: int = 256) -> dict:
     questions = {lab: label_question(lab) for lab in LABELS}
     q_tokens = max(len(tok.encode("\n\n" + q)) for q in questions.values())
-    ctx_q = context_text(exam, sample, tok, max_tokens - q_tokens - SLACK, max_statement_tokens)
-    return {"context": context_text(exam, sample, tok, max_tokens - SLACK, max_statement_tokens),
+    kw = {"use_compile_log": use_compile_log, "max_compile_tokens": max_compile_tokens}
+    ctx_q = context_text(exam, sample, tok, max_tokens - q_tokens - SLACK, max_statement_tokens, **kw)
+    return {"context": context_text(exam, sample, tok, max_tokens - SLACK, max_statement_tokens, **kw),
             "questions": {lab: f"{ctx_q}\n\n{q}" for lab, q in questions.items()}}

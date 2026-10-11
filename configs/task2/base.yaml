@@ -6,3 +6,9 @@ data:
   public_root: data/raw/public_test_release   # 360 unlabelled competition samples
   task_file: task2_error_taxonomy.json
   splits_dir: data/splits                     # 26 train / 6 val (same ids as Task 1)
+compile:                                       # self-compiled compile_log (instructor allowed it); scripts accept --no-compile
+  enabled: true
+  backend: auto                                # auto: g++ on Linux, Docker on macOS (never Apple clang)
+  image: "gcc:13.3.0"
+  cache_dir: outputs/task2/_compile_cache
+  workdir: outputs/task2/_compile_work

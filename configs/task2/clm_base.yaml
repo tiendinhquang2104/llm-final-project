@@ -1,9 +1,11 @@
 extends: base.yaml
 name: task2_clm
-description: Hướng 2 — CLM-8B (Qwen3-8B frozen + head), câu hỏi noul cho từng nhãn; train trên 32 bài gold + mẫu chèn lỗi, đánh giá k-fold; probe tuyến tính làm ablation.
+description: Hướng 2 — CLM-8B (Qwen3-8B frozen + head), câu hỏi noul cho từng nhãn; context có compile_log tự compile, probe có thêm cột has_compile_error, biến thể +cr gán Lỗi biên dịch theo log; train trên 32 bài gold + mẫu chèn lỗi, đánh giá k-fold.
 text:
   max_tokens: 2048            # CLM reference encoder length
   max_statement_tokens: 512
+  use_compile_log: true       # self-compiled g++ output between statement and code
+  max_compile_tokens: 256
 train:
   epochs: 15
   lr: 1.0e-5                  # used when lr_grid is absent
@@ -14,6 +16,7 @@ train:
   train_action_head: true
 probe:
   C: 1.0
+  compile_feature: true       # probe input = [embedding, has_compile_error]
 thresholds:
   default: 0.5
   min_rate: 0.02              # each label predicted for >= 2% of public samples

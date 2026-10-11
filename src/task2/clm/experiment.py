@@ -17,6 +17,7 @@ from src.task2.augment import source_id
 from src.task2.benchmark import hardware_info
 from src.task2.clm.heads import LinearProbe, NoulModel, TrainConfig, predict_noul, train_noul
 from src.task2.clm.text import build_state_texts, candidate_texts
+from src.task2.compile import has_compile_error
 from src.task2.evaluator import f1_scores, write_submission
 from src.task2.labels import LABELS, from_vector, to_vector
 from src.task2.thresholds import apply_thresholds, tune_thresholds
@@ -57,6 +58,12 @@ def _gold_matrix(samples) -> np.ndarray:
 
 
 SYSTEMS = ("clm_zero_shot", "clm_noul", "clm_noul_aug", "probe", "probe_aug")
+CR = "+cr"  # post-processing variant: "Lỗi biên dịch" := the self-compiled log has a compiler error
+COMPILE_LABEL = "Lỗi biên dịch"
+
+
+def _errors(samples) -> np.ndarray:
+    return np.array([has_compile_error(s.compile_log) for s in samples], bool)
 
 
 def kfold_ids(ids, k: int, seed: int) -> list[list[str]]:
@@ -71,8 +78,9 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     seed = int(cfg.get("seed", 42))
     set_seed(seed)
     final = cfg.get("final_system", "clm_noul_aug")
-    if final not in SYSTEMS:
-        raise ValueError(f"final_system={final!r} not in {SYSTEMS}")
+    final_base, final_cr = (final[:-3], True) if final.endswith(CR) else (final, False)
+    if final_base not in SYSTEMS:
+        raise ValueError(f"final_system={final!r} not in {SYSTEMS} (optionally with the {CR!r} suffix)")
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     text_cfg = cfg.get("text", {})
@@ -92,6 +100,10 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     e_mut = embed_samples(mutants, gold.exams, encoder, text_cfg, dim)
     e_pub = embed_samples(pub, public.exams if public else {}, encoder, text_cfg, dim)
     embed_seconds = time.time() - t0
+    err_gold, err_mut, err_pub = _errors(gold_s), _errors(mutants), _errors(pub)
+    if (cfg.get("probe") or {}).get("compile_feature", True):  # probe input = [embedding, has_compile_error]
+        for e, err in ((e_gold, err_gold), (e_mut, err_mut), (e_pub, err_pub)):
+            e["X"] = np.hstack([e["X"], err.astype(np.float32)[:, None]])
     Y_gold, Y_mut = _gold_matrix(gold_s), _gold_matrix(mutants)
     src_mut = np.array([source_id(m.sample_id) for m in mutants])
     train_cfg = dict(cfg.get("train") or {})
@@ -150,9 +162,18 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     th = cfg.get("thresholds") or {}
     gold_map = {s.sample_id: s.labels for s in gold_s}
 
-    def score(P, thr) -> dict:
-        pred = apply_thresholds(P, thr)
+    def score_pred(pred) -> dict:
         return f1_scores(gold_map, {s.sample_id: from_vector(r) for s, r in zip(gold_s, pred)})
+
+    def score(P, thr) -> dict:
+        return score_pred(apply_thresholds(P, thr))
+
+    j_cr = LABELS.index(COMPILE_LABEL)
+
+    def with_cr(pred, err):
+        pred = np.array(pred, bool)
+        pred[:, j_cr] = err
+        return pred
 
     default_thr = float(th.get("default", 0.5))
     chosen_lr, lr_selection = {}, {}
@@ -172,6 +193,10 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
         thresholds[system] = thr.tolist()
         systems[f"{system}@0.5"] = score(oof[system], np.full(len(LABELS), 0.5))
         systems[f"{system}@tuned"] = score(oof[system], thr)
+        thresholds[system + CR] = thr.tolist()  # same thresholds; the compile label is overridden by the log
+        systems[f"{system}{CR}@0.5"] = score_pred(with_cr(apply_thresholds(oof[system], np.full(len(LABELS), 0.5)),
+                                                         err_gold))
+        systems[f"{system}{CR}@tuned"] = score_pred(with_cr(apply_thresholds(oof[system], thr), err_gold))
 
     # 4. final models on all gold (+ all mutants), public predictions
     t2 = time.time()
@@ -184,11 +209,14 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
         P_pub = {"clm_zero_shot": predict_noul(zero, e_pub["S"], C), "clm_noul": predict_noul(m_plain, e_pub["S"], C),
                  "clm_noul_aug": predict_noul(m_aug, e_pub["S"], C), "probe": probe_proba(p_plain, e_pub["X"]),
                  "probe_aug": probe_proba(p_aug, e_pub["X"])}
-        pred = apply_thresholds(P_pub[final], np.array(thresholds[final]), float(th.get("min_rate", 0.0)))
+        pred = apply_thresholds(P_pub[final_base], np.array(thresholds[final_base]), float(th.get("min_rate", 0.0)))
+        if final_cr:
+            pred = with_cr(pred, err_pub)
         labels = {s.sample_id: from_vector(r) for s, r in zip(pub, pred)}
         write_submission(out_dir / "predictions.json", labels, [s.sample_id for s in pub])
         _write_json(out_dir / "predictions_full.json", [
             {"sample_id": s.sample_id, "exam_id": s.exam_id, "labels": labels[s.sample_id],
+             "has_compile_error": bool(err_pub[k]),
              "probs": {system: dict(zip(LABELS, np.round(P_pub[system][k], 4).tolist())) for system in SYSTEMS}}
             for k, s in enumerate(pub)])
     torch.save(m_plain.state_dict(), out_dir / "clm_noul_heads.pt")
@@ -207,7 +235,8 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
                "evaluation": "out-of-fold over gold", "systems": systems,
                "history": {"folds": fold_hist, "final": {"clm_noul": {"n_train": n_plain, "loss": h_plain["loss"]},
                                                          "clm_noul_aug": {"n_train": n_aug, "loss": h_aug["loss"]}}},
-               "final_system": final}
+               "final_system": final,
+               "compile": {"enabled": cfg.get("_compiler_id") is not None, "compiler_id": cfg.get("_compiler_id")}}
     if lr_grid:
         metrics["lr_selection"] = lr_selection
     _write_json(out_dir / "metrics.json", metrics)

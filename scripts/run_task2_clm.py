@@ -15,6 +15,7 @@ from src.task2.augment import augment  # noqa: E402
 from src.task2.augment_api import load_mutants  # noqa: E402
 from src.task2.clm.encoder import CachedEncoder  # noqa: E402
 from src.task2.clm.experiment import run_clm  # noqa: E402
+from src.task2.compile import attach_compile_logs  # noqa: E402
 from src.task2.data import load_task2  # noqa: E402
 from src.utils.config import load_config  # noqa: E402
 
@@ -46,6 +47,7 @@ def main() -> None:
     ap.add_argument("--gold-root")
     ap.add_argument("--public-root")
     ap.add_argument("--output-dir", default=str(ROOT / "outputs" / "task2"))
+    ap.add_argument("--no-compile", action="store_true", help="No self-compiled compile_log (ablation / fallback)")
     ap.add_argument("--no-public", action="store_true", help="Skip public samples (gold only)")
     a = ap.parse_args()
     cfg = load_config(a.config)
@@ -61,6 +63,14 @@ def main() -> None:
         api_path = Path(api_path) if Path(api_path).is_absolute() else ROOT / api_path
         mutants += load_mutants(api_path)
     print(f"augmentation: {len(mutants)} mutants of gold code (rules={aug.get('rules', True)}, api={api_path or '-'})")
+    # One batch: gold + bug-injection mutants + public; organizer logs are replaced everywhere (None without compiler)
+    lists, compiler_id = attach_compile_logs(cfg.get("compile"), [gold.samples, mutants, public.samples if public else []],
+                                             enabled=not a.no_compile, root=ROOT)
+    gold.samples[:], mutants = lists[0], lists[1]
+    if public:
+        public.samples[:] = lists[2]
+    cfg["_compiler_id"] = compiler_id
+    print(f"compile: {compiler_id or 'off (compile_log=None for every sample)'}")
     encoder, heads = build_encoder(cfg["encoder"], int(cfg["text"]["max_tokens"]))
     enc = CachedEncoder(encoder, ROOT / cfg.get("cache_dir", "outputs/task2/_emb_cache"))
     out_dir = Path(a.output_dir) / cfg["name"]

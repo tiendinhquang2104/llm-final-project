@@ -17,6 +17,7 @@ from src.data.loader import load_split  # noqa: E402
 from src.llm.api_client import GeminiBackend, QuotaExhausted  # noqa: E402
 from src.llm.openai_client import CostLimitReached, OpenAIBackend  # noqa: E402
 from src.task2.api_experiment import run_api  # noqa: E402
+from src.task2.compile import attach_compile_logs  # noqa: E402
 from src.task2.data import load_task2  # noqa: E402
 from src.task2.pipeline import Task2ApiPipeline  # noqa: E402
 from src.utils.config import load_config, load_dotenv  # noqa: E402
@@ -57,6 +58,7 @@ def main() -> None:
     ap.add_argument("--public-root")
     ap.add_argument("--output-dir")
     ap.add_argument("--preflight", action="store_true", help="Build prompts and count requests; no API call")
+    ap.add_argument("--no-compile", action="store_true", help="No self-compiled compile_log (ablation / fallback)")
     ap.add_argument("--smoke", action="store_true", help="One validation sample per experiment, no public run")
     a = ap.parse_args()
     load_dotenv()
@@ -66,17 +68,25 @@ def main() -> None:
     base = load_config(CONFIG_DIR / "base.yaml")
     gold = load_task2(ROOT / (a.gold_root or base["data"]["gold_root"]))
     split = load_split(ROOT / base["data"]["splits_dir"])
-    by_id = gold.by_id()
-    train_pool = [by_id[i] for i in split["train"]]
-    val = [by_id[i] for i in (run["smoke_sample_ids"] if a.smoke else split["val"])]
     out = Path(a.output_dir) if a.output_dir else ROOT / settings.get("output_dir", "outputs/task2")
     names = list(run.get("experiments", []))
     public = None
     if run.get("predict") and not a.smoke:
         public = load_task2(ROOT / (a.public_root or base["data"]["public_root"]))
+    # Self-compiled logs replace the organizer's for every sample. --preflight stays compile-free (no Docker wait;
+    # its token estimate then omits the compile block).
+    compile_on = not (a.no_compile or a.preflight)
+    lists, compiler_id = attach_compile_logs(base.get("compile"), [gold.samples, public.samples if public else []],
+                                             enabled=compile_on, root=ROOT)
+    gold.samples[:] = lists[0]
+    if public:
+        public.samples[:] = lists[1]
+    by_id = gold.by_id()
+    train_pool = [by_id[i] for i in split["train"]]
+    val = [by_id[i] for i in (run["smoke_sample_ids"] if a.smoke else split["val"])]
 
-    report = {"provider": provider, "model": settings[provider]["model"], "val_ids": [s.sample_id for s in val],
-              "experiments": {}}
+    report = {"provider": provider, "model": settings[provider]["model"], "compiler": compiler_id,
+              "val_ids": [s.sample_id for s in val], "experiments": {}}
     for name in names + ([run["predict_config"]] if public else []):
         cfg = prepare(name, settings, provider, a.smoke)
         # Same wiring as the real run below: the predict pass runs on the public set;
