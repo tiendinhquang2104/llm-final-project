@@ -35,7 +35,10 @@ def has_compile_error(log: str | None) -> bool:
 
 
 def _first_line(cmd: list[str]) -> str:
-    out = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    out = subprocess.run(cmd, capture_output=True, text=True, timeout=120, stdin=subprocess.DEVNULL)
+    if out.returncode != 0:
+        lines = (out.stderr or "").strip().splitlines()
+        raise RuntimeError(f"{' '.join(cmd[:2])} failed (rc={out.returncode}): {lines[0] if lines else 'no stderr'}")
     return (out.stdout or out.stderr).strip().splitlines()[0] if (out.stdout or out.stderr).strip() else "unknown"
 
 
@@ -53,6 +56,7 @@ class NativeCompiler:
                 args = [self.cxx, *compile_args(exam_type)[1:]]
                 try:
                     p = subprocess.run(args, cwd=d, capture_output=True, timeout=self.timeout,
+                                       stdin=subprocess.DEVNULL,
                                        env={**os.environ, "LC_ALL": "C"})
                     results.append(((p.stdout or b"").decode("utf-8", "replace")
                                     + (p.stderr or b"").decode("utf-8", "replace"), p.returncode))
@@ -91,7 +95,7 @@ class DockerCompiler:
             (j / "student.cpp").write_text(code, encoding="utf-8")
             (j / "args").write_text(" ".join(compile_args(exam_type)), encoding="utf-8")
         (self.workdir / "run.sh").write_text(_DOCKER_SCRIPT.replace("{timeout}", str(self.timeout)), encoding="utf-8")
-        subprocess.run(["docker", "run", "--rm", "--network", "none", "-v", f"{self.workdir}:/work", self.image,
+        subprocess.run(["docker", "run", "--rm", "--network", "none", "--memory", "1g", "--pids-limit", "256", "-v", f"{self.workdir}:/work", self.image,
                         "bash", "/work/run.sh"], check=True, capture_output=True, text=True)
         out = []
         for i in range(len(jobs)):
@@ -114,7 +118,7 @@ def make_compiler(backend: str = "auto", image: str = "gcc:13.3.0", workdir="out
         if backend == "docker" or (backend == "auto" and shutil.which("docker")):
             subprocess.run(["docker", "info"], check=True, capture_output=True, timeout=30)
             return DockerCompiler(image, workdir)
-    except (OSError, subprocess.SubprocessError) as exc:
+    except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
         print(f"[compile] backend unavailable: {exc!r}")
     print("[compile] WARNING: no compiler available — compile_log will be empty")
     return None

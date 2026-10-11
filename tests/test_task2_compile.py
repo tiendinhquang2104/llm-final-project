@@ -86,13 +86,14 @@ class TestHardening(unittest.TestCase):
 
         def fake_run(args, **kw):
             if "--version" in args:
-                return mock.Mock(stdout="g++ 13", stderr="")
+                return mock.Mock(stdout="g++ 13", stderr="", returncode=0)
             seen.update(kw)
             return mock.Mock(stdout=b"", stderr=b"x\xff", returncode=1)
         with mock.patch.object(comp.subprocess, "run", side_effect=fake_run):
             c = comp.NativeCompiler()
             out = c.run([("int main(){}", "single_problem")])
         self.assertEqual(seen["env"]["LC_ALL"], "C")
+        self.assertIs(seen["stdin"], comp.subprocess.DEVNULL)
         self.assertNotIn("text", seen)
         self.assertEqual(out[0][1], 1)
         self.assertIn("x", out[0][0])
@@ -135,3 +136,33 @@ class TestAttach(unittest.TestCase):
         with mock.patch.object(comp, "make_compiler", return_value=None):
             (out,), cid = comp.attach_compile_logs({}, [[s("A", "ok")]])
             self.assertEqual((out[0].compile_log, cid), (None, None))
+
+    def test_failed_version_command_raises_first_stderr_line(self):
+        bad = mock.Mock(stdout="", stderr="Unable to find image\nsecond line", returncode=1)
+        with mock.patch.object(comp.subprocess, "run", return_value=bad):
+            with self.assertRaisesRegex(RuntimeError, "Unable to find image"):
+                comp._first_line(["docker", "run", "x"])
+
+    def test_make_compiler_returns_none_when_image_pull_fails(self):
+        def fake_run(args, **kw):
+            if args[:2] == ["docker", "info"]:
+                return mock.Mock(returncode=0, stdout="", stderr="")
+            return mock.Mock(returncode=125, stdout="", stderr="pull access denied\n")
+        with mock.patch.object(comp.platform, "system", return_value="Darwin"), \
+                mock.patch.object(comp.shutil, "which", return_value="/usr/bin/docker"), \
+                mock.patch.object(comp.subprocess, "run", side_effect=fake_run):
+            self.assertIsNone(comp.make_compiler("auto"))
+
+    def test_docker_run_has_resource_limits(self):
+        calls = []
+
+        def fake_run(args, **kw):
+            calls.append(args)
+            return mock.Mock(stdout="g++ 13", stderr="", returncode=0)
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(comp.subprocess, "run", side_effect=fake_run):
+            c = comp.DockerCompiler(workdir=Path(d) / "w")
+            with mock.patch.object(Path, "read_text", return_value="0"):
+                c.run([("int main(){}", "single_problem")])
+        run_call = next(a for a in calls if "bash" in a)
+        for flag, val in (("--memory", "1g"), ("--pids-limit", "256")):
+            self.assertEqual(run_call[run_call.index(flag) + 1], val)
