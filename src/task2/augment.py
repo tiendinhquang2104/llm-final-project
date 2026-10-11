@@ -89,8 +89,23 @@ def off_by_one_size(code: str) -> str | None:
     return _sub_first(r"(\.(?:size|length)\(\)|\bstrlen\s*\([^()]*\))", r"\1 + 1", code)
 
 
+_REF_PARAM = re.compile(r"([(,]\s*(?:const\s+)?[\w:<>*]+)\s*&\s*(\w+)")
+
+
 def drop_reference_param(code: str) -> str | None:
-    return _sub_first(r"([(,]\s*(?:const\s+)?[\w:<>*]+)\s*&\s*(\w+)", r"\1 \2", code)
+    """Pass a by-reference parameter by value. Skips const refs (no bug), forward prototypes (a line ending in
+    `;` would only give a link error) and range-for headers."""
+    spans = _comment_spans(code)
+    for m in _REF_PARAM.finditer(code):
+        if _in(spans, m.start()) or re.match(r"[(,]\s*const\b", m.group(1)):
+            continue
+        ls = code.rfind("\n", 0, m.start()) + 1
+        le = code.find("\n", m.end())
+        line = code[ls:len(code) if le == -1 else le]
+        if line.rstrip().endswith(";") or re.search(r"\bfor\s*\(", line[:m.start() - ls + 1]):
+            continue
+        return code[:m.start()] + m.expand(r"\1 \2") + code[m.end():]
+    return None
 
 
 _GUARD = re.compile(r"^[ \t]*if\s*\((?:[^()\n]|\([^()\n]*\))*(?:==\s*0|<=\s*0|<\s*1|==\s*NULL|==\s*nullptr|!\s*\w+)"

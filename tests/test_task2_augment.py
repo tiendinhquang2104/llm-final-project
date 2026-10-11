@@ -75,6 +75,15 @@ class TestMutators(unittest.TestCase):
         self.assertEqual(by_name["drop_reference_param"].apply("int f(int& n) {}"), "int f(int n) {}")
         self.assertEqual(by_name["drop_reference_param"].apply("int f(string &s) {}"), "int f(string s) {}")
 
+    def test_drop_reference_skips_const_prototype_and_for_header(self):
+        rule = {m.name: m for m in MUTATORS}["drop_reference_param"]
+        self.assertIsNone(rule.apply("int f(const string& s) {}"))
+        self.assertIsNone(rule.apply("int f(int& n);\nint main() {}\n"))
+        self.assertIsNone(rule.apply("void g() {\n  for (auto& x : v) {}\n}\n"))
+        # a later real definition is still found past a prototype and a const ref
+        code = "int f(int& n);\nint g(const int& k) {}\nint f(int& n) { return n; }\n"
+        self.assertEqual(rule.apply(code), "int f(int& n);\nint g(const int& k) {}\nint f(int n) { return n; }\n")
+
     def test_not_applicable_returns_none(self):
         plain = "int main(){return 0;}\n"
         by_name = {m.name: m for m in MUTATORS}
