@@ -1,0 +1,5 @@
+extends: clm_local.yaml
+name: task2_clm_local_full
+description: Bản nộp Task 2 chạy local trên Mac (MLX 4-bit) — 32 bài gold + mẫu chèn lỗi (≤4 mỗi luật) + đủ 360 bài public, có tự compile; hệ thống cuối probe_aug.
+data:
+  public_per_exam: null       # all 360 public samples -> full predictions.json
