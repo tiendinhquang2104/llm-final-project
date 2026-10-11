@@ -83,6 +83,52 @@ class TestMutators(unittest.TestCase):
             self.assertIsNone(by_name[name].apply(plain), name)
 
 
+class TestRegressionFixes(unittest.TestCase):
+    def setUp(self):
+        self.by_name = {m.name: m for m in MUTATORS}
+
+    def test_strip_indentation_none_on_flat_code(self):
+        # no indentation and no trailing newline: the old rule only appended "\n"
+        self.assertIsNone(self.by_name["strip_indentation"].apply("int main() {\nreturn 0;\n}"))
+        self.assertIsNone(self.by_name["strip_indentation"].apply("int main() {\nreturn 0;\n}\n"))
+
+    def test_strip_indentation_keeps_blank_lines_and_trailing_newline(self):
+        out = self.by_name["strip_indentation"].apply("int a;\n\n  int b;\n")
+        self.assertEqual(out, "int a;\n\nint b;\n")
+
+    def test_drop_return_skips_block_comment(self):
+        code = "int f(int n) {\n/* return x; */\nreturn n;\n}\n"
+        out = self.by_name["drop_return_semicolon"].apply(code)
+        self.assertIn("/* return x; */", out)
+        self.assertIn("return n\n", out)
+
+    def test_drop_return_skips_line_comment(self):
+        code = "int f(int n) {\n// return y;\nreturn n;\n}\n"
+        out = self.by_name["drop_return_semicolon"].apply(code)
+        self.assertIn("// return y;", out)
+        self.assertIn("return n\n", out)
+
+    def test_drop_return_none_when_only_commented_returns(self):
+        self.assertIsNone(self.by_name["drop_return_semicolon"].apply("/* return 1; */\n// return 2;\nint x;\n"))
+
+    def test_hardcode_return_ignores_commented_return(self):
+        code = "int f(int n) {\n/* return n; */\nreturn 2 * n;\n}\n"
+        out = self.by_name["hardcode_return"].apply(code)
+        self.assertIn("/* return n; */", out)
+        self.assertIn("return 1;", out)
+        self.assertNotIn("return 2 * n;", out)
+
+    def test_hardcode_return_does_not_pick_negative_sentinel(self):
+        code = "int f(int n) {\nif (n < 0) return -1;\nreturn n * 2;\n}\n"
+        out = self.by_name["hardcode_return"].apply(code)
+        self.assertIn("return -1;", out)
+        self.assertIn("return 1;", out)
+        self.assertNotIn("return n * 2;", out)
+
+    def test_hardcode_return_none_when_only_sentinels(self):
+        self.assertIsNone(self.by_name["hardcode_return"].apply("int f(int n) {\nreturn -1;\n}\n"))
+
+
 class TestAugment(unittest.TestCase):
     def test_labels_ids_and_aux_cleared(self):
         out = augment([sample()])

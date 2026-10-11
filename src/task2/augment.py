@@ -20,9 +20,48 @@ class Mutator:
     apply: Callable[[str], "str | None"]  # None = rule not applicable to this code
 
 
+def _comment_spans(code: str) -> list[tuple[int, int]]:
+    """(start, end) of every // line comment and /* */ block comment.
+
+    String and char literals are skipped while scanning, so "//" inside a literal is not a comment. This is a
+    simple scanner, not a C++ lexer (no raw strings, no preprocessor rules).
+    """
+    spans = []
+    i, n = 0, len(code)
+    while i < n:
+        if code.startswith("//", i):
+            end = code.find("\n", i)
+            end = n if end == -1 else end
+            spans.append((i, end))
+            i = end
+        elif code.startswith("/*", i):
+            end = code.find("*/", i + 2)
+            end = n if end == -1 else end + 2
+            spans.append((i, end))
+            i = end
+        elif code[i] in "\"'":
+            j = i + 1
+            while j < n and code[j] not in (code[i], "\n"):
+                j += 2 if code[j] == "\\" else 1
+            i = j + 1
+        else:
+            i += 1
+    return spans
+
+
+def _in(spans: list[tuple[int, int]], pos: int) -> bool:
+    return any(a <= pos < b for a, b in spans)
+
+
 def _sub_first(pattern: str, repl, code: str, flags: int = 0) -> str | None:
-    new, n = re.subn(pattern, repl, code, count=1, flags=flags)
-    return new if n and new != code else None
+    """Replace the first match whose start is outside comments; None if there is none or nothing changes."""
+    spans = _comment_spans(code)
+    for m in re.finditer(pattern, code, flags):
+        if _in(spans, m.start()):
+            continue
+        new = code[:m.start()] + (repl(m) if callable(repl) else m.expand(repl)) + code[m.end():]
+        return new if new != code else None
+    return None
 
 
 def drop_return_semicolon(code: str) -> str | None:
@@ -80,26 +119,37 @@ def _cut_guard(code: str, m: re.Match) -> str | None:
 
 def remove_edge_guard(code: str) -> str | None:
     """Delete the first edge-case guard (n == 0, n <= 0, ptr == NULL, !ptr, ...) and its body, if removable."""
+    spans = _comment_spans(code)
     for m in _GUARD.finditer(code):
+        if _in(spans, m.start()):
+            continue
         new = _cut_guard(code, m)
         if new is not None:
             return new
     return None
 
 
+_COMPUTED_RETURN = re.compile(r"\breturn\s+(?!-?\d+\s*;|true\s*;|false\s*;)[^;\n]+;")  # skips constants/sentinels
+
+
 def hardcode_return(code: str) -> str | None:
-    """First non-main function returning a computed value now returns a constant."""
+    """First non-main function whose first computed (non-constant, uncommented) return now returns 1."""
+    spans = _comment_spans(code)
     for m in re.finditer(r"\b(?:int|bool|long|double|float)\s+(\w+)\s*\([^)]*\)\s*\{", code):
-        if m.group(1) == "main":
+        if m.group(1) == "main" or _in(spans, m.start()):
             continue
-        r = re.compile(r"\breturn\s+(?!0;|1;|true;|false;)[^;\n]+;").search(code, m.end())
-        if r:
-            return code[:r.start()] + "return 1;" + code[r.end():]
+        for r in _COMPUTED_RETURN.finditer(code, m.end()):
+            if not _in(spans, r.start()):
+                return code[:r.start()] + "return 1;" + code[r.end():]
     return None
 
 
 def strip_indentation(code: str) -> str | None:
-    new = "\n".join(line.strip() for line in code.splitlines() if line.strip()) + "\n"
+    """Remove leading spaces/tabs from every line (blank lines kept). None unless some line is indented."""
+    lines = code.split("\n")
+    if not any(line[:1] in (" ", "\t") and line.strip() for line in lines):
+        return None
+    new = "\n".join(line.lstrip(" \t") for line in lines)
     return new if new != code else None
 
 
