@@ -13,31 +13,11 @@ for _stream in (sys.stdout, sys.stderr):
 
 from src.task2.augment import augment  # noqa: E402
 from src.task2.augment_api import load_mutants  # noqa: E402
-from src.task2.clm.encoder import CachedEncoder  # noqa: E402
+from src.task2.clm.encoder import CachedEncoder, build_from_config  # noqa: E402
 from src.task2.clm.experiment import run_clm  # noqa: E402
 from src.task2.compile import attach_compile_logs  # noqa: E402
 from src.task2.data import load_task2  # noqa: E402
 from src.utils.config import load_config  # noqa: E402
-
-
-def build_encoder(enc_cfg: dict, max_tokens: int):
-    """-> (encoder, heads_path). Downloads only weights/config files, never Python code from the Hub."""
-    if enc_cfg["backend"] == "mlx":
-        from huggingface_hub import snapshot_download
-
-        from src.task2.clm.encoder import MLXEncoder
-
-        local = Path(snapshot_download(enc_cfg["repo"], local_dir=str(ROOT / enc_cfg["local_dir"]),
-                                       allow_patterns=["encoder/*", "heads/*", "clm_mlx.json", "LICENSE", "NOTICE"]))
-        return MLXEncoder(local / "encoder", max_tokens, int(enc_cfg.get("batch_tokens", 4096))), local / "heads"
-    from huggingface_hub import hf_hub_download
-
-    from src.task2.clm.encoder import HFEncoder
-
-    heads = hf_hub_download(enc_cfg["heads_repo"], enc_cfg["heads_file"])
-    enc = HFEncoder(enc_cfg["model"], max_tokens, enc_cfg.get("dtype", "float16"),
-                    bool(enc_cfg.get("load_in_8bit", False)), int(enc_cfg.get("batch_size", 2)))
-    return enc, Path(heads)
 
 
 def main() -> None:
@@ -71,7 +51,7 @@ def main() -> None:
         public.samples[:] = lists[2]
     cfg["_compiler_id"] = compiler_id
     print(f"compile: {compiler_id or 'off (compile_log=None for every sample)'}")
-    encoder, heads = build_encoder(cfg["encoder"], int(cfg["text"]["max_tokens"]))
+    encoder, heads = build_from_config(cfg["encoder"], int(cfg["text"]["max_tokens"]), ROOT)
     enc = CachedEncoder(encoder, ROOT / cfg.get("cache_dir", "outputs/task2/_emb_cache"))
     out_dir = Path(a.output_dir) / cfg["name"]
     m = run_clm(cfg, enc, heads, gold, public, out_dir, mutants)

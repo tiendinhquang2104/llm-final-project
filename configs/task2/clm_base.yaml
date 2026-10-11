@@ -28,3 +28,6 @@ augment:
   api_path: null              # optional mutants.json from scripts/augment_task2_api.py
 final_system: probe_aug       # best on gold OOF (macro-F1 @0.5 and @tuned); never chosen on public outputs
 cache_dir: outputs/task2/_emb_cache
+task1:
+  alphas: [0.1, 1.0, 10.0, 100.0]   # ridge strength, chosen by out-of-fold QWK on the 32 gold samples
+  compile_gate: true                 # Task 1 rule: compilable=0 zeroes the policy's dimensions

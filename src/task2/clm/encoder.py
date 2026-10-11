@@ -183,3 +183,20 @@ class HFEncoder:
     def peak_memory_gb(self):
         torch = self.torch
         return sum(torch.cuda.max_memory_allocated(i) for i in range(torch.cuda.device_count())) / 2**30
+
+
+def build_from_config(enc_cfg: dict, max_tokens: int, root: Path):
+    """-> (encoder, heads_path). Downloads only weights/config files, never Python code from the Hub."""
+    root = Path(root)
+    if enc_cfg["backend"] == "mlx":
+        from huggingface_hub import snapshot_download
+
+        local = Path(snapshot_download(enc_cfg["repo"], local_dir=str(root / enc_cfg["local_dir"]),
+                                       allow_patterns=["encoder/*", "heads/*", "clm_mlx.json", "LICENSE", "NOTICE"]))
+        return MLXEncoder(local / "encoder", max_tokens, int(enc_cfg.get("batch_tokens", 4096))), local / "heads"
+    from huggingface_hub import hf_hub_download
+
+    heads = hf_hub_download(enc_cfg["heads_repo"], enc_cfg["heads_file"])
+    enc = HFEncoder(enc_cfg["model"], max_tokens, enc_cfg.get("dtype", "float16"),
+                    bool(enc_cfg.get("load_in_8bit", False)), int(enc_cfg.get("batch_size", 2)))
+    return enc, Path(heads)
