@@ -147,3 +147,25 @@ Secrets) → train A, B → ngưỡng → `predictions.json` (đã validate) + b
 - Bản MLX 4-bit là bản chuyển đổi không chính thức (khoảng 91% đồng thuận top-1 với bản gốc).
 - Qwen3-8B fp16 trên T4 có thể tràn số → fallback 8-bit.
 - Leaderboard chưa nói rõ quy ước F1 cho nhãn vắng → báo cáo cả hai.
+
+## 9. Sửa đổi 2026-10-11 — bỏ nhãn silver (phán quyết của giảng viên)
+
+Giảng viên trả lời: **không được** cho LLM tự gán nhãn giả trên input tập test (360 bài public, gồm cả 240 bài
+private) để train/distill. Mọi phần dưới đây thay thế các mục silver ở §2, §3.2, §3.3, §5, §6:
+
+- **Bỏ silver hoàn toàn**: không còn `silver_labels.json`, `--silver`, `configs/task2/api_silver.yaml`, holdout
+  silver. Hướng 1 vẫn dự đoán 360 bài để nộp (`configs/task2/api_predict.yaml`, self-consistency n=5) — đó là suy
+  luận, không phải dữ liệu train.
+- **Dữ liệu train Hướng 2 = 32 bài gold** của `sample_dataset` + **mẫu chèn lỗi (augmentation) sinh từ chính code
+  gold** — không dùng code, đề hay bất kỳ input nào của tập test.
+  - Luật cố định (`src/task2/augment.py`): mỗi luật chèn đúng một loại lỗi, nhãn biết trước theo cách tạo
+    (nhãn mẫu mới = nhãn gốc ∪ nhãn chèn). 9 luật cho 9 nhãn (không có luật cho `Lỗi thuật toán`).
+  - Tuỳ chọn API (`src/task2/augment_api.py`, `scripts/augment_task2_api.py`): LLM sửa code gold để chèn một loại
+    lỗi được yêu cầu; nhãn biết trước vì là lỗi được yêu cầu chèn. Chỉ gửi code gold.
+  - Nên hỏi giảng viên xác nhận việc augmentation từ bộ mẫu có nhãn.
+- **Đánh giá = k-fold cross-validation trên 32 bài gold** (mặc định 4 fold, chia theo bài, seed 42). Mẫu chèn lỗi chỉ
+  vào fold train khi bài gốc của nó thuộc fold train (không rò rỉ). Số liệu báo cáo là out-of-fold trên cả 32 bài:
+  `@0.5` và `@tuned` (ngưỡng chọn trên chính OOF → lạc quan). Không còn early stopping (số epoch cố định trong config).
+- **Hệ thống**: `clm_zero_shot`, `clm_noul`, `clm_noul_aug`, `probe`, `probe_aug` (ablation có/không augmentation).
+  Bản cuối train trên cả 32 bài (+ mẫu chèn lỗi), ngưỡng từ OOF, sàn `min_rate` khi dự đoán 360 bài public.
+- Hướng 1 vẫn đánh giá trên 6 bài gold val với demo từ 26 bài gold train (không đổi).
