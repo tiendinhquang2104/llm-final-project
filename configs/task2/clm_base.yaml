@@ -6,7 +6,8 @@ text:
   max_statement_tokens: 512
 train:
   epochs: 15
-  lr: 1.0e-5
+  lr: 1.0e-5                  # used when lr_grid is absent
+  lr_grid: [1.0e-5, 1.0e-4, 1.0e-3]   # lr chosen per CLM system on gold OOF macro-F1 @tuned (ties -> smaller)
   weight_decay: 0.01
   batch_size: 32
   pos_weight_max: 10.0
@@ -22,5 +23,5 @@ augment:
   rules: true                 # src/task2/augment.py bug injection on gold code (never test inputs)
   max_per_mutator: null       # null = every applicable gold sample
   api_path: null              # optional mutants.json from scripts/augment_task2_api.py
-final_system: clm_noul_aug
+final_system: probe_aug       # best on gold OOF (macro-F1 @0.5 and @tuned); never chosen on public outputs
 cache_dir: outputs/task2/_emb_cache

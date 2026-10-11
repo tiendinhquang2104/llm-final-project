@@ -4,7 +4,7 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 
-from src.task2.augment import augment
+from src.task2.augment import augment, source_id
 from src.task2.clm.encoder import CachedEncoder
 from src.task2.clm.experiment import SYSTEMS, kfold_ids, run_clm
 from src.task2.data import load_task2
@@ -53,6 +53,53 @@ class TestRunClm(unittest.TestCase):
             self.assertEqual(res["n_samples"], 6 + len(mutants) + 2)
             for f in ("clm_noul_heads.pt", "clm_noul_aug_heads.pt", "thresholds.json", "metrics.json"):
                 self.assertTrue((tmp / "out" / f).exists(), f)
+
+    def test_augmented_fold_train_size_has_no_leak(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = load_task2(make_dataset(tmp / "g", GOLD))
+            mutants = augment(gold.samples)
+            m = run_clm(CFG, CachedEncoder(FakeEncoder(dim=16), tmp / "c"), make_fake_heads(tmp / "h.pt"), gold,
+                        None, tmp / "out", mutants, registry=None)
+            conf = json.loads((tmp / "out" / "config.json").read_text(encoding="utf-8"))
+            all_ids = sorted(s for fold in conf["folds"] for s in fold)
+            self.assertEqual(len(m["history"]["folds"]), 3 * 2)
+            for entry in m["history"]["folds"]:
+                train = set(all_ids) - set(conf["folds"][entry["fold"]])
+                n_mut = sum(source_id(i) in train for i in conf["mutant_ids"])
+                self.assertEqual(entry["n_train"], len(train) + (n_mut if entry["augment"] else 0), entry)
+                if entry["augment"]:
+                    self.assertGreater(n_mut, 0)
+
+    def test_lr_grid_selects_on_oof_and_records_history(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = load_task2(make_dataset(tmp / "g", GOLD))
+            mutants = augment(gold.samples)
+            grid = [1e-4, 1e-2]
+            cfg = {**CFG, "train": {**CFG["train"], "lr_grid": grid}}
+            m = run_clm(cfg, CachedEncoder(FakeEncoder(dim=16), tmp / "c"), make_fake_heads(tmp / "h.pt"), gold,
+                        None, tmp / "out", mutants, registry=None)
+            self.assertEqual(set(m["lr_selection"]), {"clm_noul", "clm_noul_aug"})
+            for sel in m["lr_selection"].values():
+                self.assertEqual(sel["grid"], grid)
+                self.assertIn(sel["chosen"], grid)
+                self.assertEqual(len(sel["oof_macro_f1_tuned"]), 2)
+                best = max(sel["oof_macro_f1_tuned"].values())
+                self.assertEqual(sel["oof_macro_f1_tuned"][str(sel["chosen"])], best)
+            seen = {(e["lr"], e["fold"], e["augment"]) for e in m["history"]["folds"]}
+            self.assertEqual(seen, {(lr, f, a) for lr in grid for f in range(3) for a in (False, True)})
+            self.assertEqual(len(m["history"]["folds"]), 2 * 3 * 2)
+            self.assertEqual(m["systems"]["clm_noul@tuned"]["n"], 6)
+
+    def test_no_grid_has_no_lr_selection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            gold = load_task2(make_dataset(tmp / "g", GOLD))
+            m = run_clm(CFG, CachedEncoder(FakeEncoder(dim=16), tmp / "c"), make_fake_heads(tmp / "h.pt"), gold,
+                        None, tmp / "out", (), registry=None)
+            self.assertNotIn("lr_selection", m)
+            self.assertTrue(all(e["lr"] == 1e-3 for e in m["history"]["folds"]))
 
     def test_missing_checkpoint_fails_before_embedding(self):
         with tempfile.TemporaryDirectory() as tmp:

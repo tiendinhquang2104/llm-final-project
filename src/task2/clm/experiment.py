@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import time
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -93,41 +94,56 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     embed_seconds = time.time() - t0
     Y_gold, Y_mut = _gold_matrix(gold_s), _gold_matrix(mutants)
     src_mut = np.array([source_id(m.sample_id) for m in mutants])
-    tcfg = TrainConfig(**{**(cfg.get("train") or {}), "seed": seed})
+    train_cfg = dict(cfg.get("train") or {})
+    lr_grid = sorted(float(v) for v in (train_cfg.pop("lr_grid", None) or []))
+    base_cfg = TrainConfig(**{**train_cfg, "seed": seed})
+    grid = lr_grid or [base_cfg.lr]
     probe_c = float((cfg.get("probe") or {}).get("C", 1.0))
+    CLM_SYSTEMS = (("clm_noul", "probe", False), ("clm_noul_aug", "probe_aug", True))
 
-    def fit(rows: np.ndarray, with_aug: bool):
-        """Train CLM heads + probe on gold rows (+ mutants whose source gold sample is among those rows)."""
+    def train_rows(rows: np.ndarray, with_aug: bool):
+        """Gold rows (+ mutants whose source gold sample is among those rows): S, X, Y."""
         S, X, Y = e_gold["S"][rows], e_gold["X"][rows], Y_gold[rows]
         if with_aug and len(mutants):
             keep = np.isin(src_mut, [gold_s[i].sample_id for i in rows])
             S = np.concatenate([S, e_mut["S"][keep]])
             X = np.concatenate([X, e_mut["X"][keep]])
             Y = np.concatenate([Y, Y_mut[keep]])
+        return S, X, Y
+
+    def fit_clm(rows: np.ndarray, with_aug: bool, lr: float):
+        S, _, Y = train_rows(rows, with_aug)
         model = NoulModel.from_checkpoint(heads_path)
-        hist = train_noul(model, S, C, Y, tcfg)
-        return model, LinearProbe(C=probe_c, seed=seed).fit(X, Y), hist, int(len(S))
+        hist = train_noul(model, S, C, Y, replace(base_cfg, lr=lr))
+        return model, hist, int(len(S))
+
+    def fit_probe(rows: np.ndarray, with_aug: bool):
+        _, X, Y = train_rows(rows, with_aug)
+        return LinearProbe(C=probe_c, seed=seed).fit(X, Y)
 
     def probe_proba(probe, X) -> np.ndarray:
         return probe.predict_proba(X) if len(X) else np.zeros((0, len(LABELS)), np.float32)
 
-    # 2. k-fold CV -> out-of-fold probabilities for every gold sample
+    # 2. k-fold CV -> out-of-fold probabilities for every gold sample (CLM systems once per lr in the grid)
     n = len(gold_s)
     pos = {s.sample_id: i for i, s in enumerate(gold_s)}
     folds = kfold_ids(list(pos), int((cfg.get("cv") or {}).get("folds", 4)), seed)
     oof = {system: np.zeros((n, len(LABELS)), np.float32) for system in SYSTEMS}
     oof["clm_zero_shot"] = predict_noul(zero, e_gold["S"], C)
+    oof_lr = {s_clm: {lr: np.zeros((n, len(LABELS)), np.float32) for lr in grid} for s_clm, _, _ in CLM_SYSTEMS}
     fold_hist = []
     t1 = time.time()
     for f, held in enumerate(folds):
         te = np.array([pos[i] for i in held])
         held_rows = set(te.tolist())
         tr = np.array([i for i in range(n) if i not in held_rows])
-        for with_aug, (s_clm, s_probe) in ((False, ("clm_noul", "probe")), (True, ("clm_noul_aug", "probe_aug"))):
-            model, probe, hist, n_fit = fit(tr, with_aug)
-            oof[s_clm][te] = predict_noul(model, e_gold["S"][te], C)
-            oof[s_probe][te] = probe_proba(probe, e_gold["X"][te])
-            fold_hist.append({"fold": f, "augment": with_aug, "n_train": n_fit, "loss": hist["loss"]})
+        for s_clm, s_probe, with_aug in CLM_SYSTEMS:  # the probe does not depend on lr: fit once per fold
+            oof[s_probe][te] = probe_proba(fit_probe(tr, with_aug), e_gold["X"][te])
+        for lr in grid:
+            for s_clm, _, with_aug in CLM_SYSTEMS:
+                model, hist, n_fit = fit_clm(tr, with_aug, lr)
+                oof_lr[s_clm][lr][te] = predict_noul(model, e_gold["S"][te], C)
+                fold_hist.append({"fold": f, "augment": with_aug, "lr": lr, "n_train": n_fit, "loss": hist["loss"]})
     cv_seconds = time.time() - t1
 
     # 3. thresholds from OOF; metrics = OOF over all gold (@tuned is optimistic: same rows)
@@ -137,6 +153,18 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     def score(P, thr) -> dict:
         pred = apply_thresholds(P, thr)
         return f1_scores(gold_map, {s.sample_id: from_vector(r) for s, r in zip(gold_s, pred)})
+
+    default_thr = float(th.get("default", 0.5))
+    chosen_lr, lr_selection = {}, {}
+    for s_clm, _, _ in CLM_SYSTEMS:
+        tuned = {}
+        for lr in grid:  # ascending, strict ">" -> ties keep the smaller lr
+            thr = tune_thresholds(oof_lr[s_clm][lr], Y_gold >= 0.5, default=default_thr)
+            tuned[lr] = score(oof_lr[s_clm][lr], thr)["macro_f1"]
+        chosen_lr[s_clm] = max(grid, key=lambda lr: (tuned[lr], -lr))
+        oof[s_clm] = oof_lr[s_clm][chosen_lr[s_clm]]
+        lr_selection[s_clm] = {"grid": grid, "oof_macro_f1_tuned": {str(lr): v for lr, v in tuned.items()},
+                               "chosen": chosen_lr[s_clm]}
 
     thresholds, systems = {}, {}
     for system in SYSTEMS:
@@ -148,8 +176,9 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     # 4. final models on all gold (+ all mutants), public predictions
     t2 = time.time()
     rows = np.arange(n)
-    m_plain, p_plain, h_plain, n_plain = fit(rows, False)
-    m_aug, p_aug, h_aug, n_aug = fit(rows, True)
+    m_plain, h_plain, n_plain = fit_clm(rows, False, chosen_lr["clm_noul"])
+    m_aug, h_aug, n_aug = fit_clm(rows, True, chosen_lr["clm_noul_aug"])
+    p_plain, p_aug = fit_probe(rows, False), fit_probe(rows, True)
     train_seconds = time.time() - t2
     if pub:
         P_pub = {"clm_zero_shot": predict_noul(zero, e_pub["S"], C), "clm_noul": predict_noul(m_plain, e_pub["S"], C),
@@ -179,6 +208,8 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
                "history": {"folds": fold_hist, "final": {"clm_noul": {"n_train": n_plain, "loss": h_plain["loss"]},
                                                          "clm_noul_aug": {"n_train": n_aug, "loss": h_aug["loss"]}}},
                "final_system": final}
+    if lr_grid:
+        metrics["lr_selection"] = lr_selection
     _write_json(out_dir / "metrics.json", metrics)
     _write_json(out_dir / "thresholds.json", {s: dict(zip(LABELS, t)) for s, t in thresholds.items()})
     _write_json(out_dir / "resources.json", resources)
