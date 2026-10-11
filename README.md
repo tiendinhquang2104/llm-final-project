@@ -104,6 +104,7 @@ python scripts/run_task2_api.py --preflight
 python scripts/run_task2_clm.py --config configs/task2/clm_local.yaml
 .venv/bin/python scripts/run_task1_clm.py --config configs/task2/clm_local_full.yaml  # Task 1 without API, after Task 2
 python scripts/task2_benchmark.py
+.venv/bin/python scripts/run_task2_zeroshot.py --config configs/task2/clm_local_full.yaml  # zero-shot CLM (no training); then scripts/run_task1_zeroshot.py, see docs/task2_zeroshot.md
 
 # Run Task 3 (Compliance check)
 python scripts/run_task3.py --config configs/task3/baseline_api.yaml
