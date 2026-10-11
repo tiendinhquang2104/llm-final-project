@@ -98,6 +98,7 @@ python scripts/run_task1.py --provider gemini
 python scripts/run_task1.py --provider openai
 
 # Task 2: data, API baseline (no call with --preflight), CLM-8B local run, benchmark table
+docker pull gcc:13.3.0  # macOS: self-compile runs in Docker, no global g++
 python scripts/unpack_data.py data/public-test --dest data/raw
 python scripts/run_task2_api.py --preflight
 python scripts/run_task2_clm.py --config configs/task2/clm_local.yaml

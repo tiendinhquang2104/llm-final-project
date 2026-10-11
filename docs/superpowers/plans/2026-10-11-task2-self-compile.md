@@ -301,7 +301,7 @@ Expected: `compiler_id` chứa `gcc:13.3.0` và `g++ (GCC) 13.3.0`; mức đồn
 - [ ] Notebook: thêm vào cell cài đặt dòng `!g++ --version` (in phiên bản, Kaggle dùng g++ native); ghi chú markdown: compile chỉ chạy `g++ -std=c++11` (`-fsyntax-only` cho đề nhiều câu), không chạy code; phiên bản g++ của Kaggle có thể khác GCC 13.3 của bản local → log khác chữ đôi chút, cache tách theo `compiler_id`. Giữ 7 cell, `/kaggle/tmp`, secret, pin transformers.
 - [ ] `docs/task2.md`: mục mới "Tự compile (giảng viên cho phép, 2026-10-11)": công thức, Docker `gcc:13.3.0` trên Mac (không cài g++ global), native trên Linux, log thay cho log ban tổ chức ở mọi mẫu, chỉ compile không chạy, `--no-compile` cho ablation/fallback, `+cr` là hậu xử lý; kết quả so khớp với log ban tổ chức trên gold (số từ Task 1 Step 4); thay ghi chú cũ "không đưa compile_log/test_report vào input" bằng "test_report vẫn không dùng (không có testcase)". Mục câu hỏi giảng viên: bỏ ý đã được trả lời nếu có, ghi "Tự compile: được phép (2026-10-11)".
 - [ ] `README.md`: dòng Quick Start Task 2 thêm `docker pull gcc:13.3.0  # macOS: self-compile runs in Docker, no global g++`.
-- [ ] Kiểm tra: notebook 7 cell, `git ls-files | xargs grep -l <PUBLIC_TEST_DRIVE_ID>` rỗng. Commit `"Document self-compile for Task 2"`.
+- [ ] Kiểm tra: notebook 7 cell, `git ls-files | xargs grep -l <DRIVE_ID_PREFIX>` rỗng. Commit `"Document self-compile for Task 2"`.
 
 ---
 

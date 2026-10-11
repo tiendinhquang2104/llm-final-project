@@ -4,12 +4,12 @@ Spec: `docs/superpowers/specs/2026-10-09-task2-design.md` · Plan: `docs/superpo
 
 ## Dữ liệu
 - Giải nén: `python scripts/unpack_data.py data/public-test --dest data/raw` → `data/raw/public_test_release` (360 bài,
-  không nhãn, không compile_log/test_report) và `data/raw/sample_dataset` (32 bài có nhãn, đề EX01/EX02).
+  không nhãn; compile_log/test_report của ban tổ chức không có trong public) và `data/raw/sample_dataset` (32 bài có nhãn, đề EX01/EX02).
 - Nhãn: 32 bài gold là nguồn nhãn duy nhất. Hướng 1 dùng split 26/6 (`data/splits/`) để chọn cấu hình API; Hướng 2
   đánh giá bằng k-fold (4) trên cả 32 bài gold. Điểm leaderboard chỉ dùng để chọn cấu hình cuối.
 - **Không** dùng nhãn sinh trên input tập test (phán quyết giảng viên 2026-10-11). Hướng 1 dự đoán 360 bài public
   chỉ để nộp, không đưa vào train, ngưỡng hay chọn epoch.
-- Không dùng `feedback`. Không đưa compile_log/test_report vào input (public test không có).
+- Không dùng `feedback`. `compile_log` do ta tự compile (xem mục "Tự compile"); `test_report` vẫn không dùng (không có testcase).
 
 ## Hướng 1 — API
 ```bash
@@ -129,6 +129,79 @@ Nhận xét:
 - `clm_noul_aug`: lr 1e-5 → 0.278, 1e-4 → 0.245, 1e-3 → 0.256 → chọn 1e-5.
 Lr lớn hơn không cải thiện với 5 epoch và khoảng 26 bài train mỗi fold, nên head CLM fine-tune không vượt zero-shot (0.266) một cách đáng kể; hệ thống cuối vẫn là `probe_aug` (OOF tốt nhất). Với ngưỡng tuned từ OOF (một số nhãn có ngưỡng rất thấp, ví dụ 0.05), `probe_aug` gán 4–8 nhãn cho mỗi bài trong 6 bài public thử. Đây chỉ là quan sát, không được dùng để chọn cấu hình (quy định không dùng dữ liệu test). Giải pháp hợp lệ là chọn ngưỡng hoặc ràng buộc trên gold (ví dụ giới hạn số nhãn tối đa theo phân bố số nhãn của gold), hoặc hỏi giảng viên.
 
+## Tự compile (giảng viên cho phép, 2026-10-11)
+- **Công thức** theo `note` trong `exams.json`: đề đơn `g++ -std=c++11` (compile + link), đề nhiều câu `g++ -std=c++11 -fsyntax-only`; file `student.cpp` trong `/tmp/tmpXXXXXXXX/`; chỉ compile, **không chạy** code (timeout 30 giây/bài).
+- **Môi trường**: Mac dùng Docker `gcc:13.3.0` (`--network none`), không cài g++ global (`docker pull gcc:13.3.0`); Linux/Kaggle dùng g++ native (phiên bản có thể khác, cache tách theo `compiler_id`). Không có compiler thì cảnh báo và `compile_log = None`. `--no-compile` tắt hẳn (ablation/fallback).
+- Log tự sinh **thay** log ban tổ chức ở mọi mẫu (gold, mẫu chèn lỗi, public) để đặc trưng nhất quán. `test_report` không dùng (không có testcase). Compile chỉ trích đặc trưng từ input, không tạo nhãn; mọi lựa chọn (ngưỡng, lr, hệ thống cuối, `+cr`) vẫn chỉ dựa trên OOF gold.
+- **Kiểm chứng trên 32 bài gold**: cờ "có lỗi biên dịch" khớp log ban tổ chức 32/32; so với nhãn `Lỗi biên dịch`: 6 đúng, 0 báo nhầm, 0 bỏ sót (lỗi link thiếu main không tính).
+- **Đặc trưng**: khối `compile_log` trong prompt API và trong context CLM (đặt trước code, ≤256 token), cột `has_compile_error` cho probe, biến thể `+cr` (hậu xử lý: gán `Lỗi biên dịch` theo log). `+cr` mà không có compiler bị chặn bằng lỗi cấu hình. Log rỗng (compile sạch) hiển thị "(rỗng — không có lỗi hay cảnh báo)"; chưa compile thì không có khối.
+
+**Ablation** (local Mac M3 Pro, MLX 4-bit, OOF 4-fold trên 32 gold, 34 mẫu chèn lỗi), macro-F1 @0.5 / @tuned, không compile → có compile:
+
+| Hệ thống | không compile | có compile |
+|---|---|---|
+| clm_zero_shot | .036 / .266 | .038 / .304 |
+| clm_noul_aug | .069 / .278 | .228 / .339 |
+| probe | .192 / .261 | .213 / .314 |
+| probe_aug | .245 / .298 | .287 / .362 |
+
+- F1 nhãn `Lỗi biên dịch` @tuned: ~0.32–0.42 → 1.0.
+- `+cr` không cộng thêm khi log đã là đặc trưng; với `--no-compile` thì `+cr` làm F1 nhãn này về 0 (đã chặn bằng lỗi cấu hình).
+- `probe_aug` vẫn là hệ thống cuối (OOF tốt nhất). Số nhãn mỗi bài public thử là 3–5 (trước đây 4–8): chỉ là quan sát, không dùng để chọn.
+- **Chi phí**: compile 392 bài trong Docker (một lô); encode lại 792 văn bản ≈ 66 phút; bộ nhớ đỉnh 5.27 GB; chạy ablation không compile từ cache 57 giây.
+
+Bảng benchmark đầy đủ. Cả hai lần chạy dùng chung tên run `task2_clm_local`; khối đầu là **không compile** (`outputs/task2/ablation_nocompile`), khối sau là **có compile**.
+
+*Không compile*
+
+| Run | Hệ thống | Đánh giá | Phần cứng | n val | macro-F1 | micro-F1 | giây/bài | train (s) | bộ nhớ đỉnh (GB) | token vào | token ra | USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| task2_clm_local | clm_zero_shot@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.036 | 0.069 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_zero_shot@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.266 | 0.254 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_zero_shot+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.036 | 0.069 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_zero_shot+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.234 | 0.239 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.045 | 0.118 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.247 | 0.273 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.045 | 0.118 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.215 | 0.259 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.069 | 0.087 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.278 | 0.266 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.069 | 0.088 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.246 | 0.249 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.192 | 0.252 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.261 | 0.317 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.150 | 0.217 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.219 | 0.299 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe_aug@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.245 | 0.268 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe_aug@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.298 | 0.332 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe_aug+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.211 | 0.248 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+| task2_clm_local | probe_aug+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.265 | 0.320 | 0.00 | 4.32 | 4.41 | — | — | 0.0000 |
+
+*Có compile*
+
+| Run | Hệ thống | Đánh giá | Phần cứng | n val | macro-F1 | micro-F1 | giây/bài | train (s) | bộ nhớ đỉnh (GB) | token vào | token ra | USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| task2_clm_local | clm_zero_shot@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.038 | 0.072 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_zero_shot@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.304 | 0.268 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_zero_shot+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.138 | 0.153 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_zero_shot+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.357 | 0.289 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.038 | 0.093 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.296 | 0.288 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.138 | 0.217 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.350 | 0.316 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.228 | 0.241 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.339 | 0.321 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.261 | 0.273 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | clm_noul_aug+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.339 | 0.321 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.213 | 0.267 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.314 | 0.344 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.213 | 0.267 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.314 | 0.344 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe_aug@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.287 | 0.293 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe_aug@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.362 | 0.377 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe_aug+cr@0.5 | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.287 | 0.293 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+| task2_clm_local | probe_aug+cr@tuned | out-of-fold over gold | Apple M3 Pro 18GB | 32 | 0.362 | 0.377 | 54.74 | 7.08 | 5.27 | — | — | 0.0000 |
+
 ## Rủi ro / hạn chế
 - Hướng 1: 6 bài val, khác đề thi: số đo rất nhiễu (cụm "6 bài val" chỉ áp dụng cho Hướng 1).
 - CV chia theo bài, mà gold chỉ gồm đề EX01/EX02, nên OOF đánh giá quá cao khả năng tổng quát hóa sang 6 đề thi của cuộc thi.
@@ -145,3 +218,4 @@ Lr lớn hơn không cải thiện với 5 epoch và khoảng 26 bài train mỗ
 - (a) Có được sinh dữ liệu augmentation từ code của các bài mẫu có nhãn (sample_dataset) không?
 - (b) Có được dùng sàn tỉ lệ dự đoán 2% tính trên tập dự đoán public (không nhãn, không đầu ra LLM) không?
 - (c) Có được chọn cấu hình cuối bằng điểm leaderboard public không?
+- (d) Tự compile: được phép (2026-10-11).

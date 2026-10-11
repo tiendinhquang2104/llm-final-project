@@ -169,3 +169,14 @@ private) để train/distill. Mọi phần dưới đây thay thế các mục s
 - **Hệ thống**: `clm_zero_shot`, `clm_noul`, `clm_noul_aug`, `probe`, `probe_aug` (ablation có/không augmentation).
   Bản cuối train trên cả 32 bài (+ mẫu chèn lỗi), ngưỡng từ OOF, sàn `min_rate` khi dự đoán 360 bài public.
 - Hướng 1 vẫn đánh giá trên 6 bài gold val với demo từ 26 bài gold train (không đổi).
+
+## 10. Sửa đổi 2026-10-11 — tự compile
+
+Giảng viên cho phép tự compile code sinh viên để lấy compile log làm đặc trưng.
+
+- **Công thức** (theo `note` trong `exams.json`): đề `single_problem` → `g++ -std=c++11 student.cpp -o student`; đề `multi_problem` → `g++ -std=c++11 -fsyntax-only student.cpp`; file `student.cpp` trong thư mục tạm `/tmp/tmpXXXXXXXX`. Chỉ compile, không chạy code.
+- **Môi trường**: Mac chạy Docker `gcc:13.3.0` (`--network none`), Linux/Kaggle dùng g++ native; không cài g++ global. Phiên bản compiler ghi vào cache key (`compiler_id`) và output. Không có compiler → `compile_log = None`; `--no-compile` tắt hẳn.
+- **Log thay thế** log ban tổ chức ở mọi mẫu (gold, mẫu chèn lỗi, public) để đặc trưng nhất quán.
+- **Đặc trưng**: khối `compile_log` trong prompt API; khối trước code trong context CLM (≤256 token); cột `has_compile_error` cho probe; biến thể `+cr` gán `Lỗi biên dịch` theo log (cần compiler, nếu không là lỗi cấu hình).
+- `test_report` vẫn không dùng (không có testcase).
+- Compile chỉ trích đặc trưng, không tạo nhãn; chọn cấu hình (ngưỡng, lr, hệ thống cuối, `+cr`) vẫn chỉ dựa trên OOF gold. Kết quả: xem `docs/task2.md`.
