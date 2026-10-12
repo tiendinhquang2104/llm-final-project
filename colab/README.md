@@ -5,6 +5,7 @@
 | [`01_prepare_data.ipynb`](01_prepare_data.ipynb) | Preprocess ChatML + EDA → Drive `data/` |
 | [`02_task1_baseline_api.ipynb`](02_task1_baseline_api.ipynb) | Task 1 Gemma 4 qua Gemini API và GPT-4o-mini qua OpenAI, cùng split 26/6 và pipeline |
 | [`03_task1_public_test.ipynb`](03_task1_public_test.ipynb) | Tải ZIP public test từ Drive, dự đoán 360 bài Task 1 và xuất file nộp |
+| [`04_task1_public_report.ipynb`](04_task1_public_report.ipynb) | Đọc output notebook 03 và vẽ điểm, rubric, trạng thái câu, rule, token |
 
 ## Task 1 API baseline
 
@@ -26,6 +27,8 @@ Notebook 03 tải `public-test-cham-diem-phan-hoi-files.zip` từ [folder Drive 
 Runner tương ứng: `python scripts/run_task1.py --provider gemini --data-dir <sample-root> --splits-dir <26-6-split> --predict-only --predict-root <public-root> --preflight`. Bỏ `--preflight` để gọi API. Thêm `--predict-ids ID1,ID2` cho smoke; mặc định `--predict-experiment e2_zero_shot_structured`.
 
 Checkpoint nằm trên Drive theo provider, model, experiment và dấu vân tay dữ liệu. Một lượt bị ngắt vì giới hạn API có thể chạy lại cell đầy đủ; `predictions.json` chỉ được tạo khi đủ 360 bài và đạt kiểm tra định dạng. Public test không có nhãn nên không có QWK/MAE tại máy. Không nộp file tự động.
+
+Notebook 04 đọc thư mục run đó (mặc định là lượt mới nhất đã đủ bài) và vẽ báo cáo. Không gọi API và không sửa `predictions.json`. `SAVE_REPORT = True` ghi PNG, CSV và `summary.md` vào `<run>/report/`.
 
 ## Per-person config via `.env`
 
