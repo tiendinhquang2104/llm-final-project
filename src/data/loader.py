@@ -3,16 +3,82 @@
 from __future__ import annotations
 
 import json
+import shutil
+import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from src.data.schema import RubricScores, UnifiedSample
 
+KNOWN = ("public_test_release.zip", "sample_dataset.zip")
+KNOWN_DIRS = ("public_test_release", "sample_dataset")
+
 
 def _read_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def unpack(src: Path, dest: Path) -> list[Path]:
+    src, dest = Path(src), Path(dest)
+    dest.mkdir(parents=True, exist_ok=True)
+    out: list[Path] = []
+
+    # 1. Check if known folders are already unzipped (e.g. Kaggle Datasets auto-unzip)
+    if src.is_dir():
+        for dname in KNOWN_DIRS:
+            target = dest / dname
+            if target.exists():
+                out.append(target)
+                continue
+            for fd in src.rglob(dname):
+                if fd.is_dir() and fd.resolve() != target.resolve():
+                    shutil.copytree(fd, target)
+                    out.append(target)
+                    break
+
+        # 1.5 Content-based discovery for unzipped folders
+        for dname in KNOWN_DIRS:
+            target = dest / dname
+            if target.exists():
+                continue
+            for candidate in src.rglob("exams.json"):
+                folder = candidate.parent
+                if folder.resolve() == target.resolve():
+                    continue
+                t2_file = folder / "task2_error_taxonomy.json"
+                if not t2_file.exists():
+                    continue
+                try:
+                    t2_data = json.loads(t2_file.read_text(encoding="utf-8"))
+                    samples = t2_data.get("samples", [])
+                    is_gold = len(samples) > 0 and "taxonomy_error" in samples[0].get("output", {})
+                    if (dname == "sample_dataset" and is_gold) or (dname == "public_test_release" and not is_gold):
+                        shutil.copytree(folder, target)
+                        out.append(target)
+                        break
+                except Exception:
+                    pass
+
+    # 2. Check for zip files
+    zips = [src] if src.is_file() else sorted(src.rglob("*.zip"))
+    for z in zips:
+        if z.name in KNOWN:
+            with zipfile.ZipFile(z) as zf:
+                zf.extractall(dest)
+            out.append(dest / z.stem)
+            continue
+        with zipfile.ZipFile(z) as zf:  # bundle: pull out the known inner zips
+            inner = [n for n in zf.namelist() if Path(n).name in KNOWN]
+            if not inner:
+                continue
+            tmp = dest / ".bundle"
+            for name in inner:
+                zf.extract(name, tmp)
+            out += unpack(tmp / name, dest)
+            shutil.rmtree(tmp, ignore_errors=True)
+    return sorted(set(out))
 
 
 def resolve_dataset_root(data_dir: str | Path) -> Path:
@@ -24,8 +90,42 @@ def resolve_dataset_root(data_dir: str | Path) -> Path:
       - any nested folder under <root> containing exams.json (depth <= 4)
     """
     root = Path(data_dir).resolve()
+    search_roots: list[Path] = []
     if not root.exists():
-        raise FileNotFoundError(f"data_dir does not exist: {root}")
+        target_name = root.name
+        kaggle_input = Path("/kaggle/input")
+        if kaggle_input.exists():
+            search_roots.append(kaggle_input)
+        cwd = Path.cwd()
+        for candidate_base in (cwd / "data", cwd.parent / "data", root.parent, cwd):
+            if candidate_base.exists() and candidate_base not in search_roots:
+                search_roots.append(candidate_base)
+
+        dest_dir = root.parent
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        for base in search_roots:
+            try:
+                unpack(base, dest_dir)
+            except Exception:
+                pass
+            if root.exists():
+                print(f"[data] Auto-recovered {target_name} -> {root}")
+                break
+
+    if not root.exists():
+        # Fallback: point directly to directory in /kaggle/input without copying if read-only
+        if Path("/kaggle/input").exists():
+            for fd in Path("/kaggle/input").rglob(root.name):
+                if fd.is_dir() and (fd / "exams.json").exists():
+                    root = fd
+                    print(f"[data] Pointing to /kaggle/input directory -> {root}")
+                    break
+
+    if not root.exists():
+        searched_str = ", ".join(str(p) for p in search_roots) if search_roots else "none"
+        raise FileNotFoundError(
+            f"data_dir does not exist: {root} (searched in: {searched_str})"
+        )
 
     direct_candidates = [
         root,

@@ -21,6 +21,14 @@ from src.task2.data import load_task2  # noqa: E402
 from src.utils.config import load_config  # noqa: E402
 
 
+def ensure_data(cfg: dict, root: Path) -> None:
+    gold_target = root / cfg["data"]["gold_root"]
+    if not gold_target.exists() and Path("/kaggle/input").exists():
+        from src.data.loader import unpack
+        print(f"[data] Auto-unpacking datasets from /kaggle/input -> {gold_target.parent}")
+        unpack(Path("/kaggle/input"), gold_target.parent)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=str(ROOT / "configs" / "task2" / "clm_local.yaml"))
@@ -33,6 +41,7 @@ def main() -> None:
     cfg_path = Path(a.config).resolve()
     cfg["_config_path"] = str(cfg_path.relative_to(ROOT)) if cfg_path.is_relative_to(ROOT) else str(cfg_path)
     cfg["name"] = "task1_" + cfg["name"].removeprefix("task2_")
+    ensure_data(cfg, ROOT)
     gold_root = Path(a.gold_root) if a.gold_root else ROOT / cfg["data"]["gold_root"]
     public_root = Path(a.public_root) if a.public_root else ROOT / cfg["data"]["public_root"]
     gold, public = load_task2(gold_root), load_task2(public_root)
