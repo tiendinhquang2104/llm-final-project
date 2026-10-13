@@ -199,3 +199,92 @@ class LinearProbe:
         cols = [np.full(len(X), m, np.float32) if isinstance(m, float) else m.predict_proba(X)[:, 1]
                 for m in self.models]
         return np.stack(cols, axis=1).astype(np.float32)
+
+
+class PrototypicalProbe:
+    """Few-shot prototypical metric classifier on frozen L2-normalised embeddings.
+    For each label, computes positive prototype (centroid of positive samples)
+    and negative prototype (centroid of negative samples).
+    Probability is derived from relative cosine similarity: sigmoid(tau * (sim_pos - sim_neg))."""
+
+    def __init__(self, tau: float = 5.0, default_prior: float = 0.05):
+        self.tau = float(tau)
+        self.default_prior = float(default_prior)
+        self.proto_pos = None
+        self.proto_neg = None
+        self.has_pos = None
+
+    def fit(self, X, Y) -> "PrototypicalProbe":
+        X = np.asarray(X, dtype=np.float32)
+        X = X / (np.linalg.norm(X, axis=-1, keepdims=True) + 1e-12)
+        Yb = np.asarray(Y) >= 0.5
+        n_labels = Yb.shape[1]
+        dim = X.shape[1]
+
+        self.proto_pos = np.zeros((n_labels, dim), dtype=np.float32)
+        self.proto_neg = np.zeros((n_labels, dim), dtype=np.float32)
+        self.has_pos = np.zeros(n_labels, dtype=bool)
+
+        for j in range(n_labels):
+            pos_idx = np.where(Yb[:, j])[0]
+            neg_idx = np.where(~Yb[:, j])[0]
+
+            if len(pos_idx) > 0:
+                p_pos = X[pos_idx].mean(axis=0)
+                self.proto_pos[j] = p_pos / (np.linalg.norm(p_pos) + 1e-12)
+                self.has_pos[j] = True
+
+            if len(neg_idx) > 0:
+                p_neg = X[neg_idx].mean(axis=0)
+                self.proto_neg[j] = p_neg / (np.linalg.norm(p_neg) + 1e-12)
+            else:
+                self.proto_neg[j] = -self.proto_pos[j]
+
+        return self
+
+    def predict_proba(self, X) -> np.ndarray:
+        X = np.asarray(X, dtype=np.float32)
+        X = X / (np.linalg.norm(X, axis=-1, keepdims=True) + 1e-12)
+        sim_pos = X @ self.proto_pos.T
+        sim_neg = X @ self.proto_neg.T
+
+        logits = self.tau * (sim_pos - sim_neg)
+        probs = 1.0 / (1.0 + np.exp(-np.clip(logits, -20.0, 20.0)))
+
+        for j in range(len(self.has_pos)):
+            if not self.has_pos[j]:
+                probs[:, j] = self.default_prior
+
+        return probs.astype(np.float32)
+
+
+class KNNProbe:
+    """k-Nearest Neighbor few-shot classifier with cosine similarity soft voting."""
+
+    def __init__(self, k: int = 5):
+        self.k = int(k)
+        self.X_train = None
+        self.Y_train = None
+
+    def fit(self, X, Y) -> "KNNProbe":
+        X = np.asarray(X, dtype=np.float32)
+        self.X_train = X / (np.linalg.norm(X, axis=-1, keepdims=True) + 1e-12)
+        self.Y_train = (np.asarray(Y) >= 0.5).astype(np.float32)
+        return self
+
+    def predict_proba(self, X) -> np.ndarray:
+        X = np.asarray(X, dtype=np.float32)
+        X = X / (np.linalg.norm(X, axis=-1, keepdims=True) + 1e-12)
+        sim = X @ self.X_train.T
+        k = min(self.k, len(self.X_train))
+
+        topk_idx = np.argsort(-sim, axis=1)[:, :k]
+
+        probs = np.zeros((len(X), self.Y_train.shape[1]), dtype=np.float32)
+        for i in range(len(X)):
+            sims = sim[i, topk_idx[i]]
+            weights = np.maximum(sims, 0.0) + 1e-6
+            weights /= weights.sum()
+            probs[i] = weights @ self.Y_train[topk_idx[i]]
+
+        return probs

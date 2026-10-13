@@ -50,7 +50,7 @@ class NativeCompiler:
     def run(self, jobs):
         results = []
         for code, exam_type in jobs:
-            d = Path(tempfile.mkdtemp(prefix="tmp", dir="/tmp"))
+            d = Path(tempfile.mkdtemp(prefix="tmp", dir="/tmp" if os.path.exists("/tmp") else None))
             try:
                 (d / "student.cpp").write_text(code, encoding="utf-8")
                 args = [self.cxx, *compile_args(exam_type)[1:]]
@@ -113,7 +113,7 @@ def make_compiler(backend: str = "auto", image: str = "gcc:13.3.0", workdir="out
         if system == "Darwin" and backend == "native":
             print("[compile] native backend refused on macOS (/usr/bin/g++ is Apple clang); trying Docker")
             backend = "docker"
-        if backend == "native" or (backend == "auto" and system == "Linux" and shutil.which("g++")):
+        if backend == "native" or (backend == "auto" and system in ("Linux", "Windows") and shutil.which("g++")):
             return NativeCompiler()
         if backend == "docker" or (backend == "auto" and shutil.which("docker")):
             subprocess.run(["docker", "info"], check=True, capture_output=True, timeout=30)

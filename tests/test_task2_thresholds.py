@@ -32,3 +32,11 @@ class TestThresholds(unittest.TestCase):
         floored = apply_thresholds(P, thr, min_rate=0.25)
         self.assertEqual(floored[:, 0].tolist(), [False, False, True, False])  # top-1 of column 0 forced
         self.assertEqual(floored[:, 1].tolist(), plain[:, 1].tolist())       # already >= 1 positive
+
+    def test_apply_with_max_labels(self):
+        # 4 labels: P = [0.9, 0.8, 0.7, 0.6], thr = 0.5. Without cap, all 4 are True.
+        # With max_labels=2, only top-2 by margin are kept.
+        P = np.array([[0.9, 0.8, 0.7, 0.6]])
+        thr = np.array([0.5, 0.5, 0.5, 0.5])
+        out = apply_thresholds(P, thr, max_labels=2)
+        self.assertEqual(out.tolist(), [[True, True, False, False]])

@@ -46,9 +46,19 @@ def prevalence_thresholds(P_gold: np.ndarray, Y_gold: np.ndarray, floor: float) 
                      for j in range(P_gold.shape[1])])
 
 
-def decide(P: np.ndarray, thr: np.ndarray, compile_err: np.ndarray) -> np.ndarray:
+def decide(P: np.ndarray, thr: np.ndarray, compile_err: np.ndarray,
+           max_labels: int | None = None) -> np.ndarray:
     pred = np.asarray(P) >= np.asarray(thr)
-    pred[:, LABELS.index(COMPILE_LABEL)] = np.asarray(compile_err, bool)
+    compile_idx = LABELS.index(COMPILE_LABEL)
+    pred[:, compile_idx] = np.asarray(compile_err, bool)
+    if max_labels is not None and max_labels > 0:
+        thr_arr = np.asarray(thr)
+        for i in range(pred.shape[0]):
+            active = [j for j in range(len(LABELS)) if pred[i, j] and j != compile_idx]
+            if len(active) > max_labels:
+                ranked = sorted(active, key=lambda j: float(P[i, j] - thr_arr[j]), reverse=True)
+                for j in ranked[max_labels:]:
+                    pred[i, j] = False
     return pred
 
 
@@ -69,12 +79,13 @@ def run_task2_zeroshot(cfg: dict, encoder, heads_path, gold, public, out_dir, re
     thr = prevalence_thresholds(P_gold, Y, floor)
     err_gold = np.array([has_compile_error(s.compile_log) for s in gold_s], bool)
     err_pub = np.array([has_compile_error(s.compile_log) for s in pub], bool)
-    pred_gold = decide(P_gold, thr, err_gold)
+    max_labels = (cfg.get("thresholds") or {}).get("max_labels")
+    pred_gold = decide(P_gold, thr, err_gold, max_labels=max_labels)
     gold_map = {s.sample_id: s.labels for s in gold_s}
     systems = {"clm_zeroshot_prompts": f1_scores(
         gold_map, {s.sample_id: from_vector(r) for s, r in zip(gold_s, pred_gold)})}
     if pub:
-        labels = {s.sample_id: from_vector(r) for s, r in zip(pub, decide(P_pub, thr, err_pub))}
+        labels = {s.sample_id: from_vector(r) for s, r in zip(pub, decide(P_pub, thr, err_pub, max_labels=max_labels))}
         write_submission(out_dir / "predictions.json", labels, [s.sample_id for s in pub])
         _write_json(out_dir / "predictions_full.json", [
             {"sample_id": s.sample_id, "exam_id": s.exam_id, "labels": labels[s.sample_id],

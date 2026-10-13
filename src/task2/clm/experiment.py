@@ -15,7 +15,8 @@ import torch
 from src.task1.experiment import REGISTRY, _git_commit, _write_json, append_registry
 from src.task2.augment import source_id
 from src.task2.benchmark import hardware_info
-from src.task2.clm.heads import LinearProbe, NoulModel, TrainConfig, predict_noul, train_noul
+from src.task2.clm.heads import (KNNProbe, LinearProbe, NoulModel, PrototypicalProbe,
+                                 TrainConfig, predict_noul, train_noul)
 from src.task2.clm.text import build_state_texts, candidate_texts
 from src.task2.compile import has_compile_error
 from src.task2.evaluator import f1_scores, write_submission
@@ -57,7 +58,8 @@ def _gold_matrix(samples) -> np.ndarray:
     return np.array([to_vector(s.labels) for s in samples], np.float32).reshape(len(samples), len(LABELS))
 
 
-SYSTEMS = ("clm_zero_shot", "clm_noul", "clm_noul_aug", "probe", "probe_aug")
+SYSTEMS = ("clm_zero_shot", "clm_noul", "clm_noul_aug", "probe", "probe_aug",
+           "proto", "proto_aug", "knn", "knn_aug")
 CR = "+cr"  # post-processing variant: "Lỗi biên dịch" := the self-compiled log has a compiler error
 COMPILE_LABEL = "Lỗi biên dịch"
 
@@ -135,6 +137,14 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
         _, X, Y = train_rows(rows, with_aug)
         return LinearProbe(C=probe_c, seed=seed).fit(X, Y)
 
+    def fit_proto(rows: np.ndarray, with_aug: bool):
+        _, X, Y = train_rows(rows, with_aug)
+        return PrototypicalProbe().fit(X, Y)
+
+    def fit_knn(rows: np.ndarray, with_aug: bool):
+        _, X, Y = train_rows(rows, with_aug)
+        return KNNProbe(k=int(cfg.get("knn_k", 5))).fit(X, Y)
+
     def probe_proba(probe, X) -> np.ndarray:
         return probe.predict_proba(X) if len(X) else np.zeros((0, len(LABELS)), np.float32)
 
@@ -153,6 +163,8 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
         tr = np.array([i for i in range(n) if i not in held_rows])
         for s_clm, s_probe, with_aug in CLM_SYSTEMS:  # the probe does not depend on lr: fit once per fold
             oof[s_probe][te] = probe_proba(fit_probe(tr, with_aug), e_gold["X"][te])
+            oof["proto_aug" if with_aug else "proto"][te] = probe_proba(fit_proto(tr, with_aug), e_gold["X"][te])
+            oof["knn_aug" if with_aug else "knn"][te] = probe_proba(fit_knn(tr, with_aug), e_gold["X"][te])
         for lr in grid:
             for s_clm, _, with_aug in CLM_SYSTEMS:
                 model, hist, n_fit = fit_clm(tr, with_aug, lr)
@@ -162,13 +174,14 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
 
     # 3. thresholds from OOF; metrics = OOF over all gold (@tuned is optimistic: same rows)
     th = cfg.get("thresholds") or {}
+    max_labels = th.get("max_labels")
     gold_map = {s.sample_id: s.labels for s in gold_s}
 
     def score_pred(pred) -> dict:
         return f1_scores(gold_map, {s.sample_id: from_vector(r) for s, r in zip(gold_s, pred)})
 
     def score(P, thr) -> dict:
-        return score_pred(apply_thresholds(P, thr))
+        return score_pred(apply_thresholds(P, thr, max_labels=int(max_labels) if max_labels else None))
 
     j_cr = LABELS.index(COMPILE_LABEL)
 
@@ -193,12 +206,15 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     for system in SYSTEMS:
         thr = tune_thresholds(oof[system], Y_gold >= 0.5, default=float(th.get("default", 0.5)))
         thresholds[system] = thr.tolist()
+        thresholds[system + CR] = thr.tolist()  # same thresholds; the compile label is overridden by the log
         systems[f"{system}@0.5"] = score(oof[system], np.full(len(LABELS), 0.5))
         systems[f"{system}@tuned"] = score(oof[system], thr)
-        thresholds[system + CR] = thr.tolist()  # same thresholds; the compile label is overridden by the log
-        systems[f"{system}{CR}@0.5"] = score_pred(with_cr(apply_thresholds(oof[system], np.full(len(LABELS), 0.5)),
+        systems[f"{system}{CR}@0.5"] = score_pred(with_cr(apply_thresholds(oof[system], np.full(len(LABELS), 0.5),
+                                                                           max_labels=int(max_labels) if max_labels else None),
                                                          err_gold))
-        systems[f"{system}{CR}@tuned"] = score_pred(with_cr(apply_thresholds(oof[system], thr), err_gold))
+        systems[f"{system}{CR}@tuned"] = score_pred(with_cr(apply_thresholds(oof[system], thr,
+                                                                             max_labels=int(max_labels) if max_labels else None),
+                                                           err_gold))
 
     # 4. final models on all gold (+ all mutants), public predictions
     t2 = time.time()
@@ -206,12 +222,17 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
     m_plain, h_plain, n_plain = fit_clm(rows, False, chosen_lr["clm_noul"])
     m_aug, h_aug, n_aug = fit_clm(rows, True, chosen_lr["clm_noul_aug"])
     p_plain, p_aug = fit_probe(rows, False), fit_probe(rows, True)
+    proto_plain, proto_aug = fit_proto(rows, False), fit_proto(rows, True)
+    knn_plain, knn_aug = fit_knn(rows, False), fit_knn(rows, True)
     train_seconds = time.time() - t2
     if pub:
         P_pub = {"clm_zero_shot": predict_noul(zero, e_pub["S"], C), "clm_noul": predict_noul(m_plain, e_pub["S"], C),
                  "clm_noul_aug": predict_noul(m_aug, e_pub["S"], C), "probe": probe_proba(p_plain, e_pub["X"]),
-                 "probe_aug": probe_proba(p_aug, e_pub["X"])}
-        pred = apply_thresholds(P_pub[final_base], np.array(thresholds[final_base]), float(th.get("min_rate", 0.0)))
+                 "probe_aug": probe_proba(p_aug, e_pub["X"]), "proto": probe_proba(proto_plain, e_pub["X"]),
+                 "proto_aug": probe_proba(proto_aug, e_pub["X"]), "knn": probe_proba(knn_plain, e_pub["X"]),
+                 "knn_aug": probe_proba(knn_aug, e_pub["X"])}
+        pred = apply_thresholds(P_pub[final_base], np.array(thresholds[final_base]), float(th.get("min_rate", 0.0)),
+                                max_labels=int(max_labels) if max_labels else None)
         if final_cr:
             pred = with_cr(pred, err_pub)
         labels = {s.sample_id: from_vector(r) for s, r in zip(pub, pred)}

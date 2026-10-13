@@ -20,13 +20,14 @@ probe:
 thresholds:
   default: 0.5
   min_rate: 0.02              # each label predicted for >= 2% of public samples
+  max_labels: 2               # cap max non-compile labels per sample to eliminate over-prediction
 cv:
   folds: 4                    # k-fold over the 32 gold samples (out-of-fold metrics + thresholds)
 augment:
   rules: true                 # src/task2/augment.py bug injection on gold code (never test inputs)
   max_per_mutator: null       # null = every applicable gold sample
   api_path: null              # optional mutants.json from scripts/augment_task2_api.py
-final_system: probe_aug       # best on gold OOF (macro-F1 @0.5 and @tuned); never chosen on public outputs
+final_system: proto_aug       # Few-shot prototypical metric probe with bug injection
 cache_dir: outputs/task2/_emb_cache
 task1:
   alphas: [0.1, 1.0, 10.0, 100.0]   # ridge strength, chosen by out-of-fold QWK on the 32 gold samples

@@ -6,7 +6,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from src.task2.clm.heads import Head, LinearProbe, NoulModel, TrainConfig, load_heads, predict_noul, train_noul
+from src.task2.clm.heads import (Head, KNNProbe, LinearProbe, NoulModel, PrototypicalProbe,
+                                 TrainConfig, load_heads, predict_noul, train_noul)
 from tests._task2 import make_fake_heads
 
 
@@ -66,6 +67,26 @@ class TestProbe(unittest.TestCase):
         self.assertEqual(P.shape, (60, 10))
         self.assertGreater(((P[:, 0] >= 0.5) == (Y[:, 0] == 1)).mean(), 0.8)
         self.assertTrue((P[:, 1] == 0).all())  # no positive example -> constant 0
+
+    def test_prototypical_probe(self):
+        rng = np.random.default_rng(1)
+        X = rng.standard_normal((60, 16)).astype(np.float32)
+        Y = np.zeros((60, 10), np.float32)
+        Y[:, 0] = X[:, 0] > 0
+        P = PrototypicalProbe(tau=5.0).fit(X, Y).predict_proba(X)
+        self.assertEqual(P.shape, (60, 10))
+        self.assertGreater(((P[:, 0] >= 0.5) == (Y[:, 0] == 1)).mean(), 0.75)
+        self.assertAlmostEqual(P[0, 1], 0.05, places=2)  # default prior when no positives
+
+    def test_knn_probe(self):
+        rng = np.random.default_rng(2)
+        X = rng.standard_normal((60, 16)).astype(np.float32)
+        Y = np.zeros((60, 10), np.float32)
+        Y[:, 0] = X[:, 0] > 0
+        P = KNNProbe(k=5).fit(X, Y).predict_proba(X)
+        self.assertEqual(P.shape, (60, 10))
+        self.assertGreater(((P[:, 0] >= 0.5) == (Y[:, 0] == 1)).mean(), 0.75)
+        self.assertEqual(P[:, 1].tolist(), [0.0] * 60)
 
 
 if __name__ == "__main__":

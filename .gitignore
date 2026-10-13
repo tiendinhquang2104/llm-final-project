@@ -65,6 +65,8 @@ data/processed/*
 # Competition data (real student code, must not be published)
 data/public-test/
 data/public-test-*.zip
+*.zip
+sample_submission*.json
 
 # Model weights & checkpoints
 models/
