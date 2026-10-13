@@ -10,13 +10,29 @@ import zipfile
 from pathlib import Path
 
 KNOWN = ("public_test_release.zip", "sample_dataset.zip")
+KNOWN_DIRS = ("public_test_release", "sample_dataset")
 
 
 def unpack(src: Path, dest: Path) -> list[Path]:
     src, dest = Path(src), Path(dest)
     dest.mkdir(parents=True, exist_ok=True)
-    zips = [src] if src.is_file() else sorted(src.rglob("*.zip"))
     out: list[Path] = []
+
+    # 1. Check if known folders are already unzipped (e.g. Kaggle Datasets auto-unzip)
+    if src.is_dir():
+        for dname in KNOWN_DIRS:
+            target = dest / dname
+            if target.exists():
+                out.append(target)
+                continue
+            for fd in src.rglob(dname):
+                if fd.is_dir() and fd.resolve() != target.resolve():
+                    shutil.copytree(fd, target)
+                    out.append(target)
+                    break
+
+    # 2. Check for zip files
+    zips = [src] if src.is_file() else sorted(src.rglob("*.zip"))
     for z in zips:
         if z.name in KNOWN:
             with zipfile.ZipFile(z) as zf:
