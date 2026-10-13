@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 
-GRID = np.round(np.arange(0.05, 0.951, 0.05), 2)
+GRID = np.round(np.arange(0.25, 0.851, 0.05), 2)
 
 
 def best_threshold(p, y, grid=GRID, default: float = 0.5) -> float:
