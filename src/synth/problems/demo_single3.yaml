@@ -1,0 +1,193 @@
+# Additional single_problem exams to reach 18 train singles + 1 more held-out single.
+problems_meta:
+  - exam_id: SYN-SECONDMAX
+    exam_type: single_problem
+    title: Giá trị lớn thứ hai
+    language: cpp11
+    statement: Đọc n và n số nguyên phân biệt. In giá trị lớn thứ hai.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "4\n1 5 3 4", expected: "4", group: normal}
+      - {input: "3\n9 2 7", expected: "7", group: normal}
+      - {input: "4\n1 5 3 4", expected: "4", group: example}
+      - {input: "2\n10 1", expected: "1", group: "edge:min"}
+      - {input: "5\n1 2 3 4 5", expected: "4", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      int secondMax(int a[], int n) {
+          int mx = a[0];
+          int second = a[1];
+          for (int i = 0; i < n; i++) {
+              if (a[i] > mx) { second = mx; mx = a[i]; }
+              else if (a[i] > second && a[i] != mx) second = a[i];
+          }
+          return second;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          int a[100];
+          for (int i = 0; i < n; i++) cin >> a[i];
+          cout << secondMax(a, n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-GCDARR
+    exam_type: single_problem
+    title: ƯCLN của dãy
+    language: cpp11
+    statement: Đọc n và n số nguyên dương. In ước chung lớn nhất của cả dãy.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "3\n12 18 24", expected: "6", group: normal}
+      - {input: "2\n7 13", expected: "1", group: normal}
+      - {input: "3\n12 18 24", expected: "6", group: example}
+      - {input: "1\n5", expected: "5", group: "edge:min"}
+      - {input: "4\n100 200 300 400", expected: "100", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      int gcd2(int a, int b) {
+          while (b > 0) { int t = a % b; a = b; b = t; }
+          return a;
+      }
+      int gcdArr(int a[], int n) {
+          int g = a[0];
+          for (int i = 1; i < n; i++) { g = gcd2(g, a[i]); }
+          return g;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          int a[100];
+          for (int i = 0; i < n; i++) cin >> a[i];
+          cout << gcdArr(a, n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-POWER
+    exam_type: single_problem
+    title: Luỹ thừa
+    language: cpp11
+    statement: Đọc a và b. In a^b (a, b không âm, kết quả vừa long long).
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "2 10", expected: "1024", group: normal}
+      - {input: "5 0", expected: "1", group: normal}
+      - {input: "2 10", expected: "1024", group: example}
+      - {input: "1 5", expected: "1", group: "edge:min"}
+      - {input: "2 62", expected: "4611686018427387904", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      long long power(int a, int b) {
+          long long r = 1;
+          for (int i = 0; i < b; i++) { r = r * a; }
+          return r;
+      }
+      int main() {
+          int a, b;
+          cin >> a >> b;
+          cout << power(a, b);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D21, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-COUNTUPPER
+    exam_type: single_problem
+    title: Đếm ký tự in hoa
+    language: cpp11
+    statement: Đọc một chuỗi không khoảng trắng. In số ký tự in hoa.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "aBcD", expected: "2", group: normal}
+      - {input: "abc", expected: "0", group: normal}
+      - {input: "aBcD", expected: "2", group: example}
+      - {input: "A", expected: "1", group: "edge:min"}
+      - {input: "ABCDE", expected: "5", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      #include <string>
+      using namespace std;
+      int countUpper(string s) {
+          int c = 0;
+          for (int i = 0; i < (int)s.size(); i++) {
+              if (s[i] >= 'A' && s[i] <= 'Z') c = c + 1;
+          }
+          return c;
+      }
+      int main() {
+          string s;
+          cin >> s;
+          cout << countUpper(s);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-HO-SINGLE
+    exam_type: single_problem
+    title: Held-out single (tổng chữ số chia hết cho 3)
+    language: cpp11
+    heldout: true
+    statement: |
+      Đọc số nguyên không âm n (0 <= n <= 10^9). In "True" nếu tổng các chữ số của n chia hết cho 3,
+      ngược lại in "False".
+
+      | Input | Output |
+      |---|---|
+      | 123 | True |
+      | 124 | False |
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout, constraints: "0 <= n <= 10^9"}]
+    tests:
+      - {input: "123", expected: "True", group: "normal"}
+      - {input: "124", expected: "False", group: "normal"}
+      - {input: "999", expected: "True", group: "normal"}
+      - {input: "1000", expected: "False", group: "normal"}
+      - {input: "45678", expected: "True", group: "normal"}
+      - {input: "31", expected: "False", group: "normal"}
+      - {input: "123", expected: "True", group: "example"}
+      - {input: "124", expected: "False", group: "example"}
+      - {input: "0", expected: "True", group: "edge:zero"}
+      - {input: "3", expected: "True", group: "edge:single_digit"}
+      - {input: "7", expected: "False", group: "edge:single_digit"}
+      - {input: "999999999", expected: "True", group: "edge:max"}
+      - {input: "1000000000", expected: "False", group: "edge:max"}
+      - {input: "987654321", expected: "True", group: "perf"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      int digitSum(int n) {
+          int s = 0;
+          while (n > 0) { s = s + n % 10; n = n / 10; }
+          return s;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          int s = digitSum(n);
+          cout << (s % 3 == 0 ? "True" : "False");
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
