@@ -10,7 +10,7 @@
 
 ## Task 1 QLoRA
 
-Chạy notebook 01 để tạo dữ liệu trên Drive, đồng bộ repo mới, rồi mở notebook 05 với runtime GPU. Notebook dùng `scripts/train_task1.py` và `configs/task1/lora_7b.yaml` trong repo; dữ liệu lấy từ `data/processed/task1_train.jsonl` và `task1_val.jsonl`, không dùng 78 bản ghi của ba task gộp. Preflight kiểm tra split, leakage và độ dài token. Smoke test chạy một optimizer step; lượt đầy đủ lưu checkpoint từng epoch, dự đoán 6 bài validation và chọn adapter theo QWK (hòa thì MAE). Output nằm ở `MyDrive/LLM/Final Project/data/outputs/task1/qwen25_coder7b_qlora/`. Không có bước nộp public test tự động.
+Mở notebook 05 với runtime GPU sau khi push code mới lên branch `task-1`. Notebook tự clone/pull branch này vào `/content/llm-final-project-task1-finetune/`, tải `public-test-cham-diem-phan-hoi-files.zip` từ folder Drive của cuộc thi, lấy **`sample_dataset.zip` bên trong** và tạo split 26/6 riêng ở `MyDrive/LLM/Final Project/data/task1_finetune_sample/`. Nếu `gdown` không truy cập được folder, đặt ZIP ngoài trong MyDrive và khai báo `DRIVE_ZIP` trong cell dữ liệu. Notebook dùng `scripts/train_task1.py` và `configs/task1/lora_7b.yaml` từ branch vừa pull; dữ liệu train riêng Task 1 có 26 bản ghi, không dùng 78 bản ghi của ba task gộp. Preflight kiểm tra split, leakage và độ dài token. Smoke test chạy một optimizer step; lượt đầy đủ lưu checkpoint từng epoch, dự đoán 6 bài validation và chọn adapter theo QWK (hòa thì MAE). Output nằm ở `MyDrive/LLM/Final Project/data/outputs/task1/qwen25_coder7b_qlora/`. Không có bước nộp public test tự động.
 
 ## Task 1 API baseline
 
