@@ -8,9 +8,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
+
+# Prevent CUDA memory fragmentation
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -18,8 +22,14 @@ for _stream in (sys.stdout, sys.stderr):
     if hasattr(_stream, "reconfigure"):
         _stream.reconfigure(encoding="utf-8", errors="replace")
 
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+try:
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+except ImportError:
+    torch = None
+    AutoModelForCausalLM = None
+    AutoTokenizer = None
+    BitsAndBytesConfig = None
 
 from src.data.loader import unpack
 from src.task2.compile import attach_compile_logs
@@ -63,7 +73,8 @@ def main() -> None:
     ap.add_argument("--few-shot-k", type=int, default=2, help="Number of gold few-shot demonstrations (0 for zero-shot)")
     ap.add_argument("--max-code-chars", type=int, default=6000)
     ap.add_argument("--max-new-tokens", type=int, default=256, help="Max tokens to allow full reasoning/rationale before JSON")
-    ap.add_argument("--load-in-4bit", action="store_true", help="Load model in 4-bit NF4 to save VRAM")
+    ap.add_argument("--load-in-4bit", dest="load_in_4bit", action="store_true", default=True, help="Load model in 4-bit NF4 to save VRAM (default: True)")
+    ap.add_argument("--no-4bit", dest="load_in_4bit", action="store_false", help="Disable 4-bit quantization and load in fp16")
     ap.add_argument("--load-in-8bit", action="store_true", help="Load model in 8-bit to save VRAM")
     ap.add_argument("--no-compile", action="store_true", help="Skip self-compiling g++ logs")
     ap.add_argument("--eval-gold", action="store_true", help="Also evaluate on the 32 gold samples")
@@ -93,7 +104,9 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
 
     kw = {"device_map": "auto", "trust_remote_code": True}
-    if a.load_in_4bit:
+    use_4bit = a.load_in_4bit and torch.cuda.is_available()
+    if use_4bit:
+        print("==> Enabling 4-bit NF4 quantization (VRAM usage ~4.5GB, safe against OOM)...")
         kw["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16,
@@ -123,7 +136,7 @@ def main() -> None:
             demos = select_demos(gold.samples, sample, a.few_shot_k)
             messages = build_messages(exam, sample, demos, prompt_cfg)
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+            inputs = tokenizer(prompt, return_tensors="pt", max_length=3584, truncation=True).to(model.device)
             with torch.no_grad():
                 out_ids = model.generate(
                     **inputs,
@@ -137,6 +150,7 @@ def main() -> None:
                 if COMPILE_LABEL not in labs:
                     labs.append(COMPILE_LABEL)
             gold_preds[sample.sample_id] = labs
+            del inputs, out_ids
             if idx % 8 == 0 or idx == len(gold.samples):
                 print(f"  [gold {idx}/{len(gold.samples)}] {sample.sample_id} -> {labs}")
 
@@ -145,17 +159,30 @@ def main() -> None:
         print("\n--- Gold In-Context Results ---")
         print(f"Macro-F1: {metrics['macro_f1']:.4f} | Micro-F1: {metrics['micro_f1']:.4f} | Exact: {metrics['exact_match']:.4f}")
 
-    # Generate on Public Test (328 samples)
-    print(f"\n==> Generating predictions on {len(public.samples)} Public Test samples (k={a.few_shot_k})...")
+    # Generate on Public Test (328 samples) with Resume Checkpoint support
+    ckpt_path = out_dir / "predictions_checkpoint.json"
+    full_ckpt_path = out_dir / "records_checkpoint.json"
     test_preds = {}
     full_records = []
+    if ckpt_path.exists():
+        try:
+            test_preds = json.loads(ckpt_path.read_text(encoding="utf-8"))
+            if full_ckpt_path.exists():
+                full_records = json.loads(full_ckpt_path.read_text(encoding="utf-8"))
+            print(f"==> Resumed from checkpoint: {len(test_preds)}/{len(public.samples)} samples already completed.")
+        except Exception as e:
+            print(f"Warning: Failed to load checkpoint: {e}")
+
+    print(f"\n==> Generating predictions on {len(public.samples)} Public Test samples (k={a.few_shot_k})...")
     t0 = time.time()
     for idx, sample in enumerate(public.samples, 1):
+        if sample.sample_id in test_preds:
+            continue
         exam = public.exams[sample.exam_id]
         demos = select_demos(gold.samples, sample, a.few_shot_k)
         messages = build_messages(exam, sample, demos, prompt_cfg)
         prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+        inputs = tokenizer(prompt, return_tensors="pt", max_length=3584, truncation=True).to(model.device)
         with torch.no_grad():
             out_ids = model.generate(
                 **inputs,
@@ -176,11 +203,22 @@ def main() -> None:
             "raw_output": gen_text,
             "has_compile_error": bool(sample.compile_log and "error:" in sample.compile_log.lower()),
         })
+
+        del inputs, out_ids
+
+        # Checkpoint every 10 samples and release memory
+        if idx % 10 == 0 or idx == len(public.samples):
+            with open(ckpt_path, "w", encoding="utf-8") as f:
+                json.dump(test_preds, f, ensure_ascii=False, indent=2)
+            with open(full_ckpt_path, "w", encoding="utf-8") as f:
+                json.dump(full_records, f, ensure_ascii=False)
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
         if idx % 20 == 0 or idx == len(public.samples):
             elapsed = time.time() - t0
-            sec_per_sample = elapsed / idx
-            remain = (len(public.samples) - idx) * sec_per_sample
-            print(f"  [{idx:3d}/{len(public.samples)}] {sample.sample_id:25s} -> {labs} (ETA: {remain/60:.1f}m)")
+            done = len(test_preds)
+            print(f"  [{idx:3d}/{len(public.samples)}] {sample.sample_id:25s} -> {labs} (Completed: {done}/{len(public.samples)})")
 
     # Save outputs
     sub_path = out_dir / "predictions.json"
