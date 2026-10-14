@@ -162,7 +162,8 @@ def run_task1_clm(cfg: dict, encoder, gold, rubrics: dict, public, public_ids, o
     metrics = {"name": cfg["name"], "n_gold": n, "cv_folds": len(folds), "evaluation": "out-of-fold over gold",
                "alpha_selection": {str(a): scores[a]["qwk"] for a in alphas}, "chosen_alpha": best,
                "systems": systems,
-               "compile": {"enabled": cfg.get("_compiler_id") is not None, "compiler_id": cfg.get("_compiler_id")}}
+               "compile": {"enabled": cfg.get("_compiler_id") is not None, "compiler_id": cfg.get("_compiler_id"),
+                           "source": cfg.get("_compile_source")}}
     _write_json(out_dir / "metrics.json", metrics)
     _write_json(out_dir / "resources.json", resources)
     _write_json(out_dir / "config.json", {"config": cfg, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from src.task2.labels import LABELS, normalize_labels
 from src.task2.prompts import RESPONSE_SCHEMA, build_messages, select_demos
+from src.task2.prompts_cot import FINAL_MARKER, build_cot_messages
 from src.utils.json_extractor import extract_json_objects
 
 RETRY_MSG = ("Câu trả lời trên không phải JSON hợp lệ theo schema yêu cầu. "
@@ -17,6 +18,23 @@ def parse_labels(text: str) -> list[str] | None:
     return None
 
 
+def parse_cot_labels(text: str) -> list[str] | None:
+    """CoT answer: labels from the JSON after the last `KẾT LUẬN:`; else from the last line naming
+    `taxonomy_error`; else anywhere (bare-JSON retry answers). Reasoning may quote code with braces,
+    so the whole text is the last resort only."""
+    text = text or ""
+    if FINAL_MARKER in text:
+        got = parse_labels(text.rsplit(FINAL_MARKER, 1)[1])
+        if got is not None:
+            return got
+    lines = [ln for ln in text.splitlines() if "taxonomy_error" in ln]
+    if lines:
+        got = parse_labels(lines[-1])
+        if got is not None:
+            return got
+    return parse_labels(text)
+
+
 def vote(label_lists: list[list[str]]) -> dict[str, float]:
     n = len(label_lists)
     return {lab: (sum(lab in ls for ls in label_lists) / n if n else 0.0) for lab in LABELS}
@@ -28,10 +46,16 @@ class Task2ApiPipeline:
         self.prompt_cfg = cfg.get("prompt", {})
         self.gen_cfg = cfg.get("generation", {})
         self.demo_pool = list(demo_pool)
+        self.style = self.prompt_cfg.get("style", "json")
+        self.parse = parse_cot_labels if self.style == "cot" else parse_labels
 
     def build_request(self, sample) -> dict:
-        demos = select_demos(self.demo_pool, sample, int(self.prompt_cfg.get("few_shot_k", 0)))
         exam = self.ds.exams[sample.exam_id]
+        if self.style == "cot":  # zero-shot CoT: no demos, free-text reasoning then the KẾT LUẬN line
+            return {"sample": sample, "exam": exam, "demos": [],
+                    "messages": build_cot_messages(exam, sample, self.prompt_cfg),
+                    "schema": None, "schema_name": "task2_cot"}
+        demos = select_demos(self.demo_pool, sample, int(self.prompt_cfg.get("few_shot_k", 0)))
         return {"sample": sample, "exam": exam, "demos": [d.sample_id for d in demos],
                 "messages": build_messages(exam, sample, demos, self.prompt_cfg),
                 "schema": RESPONSE_SCHEMA, "schema_name": "task2_labels"}
@@ -43,7 +67,7 @@ class Task2ApiPipeline:
                     "outputs": texts, "retry_outputs": []} for q, texts in zip(reqs, outs)]
         for _ in range(int(self.cfg.get("retry_on_parse_fail", 1))):
             bad = [i for i, r in enumerate(records)
-                   if all(parse_labels(t) is None for t in r["outputs"] + r["retry_outputs"])]
+                   if all(self.parse(t) is None for t in r["outputs"] + r["retry_outputs"])]
             if not bad:
                 break
             retry = []
@@ -65,9 +89,9 @@ class Task2ApiPipeline:
                 "probs": {lab: 0.0 for lab in LABELS}, "labels": []}
 
     def postprocess(self, record: dict) -> dict:
-        parsed = [p for p in map(parse_labels, record["outputs"]) if p is not None]
+        parsed = [p for p in map(self.parse, record["outputs"]) if p is not None]
         if not parsed:
-            parsed = [p for p in map(parse_labels, record.get("retry_outputs", [])) if p is not None]
+            parsed = [p for p in map(self.parse, record.get("retry_outputs", [])) if p is not None]
         if not parsed:
             return {**self.empty_prediction(self.ds.by_id()[record["sample_id"]])}
         probs = vote(parsed)

@@ -28,14 +28,18 @@ def main() -> None:
     ap.add_argument("--public-root")
     ap.add_argument("--output-dir", default=str(ROOT / "outputs" / "task2"))
     ap.add_argument("--no-compile", action="store_true", help="No self-compiled compile_log (ablation / fallback)")
+    ap.add_argument("--compile-source", choices=["self", "dataset"],
+                    help="self: compile every sample; dataset: use compile_log already in the data (default: config compile.source)")
     ap.add_argument("--no-public", action="store_true", help="Skip public samples (gold only)")
     a = ap.parse_args()
     cfg = load_config(a.config)
+    source = a.compile_source or (cfg.get("compile") or {}).get("source", "self")
+    keep = source == "dataset"  # dataset logs: "" means a clean compile
     cfg_path = Path(a.config).resolve()
     cfg["_config_path"] = str(cfg_path.relative_to(ROOT)) if cfg_path.is_relative_to(ROOT) else str(cfg_path)
-    gold = load_task2(Path(a.gold_root) if a.gold_root else ROOT / cfg["data"]["gold_root"])
+    gold = load_task2(Path(a.gold_root) if a.gold_root else ROOT / cfg["data"]["gold_root"], keep_empty_compile_log=keep)
     public = None if a.no_public else load_task2(Path(a.public_root) if a.public_root
-                                                 else ROOT / cfg["data"]["public_root"])
+                                                 else ROOT / cfg["data"]["public_root"], keep_empty_compile_log=keep)
     aug = cfg.get("augment") or {}
     mutants = augment(gold.samples, max_per_mutator=aug.get("max_per_mutator")) if aug.get("rules", True) else []
     api_path = a.augment_api or aug.get("api_path")
@@ -45,12 +49,13 @@ def main() -> None:
     print(f"augmentation: {len(mutants)} mutants of gold code (rules={aug.get('rules', True)}, api={api_path or '-'})")
     # One batch: gold + bug-injection mutants + public; organizer logs are replaced everywhere (None without compiler)
     lists, compiler_id = attach_compile_logs(cfg.get("compile"), [gold.samples, mutants, public.samples if public else []],
-                                             enabled=not a.no_compile, root=ROOT)
+                                             enabled=not a.no_compile, root=ROOT, source=source)
     gold.samples[:], mutants = lists[0], lists[1]
     if public:
         public.samples[:] = lists[2]
     cfg["_compiler_id"] = compiler_id
-    print(f"compile: {compiler_id or 'off (compile_log=None for every sample)'}")
+    cfg["_compile_source"] = source if compiler_id else None
+    print(f"compile: source={source} {compiler_id or 'off (compile_log=None for every sample)'}")
     encoder, heads = build_from_config(cfg["encoder"], int(cfg["text"]["max_tokens"]), ROOT)
     enc = CachedEncoder(encoder, ROOT / cfg.get("cache_dir", "outputs/task2/_emb_cache"))
     out_dir = Path(a.output_dir) / cfg["name"]

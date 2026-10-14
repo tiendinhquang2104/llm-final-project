@@ -89,9 +89,11 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
     else:
         totals = {k: prev.get(k) for k in ("tokens_in", "tokens_out", "cost_usd")}
         seconds = prev.get("seconds_per_sample")
-    resources = {"backend": info.get("backend"), "model": info.get("model"), "hardware": "API",
+    info_after = backend.info()  # local backends report their hardware and peak memory; API backends do not
+    resources = {"backend": info.get("backend"), "model": info.get("model"),
+                 "hardware": info_after.get("hardware", "API"),
                  "n_samples": len(samples), "seconds_per_sample": seconds,
-                 "train_seconds": None, "peak_memory_gb": None, **totals}
+                 "train_seconds": None, "peak_memory_gb": info_after.get("peak_memory_gb"), **totals}
     _write_json(out_dir / "metrics.json", metrics)
     _write_json(out_dir / "resources.json", resources)
     _write_json(out_dir / "config.json", {"config": cfg, "model_info": backend.info(),

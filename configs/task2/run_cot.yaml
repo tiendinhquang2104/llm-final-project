@@ -1,0 +1,14 @@
+# Runtime settings for scripts/run_task2_cot.py (local Qwen2.5-Coder-7B-Instruct, no API key).
+backend: mlx                  # override with --backend hf (Kaggle GPU)
+mlx:
+  model: mlx-community/Qwen2.5-Coder-7B-Instruct-4bit
+hf:
+  model: Qwen/Qwen2.5-Coder-7B-Instruct
+  dtype: float16
+  load_in_4bit: false         # true nếu GPU < 16 GB
+run:
+  experiment: cot_zero_shot   # evaluated on all 32 gold (zero-shot: nothing is tuned on gold)
+  smoke_sample_ids: [EX02-S201]
+  predict: false              # true (or --predict): also label the 360 public samples
+  use_cache: true
+output_dir: outputs/task2

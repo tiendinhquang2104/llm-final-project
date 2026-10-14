@@ -1,0 +1,8 @@
+extends: cot_zero_shot.yaml
+name: task2_cot_sc
+description: CoT vai giảng viên + self-consistency, 5 lần sinh (temperature 0.7, top_p 0.95), giữ nhãn có >= 50% phiếu; cùng prompt và compile_log với task2_cot_zero_shot.
+generation:
+  temperature: 0.7
+  top_p: 0.95
+  n: 5
+checkpoint_every: 2   # 5 answers per sample: save to cache more often

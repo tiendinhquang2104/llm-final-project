@@ -1,0 +1,191 @@
+# Task 2: Hướng prompting (Qwen2.5-Coder-7B-Instruct)
+
+Đáp ứng yêu cầu đề: "Ít nhất một hướng prompting trên LLM: zero-shot, few-shot, chain-of-thought, self-consistency,
+RAG trên tập train, hoặc kết hợp." Không fine-tune (không LoRA), model giữ nguyên, chỉ thay đổi prompt.
+
+## Dữ liệu: gold và silver
+
+"Gold quan trọng hơn silver" được thể hiện qua cách chọn ví dụ đưa vào prompt, không qua trọng số loss.
+
+| Vai trò | Gold 32 (`data/raw/sample_dataset`) | Silver 500 (sinh từ luật, `docs/synth_plan.md`) |
+|---|---|---|
+| Ví dụ few-shot / RAG | **Ưu tiên lấy trước** (bài thật, nhãn thật) | Chỉ dùng để bù khi gold không có ví dụ phù hợp (ví dụ `Lỗi edge case`) |
+| Chỉnh prompt | Không dùng | Dùng để thử và sửa prompt |
+| Chấm điểm | **Thước đo cuối** (macro-F1) | Không dùng |
+
+## Plan
+
+1. **Zero-shot + CoT**: prompt gồm đề bài, code, `compile_log` (tự compile) và định nghĩa 10 nhãn. Model suy luận
+   từng bước rồi xuất JSON nhãn.
+2. **Thêm self-consistency**: chạy 5 lần (temperature ≈ 0.7), giữ nhãn được đa số chọn (≥ 3/5).
+3. **Thêm RAG few-shot (kết hợp)**: với mỗi bài, tìm vài bài giống nhất (cùng đề, code gần giống). Lấy từ gold
+   trước, thiếu thì lấy silver, rồi chèn vào prompt làm ví dụ mẫu.
+4. **So sánh** 1 → 2 → 3 trên 32 gold, đặt cạnh `probe_aug` (0.362 @tuned, có compile). Chọn cấu hình nộp bài
+   chỉ dựa trên điểm gold.
+
+Phần cứng: Kaggle T4×2 cho lượt chạy đầy đủ (360 bài × 5 lần, dùng vLLM hoặc cache); Mac M3 Pro (MLX 4-bit) để
+smoke test và chấm nhanh 32 gold.
+
+### Lưu ý tránh rò rỉ dữ liệu
+- Khi chấm một bài gold, **không được lấy chính bài đó làm ví dụ** trong prompt (leave-one-out hoặc k-fold).
+- Chỉ lấy ví dụ từ gold và silver, **không lấy từ 360 bài public**, đúng với quy định của giảng viên.
+
+### Rủi ro
+- `Lỗi edge case` không có mẫu gold dương nào, nên F1 nhãn này trên gold không đo được.
+- CoT có thể xuất JSON sai định dạng: cần parser chịu lỗi, parse không được thì retry.
+- Silver lệch phân phối so với bài thật: vì vậy chỉ dùng silver để bù ví dụ và chỉnh prompt, không dùng để chấm điểm.
+
+## Chạy (zero-shot CoT)
+
+Plan code: `docs/superpowers/plans/2026-10-14-task2-cot-zero-shot.md`. Code: `src/task2/prompts_cot.py` (prompt),
+`src/task2/pipeline.py` (`prompt.style: cot`, `parse_cot_labels`), `src/llm/local_backend.py` (MLX/HF),
+`src/task2/cot_report.py` (debug report), `src/task2/cot_bundle.py` (bundle), `scripts/run_task2_cot.py`,
+`scripts/predict_task2_cot.py`. Config: `configs/task2/cot_zero_shot.yaml`, `configs/task2/run_cot.yaml`.
+
+```bash
+.venv/bin/python scripts/run_task2_cot.py --preflight                        # in prompt bài đầu, không tải model
+.venv/bin/python scripts/run_task2_cot.py --ids EX01-S101 EX01-S103          # vài bài gold (Mac, MLX 4-bit)
+.venv/bin/python scripts/run_task2_cot.py                                    # 32 gold
+.venv/bin/python scripts/run_task2_cot.py --backend hf --predict \
+    --export-bundle outputs/task2/task2_cot_bundle                           # Kaggle: 32 gold + 360 public + bundle
+.venv/bin/python scripts/run_task2_cot.py --gold-root <thư mục silver>       # chỉnh prompt trên silver
+```
+
+- **Kaggle:** `kaggle/task2_cot.ipynb` (T4 x2, fp16). Output trong `/kaggle/working`: `task2_predictions.json`,
+  `cot_gold/` và `cot_public/` (log + report), `task2_cot_bundle/`.
+- **Log và debug:** mỗi thư mục kết quả có `run.log` (toàn bộ stdout/stderr, mỗi bài một dòng: token vào/ra, giây,
+  tok/s, cảnh báo chạm `max_new_tokens`), `raw_outputs.jsonl` (lời chấm thô), `usage.jsonl` (token/giây/seed từng
+  lần sinh), `debug.jsonl` (mỗi bài một dòng: gold, dự đoán, TP/FP/FN, lời chấm, code, compile_log) và
+  `report.html` (mở bằng trình duyệt, không cần mạng): ô tổng quan, bảng theo nhãn (gold vs dự đoán, P/R/F1),
+  phân bố số nhãn mỗi bài, bảng từng bài có lọc (Sai / Có FP / Có FN / Parse lỗi / Chạm max token / Retry) và bấm
+  để xem lời chấm, code đánh số dòng, compile_log. Report được ghi cả khi lần chạy bị dừng giữa chừng.
+- **"Xuất model" (bundle):** không có trọng số được train, nên bundle = model id + revision cố định + prompt
+  (`prompt_system.txt`, `prompt_instruction.txt`, `prompt_sha256`) + generation + công thức compile + điểm gold.
+  `--save-weights` (chỉ backend hf) chép thêm trọng số vào `model/` để chạy offline. Chạy lại:
+  `python scripts/predict_task2_cot.py --bundle <dir> --data-root <dataset>`.
+- Dự đoán 360 bài public: `--predict` (hoặc `run.predict: true`). Zero-shot không chọn gì trên gold nên số trên
+  32 gold không bị lạc quan như số `@tuned` của CLM.
+
+## Chạy (CoT + self-consistency)
+
+Script riêng `scripts/run_task2_cot_sc.py`, config `configs/task2/cot_self_consistency.yaml` (kế thừa
+`cot_zero_shot.yaml`: cùng prompt, compile_log). Mỗi bài sinh `n: 5` lời chấm (temperature 0.7, top_p 0.95), giữ
+nhãn có ≥ 50% số lời chấm parse được nêu tên. Tỉ lệ phiếu từng nhãn nằm trong `predictions_full.json` (`probs`).
+Hai script dùng chung CLI `src/task2/cot_cli.py` nên có cùng các option.
+
+```bash
+.venv/bin/python scripts/run_task2_cot_sc.py --ids EX01-S101 EX01-S103       # vài bài (Mac: 5 lần sinh tuần tự)
+.venv/bin/python scripts/run_task2_cot_sc.py --backend hf --predict          # Kaggle: 32 gold + 360 public
+.venv/bin/python scripts/run_task2_cot_sc.py --backend hf --skip-gold --public-shard 1/2   # chia public qua nhiều phiên
+```
+
+- **Tốc độ:** backend HF sinh 5 lời chấm trong một lần `generate` (`num_return_sequences`, prompt chỉ prefill một
+  lần), nên chậm hơn zero-shot khoảng 1.3–2 lần thay vì 5 lần. MLX vẫn sinh tuần tự (chỉ dùng để kiểm tra).
+- **So sánh:** sau lượt gold, script tìm thư mục kết quả zero-shot cùng model/backend trong cùng `--output-dir`,
+  in bảng macro/micro/exact và F1 từng nhãn, ghi `compare.json` (cảnh báo nếu hai lần chạy khác tập bài).
+- **Report:** ô "phiếu mỗi bài" và "bài có phiếu chia rẽ", bộ lọc "Phiếu chia rẽ"; trong chi tiết từng bài có bảng
+  số phiếu từng nhãn (k/n, có đánh dấu nhãn gold) và nhãn mà từng lời chấm chọn.
+- **Kaggle:** `kaggle/task2_cot_sc.ipynb`. `BASELINE = True` chạy zero-shot trên gold trước để có bảng so sánh.
+  Nếu 360 bài vượt 12 giờ: `PUBLIC_SHARD = '1/2'`, rồi phiên sau thêm output phiên trước làm Input,
+  `RESUME_FROM = [...]`, `PUBLIC_SHARD = '2/2'`; phiên cuối `PUBLIC_SHARD = ''` (mọi bài lấy từ cache) để có
+  `task2_predictions.json` đủ 360 bài.
+- Ngưỡng 50% là cố định (đa số), không chọn trên gold.
+
+## Ví dụ prompt (vai giáo viên chấm bài)
+
+Bài code dưới đây là ví dụ tự viết để minh họa, không lấy từ tập public. Định nghĩa nhãn lấy từ `src/task2/labels.py`.
+
+### 1. System prompt
+
+```text
+Bạn là giảng viên môn Lập trình C++ nhập môn, đang chấm bài nộp của sinh viên.
+Nhiệm vụ: xác định TẤT CẢ các loại lỗi có trong bài, theo đúng danh sách nhãn bên dưới.
+Một bài có thể có 0, 1 hoặc nhiều lỗi. Bài đúng hoàn toàn thì trả về danh sách rỗng.
+
+Danh sách nhãn (chỉ dùng đúng tên này):
+- Lỗi biên dịch: code không biên dịch được (sai cú pháp, biến/hàm chưa khai báo, sai kiểu nghiêm trọng).
+- Lỗi nhập/xuất: đọc/ghi sai (in thừa/thiếu chuỗi, sai định dạng, sai hoa thường).
+- Lỗi logic: điều kiện, công thức hoặc luồng xử lý sai làm kết quả sai.
+- Lỗi vòng lặp: điều kiện dừng sai, off-by-one, vòng lặp vô hạn.
+- Lỗi mảng/chuỗi: truy cập ngoài chỉ số, sai kích thước, sai ký tự kết thúc.
+- Lỗi hàm: sai prototype/kiểu trả về, thiếu return, truyền tham trị thay vì tham chiếu.
+- Lỗi edge case: không xử lý n = 0/1, số âm, mảng/chuỗi rỗng, phần tử đầu/cuối.
+- Lỗi thuật toán: chọn thuật toán/cấu trúc dữ liệu sai hoặc không đúng yêu cầu đề.
+- Lỗi hard-code: gán cứng giá trị/kết quả theo ví dụ thay vì tính tổng quát.
+- Lỗi style: đặt tên khó hiểu, thụt lề lộn xộn, code lặp, lạm dụng biến toàn cục.
+
+Nguyên tắc chấm:
+- Chỉ gán nhãn khi chỉ ra được dòng code cụ thể gây lỗi. Không đoán.
+- Nếu compile_log có "error" thì chắc chắn có "Lỗi biên dịch". Cảnh báo (warning) thì không tính.
+- Bám sát yêu cầu đề: làm khác yêu cầu (ví dụ đề bắt dùng đệ quy mà dùng vòng lặp) là "Lỗi thuật toán".
+```
+
+### 2. User prompt (zero-shot + CoT)
+
+````text
+## Đề bài (EX99, single_problem)
+Viết hàm `int sumArray(int a[], int n)` trả về tổng n phần tử của mảng a.
+Hàm main đọc n, rồi n số nguyên, in ra "Tong = <kết quả>".
+
+## Bài nộp của sinh viên
+```cpp
+#include <iostream>
+using namespace std;
+int sumArray(int a[], int n) {
+    int s = 0;
+    for (int i = 0; i <= n; i++) s += a[i];
+    return s;
+}
+int main() {
+int n; cin >> n;
+int a[100];
+for (int i = 0; i < n; i++) cin >> a[i];
+if (n == 3) { cout << "Tong = 6"; return 0; }
+cout << "Tong: " << sumArray(a, n);
+}
+```
+
+## compile_log
+(rỗng: không có lỗi hay cảnh báo)
+
+## Cách chấm
+Hãy chấm theo từng bước, mỗi bước ghi ngắn gọn bằng chứng (số dòng / đoạn code):
+1. Biên dịch: compile_log có lỗi không?
+2. Nhập/xuất: định dạng in ra có khớp đề không?
+3. Vòng lặp và mảng: chỉ số, điều kiện dừng có đúng không?
+4. Hàm: prototype, return, cách truyền tham số có đúng không?
+5. Logic, edge case, hard-code: có nhánh nào sai, bỏ sót trường hợp biên, hoặc gán cứng không?
+6. Thuật toán: cách làm có đúng yêu cầu đề không?
+7. Style: trình bày có chấp nhận được không?
+
+Cuối cùng xuất đúng một dòng JSON:
+{"taxonomy_error": [...]}
+````
+
+### 3. Output mong muốn
+
+```text
+1. Biên dịch: compile_log rỗng, không có lỗi.
+2. Nhập/xuất: đề yêu cầu "Tong = ", bài in "Tong: " → sai định dạng. Lỗi nhập/xuất.
+3. Vòng lặp/mảng: `i <= n` lặp thừa 1 lần và đọc a[n] ngoài phạm vi dữ liệu → Lỗi vòng lặp, Lỗi mảng/chuỗi.
+4. Hàm: prototype và return đúng.
+5. Hard-code: `if (n == 3) cout << "Tong = 6"` trả kết quả cứng theo ví dụ → Lỗi hard-code.
+   Edge case: n = 0 thì vòng lặp vẫn đọc a[0]; lỗi này đã nằm trong lỗi vòng lặp, không gán thêm.
+6. Thuật toán: cộng dồn tuyến tính là đúng yêu cầu.
+7. Style: main không thụt lề → Lỗi style.
+
+{"taxonomy_error": ["Lỗi nhập/xuất", "Lỗi vòng lặp", "Lỗi mảng/chuỗi", "Lỗi hard-code", "Lỗi style"]}
+```
+
+Chương trình chỉ đọc dòng JSON cuối. Phần suy luận phía trên là chain-of-thought.
+
+### 4. Nâng cấp từ bản zero-shot
+- **Self-consistency**: gửi cùng prompt 5 lần với temperature ≈ 0.7, nhãn xuất hiện ≥ 3/5 lần thì giữ.
+- **RAG few-shot**: chèn 2–3 bài đã chấm sẵn vào giữa system prompt và bài cần chấm, theo dạng
+  `[Đề] [Code] [Lời chấm từng bước] [JSON]`. Bài mẫu lấy theo độ giống: gold trước, thiếu thì lấy silver. Lời chấm
+  từng bước của bài silver sinh từ luật cài lỗi; bài gold chỉ có nhãn nên tự viết lời chấm ngắn hoặc chỉ ghi JSON.
+
+### Hai điểm thiết kế chính
+- "Chỉ gán nhãn khi chỉ ra được dòng code" giúp model bớt gán nhãn tràn lan, vấn đề `probe_aug` đang gặp
+  (4–8 nhãn mỗi bài).
+- Quy tắc cho `compile_log` giúp nhãn `Lỗi biên dịch` gần như chắc chắn đúng.

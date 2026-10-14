@@ -117,7 +117,8 @@ def run_task1_zeroshot(cfg: dict, encoder, heads_path, gold, rubrics: dict, publ
     metrics = {"name": cfg["name"], "mode": "clm_zeroshot",
                "evaluation": "in-sample over gold (prompts derived from gold: optimistic)",
                "n_gold": len(gold_s), "n_public": len(pub), "systems": systems,
-               "compile": {"enabled": cfg.get("_compiler_id") is not None, "compiler_id": cfg.get("_compiler_id")}}
+               "compile": {"enabled": cfg.get("_compiler_id") is not None, "compiler_id": cfg.get("_compiler_id"),
+                           "source": cfg.get("_compile_source")}}
     n = len(gold_s) + len(pub)
     resources = {"backend": "clm", "model": getattr(encoder, "encoder_id", ""), "hardware": hardware_info(),
                  "n_samples": n, "seconds_per_sample": seconds / n if n else None,

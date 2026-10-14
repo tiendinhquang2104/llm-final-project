@@ -238,7 +238,8 @@ def run_clm(cfg: dict, encoder, heads_path, gold, public, out_dir, mutants=(),
                "history": {"folds": fold_hist, "final": {"clm_noul": {"n_train": n_plain, "loss": h_plain["loss"]},
                                                          "clm_noul_aug": {"n_train": n_aug, "loss": h_aug["loss"]}}},
                "final_system": final,
-               "compile": {"enabled": cfg.get("_compiler_id") is not None, "compiler_id": cfg.get("_compiler_id")}}
+               "compile": {"enabled": cfg.get("_compiler_id") is not None, "compiler_id": cfg.get("_compiler_id"),
+                           "source": cfg.get("_compile_source")}}
     if lr_grid:
         metrics["lr_selection"] = lr_selection
     _write_json(out_dir / "metrics.json", metrics)

@@ -36,7 +36,8 @@ class Task2Dataset:
         return {s.sample_id: s for s in self.samples}
 
 
-def load_task2(root, task_file: str = "task2_error_taxonomy.json") -> Task2Dataset:
+def load_task2(root, task_file: str = "task2_error_taxonomy.json", keep_empty_compile_log: bool = False) -> Task2Dataset:
+    """`keep_empty_compile_log`: "" (clean compile, e.g. a pre-compiled dataset) stays "" instead of None."""
     root = resolve_dataset_root(root)
     exams = {e["exam_id"]: e for e in json.loads((root / "exams.json").read_text(encoding="utf-8"))["exams"]}
     payload = json.loads((root / task_file).read_text(encoding="utf-8"))
@@ -52,12 +53,15 @@ def load_task2(root, task_file: str = "task2_error_taxonomy.json") -> Task2Datas
             labels = normalize_labels(raw)
             if len(labels) != len(set(raw)):
                 raise ValueError(f"{s['sample_id']}: unknown taxonomy label in {raw}")
+        log = inp.get("compile_log")
+        if not keep_empty_compile_log:
+            log = log or None
         samples.append(Task2Sample(
             sample_id=s["sample_id"], exam_id=inp["exam_id"],
             exam_type=inp.get("exam_type") or exams[inp["exam_id"]]["exam_type"],
             language=inp.get("language", "cpp11"), code_file=inp["code_file"],
             code=load_code(root, inp["code_file"]),
-            compile_log=inp.get("compile_log") or None, test_report=inp.get("test_report"),
+            compile_log=log, test_report=inp.get("test_report"),
             labels=labels,
         ))
     return Task2Dataset(root=root, exams=exams, samples=samples)

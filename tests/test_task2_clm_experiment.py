@@ -141,7 +141,7 @@ class TestRunClm(unittest.TestCase):
                                      {"P2"})
             cfg = {**CFG, "final_system": "probe_aug+cr", "probe": {"C": 1.0, "compile_feature": True},
                    "text": {**CFG["text"], "use_compile_log": True, "max_compile_tokens": 64},
-                   "_compiler_id": "fake:g++ 13"}
+                   "_compiler_id": "fake:g++ 13", "_compile_source": "dataset"}
             m = run_clm(cfg, CachedEncoder(FakeEncoder(dim=16), tmp / "c"), make_fake_heads(tmp / "h.pt"), gold,
                         public, tmp / "out", augment(gold.samples), registry=None)
             for system in SYSTEMS:
@@ -150,7 +150,7 @@ class TestRunClm(unittest.TestCase):
             for suffix in ("@0.5", "@tuned"):
                 self.assertEqual(m["systems"]["probe_aug+cr" + suffix]["per_label"]["Lỗi biên dịch"]["f1"], 1.0)
             self.assertEqual(m["final_system"], "probe_aug+cr")
-            self.assertEqual(m["compile"], {"enabled": True, "compiler_id": "fake:g++ 13"})
+            self.assertEqual(m["compile"], {"enabled": True, "compiler_id": "fake:g++ 13", "source": "dataset"})
             raw = json.loads((tmp / "out" / "predictions.json").read_text(encoding="utf-8"))
             self.assertEqual(validate_predictions(raw, ["P1", "P2"]), [])
             sub = {r["sample_id"]: r["output"]["taxonomy_error"] if "output" in r else r["labels"] for r in raw}
