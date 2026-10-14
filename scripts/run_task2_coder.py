@@ -62,7 +62,7 @@ def main() -> None:
     ap.add_argument("--output-dir", default=str(ROOT / "outputs" / "task2" / "task2_coder_local"))
     ap.add_argument("--few-shot-k", type=int, default=2, help="Number of gold few-shot demonstrations (0 for zero-shot)")
     ap.add_argument("--max-code-chars", type=int, default=6000)
-    ap.add_argument("--max-new-tokens", type=int, default=128)
+    ap.add_argument("--max-new-tokens", type=int, default=256, help="Max tokens to allow full reasoning/rationale before JSON")
     ap.add_argument("--load-in-4bit", action="store_true", help="Load model in 4-bit NF4 to save VRAM")
     ap.add_argument("--load-in-8bit", action="store_true", help="Load model in 8-bit to save VRAM")
     ap.add_argument("--no-compile", action="store_true", help="Skip self-compiling g++ logs")
