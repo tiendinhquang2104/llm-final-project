@@ -6,6 +6,11 @@
 | [`02_task1_baseline_api.ipynb`](02_task1_baseline_api.ipynb) | Task 1 Gemma 4 qua Gemini API và GPT-4o-mini qua OpenAI, cùng split 26/6 và pipeline |
 | [`03_task1_public_test.ipynb`](03_task1_public_test.ipynb) | Tải ZIP public test từ Drive, dự đoán 360 bài Task 1 và xuất file nộp |
 | [`04_task1_public_report.ipynb`](04_task1_public_report.ipynb) | Đọc output notebook 03 và vẽ điểm, rubric, trạng thái câu, rule, token |
+| [`05_task1_finetune.ipynb`](05_task1_finetune.ipynb) | QLoRA Qwen2.5-Coder-7B-Instruct trên 26 bài Task 1; smoke test, 3 epoch, đánh giá 6 bài validation và lưu adapter trên Drive |
+
+## Task 1 QLoRA
+
+Chạy notebook 01 để tạo dữ liệu trên Drive, đồng bộ repo mới, rồi mở notebook 05 với runtime GPU. Notebook dùng `scripts/train_task1.py` và `configs/task1/lora_7b.yaml` trong repo; dữ liệu lấy từ `data/processed/task1_train.jsonl` và `task1_val.jsonl`, không dùng 78 bản ghi của ba task gộp. Preflight kiểm tra split, leakage và độ dài token. Smoke test chạy một optimizer step; lượt đầy đủ lưu checkpoint từng epoch, dự đoán 6 bài validation và chọn adapter theo QWK (hòa thì MAE). Output nằm ở `MyDrive/LLM/Final Project/data/outputs/task1/qwen25_coder7b_qlora/`. Không có bước nộp public test tự động.
 
 ## Task 1 API baseline
 

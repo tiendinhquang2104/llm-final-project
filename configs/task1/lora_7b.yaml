@@ -1,0 +1,21 @@
+# Task 1 sample-dataset QLoRA run. Notebook overrides data/output paths for Drive.
+model: Qwen/Qwen2.5-Coder-7B-Instruct
+seed: 42
+data:
+  processed_dir: data/processed
+  splits_dir: data/splits
+  expected_train: 26
+  expected_val: 6
+output_dir: outputs/task1/qwen25_coder7b_qlora
+training:
+  max_length: 4096
+  epochs: 3
+  batch_size: 1
+  gradient_accumulation_steps: 4
+  learning_rate: 0.0001
+  warmup_ratio: 0.1
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+generation:
+  max_new_tokens: 256
