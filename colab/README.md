@@ -6,11 +6,11 @@
 | [`02_task1_baseline_api.ipynb`](02_task1_baseline_api.ipynb) | Task 1 Gemma 4 qua Gemini API và GPT-4o-mini qua OpenAI, cùng split 26/6 và pipeline |
 | [`03_task1_public_test.ipynb`](03_task1_public_test.ipynb) | Tải ZIP public test từ Drive, dự đoán 360 bài Task 1 và xuất file nộp |
 | [`04_task1_public_report.ipynb`](04_task1_public_report.ipynb) | Đọc output notebook 03 và vẽ điểm, rubric, trạng thái câu, rule, token |
-| [`05_task1_finetune.ipynb`](05_task1_finetune.ipynb) | QLoRA Qwen2.5-Coder-7B-Instruct trên 26 bài Task 1; smoke test, 3 epoch, đánh giá 6 bài validation và lưu adapter trên Drive |
+| [`05_task1_finetune.ipynb`](05_task1_finetune.ipynb) | QLoRA Task 1: đối chứng gold-only với silver→gold, chọn adapter bằng 6 bài gold validation |
 
 ## Task 1 QLoRA
 
-Mở notebook 05 với runtime GPU sau khi push code mới lên branch `task-1`. Notebook tự clone/pull branch này vào `/content/llm-final-project-task1-finetune/`, tải `public-test-cham-diem-phan-hoi-files.zip` từ folder Drive của cuộc thi, lấy **`sample_dataset.zip` bên trong** và tạo split 26/6 riêng ở `MyDrive/LLM/Final Project/data/task1_finetune_sample/`. Nếu `gdown` không truy cập được folder, đặt ZIP ngoài trong MyDrive và khai báo `DRIVE_ZIP` trong cell dữ liệu. Notebook dùng `scripts/train_task1.py` và `configs/task1/lora_7b.yaml` từ branch vừa pull; dữ liệu train riêng Task 1 có 26 bản ghi, không dùng 78 bản ghi của ba task gộp. Preflight kiểm tra split, leakage và độ dài token. Smoke test chạy một optimizer step; lượt đầy đủ lưu checkpoint từng epoch, dự đoán 6 bài validation và chọn adapter theo QWK (hòa thì MAE). Output nằm ở `MyDrive/LLM/Final Project/data/outputs/task1/qwen25_coder7b_qlora/`. Không có bước nộp public test tự động.
+Mở notebook 05 với runtime GPU sau khi push code mới lên branch `task-1`. Notebook tự clone/pull branch này, tải **mới** `public-test-cham-diem-phan-hoi-files.zip` và `generate-dataset.zip` từ Drive, ghi SHA-256 và chuẩn bị 26/6 gold cùng 422 silver Task 1. Silver được lọc trùng code, mâu thuẫn `exec_report` và trùng gold/public; 65 heldout cùng 150 ID chỉ có ở Task 3 không vào train. Preflight kiểm tra split, leakage và độ dài token. Smoke test chạy một bước ở mỗi giai đoạn và một lượt suy luận. Lượt đầy đủ so sánh gold-only 3 epoch với silver 1 epoch → gold 3 epoch, đánh giá từng epoch gold trên 6 bài validation và chọn theo QWK rồi MAE; hòa hoàn toàn giữ gold-only. Mỗi lượt có thư mục dữ liệu và output riêng dưới `MyDrive/LLM/Final Project/data/`, kèm manifest nguồn, dự đoán, metric và adapter. Notebook không tự nộp public test.
 
 ## Task 1 API baseline
 

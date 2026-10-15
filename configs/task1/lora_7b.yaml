@@ -1,4 +1,4 @@
-# Task 1 sample-dataset QLoRA run. Notebook overrides data/output paths for Drive.
+# Task 1 gold-only baseline versus silver→gold QLoRA run.
 model: Qwen/Qwen2.5-Coder-7B-Instruct
 seed: 42
 data:
@@ -6,13 +6,15 @@ data:
   splits_dir: data/splits
   expected_train: 26
   expected_val: 6
-output_dir: outputs/task1/qwen25_coder7b_qlora
+output_dir: outputs/task1/qwen25_coder7b_qlora_silver_gold
 training:
   max_length: 4096
   epochs: 3
+  silver_epochs: 1
   batch_size: 1
   gradient_accumulation_steps: 4
   learning_rate: 0.0001
+  silver_learning_rate: 0.00005
   warmup_ratio: 0.1
   lora_r: 16
   lora_alpha: 32

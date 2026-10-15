@@ -61,7 +61,7 @@ def _format_test_report(test_report: list[dict[str, Any]] | None) -> str:
     return "\n".join(lines)
 
 
-def _shared_context(sample: UnifiedSample, *, include_taxonomy: bool = False) -> str:
+def _shared_context(sample: Any, *, include_taxonomy: bool = False) -> str:
     """Build the user-visible context. NEVER includes teacher feedback."""
     parts = [
         f"exam_id: {sample.exam_id}",
@@ -78,7 +78,7 @@ def _shared_context(sample: UnifiedSample, *, include_taxonomy: bool = False) ->
         "```",
         "",
         "## Compile log",
-        (sample.compile_log.strip() if sample.compile_log else "(rỗng / biên dịch OK)"),
+        (sample.compile_log.strip() if sample.compile_log and sample.compile_log.strip() else "(không có compile log)"),
         "",
         "## Test report (public)",
         _format_test_report(sample.test_report),
@@ -105,7 +105,7 @@ def messages_to_chatml(messages: list[dict[str, str]]) -> str:
     return "\n".join(chunks) + "\n"
 
 
-def build_task1_messages(sample: UnifiedSample) -> tuple[list[dict[str, str]], str]:
+def build_task1_messages(sample: Any) -> tuple[list[dict[str, str]], str]:
     user = (
         _shared_context(sample)
         + "\n\nHãy chấm điểm và trả về JSON đúng schema:\n"
@@ -113,7 +113,7 @@ def build_task1_messages(sample: UnifiedSample) -> tuple[list[dict[str, str]], s
         '"edge_case":0-2,"complexity":0|1,"code_quality":0|1},"total_score":0-10}'
     )
     target_obj = {
-        "rubric": sample.rubric.model_dump(),
+        "rubric": sample.rubric.model_dump() if hasattr(sample.rubric, "model_dump") else sample.rubric,
         "total_score": sample.total_score,
     }
     target = json.dumps(target_obj, ensure_ascii=False, separators=(",", ":"))

@@ -35,7 +35,7 @@ def _validate_target(target: str, sample_id: str) -> None:
         if to_cents(obj["total_score"], 10) != total:
             raise ValueError("total_score differs from rubric sum")
     except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        raise ValueError(f"Invalid gold Task 1 output for {sample_id}: {exc}") from exc
+        raise ValueError(f"Invalid Task 1 output for {sample_id}: {exc}") from exc
 
 
 def load_task1_splits(
@@ -188,3 +188,33 @@ def best_epoch(results: list[dict]) -> dict:
     if not results:
         raise ValueError("No checkpoint evaluation results")
     return max(results, key=lambda r: (r["metrics"]["qwk"], -r["metrics"]["mae"], -r["epoch"]))
+
+
+def load_silver_records(path: str | Path, gold_records: list[ChatMLRecord], *, expected: int | None = None) -> list[ChatMLRecord]:
+    """Load audited Task 1 silver prompts, rejecting task/ID leakage."""
+    records = [ChatMLRecord.model_validate(row) for row in _read_jsonl(Path(path))]
+    if expected is not None and len(records) != expected:
+        raise ValueError(f"Expected {expected} silver records; found {len(records)}")
+    gold_ids = {rec.sample_id for rec in gold_records}
+    ids = [rec.sample_id for rec in records]
+    if len(ids) != len(set(ids)) or gold_ids.intersection(ids):
+        raise ValueError("Duplicate silver ID or silver/gold ID overlap")
+    for rec in records:
+        if rec.task != "task1" or rec.split != "silver":
+            raise ValueError(f"Unexpected silver task/split for {rec.sample_id}")
+        if [m.get("role") for m in rec.messages] != ["system", "user", "assistant"]:
+            raise ValueError(f"Invalid silver messages for {rec.sample_id}")
+        if rec.messages[-1]["content"] != rec.target:
+            raise ValueError(f"Silver target mismatch for {rec.sample_id}")
+        _validate_target(rec.target, rec.sample_id)
+        if "exec_report" in rec.messages[0]["content"] + rec.messages[1]["content"]:
+            raise ValueError(f"exec_report leaked for {rec.sample_id}")
+    assert_no_feedback_leakage(records)
+    return records
+
+
+def choose_variant(gold_only: dict, silver_then_gold: dict) -> dict:
+    """Select by gold-validation QWK, then MAE; exact ties keep gold-only."""
+    gold_key = (gold_only["metrics"]["qwk"], -gold_only["metrics"]["mae"])
+    silver_key = (silver_then_gold["metrics"]["qwk"], -silver_then_gold["metrics"]["mae"])
+    return silver_then_gold if silver_key > gold_key else gold_only
