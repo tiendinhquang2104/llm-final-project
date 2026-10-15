@@ -31,8 +31,10 @@ except ImportError:
     AutoTokenizer = None
     BitsAndBytesConfig = None
 
+from dataclasses import replace
+
 from src.data.loader import unpack
-from src.task2.compile import attach_compile_logs
+from src.task2.compile import attach_compile_logs, has_compile_error
 from src.task2.data import load_task2
 from src.task2.evaluator import f1_scores, validate_predictions, write_submission
 from src.task2.labels import LABELS, normalize_labels
@@ -70,7 +72,7 @@ def main() -> None:
     ap.add_argument("--gold-root", default=str(ROOT / "data" / "raw" / "sample_dataset"))
     ap.add_argument("--public-root", default=str(ROOT / "data" / "raw" / "public_test_release"))
     ap.add_argument("--output-dir", default=str(ROOT / "outputs" / "task2" / "task2_coder_local"))
-    ap.add_argument("--few-shot-k", type=int, default=2, help="Number of gold few-shot demonstrations (0 for zero-shot)")
+    ap.add_argument("--few-shot-k", type=int, default=3, help="Number of gold few-shot demonstrations (default: 3)")
     ap.add_argument("--max-code-chars", type=int, default=6000)
     ap.add_argument("--max-new-tokens", type=int, default=256, help="Max tokens to allow full reasoning/rationale before JSON")
     ap.add_argument("--load-in-4bit", dest="load_in_4bit", action="store_true", default=True, help="Load model in 4-bit NF4 to save VRAM (default: True)")
@@ -133,8 +135,11 @@ def main() -> None:
         gold_preds = {}
         for idx, sample in enumerate(gold.samples, 1):
             exam = gold.exams[sample.exam_id]
+            is_c_err = has_compile_error(sample.compile_log)
+            # If code compiled cleanly, avoid showing non-fatal warnings / linker noise in prompt
+            sample_prompt = sample if is_c_err else replace(sample, compile_log="")
             demos = select_demos(gold.samples, sample, a.few_shot_k)
-            messages = build_messages(exam, sample, demos, prompt_cfg)
+            messages = build_messages(exam, sample_prompt, demos, prompt_cfg)
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             inputs = tokenizer(prompt, return_tensors="pt", max_length=3584, truncation=True).to(model.device)
             with torch.no_grad():
@@ -146,9 +151,12 @@ def main() -> None:
                 )
             gen_text = tokenizer.decode(out_ids[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
             labs = robust_parse_labels(gen_text)
-            if sample.compile_log and ("error:" in sample.compile_log.lower()):
+            if is_c_err:
                 if COMPILE_LABEL not in labs:
                     labs.append(COMPILE_LABEL)
+            else:
+                if COMPILE_LABEL in labs:
+                    labs.remove(COMPILE_LABEL)
             gold_preds[sample.sample_id] = labs
             del inputs, out_ids
             if idx % 8 == 0 or idx == len(gold.samples):
@@ -179,8 +187,10 @@ def main() -> None:
         if sample.sample_id in test_preds:
             continue
         exam = public.exams[sample.exam_id]
+        is_c_err = has_compile_error(sample.compile_log)
+        sample_prompt = sample if is_c_err else replace(sample, compile_log="")
         demos = select_demos(gold.samples, sample, a.few_shot_k)
-        messages = build_messages(exam, sample, demos, prompt_cfg)
+        messages = build_messages(exam, sample_prompt, demos, prompt_cfg)
         prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         inputs = tokenizer(prompt, return_tensors="pt", max_length=3584, truncation=True).to(model.device)
         with torch.no_grad():
@@ -192,16 +202,19 @@ def main() -> None:
             )
         gen_text = tokenizer.decode(out_ids[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
         labs = robust_parse_labels(gen_text)
-        if sample.compile_log and ("error:" in sample.compile_log.lower()):
+        if is_c_err:
             if COMPILE_LABEL not in labs:
                 labs.append(COMPILE_LABEL)
+        else:
+            if COMPILE_LABEL in labs:
+                labs.remove(COMPILE_LABEL)
         test_preds[sample.sample_id] = labs
         full_records.append({
             "sample_id": sample.sample_id,
             "exam_id": sample.exam_id,
             "labels": labs,
             "raw_output": gen_text,
-            "has_compile_error": bool(sample.compile_log and "error:" in sample.compile_log.lower()),
+            "has_compile_error": is_c_err,
         })
 
         del inputs, out_ids
