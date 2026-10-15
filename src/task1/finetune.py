@@ -126,6 +126,16 @@ def encode_inference_prompt(record: ChatMLRecord, tokenizer: Any, max_length: in
     return ids
 
 
+def strip_code_fence(text: str) -> str:
+    """Remove one surrounding Markdown code fence (```json ... ```), which instruct models often add."""
+    t = (text or "").strip()
+    if t.startswith("```") and t.endswith("```") and t.count("```") == 2:
+        t = t[3:-3]
+        first, _, rest = t.partition("\n")
+        t = rest if first.strip().lower() in ("", "json") else t
+    return t.strip()
+
+
 def parse_generated_score(text: str) -> tuple[dict[str, Any] | None, bool, bool]:
     """Return a normalized score, JSON parse flag, and strict output-valid flag.
 
@@ -134,7 +144,7 @@ def parse_generated_score(text: str) -> tuple[dict[str, Any] | None, bool, bool]
     predictions in the evaluator; no score is silently fabricated here.
     """
     try:
-        obj = json.loads(text.strip())
+        obj = json.loads(strip_code_fence(text))
     except (TypeError, ValueError, json.JSONDecodeError):
         return None, False, False
     if not isinstance(obj, dict) or not isinstance(obj.get("rubric"), dict):

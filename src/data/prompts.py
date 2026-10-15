@@ -61,6 +61,18 @@ def _format_test_report(test_report: list[dict[str, Any]] | None) -> str:
     return "\n".join(lines)
 
 
+# The organizer's compile logs in the labelled sample are cut at 2000 characters; a release can ship longer ones
+# (one public multi_problem log is ~16K tokens of cascading errors). Same cut everywhere, so a prompt never
+# depends on where the log came from.
+COMPILE_LOG_MAX_CHARS = 2000
+
+
+def _compile_log_text(log: str | None) -> str:
+    if not log or not log.strip():
+        return "(không có compile log)"
+    return log.strip()[:COMPILE_LOG_MAX_CHARS]
+
+
 def _shared_context(sample: Any, *, include_taxonomy: bool = False) -> str:
     """Build the user-visible context. NEVER includes teacher feedback."""
     parts = [
@@ -78,7 +90,7 @@ def _shared_context(sample: Any, *, include_taxonomy: bool = False) -> str:
         "```",
         "",
         "## Compile log",
-        (sample.compile_log.strip() if sample.compile_log and sample.compile_log.strip() else "(không có compile log)"),
+        _compile_log_text(sample.compile_log),
         "",
         "## Test report (public)",
         _format_test_report(sample.test_report),

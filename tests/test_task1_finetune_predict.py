@@ -104,3 +104,13 @@ def test_validation_error_report(tmp_path):
     assert "| B |" in report and "| C |" in report and "| A |" not in report  # |10-9| < 2 is not flagged
     assert "logic 4→1" in report
     assert "2/3 samples" in report
+
+
+def test_compile_log_is_cut_like_the_organizer_logs():
+    from src.data.prompts import COMPILE_LOG_MAX_CHARS
+
+    long_log = "error: x\n" * 5000
+    user = build_task1_prompt(prompt_sample(compile_log=long_log))[1]["content"]
+    assert long_log.strip()[:COMPILE_LOG_MAX_CHARS] in user
+    assert long_log.strip()[:COMPILE_LOG_MAX_CHARS + 50] not in user
+    assert "(không có compile log)" in build_task1_prompt(prompt_sample(compile_log="  "))[1]["content"]
