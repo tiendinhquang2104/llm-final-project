@@ -1,0 +1,10 @@
+extends: cot_zero_shot.yaml
+name: task2_cot_fewshot
+description: CoT vai giảng viên + RAG few-shot - 3 bài đã chấm giống nhất (TF-IDF trên code), gold trước (độ giống >= 0.3), thiếu thì silver; không bao giờ lấy bài public; demo chỉ gồm code, tình trạng compile và dòng KẾT LUẬN.
+prompt:
+  few_shot_k: 3
+  demo_max_code_chars: 1800
+demos:
+  gold: true            # 32 bài gold (bài đang chấm không bao giờ là demo của chính nó)
+  silver: true          # data/synth/v1 (tải theo SILVER_DRIVE_ID nếu chưa có)
+  min_gold_sim: 0.3

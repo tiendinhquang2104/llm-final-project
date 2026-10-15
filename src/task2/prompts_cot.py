@@ -2,6 +2,9 @@
 Pure functions of (exam, sample, cfg); never use `feedback`."""
 from __future__ import annotations
 
+import json
+
+from src.task2.labels import LABELS
 from src.task2.prompts import LABEL_GUIDE, exam_text, submission_text
 
 FINAL_MARKER = "KẾT LUẬN:"
@@ -13,7 +16,8 @@ SYSTEM_COT = (
     "DANH SÁCH NHÃN (chỉ dùng đúng tên này):\n" + LABEL_GUIDE + "\n\n"
     "NGUYÊN TẮC CHẤM:\n"
     "- Chỉ gán nhãn khi chỉ ra được dòng code cụ thể gây lỗi. Không đoán.\n"
-    '- Nếu compile_log có "error" thì chắc chắn có "Lỗi biên dịch". Cảnh báo (warning) thì không tính.\n'
+    '- Nếu compile_log có "error" thì chắc chắn có "Lỗi biên dịch". Cảnh báo (warning) và lỗi liên kết thiếu hàm '
+    'main ("undefined reference to `main\'") thì không tính; compile_log rỗng nghĩa là biên dịch được.\n'
     '- Bám sát yêu cầu đề: làm khác yêu cầu (ví dụ đề bắt dùng đệ quy mà dùng vòng lặp) là "Lỗi thuật toán".'
 )
 
@@ -41,9 +45,29 @@ def cot_instruction() -> str:
             "Không được bỏ mục nào và không được viết KẾT LUẬN trước khi xong 7 mục.\n\n"
             f"{template}\n"
             f'{FINAL_MARKER} {{"taxonomy_error": ["<nhãn>", ...]}}\n\n'
-            "Trong dòng KẾT LUẬN chỉ dùng đúng tên nhãn trong danh sách; [] nếu bài không có lỗi.")
+            "Trong dòng KẾT LUẬN chỉ được dùng các nhãn sau, viết nguyên văn (kể cả chữ \"Lỗi\"), không dùng tên "
+            f"mục chấm: {json.dumps(list(LABELS), ensure_ascii=False)}. Nhãn phải khớp với lỗi đã nêu ở 7 mục; "
+            "[] nếu bài không có lỗi.")
 
 
-def build_cot_messages(exam: dict, sample, cfg: dict) -> list[dict]:
-    user = "\n".join([exam_text(exam), submission_text(sample, cfg), cot_instruction()])
+def demos_text(demos: list, cfg: dict) -> str:
+    """Graded examples (other submissions, possibly other exams): code + compile status + conclusion line only."""
+    if not demos:
+        return ""
+    from src.task2.cot_demos import compile_status
+    lim = int(cfg.get("demo_max_code_chars", 1800))
+    parts = ["## VÍ DỤ BÀI ĐÃ ĐƯỢC GIẢNG VIÊN CHẤM (bài khác, chỉ để tham khảo cách gán nhãn: giảng viên chỉ ghi "
+             "những lỗi rõ ràng, có bằng chứng trong code)"]
+    for i, d in enumerate(demos, 1):
+        smp = d.sample
+        code = smp.code if len(smp.code) <= lim else smp.code[:lim] + "\n// ...(cắt bớt)"
+        parts.append(f"### Ví dụ {i} (đề {smp.exam_id})\n```cpp\n{code}\n```\n"
+                     f"compile_log: {compile_status(smp.compile_log)}\n"
+                     f'{FINAL_MARKER} {json.dumps({"taxonomy_error": list(smp.labels)}, ensure_ascii=False)}\n')
+    return "\n".join(parts) + "\n"
+
+
+def build_cot_messages(exam: dict, sample, cfg: dict, demos=()) -> list[dict]:
+    user = "\n".join(x for x in [exam_text(exam), demos_text(list(demos), cfg), submission_text(sample, cfg),
+                                  cot_instruction()] if x)
     return [{"role": "system", "content": SYSTEM_COT}, {"role": "user", "content": user}]

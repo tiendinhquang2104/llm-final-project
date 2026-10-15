@@ -100,6 +100,43 @@ Hai script dùng chung CLI `src/task2/cot_cli.py` nên có cùng các option.
   `task2_predictions.json` đủ 360 bài.
 - Ngưỡng 50% là cố định (đa số), không chọn trên gold.
 
+## Tái lập bằng một lệnh (bundle)
+
+```bash
+python scripts/predict_task2_cot.py
+```
+
+Dùng bundle ghi trong `bundles/task2_cot/BEST`, dự đoán 360 bài public, tự chọn backend (MLX trên Mac / HF trên
+GPU) và ghi `outputs/task2/predict_cot/<bundle>/predictions.json` + `report.html` + `run.log`. Bundle (không có
+trọng số được train) gồm model id + revision cố định, prompt (`prompt_sha256`), generation, quy tắc compile, git
+commit, hash demo pool gold/silver và `demos.json` (demo từng bài). Script cảnh báo khi prompt, demo pool hoặc
+compiler khác lúc export. Cách cập nhật bundle tốt nhất sau lượt Kaggle: `bundles/task2_cot/README.md`.
+Đã kiểm tra: chạy lại EX02-S209 từ bundle `cot_fewshot` cho đúng 3 demo như `demos.json` và lời chấm giống hệt.
+
+## Sửa sau lần chạy Kaggle đầu tiên (2026-10-15)
+
+Lần chạy zero-shot CoT đầu trên 32 gold (T4 x2): macro-F1 0.053, micro-F1 0.132; chỉ `Lỗi biên dịch` có F1 (0.53).
+Bốn lỗi chính và cách sửa (mục 1-2 sửa định dạng / quy tắc tất định; mục 3-4 phải chỉnh trên silver, gold chỉ để đo):
+
+1. **Tên nhãn sai định dạng** — model ghi tên mục chấm ("Vòng lặp", "Hàm") nên parser bỏ cả nhãn đúng. Sửa:
+   `coerce_labels` (`src/task2/labels.py`) map tên ngắn / tên mục ghép về nhãn chuẩn; prompt nhắc lại nguyên văn 10
+   nhãn ngay trước dòng KẾT LUẬN.
+2. **Bịa lỗi biên dịch** (7/13 dự đoán sai: log rỗng, chỉ warning, hoặc thiếu `main`). Sửa: `prompt.compile_rule:
+   true` — `Lỗi biên dịch` := `has_compile_error(compile_log)` (quy tắc "+cr" của Hướng 2), áp sau bỏ phiếu, kể cả
+   khi lời chấm không parse được; phiếu gốc của model giữ trong `model_compile_vote`. Cần compiler (Docker / g++):
+   không có thì script in CẢNH BÁO và quy tắc không áp dụng.
+3. **Không biết quy ước gán nhãn của giảng viên** (gold ghi 1-2 lỗi chính; model liệt kê mọi thứ). Sửa: RAG few-shot
+   `configs/task2/cot_fewshot.yaml`, `scripts/run_task2_cot_fewshot.py`, `src/task2/cot_demos.py`: 3 bài giống
+   nhất theo TF-IDF trên code; gold có độ giống ≥ 0.3 trước, silver bù; không bao giờ lấy bài public hay chính bài
+   đang chấm; demo = code (≤ 1800 ký tự) + tình trạng compile + dòng KẾT LUẬN (không dùng `feedback`). Prompt dài
+   hơn `max_prompt_chars` (24000) thì bỏ bớt demo ít giống nhất (tránh OOM trên T4).
+4. **Nhãn ngẫu nhiên** — self-consistency kết hợp few-shot: `configs/task2/cot_fewshot_sc.yaml`
+   (`run_task2_cot_sc.py --experiment cot_fewshot_sc`).
+
+Report có thêm: demo đã dùng (nguồn:sample_id:độ giống) và nguồn của `Lỗi biên dịch` (quy tắc, kèm phiếu model).
+Kiểm tra local (MLX, 3 bài gold từng sai): quy tắc compile bỏ đúng `Lỗi biên dịch` bịa ở cả 3 bài; few-shot + SC
+giảm EX02-S209 từ 7 nhãn (greedy) còn 4. Số trên 3 bài không dùng để chọn cấu hình.
+
 ## Ví dụ prompt (vai giáo viên chấm bài)
 
 Bài code dưới đây là ví dụ tự viết để minh họa, không lấy từ tập public. Định nghĩa nhãn lấy từ `src/task2/labels.py`.

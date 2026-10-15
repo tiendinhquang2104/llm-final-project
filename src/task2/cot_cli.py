@@ -16,7 +16,7 @@ from src.data.synth_fetch import silver_roots
 from src.llm.local_backend import make_local_backend
 from src.task1.experiment import REGISTRY
 from src.task2.cot_bundle import export_bundle
-from src.task2.cot_runner import load_with_compile, run_and_report, tee_log
+from src.task2.cot_runner import build_retriever, load_with_compile, run_and_report, tee_log
 from src.task2.labels import LABELS
 from src.task2.pipeline import Task2ApiPipeline
 from src.utils.config import load_config, load_dotenv
@@ -132,15 +132,22 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
     cfg["_config_path"] = str(path.relative_to(root))
     cfg["name"] = run_name(config_dir, a.experiment, kind, settings[kind]["model"], a.smoke, data_tag)
 
-    pipe = Task2ApiPipeline(gold, None, cfg)
-    first = pipe.build_request(samples[0])["messages"]
+    if (cfg.get("prompt") or {}).get("compile_rule") and compile_on and source == "self" and not compiler_id:
+        print("CẢNH BÁO: không có compiler (Docker tắt? g++ thiếu?) -> compile_log = None, quy tắc 'Lỗi biên dịch' "
+              "theo compile_log KHÔNG được áp dụng và prompt không có compile_log. Bật Docker / cài g++, hoặc dùng "
+              "--compile-source dataset.", flush=True)
+    retriever = build_retriever(cfg, root, compile_cfg, source, compile_on, silver_dir=a.silver_dir)
+    pipe = Task2ApiPipeline(gold, None, cfg, retriever or ())
+    first_req = pipe.build_request(samples[0])
+    first = first_req["messages"]
     chars = sum(len(m["content"]) for s in samples for m in pipe.build_request(s)["messages"])
     gen = cfg.get("generation", {})
     print(json.dumps({"experiment": a.experiment, "labelled_set": str(labelled_root), "backend": kind, "model": settings[kind]["model"],
                       "generation": gen, "compile_source": source, "compiler": compiler_id,
                       "n_labelled": 0 if a.skip_gold else len(samples), "n_public": len(public_samples),
                       "public_shard": a.public_shard, "completions_per_sample": int(gen.get("n", 1)),
-                      "approx_input_tokens": chars // 3}, ensure_ascii=False, indent=2))
+                      "approx_input_tokens": chars // 3, "demos_first_sample": first_req["demos"]},
+                     ensure_ascii=False, indent=2))
     if a.preflight:
         print("\n=== SYSTEM ===\n" + first[0]["content"] + "\n\n=== USER ===\n" + first[1]["content"])
         return
@@ -153,10 +160,10 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
         backend = make_local_backend(kind, settings)
         print(f"model: {json.dumps({k: v for k, v in backend.info().items() if k != 'usage'}, ensure_ascii=False)}")
         m = None
+        partial = bool(a.smoke or a.ids or a.limit)  # quick checks stay out of experiments/registry.csv
         if not a.skip_gold:
-            partial = a.smoke or a.ids or a.limit  # quick checks stay out of experiments/registry.csv
             m = run_and_report(cfg, gold, samples, backend, run_dir, use_cache=run.get("use_cache", True),
-                               registry=None if partial else REGISTRY)
+                               registry=None if partial else REGISTRY, demo_pool=retriever or ())
             api = m["systems"].get("api") or {}
             print(f"{cfg['name']}: macro-F1={api.get('macro_f1')} micro-F1={api.get('micro_f1')} "
                   f"parse_fail={m['parse_failures']}")
@@ -166,7 +173,7 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
         if public_samples:
             pcfg = {**cfg, "name": cfg["name"] + "_predict"}
             run_and_report(pcfg, public, public_samples, backend, out / pcfg["name"],
-                           use_cache=run.get("use_cache", True), registry=None)
+                           use_cache=run.get("use_cache", True), registry=None, demo_pool=retriever or ())
             where = out / pcfg["name"] / "predictions.json"
             if shard:
                 print(f"predictions (CHỈ shard {a.public_shard}, {len(public_samples)} bài) -> {where}; "
@@ -178,6 +185,8 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
             if a.save_weights and saver is None:
                 print(f"--save-weights: backend {kind} không hỗ trợ lưu trọng số, bundle chỉ ghi model id")
             bundle = export_bundle(a.export_bundle, cfg, kind, backend.info(), {**(compile_cfg or {}),
-                                   "source": source, "compiler_id": compiler_id}, m, saver)
+                                   "source": source, "compiler_id": compiler_id}, m, saver,
+                                   demo_pools=retriever.fingerprint() if retriever else None,
+                                   run_dir=None if a.skip_gold else run_dir, partial=partial)
             print(f"bundle -> {bundle}")
         print(f"{kind} usage: {json.dumps(backend.info().get('usage'))}")

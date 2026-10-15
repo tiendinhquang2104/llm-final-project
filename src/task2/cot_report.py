@@ -9,6 +9,7 @@ import html
 import json
 from pathlib import Path
 
+from src.llm.local_backend import OOM_MARK
 from src.task2.evaluator import f1_scores
 from src.task2.labels import LABELS
 from src.task2.pipeline import parse_cot_labels
@@ -64,7 +65,10 @@ def build_rows(out_dir, samples: list, postprocess=None) -> list[dict]:
                "reasoning_chars": reasoning,
                "output_labels": [parse_cot_labels(o) for o in rec.get("outputs", [])],  # per vote; None = unparsed
                "split_labels": [lab for lab, v in (p.get("probs") or {}).items() if 0 < v < 1],
+               "demos": rec.get("demos", []),
+               "compile_rule": bool(p.get("compile_rule")), "model_compile_vote": p.get("model_compile_vote"),
                "no_reasoning": reasoning is not None and reasoning < MIN_REASONING_CHARS,
+               "oom": any(o.startswith(OOM_MARK) for o in rec.get("outputs", []) + rec.get("retry_outputs", [])),
                "compile_log": s.compile_log, "code": s.code}
         if gold is not None:
             row.update(tp=[x for x in pred if x in gold], fp=[x for x in pred if x not in gold],
@@ -84,6 +88,7 @@ def summarize(rows: list[dict], metrics: dict | None, resources: dict | None) ->
         "hit_max_tokens": sum(r["hit_max_tokens"] for r in rows),
         "retried": sum(bool(r["retry_outputs"]) for r in rows),
         "no_reasoning": sum(r["no_reasoning"] for r in rows),
+        "oom": sum(r["oom"] for r in rows),
         "split_samples": sum(bool(r["split_labels"]) for r in rows),
         "votes_per_sample": max((len(r["outputs"]) for r in rows), default=0),
         "pred_count": {lab: sum(lab in r["pred"] for r in rows) for lab in LABELS},
@@ -179,7 +184,7 @@ const sc=S.scores,res=S.resources||{};
 const tiles=[];
 if(sc){tiles.push(['macro-F1',f(sc.macro_f1)],['micro-F1',f(sc.micro_f1)],['exact match',f(sc.exact_match)]);}
 tiles.push(['số bài',S.n],['phiếu mỗi bài',S.votes_per_sample],['bài có phiếu chia rẽ',S.split_samples],
-['parse lỗi',S.parse_failures],['thiếu suy luận',S.no_reasoning],['phải retry',S.retried],['chạm max token',S.hit_max_tokens],
+['parse lỗi',S.parse_failures],['GPU hết bộ nhớ (OOM)',S.oom],['thiếu suy luận',S.no_reasoning],['phải retry',S.retried],['chạm max token',S.hit_max_tokens],
 ['giây/bài',f(S.mean_seconds,1)],['token vào',res.tokens_in??'—'],['token ra',res.tokens_out??'—'],
 ['bộ nhớ đỉnh (GB)',f(res.peak_memory_gb,2)]);
 document.getElementById('tiles').innerHTML=tiles.map(([k,v])=>`<div class="tile"><b>${esc(v)}</b><span>${esc(k)}
@@ -202,7 +207,7 @@ style="height:${cg[k]/hm*100}%;background:var(--gold)"></i>`:''}<i title="dự �
 ${cp[k]/hm*100}%;background:var(--pred)"></i></div><small>${k} nhãn</small></div>`).join('');
 const FILTERS=[['all','Tất cả',r=>true]];
 if(S.has_gold)FILTERS.push(['wrong','Sai',r=>!r.exact],['fp','Có FP',r=>r.fp.length],['fn','Có FN',r=>r.fn.length]);
-FILTERS.push(['split','Phiếu chia rẽ',r=>r.split_labels.length],['parse','Parse lỗi',r=>!r.parse_ok],['noreason','Thiếu suy luận',r=>r.no_reasoning],['max','Chạm max token',r=>r.hit_max_tokens],
+FILTERS.push(['split','Phiếu chia rẽ',r=>r.split_labels.length],['parse','Parse lỗi',r=>!r.parse_ok],['oom','OOM',r=>r.oom],['noreason','Thiếu suy luận',r=>r.no_reasoning],['max','Chạm max token',r=>r.hit_max_tokens],
 ['retry','Phải retry',r=>r.retry_outputs.length]);
 let cur='all',q='',open=new Set();
 const fe=document.getElementById('filters');
@@ -224,6 +229,9 @@ ${v>=0.5?'var(--tp)':'var(--fn)'}"></span></td></tr>`}h+='</table>'}
 r.outputs.forEach((o,i)=>{const ol=(r.output_labels||[])[i];h+=`<b>Lời chấm${nv>1?' #'+(i+1):''}</b> ${ol==null?
 '<span class="warn">không parse được</span>':ol.map(x=>`<span class="chip nt">${esc(x)}</span>`).join('')||
 '<span class="chip nt">[]</span>'}<pre>${esc(o)}</pre>`});r.retry_outputs.forEach((o,i)=>{h+=`<b class="warn">Retry #${i+1}</b><pre>${esc(o)}</pre>`});
+if(r.compile_rule)h+=`<b>Lỗi biên dịch</b> lấy từ compile_log (quy tắc), phiếu của model: ${r.model_compile_vote==null?
+'—':f(r.model_compile_vote,2)}<br>`;
+if(r.demos&&r.demos.length)h+=`<b>Demo few-shot</b> (nguồn:sample_id:độ giống) <span class="sub">${esc(r.demos.join(' · '))}</span><br>`;
 h+=`<b>compile_log</b><pre>${r.compile_log==null?'(không có)':esc(r.compile_log)||'(rỗng — compile sạch)'}</pre>`;
 h+=`<b>Code</b><pre>${esc(numbered(r.code))}</pre>`;return h}
 function draw(){[...fe.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.k==cur));
@@ -232,7 +240,7 @@ let h='<tr><th>sample_id</th><th>exam</th><th>nhãn</th><th class="num">token ra
 'ghi chú</th></tr>';
 for(const r of R){if(!pass(r))continue;const hay=(r.sample_id+' '+r.exam_id+' '+r.pred.join(' ')+' '+(r.gold||[])
 .join(' ')).toLowerCase();if(q&&!hay.includes(q))continue;
-const notes=[!r.parse_ok&&'<span class="warn">parse lỗi</span>',r.no_reasoning&&'<span class="warn">thiếu suy luận</span>',r.hit_max_tokens&&'<span class="warn">chạm max</span>',
+const notes=[r.oom&&'<span class="warn">OOM</span>',!r.parse_ok&&'<span class="warn">parse lỗi</span>',r.no_reasoning&&'<span class="warn">thiếu suy luận</span>',r.hit_max_tokens&&'<span class="warn">chạm max</span>',
 r.retry_outputs.length&&'retry',r.split_labels.length&&('chia rẽ: '+esc(r.split_labels.join(', ')))].filter(Boolean)
 .join(' · ');
 h+=`<tr class="row" data-id="${esc(r.sample_id)}"><td>${esc(r.sample_id)}</td><td>${esc(r.exam_id)}</td><td>

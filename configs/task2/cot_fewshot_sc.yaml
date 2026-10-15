@@ -1,0 +1,8 @@
+extends: cot_fewshot.yaml
+name: task2_cot_fewshot_sc
+description: CoT + RAG few-shot (cot_fewshot.yaml) + self-consistency 5 lần (temperature 0.7, top_p 0.95), giữ nhãn có >= 50% phiếu; Lỗi biên dịch vẫn lấy từ compile_log.
+generation:
+  temperature: 0.7
+  top_p: 0.95
+  n: 5
+checkpoint_every: 2

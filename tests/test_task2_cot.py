@@ -338,5 +338,194 @@ class TestCotCli(unittest.TestCase):
         self.assertIn("so sánh", (self.root / "out" / sc / "run.log").read_text(encoding="utf-8"))
 
 
+
+class FakeOOM(Exception):
+    pass
+
+
+def oom_backend(fail):
+    """HFChatBackend without a model: `_generate` raises FakeOOM when fail(n, seed) is true."""
+    from src.llm.local_backend import HFChatBackend
+    b = HFChatBackend.__new__(HFChatBackend)
+    LocalChatBackend.__init__(b, "fake-hf", hardware="gpu")
+    b.oom_error = FakeOOM
+    b.torch = SimpleNamespace(cuda=SimpleNamespace(is_available=lambda: False))
+    b.tok = SimpleNamespace(apply_chat_template=lambda m, **k: "x" * 300)
+    b.memory_report = lambda: "mem"
+    b.calls = []
+
+    def gen(messages, temperature, max_tokens, seed, n):
+        b.calls.append((n, seed))
+        if fail(n, seed):
+            raise FakeOOM()
+        return [(cot_answer("Lỗi logic"), 100, 5, 0.1)] * n
+    b._generate = gen
+    return b
+
+
+class TestOOMFallback(unittest.TestCase):
+    def test_batched_oom_falls_back_to_one_by_one(self):
+        b = oom_backend(lambda n, seed: n > 1)
+        out = b.generate([req("A")], {"n": 3, "temperature": 0.7, "seed": 0})
+        self.assertEqual(len(out[0]), 3)
+        self.assertEqual([n for n, _ in b.calls], [3, 1, 1, 1])
+        self.assertEqual(len({s for n, s in b.calls if n == 1}), 3)    # distinct seeds per vote
+
+    def test_single_oom_gives_placeholder_and_run_continues(self):
+        from src.llm.local_backend import OOM_MARK
+        b = oom_backend(lambda n, seed: True)
+        out = b.generate([req("A"), req("B")], {"n": 1, "temperature": 0.0})
+        self.assertTrue(all(o[0].startswith(OOM_MARK) for o in out))
+        self.assertIsNone(parse_cot_labels(out[0][0]))                   # never parses -> retried on rerun
+
+    def test_report_flags_oom(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ds = load_task2(make_dataset(Path(tmp) / "d", [("A1", "EXA", ["Lỗi logic"])]))
+            b = oom_backend(lambda n, seed: True)
+            m = run_and_report(COT_CFG, ds, ds.samples, b, Path(tmp) / "out", registry=None)
+            self.assertEqual(m["parse_failures"], 1)
+            row = json.loads((Path(tmp) / "out" / "debug.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            self.assertTrue(row["oom"])
+
+
+
+class TestLenientLabels(unittest.TestCase):
+    def test_coerce_short_names_and_step_headers(self):
+        from src.task2.labels import coerce_labels
+        self.assertEqual(coerce_labels(["Vòng lặp", "Hàm", "Logic", "Thuật toán"]),
+                         ["Lỗi logic", "Lỗi vòng lặp", "Lỗi hàm", "Lỗi thuật toán"])
+        self.assertEqual(coerce_labels(["Vòng lặp và mảng/chuỗi"]), ["Lỗi vòng lặp", "Lỗi mảng/chuỗi"])
+        self.assertEqual(coerce_labels(["lỗi STYLE ", "hardcode"]), ["Lỗi hard-code", "Lỗi style"])
+        self.assertEqual(coerce_labels(["Lỗi lạ", "Logic và cái gì đó"]), [])
+        self.assertEqual(coerce_labels("Lỗi logic"), [])
+
+    def test_cot_parser_maps_short_names(self):
+        text = '7. Style: ổn.\nKẾT LUẬN: {"taxonomy_error": ["Vòng lặp", "Lỗi hàm"]}'
+        self.assertEqual(parse_cot_labels(text), ["Lỗi vòng lặp", "Lỗi hàm"])
+
+
+class TestCompileRule(unittest.TestCase):
+    LOGS = {"A1": "", "A2": "student.cpp:3:5: error: 'x' was not declared",
+            "A3": "student.cpp:9:1: warning: no return statement [-Wreturn-type]",
+            "A4": "/usr/bin/ld: undefined reference to `main'\ncollect2: error: ld returned 1 exit status"}
+
+    def run_rule(self, answers, rule=True):
+        with tempfile.TemporaryDirectory() as tmp:
+            ds = load_task2(make_dataset(Path(tmp), [(k, "EXA", []) for k in self.LOGS]))
+            for smp in ds.samples:
+                smp.compile_log = self.LOGS[smp.sample_id]
+            cfg = {**COT_CFG, "prompt": {**COT_CFG["prompt"], "compile_rule": rule}, "retry_on_parse_fail": 0}
+            pipe = Task2ApiPipeline(ds, FakeBackend(answers), cfg)
+            return {p["sample_id"]: p for p in map(pipe.postprocess, pipe.infer(ds.samples))}
+
+    def test_rule_overrides_model_both_ways(self):
+        preds = self.run_rule([cot_answer("Lỗi biên dịch", "Lỗi logic"), cot_answer(),
+                               cot_answer("Lỗi biên dịch"), cot_answer("Lỗi biên dịch")])
+        self.assertEqual(preds["A1"]["labels"], ["Lỗi logic"])          # clean log: model's compile label dropped
+        self.assertEqual(preds["A1"]["model_compile_vote"], 1.0)
+        self.assertEqual(preds["A2"]["labels"], ["Lỗi biên dịch"])      # real error: added
+        self.assertEqual(preds["A3"]["labels"], [])                     # warning only
+        self.assertEqual(preds["A4"]["labels"], [])                     # missing main (link) does not count
+
+    def test_rule_applies_when_answer_unparsed(self):
+        preds = self.run_rule(["rác", "rác", "rác", "rác"])
+        self.assertFalse(preds["A2"]["parse_ok"])
+        self.assertEqual(preds["A2"]["labels"], ["Lỗi biên dịch"])
+        self.assertEqual(preds["A1"]["labels"], [])
+
+    def test_rule_off_keeps_model_vote(self):
+        preds = self.run_rule([cot_answer("Lỗi biên dịch")] * 4, rule=False)
+        self.assertEqual(preds["A1"]["labels"], ["Lỗi biên dịch"])
+
+
+LOOP = "#include <iostream>\nint main() {\n  int n, s = 0; std::cin >> n;\n  for (int i = 0; i <= n; i++) s += i;\n" \
+       "  std::cout << s;\n}\n"
+REC = "#include <iostream>\nint f(int n) { return n ? n + f(n - 1) : 0; }\nint main() { int n; std::cin >> n; " \
+      "std::cout << f(n); }\n"
+
+
+class TestDemoRetriever(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.gold = load_task2(make_dataset(root / "g", [("G1", "EXA", ["Lỗi vòng lặp"]), ("G2", "EXA", [])],
+                                            code={"G1": LOOP, "G2": REC}))
+        self.silver = load_task2(make_dataset(root / "s", [("S1", "EXA", ["Lỗi logic"]), ("S2", "EXA", ["Lỗi hàm"])],
+                                              code={"S1": LOOP + "// s1\n", "S2": REC + "// s2\n"}))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_gold_first_then_silver_and_never_self(self):
+        from src.task2.cot_demos import DemoRetriever
+        r = DemoRetriever(self.gold.samples, self.silver.samples, k=3, min_gold_sim=0.6)
+        demos = r.select(self.gold.by_id()["G1"])
+        ids = [d.sample.sample_id for d in demos]
+        self.assertNotIn("G1", ids)
+        self.assertEqual(ids[0], "S1")             # G2 is below min_gold_sim -> silver fills, most similar first
+        self.assertEqual([d.source for d in demos], ["silver", "silver"])
+        r0 = DemoRetriever(self.gold.samples, self.silver.samples, k=2, min_gold_sim=0.0)
+        self.assertEqual([d.source for d in r0.select(self.silver.by_id()["S1"])], ["gold", "gold"])
+        self.assertEqual(r.info(), {"k": 3, "min_gold_sim": 0.6, "gold": 2, "silver": 2})
+
+    def test_prompt_shows_demos_and_budget_drops_them(self):
+        from src.task2.cot_demos import DemoRetriever
+        r = DemoRetriever(self.gold.samples, self.silver.samples, k=2, min_gold_sim=0.0)
+        cfg = {**COT_CFG, "prompt": {**COT_CFG["prompt"], "few_shot_k": 2}}
+        req = Task2ApiPipeline(self.gold, None, cfg, r).build_request(self.gold.by_id()["G1"])
+        user = req["messages"][1]["content"]
+        self.assertEqual(len(req["demos"]), 2)
+        self.assertTrue(all(d.startswith(("gold:", "silver:")) for d in req["demos"]))
+        self.assertIn("VÍ DỤ BÀI ĐÃ ĐƯỢC GIẢNG VIÊN CHẤM", user)
+        self.assertLess(user.index("VÍ DỤ"), user.index("BÀI NỘP CẦN PHÂN LOẠI"))
+        self.assertNotIn("feedback", user.lower())
+        total = sum(len(m["content"]) for m in req["messages"])
+        small = {**cfg, "prompt": {**cfg["prompt"], "max_prompt_chars": total - 10}}
+        req2 = Task2ApiPipeline(self.gold, None, small, r).build_request(self.gold.by_id()["G1"])
+        self.assertEqual(len(req2["demos"]), 1)
+
+
+    def test_bundle_pins_demo_pools_and_demos(self):
+        from src.task2.cot_bundle import check_demo_pools
+        from src.task2.cot_demos import DemoRetriever
+        r = DemoRetriever(self.gold.samples, self.silver.samples, k=2, min_gold_sim=0.0)
+        cfg = {**COT_CFG, "prompt": {**COT_CFG["prompt"], "few_shot_k": 2}}
+        out = Path(self.tmp.name) / "run"
+        backend = VotingLocal([["Lỗi logic"]] * 4)
+        m = run_and_report(cfg, self.gold, self.gold.samples, backend, out, registry=None, demo_pool=r)
+        b = export_bundle(Path(self.tmp.name) / "bundle", cfg, "mlx", backend.info(), None, m,
+                          demo_pools=r.fingerprint(), run_dir=out, partial=True)
+        meta = load_bundle(b)
+        self.assertTrue(meta["gold_metrics"]["partial"])
+        self.assertEqual(meta["demo_pools"]["gold"]["n"], 2)
+        demos = json.loads((b / "demos.json").read_text(encoding="utf-8"))
+        self.assertEqual(sorted(demos), ["G1", "G2"])
+        self.assertIn("demos.json", (b / "README.md").read_text(encoding="utf-8"))
+        self.assertEqual(check_demo_pools(meta, r.fingerprint()), [])
+        other = DemoRetriever(self.gold.samples, self.silver.samples[:1], k=2)
+        self.assertEqual(len(check_demo_pools(meta, other.fingerprint())), 1)   # silver changed
+        self.assertTrue(check_demo_pools(meta, None))
+
+
+
+class TestPredictScript(unittest.TestCase):
+    def test_resolve_bundle_best_name_and_path(self):
+        import importlib.util
+        from unittest import mock
+        path = Path(__file__).resolve().parents[1] / "scripts" / "predict_task2_cot.py"
+        spec = importlib.util.spec_from_file_location("predict_task2_cot", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "cot_fewshot_sc").mkdir()
+            (root / "BEST").write_text("cot_fewshot_sc\n# note\n", encoding="utf-8")
+            with mock.patch.object(mod, "BUNDLES", root):
+                self.assertEqual(mod.resolve_bundle("best"), root / "cot_fewshot_sc")
+                self.assertEqual(mod.resolve_bundle("cot_zero_shot"), root / "cot_zero_shot")
+                self.assertEqual(mod.resolve_bundle(str(root / "cot_fewshot_sc")), root / "cot_fewshot_sc")
+        self.assertIn(mod.auto_backend(), ("mlx", "hf"))
+
+
 if __name__ == "__main__":
     unittest.main()

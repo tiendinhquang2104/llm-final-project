@@ -1,13 +1,15 @@
 extends: base.yaml
 name: task2_cot_zero_shot
-description: Zero-shot chain-of-thought, vai giảng viên, 7 bước chấm rồi dòng KẾT LUẬN; có compile_log tự compile; không demo, không test_report.
+description: Zero-shot chain-of-thought, vai giảng viên, 7 bước chấm rồi dòng KẾT LUẬN; có compile_log tự compile; Lỗi biên dịch lấy từ compile_log; không demo, không test_report.
 prompt:
   style: cot
   few_shot_k: 0
   max_code_chars: 12000
   use_aux_signals: true
+  compile_rule: true     # "Lỗi biên dịch" := compile_log có lỗi compiler (warning / thiếu main không tính), thay cho phiếu của model
+  max_prompt_chars: 24000  # ~8k token; prompt dài hơn thì bỏ bớt demo (T4: OOM với prompt dài)
 generation:
-  temperature: 0.0     # zero-shot greedy; self-consistency (bước sau) = n: 5, temperature: 0.7
+  temperature: 0.0     # zero-shot greedy; self-consistency = cot_self_consistency.yaml
   max_new_tokens: 1024
   enable_thinking: false
   n: 1

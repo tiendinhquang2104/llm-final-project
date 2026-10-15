@@ -5,6 +5,7 @@ the constructors so tests and --preflight never load a model.
 """
 from __future__ import annotations
 
+import os
 import platform
 import time
 import zlib
@@ -116,22 +117,35 @@ class MLXChatBackend(LocalChatBackend):
         return fn() / 2**30
 
 
+OOM_MARK = "[OOM]"  # text of an answer lost to CUDA out-of-memory: never parses, so a rerun retries the sample
+
+
 class HFChatBackend(LocalChatBackend):
     name = "hf"
 
     def __init__(self, model: str = "Qwen/Qwen2.5-Coder-7B-Instruct", dtype: str = "float16",
-                 load_in_4bit: bool = False, revision: str | None = None, hardware: str = ""):
+                 load_in_4bit: bool = False, revision: str | None = None, hardware: str = "",
+                 gpu_reserve_gb: float = 4.0):
+        """`gpu_reserve_gb`: memory left free on every GPU when placing the weights, for the KV cache and the
+        attention of long prompts (public prompts reach ~5.8k tokens; 2x T4 OOMed without it)."""
         super().__init__(model, hardware)
+        os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")  # before CUDA init
         import torch
+        import transformers
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         self.torch = torch
+        self.oom_error = getattr(torch, "OutOfMemoryError", None) or torch.cuda.OutOfMemoryError
         kw = {"device_map": "auto", "revision": revision}
+        if torch.cuda.is_available():
+            kw["max_memory"] = {i: f"{max(1.0, torch.cuda.get_device_properties(i).total_memory / 2**30
+                                         - gpu_reserve_gb):.1f}GiB" for i in range(torch.cuda.device_count())}
         if load_in_4bit:
             from transformers import BitsAndBytesConfig
             kw["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
         else:
-            kw["torch_dtype"] = getattr(torch, dtype)
+            major, minor = (int(x) for x in transformers.__version__.split(".")[:2])
+            kw["dtype" if (major, minor) >= (4, 56) else "torch_dtype"] = getattr(torch, dtype)  # renamed in 4.56
         self.lm = AutoModelForCausalLM.from_pretrained(model, **kw).eval()
         self.tok = AutoTokenizer.from_pretrained(model, revision=revision)
         self.revision = revision or getattr(self.lm.config, "_commit_hash", None)
@@ -140,12 +154,61 @@ class HFChatBackend(LocalChatBackend):
         self.eos_ids.discard(None)
         if torch.cuda.is_available() and not hardware:
             self.hardware = f"{torch.cuda.get_device_name(0)} x{torch.cuda.device_count()}"
+        print(f"hf: transformers {transformers.__version__}, torch {torch.__version__}, "
+              f"max_memory {kw.get('max_memory')}", flush=True)
+        print(f"hf: {self.memory_report()}", flush=True)
+
+    def memory_report(self) -> str:
+        """Weights dtype, layers per device and memory per GPU: the first thing to read after an OOM."""
+        torch = self.torch
+        dtypes = sorted({str(p.dtype).replace("torch.", "") for p in self.lm.parameters()})
+        placed: dict[str, int] = {}
+        for dev in (getattr(self.lm, "hf_device_map", None) or {}).values():
+            placed[str(dev)] = placed.get(str(dev), 0) + 1
+        gpus = []
+        if torch.cuda.is_available():
+            for i in range(torch.cuda.device_count()):
+                free, total = torch.cuda.mem_get_info(i)
+                gpus.append(f"cuda:{i} {torch.cuda.memory_allocated(i) / 2**30:.1f} GiB allocated, "
+                            f"{free / 2**30:.1f}/{total / 2**30:.1f} GiB free")
+        return f"dtype {dtypes}, modules per device {placed}, " + "; ".join(gpus)
+
+    def _free(self):
+        import gc
+        gc.collect()
+        if self.torch.cuda.is_available():
+            self.torch.cuda.empty_cache()
+
+    def _oom(self, messages, n: int) -> list[tuple[str, int, int, float]]:
+        p_tok = len(self.tok.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)) // 3
+        print(f"  CUDA OOM (prompt ~{p_tok} token): bỏ qua bài này, chạy lại sẽ thử lại. {self.memory_report()}",
+              flush=True)
+        return [(f"{OOM_MARK} CUDA out of memory, prompt ~{p_tok} token", p_tok, 0, 0.0)] * n
 
     def _complete(self, messages, temperature, max_tokens, seed):
-        return self._generate(messages, temperature, max_tokens, seed, 1)[0][:3]
+        try:
+            return self._generate(messages, temperature, max_tokens, seed, 1)[0][:3]
+        except self.oom_error:
+            self._free()
+            return self._oom(messages, 1)[0][:3]
 
     def _complete_n(self, messages, temperature, max_tokens, seed, n):
-        return self._generate(messages, temperature, max_tokens, seed, n)
+        """Batched n answers; on OOM falls back to one answer at a time, then to an [OOM] placeholder."""
+        try:
+            return self._generate(messages, temperature, max_tokens, seed, n)
+        except self.oom_error:
+            self._free()
+            if n == 1:
+                return self._oom(messages, 1)
+            print(f"  CUDA OOM khi sinh {n} câu cùng lúc: sinh lần lượt từng câu", flush=True)
+            res = []
+            for k in range(n):
+                try:
+                    res += self._generate(messages, temperature, max_tokens, seed + k, 1)
+                except self.oom_error:
+                    self._free()
+                    res += self._oom(messages, 1)
+            return res
 
     def _generate(self, messages, temperature, max_tokens, seed, n):
         """One generate call for n answers (num_return_sequences): the prompt is prefilled once and the n answers
@@ -161,8 +224,10 @@ class HFChatBackend(LocalChatBackend):
             out = self.lm.generate(**enc, max_new_tokens=max_tokens, pad_token_id=self.tok.eos_token_id, **kw)
         dt = (time.time() - t0) / n
         p_tok = int(enc["input_ids"].shape[1])
+        rows = out[:, p_tok:].tolist()
+        del out, enc  # drop GPU tensors before the next sample
         res = []
-        for row in out[:, p_tok:].tolist():
+        for row in rows:
             o_tok = next((i + 1 for i, t in enumerate(row) if t in self.eos_ids), len(row))  # rest is padding
             res.append((self.tok.decode(row[:o_tok], skip_special_tokens=True), p_tok, o_tok, dt))
         return res

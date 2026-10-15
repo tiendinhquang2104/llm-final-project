@@ -6,6 +6,7 @@ hf:
   model: Qwen/Qwen2.5-Coder-7B-Instruct
   dtype: float16
   load_in_4bit: false         # true nếu GPU < 16 GB
+  gpu_reserve_gb: 4.0         # để trống trên mỗi GPU khi đặt trọng số (KV cache + attention prompt dài ~5.8k token)
 run:
   experiment: cot_zero_shot   # evaluated on all 32 gold (zero-shot: nothing is tuned on gold)
   smoke_sample_ids: [EX02-S201]

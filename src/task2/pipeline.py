@@ -1,7 +1,8 @@
 """Task 2 Hướng 1: prompt -> LLM -> parse labels -> self-consistency vote -> probabilities and labels."""
 from __future__ import annotations
 
-from src.task2.labels import LABELS, normalize_labels
+from src.task2.compile import has_compile_error
+from src.task2.labels import LABELS, coerce_labels, normalize_labels
 from src.task2.prompts import RESPONSE_SCHEMA, build_messages, select_demos
 from src.task2.prompts_cot import FINAL_MARKER, build_cot_messages
 from src.utils.json_extractor import extract_json_objects
@@ -10,11 +11,12 @@ RETRY_MSG = ("Câu trả lời trên không phải JSON hợp lệ theo schema y
              "Hãy trả về DUY NHẤT một object JSON hợp lệ, không thêm chữ nào khác.")
 
 
-def parse_labels(text: str) -> list[str] | None:
-    """Labels from the last JSON object with a list `taxonomy_error` (unknown labels dropped); None if none."""
+def parse_labels(text: str, lenient: bool = False) -> list[str] | None:
+    """Labels from the last JSON object with a list `taxonomy_error` (unknown labels dropped); None if none.
+    `lenient`: also map short names ("Vòng lặp" -> Lỗi vòng lặp) via coerce_labels."""
     for obj in extract_json_objects(text or ""):
         if isinstance(obj.get("taxonomy_error"), list):
-            return normalize_labels(obj["taxonomy_error"])
+            return (coerce_labels if lenient else normalize_labels)(obj["taxonomy_error"])
     return None
 
 
@@ -24,15 +26,15 @@ def parse_cot_labels(text: str) -> list[str] | None:
     so the whole text is the last resort only."""
     text = text or ""
     if FINAL_MARKER in text:
-        got = parse_labels(text.rsplit(FINAL_MARKER, 1)[1])
+        got = parse_labels(text.rsplit(FINAL_MARKER, 1)[1], lenient=True)
         if got is not None:
             return got
     lines = [ln for ln in text.splitlines() if "taxonomy_error" in ln]
     if lines:
-        got = parse_labels(lines[-1])
+        got = parse_labels(lines[-1], lenient=True)
         if got is not None:
             return got
-    return parse_labels(text)
+    return parse_labels(text, lenient=True)
 
 
 def vote(label_lists: list[list[str]]) -> dict[str, float]:
@@ -45,16 +47,26 @@ class Task2ApiPipeline:
         self.ds, self.backend, self.cfg = dataset, backend, cfg
         self.prompt_cfg = cfg.get("prompt", {})
         self.gen_cfg = cfg.get("generation", {})
-        self.demo_pool = list(demo_pool)
+        # CoT few-shot takes a retriever (src/task2/cot_demos.DemoRetriever); the JSON style takes a list of samples
+        self.retriever = demo_pool if hasattr(demo_pool, "select") else None
+        self.demo_pool = [] if self.retriever else list(demo_pool)
+        self._by_id = None
         self.style = self.prompt_cfg.get("style", "json")
         self.parse = parse_cot_labels if self.style == "cot" else parse_labels
 
     def build_request(self, sample) -> dict:
         exam = self.ds.exams[sample.exam_id]
-        if self.style == "cot":  # zero-shot CoT: no demos, free-text reasoning then the KẾT LUẬN line
-            return {"sample": sample, "exam": exam, "demos": [],
-                    "messages": build_cot_messages(exam, sample, self.prompt_cfg),
-                    "schema": None, "schema_name": "task2_cot"}
+        if self.style == "cot":  # CoT: optional retrieved demos, free-text reasoning then the KẾT LUẬN line
+            k = int(self.prompt_cfg.get("few_shot_k", 0))
+            demos = self.retriever.select(sample)[:k] if (self.retriever and k > 0) else []
+            budget = int(self.prompt_cfg.get("max_prompt_chars", 0))
+            messages = build_cot_messages(exam, sample, self.prompt_cfg, demos)
+            while demos and budget and sum(len(m["content"]) for m in messages) > budget:
+                demos = demos[:-1]  # long submission: drop the least similar demo (GPU memory, see run_cot.yaml)
+                messages = build_cot_messages(exam, sample, self.prompt_cfg, demos)
+            return {"sample": sample, "exam": exam,
+                    "demos": [f"{d.source}:{d.sample.sample_id}:{d.similarity:.2f}" for d in demos],
+                    "messages": messages, "schema": None, "schema_name": "task2_cot"}
         demos = select_demos(self.demo_pool, sample, int(self.prompt_cfg.get("few_shot_k", 0)))
         return {"sample": sample, "exam": exam, "demos": [d.sample_id for d in demos],
                 "messages": build_messages(exam, sample, demos, self.prompt_cfg),
@@ -93,7 +105,27 @@ class Task2ApiPipeline:
         if not parsed:
             parsed = [p for p in map(self.parse, record.get("retry_outputs", [])) if p is not None]
         if not parsed:
-            return {**self.empty_prediction(self.ds.by_id()[record["sample_id"]])}
+            out = self.empty_prediction(self._sample(record["sample_id"]))
+            log = self._sample(record["sample_id"]).compile_log
+            if self.prompt_cfg.get("compile_rule") and has_compile_error(log):  # the rule needs no model answer
+                out["probs"]["Lỗi biên dịch"] = 1.0
+                out["labels"] = ["Lỗi biên dịch"]
+                out["compile_rule"] = True
+            return out
         probs = vote(parsed)
-        return {"sample_id": record["sample_id"], "exam_id": record["exam_id"], "parse_ok": True,
-                "n_parsed": len(parsed), "probs": probs, "labels": [lab for lab in LABELS if probs[lab] >= 0.5]}
+        out = {"sample_id": record["sample_id"], "exam_id": record["exam_id"], "parse_ok": True,
+               "n_parsed": len(parsed), "probs": probs}
+        log = self._sample(record["sample_id"]).compile_log
+        if self.prompt_cfg.get("compile_rule") and log is not None:
+            # "Lỗi biên dịch" := the self-compiled log has a compiler error (warnings / missing main do not count);
+            # the model's vote for it is kept in model_probs for the report
+            out["model_compile_vote"] = probs["Lỗi biên dịch"]
+            probs["Lỗi biên dịch"] = 1.0 if has_compile_error(log) else 0.0
+            out["compile_rule"] = True
+        out["labels"] = [lab for lab in LABELS if probs[lab] >= 0.5]
+        return out
+
+    def _sample(self, sample_id):
+        if self._by_id is None:
+            self._by_id = self.ds.by_id()
+        return self._by_id[sample_id]

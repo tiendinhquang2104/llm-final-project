@@ -56,13 +56,38 @@ def load_with_compile(root, compile_cfg: dict | None, source: str, enabled: bool
     return ds, compiler_id
 
 
+def build_retriever(cfg: dict, root, compile_cfg: dict | None, source: str, compile_on: bool,
+                    gold_root=None, silver_dir="data/synth/v1"):
+    """DemoRetriever over the labelled pools named by cfg["demos"] (gold and/or silver, never public) when
+    prompt.few_shot_k > 0; else None. Pools get the same compile_log treatment as the graded samples."""
+    k = int((cfg.get("prompt") or {}).get("few_shot_k", 0))
+    if k <= 0:
+        return None
+    from src.data.synth_fetch import silver_roots
+    from src.task2.cot_demos import DemoRetriever
+    from src.utils.config import load_config
+    demos = cfg.get("demos") or {}
+    root = Path(root)
+    gold, silver = [], []
+    if demos.get("gold", True):
+        gold_root = gold_root or root / load_config(root / "configs" / "task2" / "base.yaml")["data"]["gold_root"]
+        gold = load_with_compile(gold_root, compile_cfg, source, compile_on, root)[0].samples
+    if demos.get("silver", True):
+        silver = load_with_compile(silver_roots(root / silver_dir)["silver"], compile_cfg, source, compile_on,
+                                   root)[0].samples
+    retriever = DemoRetriever(gold, silver, k=k, min_gold_sim=float(demos.get("min_gold_sim", 0.3)))
+    print(f"demos: {retriever.info()}", flush=True)
+    return retriever
+
+
 def run_and_report(cfg: dict, dataset, samples: list, backend, out_dir, use_cache: bool = True,
-                   registry=REGISTRY) -> dict:
+                   registry=REGISTRY, demo_pool=()) -> dict:
     """run_api (cached, resumable) then debug.jsonl + report.html in the same folder. The report is written even
     when the run stops early (Ctrl-C, OOM), from whatever was cached."""
     out_dir = Path(out_dir)
     try:
-        return run_api(cfg, dataset, samples, backend, out_dir, use_cache=use_cache, registry=registry)
+        return run_api(cfg, dataset, samples, backend, out_dir, demo_pool=demo_pool, use_cache=use_cache,
+                       registry=registry)
     finally:
         if (out_dir / "raw_outputs.jsonl").exists():
             pipe = Task2ApiPipeline(dataset, None, cfg)

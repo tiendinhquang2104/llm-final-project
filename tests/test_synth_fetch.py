@@ -95,6 +95,35 @@ class TestSynthFetch(unittest.TestCase):
         self.assertEqual(json.loads((silver / "config.json").read_text(encoding="utf-8"))["ids"], ["S1", "S2"])
         self.assertEqual(json.loads((heldout / "config.json").read_text(encoding="utf-8"))["ids"], ["H1"])
 
+    def test_cli_fewshot_demos_come_from_gold_and_silver_only(self):
+        from src.task2 import cot_cli
+        from tests.test_task2_cot import VotingLocal
+        project = Path(__file__).resolve().parents[1]
+        gold = make_dataset(self.root / "gold", [("G1", "EXA", ["Lỗi logic"]), ("G2", "EXA", [])])
+        public = make_dataset(self.root / "pub", [("P1", "EXA", None), ("P2", "EXA", None)])
+        run_cfg = self.root / "run.yaml"
+        run_cfg.write_text("backend: mlx\nmlx: {model: fake/qwen}\nrun: {experiment: x, smoke_sample_ids: [G1], "
+                           "predict: false, use_cache: true}\n", encoding="utf-8")
+        argv = ["--run-config", str(run_cfg), "--no-compile", "--limit", "2", "--gold-root", str(gold),
+                "--public-root", str(public), "--predict", "--silver-dir", str(self.dir),
+                "--output-dir", str(self.root / "out")]
+        with mock.patch.object(cot_cli, "make_local_backend", side_effect=lambda k, s: VotingLocal([["Lỗi logic"]] * 9)), \
+                mock.patch("src.task2.cot_runner.REGISTRY", self.root / "registry.csv"), \
+                mock.patch.object(cot_cli, "REGISTRY", self.root / "registry.csv"):
+            cot_cli.main(project, "cot_fewshot", baseline="cot_zero_shot", argv=argv)
+        out = self.root / "out"
+        demos = []
+        for d in out.iterdir():
+            for line in (d / "raw_outputs.jsonl").read_text(encoding="utf-8").splitlines():
+                demos += json.loads(line)["record"]["demos"]
+        ids = {x.split(":")[1] for x in demos}
+        self.assertTrue(ids)
+        self.assertTrue(ids <= {"G1", "G2", "S1", "S2"})               # never P1/P2, never heldout H1
+        for d in out.iterdir():
+            for line in (d / "raw_outputs.jsonl").read_text(encoding="utf-8").splitlines():
+                rec = json.loads(line)["record"]
+                self.assertNotIn(rec["sample_id"], [x.split(":")[1] for x in rec["demos"]])  # never itself
+
 
 if __name__ == "__main__":
     unittest.main()

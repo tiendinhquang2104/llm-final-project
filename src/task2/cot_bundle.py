@@ -19,9 +19,12 @@ def prompt_sha256() -> str:
 
 
 def export_bundle(bundle_dir, cfg: dict, kind: str, backend_info: dict, compile_cfg: dict | None,
-                  metrics: dict | None = None, weights_saver=None) -> Path:
+                  metrics: dict | None = None, weights_saver=None, demo_pools: dict | None = None,
+                  run_dir=None, partial: bool = False) -> Path:
     """Write bundle.json, the rendered prompts and a README. `weights_saver(path)` (e.g. HFChatBackend.save)
-    also writes the backbone weights into `<bundle>/model`."""
+    also writes the backbone weights into `<bundle>/model`. `demo_pools` (DemoRetriever.fingerprint) pins the
+    few-shot pools; `run_dir` adds demos.json (demos used per graded sample, from raw_outputs.jsonl); `partial`
+    marks gold metrics computed on a subset (--ids / --limit / --smoke)."""
     bundle = Path(bundle_dir)
     bundle.mkdir(parents=True, exist_ok=True)
     weights = None
@@ -34,15 +37,48 @@ def export_bundle(bundle_dir, cfg: dict, kind: str, backend_info: dict, compile_
         "backend": kind, "model": backend_info.get("model"), "revision": backend_info.get("revision"),
         "weights": weights, "hardware_used": backend_info.get("hardware"),
         "experiment": {k: cfg[k] for k in ("name", "description", "prompt", "generation", "retry_on_parse_fail",
-                                           "checkpoint_every", "seed") if k in cfg},
+                                           "checkpoint_every", "seed", "demos") if k in cfg},
         "compile": compile_cfg, "prompt_sha256": prompt_sha256(),
-        "gold_metrics": {k: api.get(k) for k in ("n", "macro_f1", "micro_f1", "exact_match")} if api else None,
+        "gold_metrics": ({**{k: api.get(k) for k in ("n", "macro_f1", "micro_f1", "exact_match")},
+                          "partial": partial} if api else None),
+        "demo_pools": demo_pools,
     }
+    demos = _demos_used(run_dir)
+    if demos:
+        (bundle / "demos.json").write_text(json.dumps(demos, ensure_ascii=False, indent=1), encoding="utf-8")
+        meta["demos_file"] = "demos.json"
     (bundle / "bundle.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     (bundle / "prompt_system.txt").write_text(SYSTEM_COT, encoding="utf-8")
     (bundle / "prompt_instruction.txt").write_text(cot_instruction(), encoding="utf-8")
     (bundle / "README.md").write_text(_readme(meta), encoding="utf-8")
     return bundle
+
+
+def _demos_used(run_dir) -> dict:
+    path = Path(run_dir) / "raw_outputs.jsonl" if run_dir else None
+    if not path or not path.exists():
+        return {}
+    out = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            rec = json.loads(line)["record"]
+        except (json.JSONDecodeError, KeyError):
+            continue
+        if rec.get("demos"):
+            out[rec["sample_id"]] = rec["demos"]  # later lines (reruns) win
+    return dict(sorted(out.items()))
+
+
+def check_demo_pools(meta: dict, fingerprint: dict | None) -> list[str]:
+    """Differences between the bundle's few-shot pools and the current ones (empty = same demos possible)."""
+    want = meta.get("demo_pools")
+    if not want:
+        return []
+    if not fingerprint:
+        return ["bundle dùng few-shot nhưng lần chạy này không có demo pool"]
+    return [f"{src}: bundle n={want[src]['n']} sha256={want[src]['sha256'][:12]} | hiện tại n={fingerprint[src]['n']} "
+            f"sha256={fingerprint[src]['sha256'][:12]}"
+            for src in want if want[src] != fingerprint.get(src)]
 
 
 def load_bundle(bundle_dir) -> dict:
@@ -71,13 +107,21 @@ def backend_settings(meta: dict, kind: str | None = None) -> tuple[str, dict]:
 
 def _readme(meta: dict) -> str:
     gm = meta.get("gold_metrics") or {}
-    return f"""# Task 2 zero-shot CoT bundle
+    pools = meta.get("demo_pools")
+    pools_txt = ("Few-shot: demo lấy từ " + ", ".join(f"{k} ({v['n']} bài, sha256 {v['sha256'][:12]})"
+                                                       for k, v in pools.items())
+                 + "; `demos.json` = demo đã dùng cho từng bài lúc export. Chạy lại với gold/silver khác hash thì "
+                 "script cảnh báo (demo có thể khác)." if pools else "Không dùng few-shot.")
+    note = " (chỉ một phần bài: kiểm tra pipeline, không phải điểm chính thức)" if gm.get("partial") else ""
+    return f"""# Task 2 CoT bundle: {meta['experiment'].get('name')}
 
 Không có trọng số được train: "model" = backbone `{meta['model']}` (revision `{meta.get('revision')}`)
 + prompt giảng viên (`prompt_system.txt`, `prompt_instruction.txt`) + cấu hình sinh trong `bundle.json`.
 Trọng số kèm theo: {'có, thư mục `model/`' if meta.get('weights') else 'không (tải lại theo model id + revision)'}.
 
-Điểm trên gold lúc export: macro-F1 = {gm.get('macro_f1')}, micro-F1 = {gm.get('micro_f1')}, n = {gm.get('n')}.
+Điểm trên gold lúc export{note}: macro-F1 = {gm.get('macro_f1')}, micro-F1 = {gm.get('micro_f1')}, n = {gm.get('n')}.
+
+{pools_txt}
 
 ## Chạy lại
 
