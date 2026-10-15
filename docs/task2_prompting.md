@@ -48,8 +48,17 @@ Plan code: `docs/superpowers/plans/2026-10-14-task2-cot-zero-shot.md`. Code: `sr
 .venv/bin/python scripts/run_task2_cot.py                                    # 32 gold
 .venv/bin/python scripts/run_task2_cot.py --backend hf --predict \
     --export-bundle outputs/task2/task2_cot_bundle                           # Kaggle: 32 gold + 360 public + bundle
-.venv/bin/python scripts/run_task2_cot.py --gold-root <thư mục silver>       # chỉnh prompt trên silver
+.venv/bin/python scripts/run_task2_cot.py --silver                           # chỉnh prompt trên 462 bài silver
+.venv/bin/python scripts/run_task2_cot.py --silver-heldout                   # 65 bài silver của 4 đề giữ riêng
 ```
+
+**Tập silver** (`data/synth/v1/generate-dataset.zip`, sinh theo `docs/synth_plan.md`): 462 bài có nhãn Task 2
+(28 đề `SYN-*`) và `heldout/` 65 bài (4 đề không dùng khi sinh, chỉ để đánh giá). `--silver` / `--silver-heldout`
+dùng thư mục đã giải nén nếu có, nếu không thì giải nén zip, nếu chưa có zip thì tải từ Google Drive theo
+`SILVER_DRIVE_ID` (biến môi trường, `.env` hoặc Kaggle secret; id không commit vì repo công khai). Tải/giải nén
+riêng: `python scripts/fetch_synth_data.py [--drive-id ID]`. Kết quả có hậu tố `_silver` / `_silver_heldout`, và
+script self-consistency so sánh với zero-shot trên cùng tập. Silver chưa có `compile_log`: bài được tự compile như
+mẫu chèn lỗi.
 
 - **Kaggle:** `kaggle/task2_cot.ipynb` (T4 x2, fp16). Output trong `/kaggle/working`: `task2_predictions.json`,
   `cot_gold/` và `cot_public/` (log + report), `task2_cot_bundle/`.

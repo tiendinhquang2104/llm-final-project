@@ -12,20 +12,22 @@ import json
 import re
 from pathlib import Path
 
+from src.data.synth_fetch import silver_roots
 from src.llm.local_backend import make_local_backend
 from src.task1.experiment import REGISTRY
 from src.task2.cot_bundle import export_bundle
 from src.task2.cot_runner import load_with_compile, run_and_report, tee_log
 from src.task2.labels import LABELS
 from src.task2.pipeline import Task2ApiPipeline
-from src.utils.config import load_config
+from src.utils.config import load_config, load_dotenv
 
 
 def run_name(config_dir: Path, experiment: str, kind: str, model: str, smoke: bool = False,
-             silver: bool = False) -> str:
+             data_tag: str = "") -> str:
+    """`data_tag`: "" (32 gold), "silver", "silver_heldout" or "custom" (--gold-root)."""
     tag = re.sub(r"[^A-Za-z0-9._-]+", "-", model)
     return load_config(config_dir / f"{experiment}.yaml")["name"] + ("_smoke" if smoke else "") \
-        + ("_silver" if silver else "") + f"__{kind}__{tag}"
+        + (f"_{data_tag}" if data_tag else "") + f"__{kind}__{tag}"
 
 
 def parse_shard(text: str | None) -> tuple[int, int] | None:
@@ -71,7 +73,11 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
     ap.add_argument("--run-config", default=str(config_dir / "run_cot.yaml"))
     ap.add_argument("--experiment", default=experiment, help=f"Config in configs/task2 (default: {experiment})")
     ap.add_argument("--backend", choices=("mlx", "hf"))
-    ap.add_argument("--gold-root", help="Labelled set to score (default: 32 gold; point at silver to tune the prompt)")
+    ap.add_argument("--gold-root", help="Labelled set to score instead of the 32 gold")
+    ap.add_argument("--silver", action="store_true", help="Score the synthetic silver set (data/synth/v1, fetched "
+                    "from Drive via SILVER_DRIVE_ID if missing) to tune the prompt")
+    ap.add_argument("--silver-heldout", action="store_true", help="Score the silver heldout/ split (4 unseen exams)")
+    ap.add_argument("--silver-dir", default="data/synth/v1", help="Where generate-dataset.zip lives / is extracted")
     ap.add_argument("--public-root")
     ap.add_argument("--output-dir")
     ap.add_argument("--preflight", action="store_true", help="Build prompts, print the first one; no model")
@@ -88,6 +94,10 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
     ap.add_argument("--export-bundle", metavar="DIR", help="Write a reusable bundle (config + prompt + model id)")
     ap.add_argument("--save-weights", action="store_true", help="With --export-bundle (hf only): copy weights too")
     a = ap.parse_args(argv)
+    load_dotenv()
+    if sum(map(bool, (a.gold_root, a.silver, a.silver_heldout))) > 1:
+        raise SystemExit("chọn một trong --gold-root / --silver / --silver-heldout")
+    data_tag = "silver" if a.silver else "silver_heldout" if a.silver_heldout else "custom" if a.gold_root else ""
     settings = load_config(a.run_config)
     kind = a.backend or settings.get("backend", "mlx")
     run = settings["run"]
@@ -97,8 +107,11 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
     compile_on = not (a.no_compile or a.preflight)
     shard = parse_shard(a.public_shard)
 
-    gold, compiler_id = load_with_compile(root / (a.gold_root or base["data"]["gold_root"]), compile_cfg, source,
-                                          compile_on, root)
+    if a.silver or a.silver_heldout:
+        labelled_root = silver_roots(root / a.silver_dir)["silver" if a.silver else "heldout"]
+    else:
+        labelled_root = root / (a.gold_root or base["data"]["gold_root"])
+    gold, compiler_id = load_with_compile(labelled_root, compile_cfg, source, compile_on, root)
     public = None
     if (run.get("predict") or a.predict or shard) and not (a.smoke or a.preflight):
         public, _ = load_with_compile(root / (a.public_root or base["data"]["public_root"]), compile_cfg, source,
@@ -117,13 +130,13 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
     path = config_dir / f"{a.experiment}.yaml"
     cfg = load_config(path)
     cfg["_config_path"] = str(path.relative_to(root))
-    cfg["name"] = run_name(config_dir, a.experiment, kind, settings[kind]["model"], a.smoke, bool(a.gold_root))
+    cfg["name"] = run_name(config_dir, a.experiment, kind, settings[kind]["model"], a.smoke, data_tag)
 
     pipe = Task2ApiPipeline(gold, None, cfg)
     first = pipe.build_request(samples[0])["messages"]
     chars = sum(len(m["content"]) for s in samples for m in pipe.build_request(s)["messages"])
     gen = cfg.get("generation", {})
-    print(json.dumps({"experiment": a.experiment, "backend": kind, "model": settings[kind]["model"],
+    print(json.dumps({"experiment": a.experiment, "labelled_set": str(labelled_root), "backend": kind, "model": settings[kind]["model"],
                       "generation": gen, "compile_source": source, "compiler": compiler_id,
                       "n_labelled": 0 if a.skip_gold else len(samples), "n_public": len(public_samples),
                       "public_shard": a.public_shard, "completions_per_sample": int(gen.get("n", 1)),
@@ -149,7 +162,7 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
                   f"parse_fail={m['parse_failures']}")
             if baseline:
                 compare(run_dir, out / run_name(config_dir, baseline, kind, settings[kind]["model"], a.smoke,
-                                                bool(a.gold_root)))
+                                                data_tag))
         if public_samples:
             pcfg = {**cfg, "name": cfg["name"] + "_predict"}
             run_and_report(pcfg, public, public_samples, backend, out / pcfg["name"],

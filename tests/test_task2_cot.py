@@ -326,8 +326,8 @@ class TestCotCli(unittest.TestCase):
             cot_cli.main(project, "cot_zero_shot", argv=argv)
             cot_cli.main(project, "cot_self_consistency", baseline="cot_zero_shot", argv=argv)
         names = sorted(p.name for p in (self.root / "out").iterdir())
-        zs = "task2_cot_zero_shot_silver__mlx__fake-qwen"
-        sc = "task2_cot_sc_silver__mlx__fake-qwen"
+        zs = "task2_cot_zero_shot_custom__mlx__fake-qwen"
+        sc = "task2_cot_sc_custom__mlx__fake-qwen"
         self.assertEqual(names, sorted([zs, zs + "_predict", sc, sc + "_predict"]))
         cmp_ = json.loads((self.root / "out" / sc / "compare.json").read_text(encoding="utf-8"))
         self.assertEqual(cmp_["baseline"], zs)
