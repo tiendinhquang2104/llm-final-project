@@ -1,5 +1,8 @@
 # Task 1 — Chấm điểm theo rubric (Hướng 1: Prompting qua API)
 
+> **Hướng 2 — fine-tune QLoRA** (Qwen2.5-Coder-7B, adapter riêng của Task 1, gold + silver, dự đoán public test, chạy trên
+> Kaggle): xem [`docs/task1_finetune.md`](task1_finetune.md).
+
 Chấm 6 chiều rubric (`compilable 0-1, io_format 0-1, logic 0-4, edge_case 0-2, complexity 0-1, code_quality 0-1`,
 tổng 0–10) cho bài C++ bằng **Gemini API hoặc OpenAI Responses API** qua cùng một prompt, rule và evaluator.
 

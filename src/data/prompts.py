@@ -105,24 +105,25 @@ def messages_to_chatml(messages: list[dict[str, str]]) -> str:
     return "\n".join(chunks) + "\n"
 
 
-def build_task1_messages(sample: Any) -> tuple[list[dict[str, str]], str]:
+def build_task1_prompt(sample: Any) -> list[dict[str, str]]:
+    """System + user messages only: the exact inference prompt of the Task 1 adapter (no label needed)."""
     user = (
         _shared_context(sample)
         + "\n\nHãy chấm điểm và trả về JSON đúng schema:\n"
         '{"rubric":{"compilable":0|1,"io_format":0|1,"logic":0-4,'
         '"edge_case":0-2,"complexity":0|1,"code_quality":0|1},"total_score":0-10}'
     )
+    return [{"role": "system", "content": SYSTEM_TASK1}, {"role": "user", "content": user}]
+
+
+def build_task1_messages(sample: Any) -> tuple[list[dict[str, str]], str]:
+    prompt = build_task1_prompt(sample)
     target_obj = {
         "rubric": sample.rubric.model_dump() if hasattr(sample.rubric, "model_dump") else sample.rubric,
         "total_score": sample.total_score,
     }
     target = json.dumps(target_obj, ensure_ascii=False, separators=(",", ":"))
-    messages = [
-        {"role": "system", "content": SYSTEM_TASK1},
-        {"role": "user", "content": user},
-        {"role": "assistant", "content": target},
-    ]
-    return messages, target
+    return prompt + [{"role": "assistant", "content": target}], target
 
 
 def build_task2_messages(sample: UnifiedSample) -> tuple[list[dict[str, str]], str]:

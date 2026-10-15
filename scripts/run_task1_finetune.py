@@ -1,0 +1,83 @@
+"""One command for the whole Task 1 fine-tuned system (Hướng 2) on a CUDA machine (Kaggle, Colab, local GPU).
+
+    python scripts/run_task1_finetune.py --gold-root <sample_dataset> --public-root <public_test_release> \
+        --silver-root <generate-dataset> --work-dir <empty dir> [--smoke] [--preflight]
+
+Steps (each is an existing, tested script): gold ChatML + fixed 26/6 split (must equal data/splits) -> audited
+silver -> training preflight -> QLoRA gold-only vs silver->gold, adapter chosen on gold validation -> error analysis
+of the chosen adapter -> prediction of the release with best_adapter (task1_predictions.json, format-checked).
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+
+def parse_args() -> argparse.Namespace:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--gold-root", type=Path, required=True, help="sample_dataset (32 teacher-graded samples)")
+    ap.add_argument("--public-root", type=Path, required=True, help="release to predict (public or private test)")
+    ap.add_argument("--silver-root", type=Path, required=True, help="generate-dataset (synthetic silver)")
+    ap.add_argument("--work-dir", type=Path, required=True, help="new directory for processed data and outputs")
+    ap.add_argument("--config", type=Path, default=ROOT / "configs/task1/lora_7b.yaml")
+    ap.add_argument("--source-manifest", type=Path, help="optional ZIP hash manifest copied into the run")
+    ap.add_argument("--smoke", action="store_true", help="1 step per stage, 1 validation sample, 1 public sample/exam")
+    ap.add_argument("--preflight", action="store_true", help="data + token checks only, no GPU")
+    return ap.parse_args()
+
+
+def run(*cmd) -> None:
+    print("$", " ".join(map(str, cmd)), flush=True)
+    subprocess.run([sys.executable, *map(str, cmd)], cwd=ROOT, check=True)
+
+
+def main() -> None:
+    a = parse_args()
+    work = a.work_dir
+    processed, splits, silver = work / "gold_processed", work / "gold_splits", work / "silver_processed"
+    out = work / "qlora"
+    if not processed.exists():
+        run("scripts/prepare_data.py", "--data_dir", a.gold_root, "--output_dir", processed, "--splits_dir", splits,
+            "--seed", 42, "--val_ratio", 0.2)
+    for part in ("train", "val"):  # the evaluation split must be exactly the committed one
+        committed = json.loads((ROOT / "data/splits" / f"{part}_ids.json").read_text(encoding="utf-8"))
+        if committed != json.loads((splits / f"{part}_ids.json").read_text(encoding="utf-8")):
+            sys.exit(f"gold {part} split differs from data/splits/{part}_ids.json")
+    if not (silver / "silver_manifest.json").exists():
+        run("scripts/prepare_task1_silver.py", "--silver-root", a.silver_root, "--gold-root", a.gold_root,
+            "--public-root", a.public_root, "--output-dir", silver)
+    train = ["scripts/train_task1.py", "--config", a.config, "--processed-dir", processed, "--splits-dir", splits,
+             "--silver-processed-dir", silver, "--output-dir", out]
+    if a.source_manifest:
+        train += ["--source-manifest", a.source_manifest]
+    run(*train, "--preflight")
+    if a.preflight:
+        return
+    run(*train, *(["--smoke"] if a.smoke else []))
+    run_dir = out / "smoke" if a.smoke else out
+
+    from src.task1.finetune import validation_error_report
+
+    (run_dir / "error_analysis.md").write_text(validation_error_report(run_dir), encoding="utf-8")
+    predict = ["scripts/predict_task1_finetuned.py", "--config", a.config, "--adapter", run_dir / "best_adapter",
+               "--public-root", a.public_root, "--processed-dir", processed, "--splits-dir", splits,
+               "--output-dir", run_dir / "public_predictions"]
+    run(*predict, *(["--limit-per-exam", 1] if a.smoke else []))
+    summary = json.loads((run_dir / "training_summary.json").read_text(encoding="utf-8"))
+    print(json.dumps({"selected_variant": summary["selected_variant"], "selected_epoch": summary["selected_epoch"],
+                      "gold_val_qwk": summary["selected_metrics"]["qwk"], "gold_val_mae": summary["selected_metrics"]["mae"],
+                      "adapter": str(run_dir / "best_adapter"),
+                      "submission": str(run_dir / "public_predictions" / "task1_predictions.json"),
+                      "error_analysis": str(run_dir / "error_analysis.md")}, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

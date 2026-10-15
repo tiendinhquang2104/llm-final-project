@@ -7,6 +7,7 @@
 | [`03_task1_public_test.ipynb`](03_task1_public_test.ipynb) | Tải ZIP public test từ Drive, dự đoán 360 bài Task 1 và xuất file nộp |
 | [`04_task1_public_report.ipynb`](04_task1_public_report.ipynb) | Đọc output notebook 03 và vẽ điểm, rubric, trạng thái câu, rule, token |
 | [`05_task1_finetune.ipynb`](05_task1_finetune.ipynb) | QLoRA Task 1: đối chứng gold-only với silver→gold, chọn adapter bằng 6 bài gold validation |
+| [`../kaggle/task1_finetune.ipynb`](../kaggle/task1_finetune.ipynb) | Bản Kaggle của notebook 05 + dự đoán 360 bài public bằng `best_adapter` (xem `docs/task1_finetune.md`) |
 
 ## Task 1 QLoRA
 
