@@ -527,5 +527,100 @@ class TestPredictScript(unittest.TestCase):
         self.assertIn(mod.auto_backend(), ("mlx", "hf"))
 
 
+
+class TestStripComments(unittest.TestCase):
+    CODE = ("int f(int n) { return n; }\n"
+            "// bool isArm(int a)\n"
+            "// {\n"
+            "//     return a > 0;\n"
+            "// }\n"
+            "/* old\n   version */ int g() { return 1; }\n"
+            'int main() { std::cout << "a // b"; }\n')
+
+    def test_line_numbers_and_literals_kept(self):
+        from src.task2.prompts_cot import strip_comments
+        out = strip_comments(self.CODE)
+        self.assertEqual(out.count("\n"), self.CODE.count("\n"))
+        self.assertNotIn("isArm", out)
+        self.assertNotIn("old", out)
+        self.assertEqual(out.splitlines()[6].strip(), "int g() { return 1; }")   # still line 7
+        self.assertIn('"a // b"', out)
+
+    def test_all_commented(self):
+        from src.task2.prompts_cot import ALL_COMMENTED, strip_comments
+        self.assertEqual(strip_comments("//int main() {}\n/* x */\n"), ALL_COMMENTED)
+        self.assertEqual(strip_comments(""), "")
+
+    def test_prompt_and_demos_hide_comments_only_when_enabled(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ds = load_task2(make_dataset(Path(tmp), [("A1", "EXA", []), ("A2", "EXA", ["Lỗi logic"])],
+                                         code={"A1": self.CODE, "A2": self.CODE}))
+            from src.task2.cot_demos import DemoRetriever
+            r = DemoRetriever(ds.samples, [], k=1, min_gold_sim=0.0)
+            on = {**COT_CFG, "prompt": {**COT_CFG["prompt"], "few_shot_k": 1, "strip_comments": True}}
+            user = Task2ApiPipeline(ds, None, on, r).build_request(ds.by_id()["A1"])["messages"][1]["content"]
+            self.assertNotIn("isArm", user)                       # neither in the demo nor in the submission
+            self.assertIn("   7| ", user)                          # numbering kept
+            off = {**on, "prompt": {**on["prompt"], "strip_comments": False}}
+            user_off = Task2ApiPipeline(ds, None, off, r).build_request(ds.by_id()["A1"])["messages"][1]["content"]
+            self.assertIn("isArm", user_off)
+            self.assertEqual(ds.by_id()["A1"].code, self.CODE)     # the dataset itself is untouched
+
+
+
+class TestExamRequirements(unittest.TestCase):
+    PRIVATE = {  # an unseen exam: other file, other parameter name, other wording
+        "exam_id": "PRIV-1", "exam_type": "multi_problem", "data_file": "students-2027.txt",
+        "note": "Bài nộp chỉ chứa hàm, không có main.",
+        "grading_policy": "Nếu P1 sai thì P2 không được chấm.",
+        "statement": "Only `iostream, fstream,` and `string` library is allowed. Do not use `sort`. "
+                     "You must work in-place, không dùng thêm mảng phụ.",
+        "problems": [{"pid": "P1", "prototype": "Student* readAll(string path_to_file, int& n);",
+                      "is_prerequisite_for": ["P2"]},
+                     {"pid": "P2", "prototype": "double avg(Student* s, int n);", "constraints": "không được dùng vector"}],
+    }
+
+    def test_private_exam_uses_its_own_fields(self):
+        from src.task2.prompts_cot import exam_requirements
+        r = exam_requirements(self.PRIVATE)
+        self.assertIn("`Student* readAll(string path_to_file, int& n);` (điều kiện để chấm P2)", r)
+        self.assertIn("`students-2027.txt`", r)
+        self.assertIn("tham số `path_to_file`", r)
+        self.assertIn("Thư viện được phép: iostream, fstream, string.", r)
+        self.assertIn("Hàm bị cấm: `sort`, `vector`.", r)
+        self.assertIn("KHÔNG có main là đúng", r)
+        for leaked in ("50-best", "prob1", "General", "filename", "thêm"):
+            self.assertNotIn(leaked, r)
+
+    def test_missing_fields_give_no_lines(self):
+        from src.task2.prompts_cot import exam_requirements
+        self.assertEqual(exam_requirements({"exam_id": "X", "exam_type": "single_problem", "statement": "Viết chương trình."}), "")
+        r = exam_requirements({"exam_id": "Y", "exam_type": "single_problem",
+                               "problems": [{"pid": "P1", "io_mode": "stdin/stdout"}]})
+        self.assertIn("stdin", r)
+        self.assertNotIn("File dữ liệu", r)
+        self.assertNotIn("Hàm bắt buộc", r)
+
+    def test_prompt_has_requirements_and_eight_steps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ds = load_task2(make_dataset(Path(tmp), [("B1", "EXB", [])]))
+            user = Task2ApiPipeline(ds, None, COT_CFG).build_request(ds.samples[0])["messages"][1]["content"]
+            self.assertIn("## YÊU CẦU CỦA ĐỀ", user)
+            self.assertLess(user.index("YÊU CẦU CỦA ĐỀ"), user.index("BÀI NỘP CẦN PHÂN LOẠI"))
+            self.assertIn("8. Rà lại: <", user)
+
+
+class TestAbstentionVote(unittest.TestCase):
+    def test_unparsed_answers_count_against_the_majority(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ds = load_task2(make_dataset(Path(tmp), [("A1", "EXA", [])]))
+            cfg = {**COT_CFG, "generation": {"temperature": 0.7, "n": 5}, "retry_on_parse_fail": 0}
+            answers = [cot_answer("Lỗi logic"), cot_answer("Lỗi logic"), cot_answer(), "rác", "rác"]
+            pipe = Task2ApiPipeline(ds, FakeBackend(answers), cfg)
+            pred = pipe.postprocess(pipe.infer(ds.samples)[0])
+            self.assertAlmostEqual(pred["probs"]["Lỗi logic"], 2 / 5)   # was 2/3 of the parsed answers
+            self.assertEqual(pred["labels"], [])
+
+
 if __name__ == "__main__":
     unittest.main()

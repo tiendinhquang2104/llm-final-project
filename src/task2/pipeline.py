@@ -102,8 +102,10 @@ class Task2ApiPipeline:
 
     def postprocess(self, record: dict) -> dict:
         parsed = [p for p in map(self.parse, record["outputs"]) if p is not None]
+        total = len(record["outputs"])
         if not parsed:
             parsed = [p for p in map(self.parse, record.get("retry_outputs", [])) if p is not None]
+            total = len(parsed)
         if not parsed:
             out = self.empty_prediction(self._sample(record["sample_id"]))
             log = self._sample(record["sample_id"]).compile_log
@@ -113,6 +115,9 @@ class Task2ApiPipeline:
                 out["compile_rule"] = True
             return out
         probs = vote(parsed)
+        if self.style == "cot" and total > len(parsed):
+            # an unparsed answer is an abstention: a label needs half of ALL answers (3 of 5), not 2 of the 4 parsed
+            probs = {lab: v * len(parsed) / total for lab, v in probs.items()}
         out = {"sample_id": record["sample_id"], "exam_id": record["exam_id"], "parse_ok": True,
                "n_parsed": len(parsed), "probs": probs}
         log = self._sample(record["sample_id"]).compile_log
