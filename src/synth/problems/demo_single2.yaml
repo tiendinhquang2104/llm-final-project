@@ -1,0 +1,225 @@
+# More single_problem exams (array/string/math) — expand bank + support D20/D21 rare labels.
+problems_meta:
+  - exam_id: SYN-SUMEVEN
+    exam_type: single_problem
+    title: Tổng số chẵn
+    language: cpp11
+    statement: Đọc n và n số nguyên. In tổng các số chẵn.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "4\n1 2 3 4", expected: "6", group: normal}
+      - {input: "3\n1 3 5", expected: "0", group: normal}
+      - {input: "4\n1 2 3 4", expected: "6", group: example}
+      - {input: "1\n2", expected: "2", group: "edge:min"}
+      - {input: "5\n2 4 6 8 10", expected: "30", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      int sumEven(int a[], int n) {
+          int s = 0;
+          for (int i = 0; i < n; i++) {
+              if (a[i] % 2 == 0) s = s + a[i];
+          }
+          return s;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          int a[100];
+          for (int i = 0; i < n; i++) {
+              cin >> a[i];
+          }
+          cout << sumEven(a, n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-MAXARR
+    exam_type: single_problem
+    title: Giá trị lớn nhất
+    language: cpp11
+    statement: Đọc n và n số nguyên. In giá trị lớn nhất.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "3\n1 5 3", expected: "5", group: normal}
+      - {input: "1\n7", expected: "7", group: normal}
+      - {input: "3\n1 5 3", expected: "5", group: example}
+      - {input: "2\n9 4", expected: "9", group: "edge:min"}
+      - {input: "5\n1 2 3 4 8", expected: "8", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      int maxVal(int a[], int n) {
+          int m = a[0];
+          for (int i = 1; i < n; i++) {
+              if (a[i] > m) m = a[i];
+          }
+          return m;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          int a[100];
+          for (int i = 0; i < n; i++) {
+              cin >> a[i];
+          }
+          cout << maxVal(a, n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-COUNTVOWEL
+    exam_type: single_problem
+    title: Đếm nguyên âm
+    language: cpp11
+    statement: Đọc một chuỗi không khoảng trắng. In số nguyên âm (a, e, i, o, u).
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "hello", expected: "2", group: normal}
+      - {input: "xyz", expected: "0", group: normal}
+      - {input: "hello", expected: "2", group: example}
+      - {input: "a", expected: "1", group: "edge:min"}
+      - {input: "aeiou", expected: "5", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      #include <string>
+      using namespace std;
+      int countVowel(string s) {
+          int c = 0;
+          for (int i = 0; i < (int)s.size(); i++) {
+              char ch = s[i];
+              if (ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u') c = c + 1;
+          }
+          return c;
+      }
+      int main() {
+          string s;
+          cin >> s;
+          cout << countVowel(s);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-UPPER
+    exam_type: single_problem
+    title: In hoa chuỗi
+    language: cpp11
+    statement: Đọc một chuỗi không khoảng trắng. In chuỗi viết hoa.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "abc", expected: "ABC", group: normal}
+      - {input: "Ab1", expected: "AB1", group: normal}
+      - {input: "abc", expected: "ABC", group: example}
+      - {input: "a", expected: "A", group: "edge:min"}
+      - {input: "abcde", expected: "ABCDE", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      #include <string>
+      using namespace std;
+      string toUpper(string s) {
+          for (int i = 0; i < (int)s.size(); i++) {
+              if (s[i] >= 'a' && s[i] <= 'z') s[i] = s[i] - 32;
+          }
+          return s;
+      }
+      int main() {
+          string s;
+          cin >> s;
+          cout << toUpper(s);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-FIB
+    exam_type: single_problem
+    title: Số Fibonacci
+    language: cpp11
+    statement: Đọc n. In số Fibonacci thứ n (F(0)=0, F(1)=1).
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "7", expected: "13", group: normal}
+      - {input: "0", expected: "0", group: normal}
+      - {input: "7", expected: "13", group: example}
+      - {input: "1", expected: "1", group: "edge:min"}
+      - {input: "90", expected: "2880067194370816120", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      long long fib(int n) {
+          if (n <= 1) return n;
+          long long a = 0;
+          long long b = 1;
+          for (int i = 2; i <= n; i++) {
+              long long c = a + b;
+              a = b;
+              b = c;
+          }
+          return b;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          cout << fib(n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D21, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-FACT
+    exam_type: single_problem
+    title: Giai thừa
+    language: cpp11
+    statement: Đọc n (0<=n<=20). In n giai thừa.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "5", expected: "120", group: normal}
+      - {input: "1", expected: "1", group: normal}
+      - {input: "5", expected: "120", group: example}
+      - {input: "0", expected: "1", group: "edge:min"}
+      - {input: "20", expected: "2432902008176640000", group: "edge:max"}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      long long fact(int n) {
+          long long r = 1;
+          for (int i = 2; i <= n; i++) {
+              r = r * i;
+          }
+          return r;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          cout << fact(n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D21, level: "Level 2 - Chẩn đoán"}

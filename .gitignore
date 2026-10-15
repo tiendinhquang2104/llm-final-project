@@ -65,6 +65,8 @@ data/processed/*
 # Competition data (real student code, must not be published)
 data/public-test/
 data/public-test-*.zip
+# Synthetic dataset (generated; keep out of git)
+data/synth/*
 
 # Model weights & checkpoints
 models/

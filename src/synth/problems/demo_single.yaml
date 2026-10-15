@@ -1,0 +1,294 @@
+# Additional single_problem exams (topics deliberately different from the public test set:
+# no Armstrong / list-removal / Generals / Battles / BST). Same schema as demo.yaml.
+problems_meta:
+  - exam_id: SYN-PERFECT
+    exam_type: single_problem
+    title: Số hoàn hảo
+    language: cpp11
+    statement: |
+      Đọc số nguyên dương n. In "True" nếu n là số hoàn hảo (tổng các ước thực sự bằng n), ngược lại "False".
+      Ràng buộc: 1 <= n <= 10^8.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout, constraints: "1 <= n <= 10^8"}]
+    tests:
+      - {input: "6", expected: "True", group: normal}
+      - {input: "28", expected: "True", group: normal}
+      - {input: "12", expected: "False", group: normal}
+      - {input: "6", expected: "True", group: example}
+      - {input: "1", expected: "False", group: "edge:min"}
+      - {input: "33550336", expected: "True", group: "edge:max"}
+      - {input: "100000000", expected: "False", group: perf}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      bool isPerfect(int n) {
+          int sum = 0;
+          for (int i = 1; i < n; i++) {
+              if (n % i == 0) sum = sum + i;
+          }
+          return sum == n && n > 1;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          cout << (isPerfect(n) ? "True" : "False");
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D02, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D19, level: "Level 2 - Chẩn đoán"}
+        - {defect: D23, level: "Level 3 - Gợi ý sửa"}
+
+  - exam_id: SYN-PALIN
+    exam_type: single_problem
+    title: Số palindrome
+    language: cpp11
+    statement: |
+      Đọc số nguyên không âm n. In "True" nếu n đọc xuôi ngược giống nhau, ngược lại "False".
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "121", expected: "True", group: normal}
+      - {input: "123", expected: "False", group: normal}
+      - {input: "121", expected: "True", group: example}
+      - {input: "0", expected: "True", group: "edge:min"}
+      - {input: "1000000001", expected: "True", group: "edge:max"}
+      - {input: "123456789", expected: "False", group: perf}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      bool isPalin(int n) {
+          int rev = 0;
+          int tmp = n;
+          while (tmp > 0) {
+              rev = rev * 10 + tmp % 10;
+              tmp = tmp / 10;
+          }
+          return rev == n;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          cout << (isPalin(n) ? "True" : "False");
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D02, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D19, level: "Level 2 - Chẩn đoán"}
+        - {defect: D23, level: "Level 3 - Gợi ý sửa"}
+
+  - exam_id: SYN-DIGITSUM
+    exam_type: single_problem
+    title: Tổng chữ số
+    language: cpp11
+    statement: |
+      Đọc số nguyên không âm n. In tổng các chữ số của n.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "123", expected: "6", group: normal}
+      - {input: "999", expected: "27", group: normal}
+      - {input: "123", expected: "6", group: example}
+      - {input: "0", expected: "0", group: "edge:min"}
+      - {input: "999999999", expected: "81", group: "edge:max"}
+      - {input: "1000000000", expected: "1", group: perf}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      int digitSum(int n) {
+          int s = 0;
+          while (n > 0) {
+              s = s + n % 10;
+              n = n / 10;
+          }
+          return s;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          cout << digitSum(n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D02, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D23, level: "Level 3 - Gợi ý sửa"}
+
+  - exam_id: SYN-PRIME
+    exam_type: single_problem
+    title: Kiểm tra số nguyên tố
+    language: cpp11
+    statement: |
+      Đọc số nguyên n. In "True" nếu n là số nguyên tố, ngược lại "False".
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "7", expected: "True", group: normal}
+      - {input: "10", expected: "False", group: normal}
+      - {input: "7", expected: "True", group: example}
+      - {input: "1", expected: "False", group: "edge:min"}
+      - {input: "2", expected: "True", group: "edge:small_prime"}
+      - {input: "3", expected: "True", group: "edge:small_prime"}
+      - {input: "2147483647", expected: "True", group: "edge:max"}
+      - {input: "1000000007", expected: "True", group: perf}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      bool isPrime(int n) {
+          if (n < 2) return false;
+          for (long long i = 2; i * i <= n; i++) {
+              if (n % i == 0) return false;
+          }
+          return true;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          cout << (isPrime(n) ? "True" : "False");
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D02, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D19, level: "Level 2 - Chẩn đoán"}
+        - {defect: D23, level: "Level 3 - Gợi ý sửa"}
+
+  - exam_id: SYN-BASE2
+    exam_type: single_problem
+    title: Đổi sang hệ nhị phân
+    language: cpp11
+    statement: |
+      Đọc số nguyên không âm n. In biểu diễn nhị phân của n (không có số 0 thừa ở đầu).
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "5", expected: "101", group: normal}
+      - {input: "10", expected: "1010", group: normal}
+      - {input: "5", expected: "101", group: example}
+      - {input: "0", expected: "0", group: "edge:min"}
+      - {input: "1073741824", expected: "1000000000000000000000000000000", group: "edge:max"}
+      - {input: "1048575", expected: "11111111111111111111", group: perf}
+    reference: |
+      #include <iostream>
+      #include <string>
+      using namespace std;
+      string toBin(int n) {
+          string r = "";
+          if (n == 0) return "0";
+          while (n > 0) {
+              r = char('0' + n % 2) + r;
+              n = n / 2;
+          }
+          return r;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          cout << toBin(n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D02, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D23, level: "Level 3 - Gợi ý sửa"}
+
+  - exam_id: SYN-REVSTR
+    exam_type: single_problem
+    title: Đảo chuỗi
+    language: cpp11
+    statement: |
+      Đọc một chuỗi ký tự (không khoảng trắng). In chuỗi đảo ngược.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "abc", expected: "cba", group: normal}
+      - {input: "hello", expected: "olleh", group: normal}
+      - {input: "abc", expected: "cba", group: example}
+      - {input: "a", expected: "a", group: "edge:min"}
+      - {input: "abcd", expected: "dcba", group: "edge:max"}
+      - {input: "aaaaaaaaaa", expected: "aaaaaaaaaa", group: perf}
+    reference: |
+      #include <iostream>
+      #include <string>
+      using namespace std;
+      string reverseStr(string s) {
+          int n = s.size();
+          for (int i = 0; i < n / 2; i++) {
+              char t = s[i];
+              s[i] = s[n - 1 - i];
+              s[n - 1 - i] = t;
+          }
+          return s;
+      }
+      int main() {
+          string s;
+          cin >> s;
+          cout << reverseStr(s);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D02, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+        - {defect: D23, level: "Level 3 - Gợi ý sửa"}
+
+  - exam_id: SYN-DISTINCT
+    exam_type: single_problem
+    title: Đếm số phần tử phân biệt
+    language: cpp11
+    statement: |
+      Đọc n rồi n số nguyên. In số lượng giá trị phân biệt trong dãy.
+    problems: [{pid: P1, max_score: 10, io_mode: stdin/stdout}]
+    tests:
+      - {input: "5\n1 2 2 3 1", expected: "3", group: normal}
+      - {input: "3\n7 7 7", expected: "1", group: normal}
+      - {input: "5\n1 2 2 3 1", expected: "3", group: example}
+      - {input: "1\n42", expected: "1", group: "edge:min"}
+      - {input: "4\n5 4 3 2", expected: "4", group: "edge:max"}
+      - {input: "10\n1 2 3 4 5 6 7 8 9 10", expected: "10", group: perf}
+    reference: |
+      #include <iostream>
+      using namespace std;
+      int countDistinct(int a[], int n) {
+          int c = 0;
+          for (int i = 0; i < n; i++) {
+              bool dup = false;
+              for (int j = 0; j < i; j++) {
+                  if (a[i] == a[j]) dup = true;
+              }
+              if (!dup) c = c + 1;
+          }
+          return c;
+      }
+      int main() {
+          int n;
+          cin >> n;
+          int a[100];
+          for (int i = 0; i < n; i++) {
+              cin >> a[i];
+          }
+          cout << countDistinct(a, n);
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D02, level: "Level 2 - Chẩn đoán"}
+        - {defect: D07, level: "Level 3 - Gợi ý sửa"}
+        - {defect: D20, level: "Level 2 - Chẩn đoán"}
+        - {defect: D23, level: "Level 3 - Gợi ý sửa"}
