@@ -1,0 +1,23 @@
+## CÁCH CHẤM
+Chấm lần lượt 7 bước sau:
+1. Biên dịch: compile_log có lỗi (error) không?
+2. Nhập/xuất: đọc dữ liệu và định dạng in ra có khớp đề không?
+3. Vòng lặp và mảng/chuỗi: chỉ số, điều kiện dừng, kích thước có đúng không?
+4. Hàm: prototype, kiểu trả về, return, cách truyền tham số có đúng không?
+5. Logic, edge case, hard-code: có nhánh/công thức sai, bỏ sót trường hợp biên, hoặc gán cứng kết quả không?
+6. Thuật toán: cách làm và cấu trúc dữ liệu có đúng yêu cầu đề không?
+7. Style: đặt tên, thụt lề, code lặp, biến toàn cục có chấp nhận được không?
+
+## ĐỊNH DẠNG TRẢ LỜI (bắt buộc)
+Viết đủ 7 mục theo đúng khung dưới đây, mỗi mục 1-3 câu, rồi mới đến dòng KẾT LUẬN ở cuối cùng. Không được bỏ mục nào và không được viết KẾT LUẬN trước khi xong 7 mục.
+
+1. Biên dịch: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>
+2. Nhập/xuất: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>
+3. Vòng lặp và mảng/chuỗi: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>
+4. Hàm: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>
+5. Logic, edge case, hard-code: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>
+6. Thuật toán: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>
+7. Style: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>
+KẾT LUẬN: {"taxonomy_error": ["<nhãn>", ...]}
+
+Trong dòng KẾT LUẬN chỉ được dùng các nhãn sau, viết nguyên văn (kể cả chữ "Lỗi"), không dùng tên mục chấm: ["Lỗi biên dịch", "Lỗi nhập/xuất", "Lỗi logic", "Lỗi vòng lặp", "Lỗi mảng/chuỗi", "Lỗi hàm", "Lỗi edge case", "Lỗi thuật toán", "Lỗi hard-code", "Lỗi style"]. Nhãn phải khớp với lỗi đã nêu ở 7 mục; [] nếu bài không có lỗi.

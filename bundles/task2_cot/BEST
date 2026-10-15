@@ -1,0 +1,4 @@
+cot_fewshot_sc
+# Dòng đầu = tên thư mục bundle mà `python scripts/predict_task2_cot.py` dùng khi không có --bundle.
+# TẠM THỜI (2026-10-15): chưa có điểm 32 gold trên Kaggle; chọn cấu hình đầy đủ nhất. Sau lượt Kaggle, đổi sang
+# bundle có macro-F1 trên 32 gold cao nhất (xem bundles/task2_cot/README.md). Không chọn theo kết quả public.

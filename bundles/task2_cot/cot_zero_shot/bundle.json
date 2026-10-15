@@ -1,0 +1,49 @@
+{
+  "format": "task2-cot-bundle/1",
+  "created": "2026-10-15 20:23:08",
+  "git_commit": "dd1f83ea0a",
+  "backend": "mlx",
+  "model": "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
+  "revision": "019cc73c45c770444708a6dd8690c66243cc5c80",
+  "weights": null,
+  "hardware_used": "Darwin arm64",
+  "experiment": {
+    "name": "task2_cot_zero_shot__mlx__mlx-community-Qwen2.5-Coder-7B-Instruct-4bit",
+    "description": "Zero-shot chain-of-thought, vai giảng viên, 7 bước chấm rồi dòng KẾT LUẬN; có compile_log tự compile; Lỗi biên dịch lấy từ compile_log; không demo, không test_report.",
+    "prompt": {
+      "style": "cot",
+      "few_shot_k": 0,
+      "max_code_chars": 12000,
+      "use_aux_signals": true,
+      "compile_rule": true,
+      "max_prompt_chars": 24000
+    },
+    "generation": {
+      "temperature": 0.0,
+      "max_new_tokens": 1024,
+      "enable_thinking": false,
+      "n": 1
+    },
+    "retry_on_parse_fail": 1,
+    "checkpoint_every": 4,
+    "seed": 42
+  },
+  "compile": {
+    "enabled": true,
+    "backend": "auto",
+    "image": "gcc:13.3.0",
+    "cache_dir": "outputs/task2/_compile_cache",
+    "workdir": "outputs/task2/_compile_work",
+    "source": "self",
+    "compiler_id": "docker:gcc:13.3.0:g++ (GCC) 13.3.0"
+  },
+  "prompt_sha256": "2da0289000607e3bef288dda6b5395ebbfe91ddba92f822faab6b6d19425e35e",
+  "gold_metrics": {
+    "n": 1,
+    "macro_f1": 0.0,
+    "micro_f1": 0.0,
+    "exact_match": 0.0,
+    "partial": true
+  },
+  "demo_pools": null
+}
