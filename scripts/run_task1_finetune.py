@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -36,7 +37,8 @@ def parse_args() -> argparse.Namespace:
 
 def run(*cmd) -> None:
     print("$", " ".join(map(str, cmd)), flush=True)
-    subprocess.run([sys.executable, *map(str, cmd)], cwd=ROOT, check=True)
+    env = {**os.environ, "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True", "PYTHONUNBUFFERED": "1"}
+    subprocess.run([sys.executable, *map(str, cmd)], cwd=ROOT, check=True, env=env)
 
 
 def main() -> None:
@@ -61,7 +63,9 @@ def main() -> None:
     run(*train, "--preflight")
     if a.preflight:
         return
-    run(*train, *(["--smoke"] if a.smoke else []))
+    # One process per arm: a 16 GB T4 cannot hold the first arm's leftovers and the second arm at once.
+    for stage in ("gold_only", "silver_then_gold", "select"):
+        run(*train, "--stage", stage, *(["--smoke"] if a.smoke else []))
     run_dir = out / "smoke" if a.smoke else out
 
     from src.task1.finetune import validation_error_report

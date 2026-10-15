@@ -29,6 +29,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument(
+        "--stage", choices=("all", "gold_only", "silver_then_gold", "select"), default="all",
+        help="all = both arms + selection in one process (default). On a 16 GB GPU run gold_only, "
+             "silver_then_gold and select as separate processes so each arm's GPU memory is fully released.",
+    )
     return parser.parse_args()
 
 
@@ -98,8 +103,12 @@ def run(args: argparse.Namespace) -> dict:
 
     if not torch.cuda.is_available():
         raise RuntimeError("QLoRA training requires a Colab CUDA GPU")
-    if output.exists() and any(p.name != "smoke" for p in output.iterdir()):
-        raise FileExistsError(f"Output already contains a run: {output}; use a fresh directory")
+    done = {p.name for p in output.iterdir()} - {"smoke"} if output.exists() else set()
+    clash = {"all": done - {"training_config.json", "silver_manifest.json", "source_manifest.json"},
+             "gold_only": done & {"gold_only"}, "silver_then_gold": done & {"silver_then_gold"},
+             "select": done & {"best_adapter", "training_summary.json"}}[args.stage]
+    if clash:
+        raise FileExistsError(f"Output already contains {sorted(clash)}: {output}; use a fresh directory")
     output.mkdir(parents=True, exist_ok=True)
     _write(output / "training_config.json", cfg)
     _write(output / "silver_manifest.json", silver_manifest)
@@ -184,25 +193,37 @@ def run(args: argparse.Namespace) -> dict:
         return paths
 
     # Both arms begin from the same base weights and random seed.
-    baseline_model = fresh_model()
-    baseline_ckpts = train_stage(
-        baseline_model, gold_rows, output / "gold_only" / "gold",
-        epochs=int(training["epochs"]), lr=float(training["learning_rate"]),
-    )
-    del baseline_model
-    clear_gpu()
+    if args.stage in ("all", "gold_only"):
+        baseline_model = fresh_model()
+        baseline_ckpts = train_stage(
+            baseline_model, gold_rows, output / "gold_only" / "gold",
+            epochs=int(training["epochs"]), lr=float(training["learning_rate"]),
+        )
+        del baseline_model
+        clear_gpu()
 
-    silver_model = fresh_model()
-    silver_ckpts = train_stage(
-        silver_model, silver_rows, output / "silver_then_gold" / "silver",
-        epochs=int(training["silver_epochs"]), lr=float(training["silver_learning_rate"]),
-    )
-    silver_gold_ckpts = train_stage(
-        silver_model, gold_rows, output / "silver_then_gold" / "gold",
-        epochs=int(training["epochs"]), lr=float(training["learning_rate"]),
-    )
-    del silver_model
-    clear_gpu()
+    if args.stage in ("all", "silver_then_gold"):
+        silver_model = fresh_model()
+        silver_ckpts = train_stage(
+            silver_model, silver_rows, output / "silver_then_gold" / "silver",
+            epochs=int(training["silver_epochs"]), lr=float(training["silver_learning_rate"]),
+        )
+        silver_gold_ckpts = train_stage(
+            silver_model, gold_rows, output / "silver_then_gold" / "gold",
+            epochs=int(training["epochs"]), lr=float(training["learning_rate"]),
+        )
+        del silver_model
+        clear_gpu()
+
+    if args.stage in ("gold_only", "silver_then_gold"):
+        return {"stage": args.stage, "output": str(output), "data": preflight}
+    if args.stage == "select":  # arms were trained by earlier processes: read their checkpoints from disk
+        n_gold, n_silver = (1, 1) if args.smoke else (int(training["epochs"]), int(training["silver_epochs"]))
+        baseline_ckpts = _checkpoints(output / "gold_only" / "gold")
+        silver_ckpts = _checkpoints(output / "silver_then_gold" / "silver")
+        silver_gold_ckpts = _checkpoints(output / "silver_then_gold" / "gold")
+        if (len(baseline_ckpts), len(silver_ckpts), len(silver_gold_ckpts)) != (n_gold, n_silver, n_gold):
+            raise RuntimeError("--stage select needs both arms trained first (gold_only, silver_then_gold)")
 
     eval_records = gold_val[:1] if args.smoke else gold_val
     eval_base = load_base()
