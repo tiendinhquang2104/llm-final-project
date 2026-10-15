@@ -19,8 +19,11 @@ PUBLIC_CSV = {"Class01-Test1": ("generals.csv", "50-best-european-generals-clean
               "Class02-Test1": ("battles.csv", "50-european-battles-first-20.csv")}
 
 
-def valid_parsed(parsed, exam_type: str) -> bool:
-    """Accept only an in-range rubric and a P1 verdict where prerequisite rules need it."""
+def valid_parsed(parsed, exam_type: str, template: str = "structured") -> bool:
+    """Accept only an in-range rubric and a P1 verdict where prerequisite rules need it.
+
+    The plain template asks for the six scores only (no per-problem status), so it never has a P1 verdict.
+    """
     if not parsed.ok or not parsed.rubric:
         return False
     if any(not isinstance(parsed.rubric.get(d), (int, float))
@@ -28,7 +31,7 @@ def valid_parsed(parsed, exam_type: str) -> bool:
            or not math.isfinite(parsed.rubric[d])
            or not _valid_score(parsed.rubric[d], DIM_MAX[d]) for d in DIMENSIONS):
         return False
-    return exam_type != "multi_problem" or bool(parsed.problems.get("P1"))
+    return exam_type != "multi_problem" or template == "plain" or bool(parsed.problems.get("P1"))
 
 
 def _valid_score(value: object, maximum: int) -> bool:
@@ -80,7 +83,7 @@ class Task1Pipeline:
         outs = self.backend.generate(reqs, self.gen_cfg)
         records = []
         for q, texts in zip(reqs, outs):
-            records.append({"sample_id": q["sample"].sample_id, "exam_type": q["sample"].exam_type,
+            records.append({"sample_id": q["sample"].sample_id, "exam_type": q["sample"].exam_type, "template": q.get("template", "structured"),
                             "demos": q["demos"], "outputs": texts,
                             "retry_outputs": []})
         n_retry = int(self.cfg.get("retry_on_parse_fail", 1))
@@ -108,7 +111,7 @@ class Task1Pipeline:
 
     # -- post-processing (pure; can be re-run with different rule configs) -------------------------
     def _valid(self, parsed, sample: Sample) -> bool:
-        return valid_parsed(parsed, sample.exam_type)
+        return valid_parsed(parsed, sample.exam_type, self.prompt_cfg.get("template", "structured"))
 
     def postprocess(self, record: dict, rule_cfg: RuleConfig | None = None) -> dict:
         rule_cfg = rule_cfg or self.rule_cfg

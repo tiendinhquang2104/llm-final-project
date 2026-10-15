@@ -89,10 +89,10 @@ def to_markdown(ea: dict, title: str = "Error analysis") -> str:
               "| sample | gold | pred | llm(before rules) | Δ | dims Δ | compile | tests | problems | tags |",
               "|---|---|---|---|---|---|---|---|---|---|"]
     for r in ea["cases"]:
-        dims = ", ".join(f"{d}{v:+d}" for d, v in r["dim_diff"].items())
+        dims = ", ".join(f"{d}{v:+g}" for d, v in r["dim_diff"].items())  # scores may be 0.01 multiples
         probs = " ".join(f"{k}:{v}" for k, v in r["problems"].items())
         lines.append(f"| {r['sample_id']} | {r['gold_total']} | {r['pred_total']} | {r['llm_total']} | "
-                     f"{r['diff']:+d} | {dims} | {r['compile']} | {r['tests']} | {probs} | {'; '.join(r['tags'])} |")
+                     f"{r['diff']:+g} | {dims} | {r['compile']} | {r['tests']} | {probs} | {'; '.join(r['tags'])} |")
     lines += ["", "### Model rationale for each case", ""]
     for r in ea["cases"]:
         lines.append(f"- **{r['sample_id']}** ({'; '.join(r['rule_trace']) or 'no rule fired'}): {r['rationale']}")

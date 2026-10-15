@@ -4,7 +4,7 @@
         --processed-dir <gold_processed> --splits-dir <gold_splits> --output-dir <out> --preflight
     ... same without --preflight (GPU), add --limit-per-exam 1 for a smoke run.
 
-Same prompt (src/data/prompts.build_task1_prompt), greedy decoding and parser (finetune.parse_generated_score)
+Same prompt (src/data/prompts.build_task1_prompt), greedy decoding and parser (finetune.parse_generated)
 as the gold-validation evaluation in scripts/train_task1.py. Raw outputs are checkpointed per batch, so an
 interrupted run resumes. An unparseable output gets the median gold rubric of its exam type (flagged
 `fallback_used`) so the submission always covers every sample_id; nothing is written unless the file passes
@@ -29,7 +29,7 @@ if str(ROOT) not in sys.path:
 
 from src.task1.evaluator import validate_predictions  # noqa: E402
 from src.task1.finetune import (  # noqa: E402
-    fallback_score, load_task1_splits, load_unlabelled_prompts, parse_generated_score,
+    apply_policy, fallback_score, load_task1_splits, load_unlabelled_prompts, parse_generated,
 )
 
 
@@ -45,6 +45,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--batch-size", type=int, default=4)
     ap.add_argument("--limit-per-exam", type=int, help="first N samples of each exam (smoke test)")
     ap.add_argument("--preflight", action="store_true", help="prompts + token lengths only, no model")
+    ap.add_argument("--no-rules", action="store_true", help="raw model scores (no prerequisite rule / compile gate)")
     return ap.parse_args()
 
 
@@ -149,17 +150,23 @@ def main() -> None:
             print(f"[predict] {min(k + a.batch_size, len(todo))}/{len(todo)}  {time.time() - t0:.0f}s", flush=True)
     seconds = time.time() - t0
 
+    from src.data.loader import load_exams, resolve_dataset_root
+
+    exams = load_exams(resolve_dataset_root(a.public_root))
     submission, details = [], []
     for p in prompts:
         raw = done.get(p["sample_id"])
-        pred, json_ok, strict_ok = parse_generated_score(raw) if raw is not None else (None, False, False)
-        fallback = pred is None
+        pred, statuses, json_ok, strict_ok = parse_generated(raw) if raw is not None else (None, {}, False, False)
+        fallback, before, trace = pred is None, pred, []
         if fallback:
             pred = fallback_score(gold_train + gold_val, p["exam_type"])
+        elif not a.no_rules:  # same exam policy as the API pipeline: prerequisite rule + compile gate
+            pred, trace = apply_policy(pred, statuses, exams[p["exam_id"]])
         submission.append({"sample_id": p["sample_id"], "output": pred})
         details.append({"sample_id": p["sample_id"], "exam_id": p["exam_id"], "raw_output": raw,
                         "json_ok": json_ok, "strict_output_ok": strict_ok, "fallback_used": fallback,
-                        "reason": "prompt_too_long" if p["sample_id"] in too_long else None, "prediction": pred})
+                        "reason": "prompt_too_long" if p["sample_id"] in too_long else None, "problems": statuses,
+                        "prediction_before_rules": before, "rule_trace": trace, "prediction": pred})
     errors = validate_predictions(submission, expected_ids)
     if errors:
         raise RuntimeError(f"Submission failed format validation: {errors[:5]}")
@@ -171,6 +178,8 @@ def main() -> None:
         commit = None
     info = {**{k: v for k, v in preflight.items() if k != "too_long_for_max_length"},
             "n_too_long": len(too_long), "n_fallback": sum(d["fallback_used"] for d in details),
+            "rules_applied": not a.no_rules, "n_rule_changed": sum(any(not t.endswith("no_op") for t in d["rule_trace"]) for d in details),
+            "n_with_p1_status": sum("P1" in d["problems"] for d in details),
             "valid_output_rate": sum(d["strict_output_ok"] for d in details) / len(details),
             "generate_seconds": round(seconds, 1), "new_tokens": new_tokens,
             "gpu": torch.cuda.get_device_name(0), "peak_gpu_gb": round(torch.cuda.max_memory_allocated() / 2**30, 2),

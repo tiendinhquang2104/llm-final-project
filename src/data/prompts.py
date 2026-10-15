@@ -117,23 +117,33 @@ def messages_to_chatml(messages: list[dict[str, str]]) -> str:
     return "\n".join(chunks) + "\n"
 
 
+TASK1_PROBLEM_STATUSES = "correct|partial|wrong|runtime_error|not_attempted"
+
+
 def build_task1_prompt(sample: Any) -> list[dict[str, str]]:
-    """System + user messages only: the exact inference prompt of the Task 1 adapter (no label needed)."""
-    user = (
-        _shared_context(sample)
-        + "\n\nHãy chấm điểm và trả về JSON đúng schema:\n"
-        '{"rubric":{"compilable":0|1,"io_format":0|1,"logic":0-4,'
-        '"edge_case":0-2,"complexity":0|1,"code_quality":0|1},"total_score":0-10}'
-    )
+    """System + user messages only: the exact inference prompt of the Task 1 adapter (no label needed).
+
+    For multi_problem exams the schema also asks for the verdict of every question (P1..Pn), which the
+    prerequisite rule (src/task1/prerequisite_rules.py) needs to zero the questions that depend on a failed P1.
+    """
+    schema = ('{"rubric":{"compilable":0|1,"io_format":0|1,"logic":0-4,'
+              '"edge_case":0-2,"complexity":0|1,"code_quality":0|1},"total_score":0-10}')
+    if getattr(sample, "exam_type", "") == "multi_problem":
+        schema = ('{"problems":[{"pid":"P1","status":"' + TASK1_PROBLEM_STATUSES + '"},...],'
+                  + schema[1:])
+    user = _shared_context(sample) + "\n\nHãy chấm điểm và trả về JSON đúng schema:\n" + schema
     return [{"role": "system", "content": SYSTEM_TASK1}, {"role": "user", "content": user}]
 
 
 def build_task1_messages(sample: Any) -> tuple[list[dict[str, str]], str]:
+    """Prompt + target. `sample.problem_status` ({pid: status}), when present, is written before the rubric."""
     prompt = build_task1_prompt(sample)
-    target_obj = {
-        "rubric": sample.rubric.model_dump() if hasattr(sample.rubric, "model_dump") else sample.rubric,
-        "total_score": sample.total_score,
-    }
+    target_obj = {}
+    statuses = getattr(sample, "problem_status", None)
+    if statuses:
+        target_obj["problems"] = [{"pid": pid, "status": st} for pid, st in statuses.items()]
+    target_obj["rubric"] = sample.rubric.model_dump() if hasattr(sample.rubric, "model_dump") else sample.rubric
+    target_obj["total_score"] = sample.total_score
     target = json.dumps(target_obj, ensure_ascii=False, separators=(",", ":"))
     return prompt + [{"role": "assistant", "content": target}], target
 

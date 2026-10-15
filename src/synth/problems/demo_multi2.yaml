@@ -1,0 +1,291 @@
+# Multi_problem exams (4 questions: P1 read CSV prerequisite, P2/P3 aggregate, P4 output) with harness.
+problems_meta:
+  - exam_id: SYN-COUNT
+    exam_type: multi_problem
+    title: Đếm bản ghi
+    language: cpp11
+    statement: |
+      Cho file cnt.csv mỗi dòng gồm hai số a b.
+      P1: đọc toàn bộ bản ghi vào mảng cấp phát động (P1 sai thì không chấm các câu sau).
+      P2: đếm số bản ghi.
+      P3: tìm giá trị b nhỏ nhất.
+      P4: in số bản ghi.
+    problems:
+      - {pid: P1, max_score: 2.5, prototype: "Rec* prob1(string filename, int& n);", is_prerequisite_for: [P2, P3, P4]}
+      - {pid: P2, max_score: 2.5, prototype: "int prob2(Rec* arr, int n);"}
+      - {pid: P3, max_score: 2.5, prototype: "int prob3(Rec* arr, int n);"}
+      - {pid: P4, max_score: 2.5, prototype: "void prob4(Rec* arr, int n);"}
+    data_files:
+      cnt.csv: "1 5\n2 3\n4 9\n"
+    reference: |
+      #include <iostream>
+      #include <fstream>
+      using namespace std;
+      struct Rec { int a, b; };
+      Rec* prob1(string filename, int& n) {
+          ifstream f(filename);
+          Rec* arr = new Rec[100];
+          n = 0;
+          while (f >> arr[n].a >> arr[n].b) { n = n + 1; }
+          return arr;
+      }
+      int prob2(Rec* arr, int n) { return n; }
+      int prob3(Rec* arr, int n) {
+          int m = arr[0].b;
+          for (int i = 1; i < n; i++) { if (arr[i].b < m) m = arr[i].b; }
+          return m;
+      }
+      void prob4(Rec* arr, int n) { cout << prob2(arr, n); }
+    harness: |
+      int main() {
+          int n = 0;
+          Rec* a = prob1("cnt.csv", n);
+          int c = prob2(a, n);
+          int m = prob3(a, n);
+          prob4(a, n);
+          cout << "\nP1=" << (n == 3 ? "ok" : "fail")
+               << " P2=" << (c == 3 ? "ok" : "fail")
+               << " P3=" << (m == 3 ? "ok" : "fail")
+               << " P4=" << (c == 3 ? "ok" : "fail") << "\n";
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, states: [ok, ok, ok, ok], total: 10, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D04, level: "Level 2 - Chẩn đoán"}
+        - {defect: D15, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-PROD
+    exam_type: multi_problem
+    title: Tổng tích
+    language: cpp11
+    statement: |
+      Cho file prod.csv mỗi dòng gồm hai số a b.
+      P1: đọc bản ghi vào mảng động (tiên quyết).
+      P2: tính tổng các tích a*b.
+      P3: tìm tích lớn nhất.
+      P4: in tổng tích.
+    problems:
+      - {pid: P1, max_score: 2.5, prototype: "Rec* prob1(string filename, int& n);", is_prerequisite_for: [P2, P3, P4]}
+      - {pid: P2, max_score: 2.5, prototype: "int prob2(Rec* arr, int n);"}
+      - {pid: P3, max_score: 2.5, prototype: "int prob3(Rec* arr, int n);"}
+      - {pid: P4, max_score: 2.5, prototype: "void prob4(Rec* arr, int n);"}
+    data_files:
+      prod.csv: "2 3\n1 4\n5 1\n"
+    reference: |
+      #include <iostream>
+      #include <fstream>
+      using namespace std;
+      struct Rec { int a, b; };
+      Rec* prob1(string filename, int& n) {
+          ifstream f(filename);
+          Rec* arr = new Rec[100];
+          n = 0;
+          while (f >> arr[n].a >> arr[n].b) { n = n + 1; }
+          return arr;
+      }
+      int prob2(Rec* arr, int n) {
+          int s = 0;
+          for (int i = 0; i < n; i++) { s = s + arr[i].a * arr[i].b; }
+          return s;
+      }
+      int prob3(Rec* arr, int n) {
+          int m = arr[0].a * arr[0].b;
+          for (int i = 1; i < n; i++) { if (arr[i].a * arr[i].b > m) m = arr[i].a * arr[i].b; }
+          return m;
+      }
+      void prob4(Rec* arr, int n) { cout << prob2(arr, n); }
+    harness: |
+      int main() {
+          int n = 0;
+          Rec* a = prob1("prod.csv", n);
+          int s = prob2(a, n);
+          int m = prob3(a, n);
+          prob4(a, n);
+          cout << "\nP1=" << (n == 3 ? "ok" : "fail")
+               << " P2=" << (s == 15 ? "ok" : "fail")
+               << " P3=" << (m == 6 ? "ok" : "fail")
+               << " P4=" << (s == 15 ? "ok" : "fail") << "\n";
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, states: [ok, ok, ok, ok], total: 10, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D04, level: "Level 2 - Chẩn đoán"}
+        - {defect: D15, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-RANGE
+    exam_type: multi_problem
+    title: Khoảng giá trị
+    language: cpp11
+    statement: |
+      Cho file rng.csv mỗi dòng gồm hai số a b.
+      P1: đọc bản ghi vào mảng động (tiên quyết).
+      P2: đếm số dòng có a < b.
+      P3: tìm giá trị a lớn nhất.
+      P4: in số dòng có a < b.
+    problems:
+      - {pid: P1, max_score: 2.5, prototype: "Rec* prob1(string filename, int& n);", is_prerequisite_for: [P2, P3, P4]}
+      - {pid: P2, max_score: 2.5, prototype: "int prob2(Rec* arr, int n);"}
+      - {pid: P3, max_score: 2.5, prototype: "int prob3(Rec* arr, int n);"}
+      - {pid: P4, max_score: 2.5, prototype: "void prob4(Rec* arr, int n);"}
+    data_files:
+      rng.csv: "1 2\n7 3\n4 9\n"
+    reference: |
+      #include <iostream>
+      #include <fstream>
+      using namespace std;
+      struct Rec { int a, b; };
+      Rec* prob1(string filename, int& n) {
+          ifstream f(filename);
+          Rec* arr = new Rec[100];
+          n = 0;
+          while (f >> arr[n].a >> arr[n].b) { n = n + 1; }
+          return arr;
+      }
+      int prob2(Rec* arr, int n) {
+          int c = 0;
+          for (int i = 0; i < n; i++) { if (arr[i].a < arr[i].b) c = c + 1; }
+          return c;
+      }
+      int prob3(Rec* arr, int n) {
+          int m = arr[0].a;
+          for (int i = 1; i < n; i++) { if (arr[i].a > m) m = arr[i].a; }
+          return m;
+      }
+      void prob4(Rec* arr, int n) { cout << prob2(arr, n); }
+    harness: |
+      int main() {
+          int n = 0;
+          Rec* a = prob1("rng.csv", n);
+          int c = prob2(a, n);
+          int m = prob3(a, n);
+          prob4(a, n);
+          cout << "\nP1=" << (n == 3 ? "ok" : "fail")
+               << " P2=" << (c == 2 ? "ok" : "fail")
+               << " P3=" << (m == 7 ? "ok" : "fail")
+               << " P4=" << (c == 2 ? "ok" : "fail") << "\n";
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, states: [ok, ok, ok, ok], total: 10, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D04, level: "Level 2 - Chẩn đoán"}
+        - {defect: D15, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-HO-MULTI1
+    exam_type: multi_problem
+    title: Held-out multi 1 (đếm cột a chẵn)
+    language: cpp11
+    heldout: true
+    statement: |
+      Cho file ho1.csv mỗi dòng hai số a b.
+      P1: đọc bản ghi vào mảng động (tiên quyết). P2: đếm a chẵn. P3: max b. P4: in số a chẵn.
+    problems:
+      - {pid: P1, max_score: 2.5, prototype: "Rec* prob1(string filename, int& n);", is_prerequisite_for: [P2, P3, P4]}
+      - {pid: P2, max_score: 2.5, prototype: "int prob2(Rec* arr, int n);"}
+      - {pid: P3, max_score: 2.5, prototype: "int prob3(Rec* arr, int n);"}
+      - {pid: P4, max_score: 2.5, prototype: "void prob4(Rec* arr, int n);"}
+    data_files:
+      ho1.csv: "2 5\n3 8\n4 1\n"
+    reference: |
+      #include <iostream>
+      #include <fstream>
+      using namespace std;
+      struct Rec { int a, b; };
+      Rec* prob1(string filename, int& n) {
+          ifstream f(filename);
+          Rec* arr = new Rec[100];
+          n = 0;
+          while (f >> arr[n].a >> arr[n].b) { n = n + 1; }
+          return arr;
+      }
+      int prob2(Rec* arr, int n) {
+          int c = 0;
+          for (int i = 0; i < n; i++) { if (arr[i].a % 2 == 0) c = c + 1; }
+          return c;
+      }
+      int prob3(Rec* arr, int n) {
+          int m = arr[0].b;
+          for (int i = 1; i < n; i++) { if (arr[i].b > m) m = arr[i].b; }
+          return m;
+      }
+      void prob4(Rec* arr, int n) { cout << prob2(arr, n); }
+    harness: |
+      int main() {
+          int n = 0;
+          Rec* a = prob1("ho1.csv", n);
+          int c = prob2(a, n);
+          int m = prob3(a, n);
+          prob4(a, n);
+          cout << "\nP1=" << (n == 3 ? "ok" : "fail")
+               << " P2=" << (c == 2 ? "ok" : "fail")
+               << " P3=" << (m == 8 ? "ok" : "fail")
+               << " P4=" << (c == 2 ? "ok" : "fail") << "\n";
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, states: [ok, ok, ok, ok], total: 10, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D15, level: "Level 2 - Chẩn đoán"}
+
+  - exam_id: SYN-HO-MULTI2
+    exam_type: multi_problem
+    title: Held-out multi 2 (hiệu số)
+    language: cpp11
+    heldout: true
+    statement: |
+      Cho file ho2.csv mỗi dòng hai số a b.
+      P1: đọc bản ghi vào mảng động (tiên quyết). P2: tổng a-b. P3: min a. P4: in tổng.
+    problems:
+      - {pid: P1, max_score: 2.5, prototype: "Rec* prob1(string filename, int& n);", is_prerequisite_for: [P2, P3, P4]}
+      - {pid: P2, max_score: 2.5, prototype: "int prob2(Rec* arr, int n);"}
+      - {pid: P3, max_score: 2.5, prototype: "int prob3(Rec* arr, int n);"}
+      - {pid: P4, max_score: 2.5, prototype: "void prob4(Rec* arr, int n);"}
+    data_files:
+      ho2.csv: "5 2\n6 1\n3 3\n"
+    reference: |
+      #include <iostream>
+      #include <fstream>
+      using namespace std;
+      struct Rec { int a, b; };
+      Rec* prob1(string filename, int& n) {
+          ifstream f(filename);
+          Rec* arr = new Rec[100];
+          n = 0;
+          while (f >> arr[n].a >> arr[n].b) { n = n + 1; }
+          return arr;
+      }
+      int prob2(Rec* arr, int n) {
+          int s = 0;
+          for (int i = 0; i < n; i++) { s = s + (arr[i].a - arr[i].b); }
+          return s;
+      }
+      int prob3(Rec* arr, int n) {
+          int m = arr[0].a;
+          for (int i = 1; i < n; i++) { if (arr[i].a < m) m = arr[i].a; }
+          return m;
+      }
+      void prob4(Rec* arr, int n) { cout << prob2(arr, n); }
+    harness: |
+      int main() {
+          int n = 0;
+          Rec* a = prob1("ho2.csv", n);
+          int s = prob2(a, n);
+          int m = prob3(a, n);
+          prob4(a, n);
+          cout << "\nP1=" << (n == 3 ? "ok" : "fail")
+               << " P2=" << (s == 8 ? "ok" : "fail")
+               << " P3=" << (m == 3 ? "ok" : "fail")
+               << " P4=" << (s == 8 ? "ok" : "fail") << "\n";
+          return 0;
+      }
+    metadata:
+      targets:
+        - {defect: CLEAN, states: [ok, ok, ok, ok], total: 10, level: "Level 1 - Gợi ý nhẹ"}
+        - {defect: D01, level: "Level 2 - Chẩn đoán"}
+        - {defect: D15, level: "Level 2 - Chẩn đoán"}

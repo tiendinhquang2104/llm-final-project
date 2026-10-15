@@ -27,6 +27,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--silver-processed-dir", type=Path, required=True)
     parser.add_argument("--source-manifest", type=Path)
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--gold-root", type=Path,
+                        help="gold dataset (exams.json): apply the exam policy (prerequisite rule + compile gate) "
+                             "when scoring validation answers, as in the API pipeline")
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument(
@@ -61,6 +64,11 @@ def run(args: argparse.Namespace) -> dict:
         processed, splits, expected_train=cfg["data"]["expected_train"],
         expected_val=cfg["data"]["expected_val"],
     )
+    exams = None
+    if args.gold_root:
+        from src.data.loader import load_exams, resolve_dataset_root
+
+        exams = load_exams(resolve_dataset_root(args.gold_root))
     silver_manifest = json.loads(
         (args.silver_processed_dir / "silver_manifest.json").read_text(encoding="utf-8")
     )
@@ -260,14 +268,15 @@ def run(args: argparse.Namespace) -> dict:
                 raw_by_id[rec.sample_id] = tokenizer.decode(
                     generated[0][len(ids):], skip_special_tokens=True
                 )
-            metrics, details = evaluate_generations(eval_records, raw_by_id)
+            metrics, details = evaluate_generations(eval_records, raw_by_id, exams)
             epoch_dir = output / name / f"epoch_{epoch}"
             _write(epoch_dir / "metrics.json", metrics)
             _write(epoch_dir / "validation_predictions.json", details)
             results.append({
                 "variant": name, "epoch": epoch, "checkpoint": str(checkpoint), "metrics": metrics
             })
-            print(f"{name} epoch {epoch}: QWK={metrics['qwk']:.4f} MAE={metrics['mae']:.4f}", flush=True)
+            print(f"{name} epoch {epoch}: QWK={metrics['qwk']:.4f} MAE={metrics['mae']:.4f} "
+                  f"(before rules QWK={metrics['before_rules']['qwk']:.4f})", flush=True)
         selected = best_epoch(results)
         _write(output / name / "validation_report.json", {
             "selected": selected, "all_epochs": results

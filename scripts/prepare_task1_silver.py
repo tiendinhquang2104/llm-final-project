@@ -20,8 +20,11 @@ def main() -> None:
     parser.add_argument("--gold-root", type=Path, required=True)
     parser.add_argument("--public-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--status-file", type=Path,
+                        help="P1..P4 states from scripts/derive_task1_silver_status.py (enables the prerequisite rule)")
     args = parser.parse_args()
-    manifest = prepare_silver_task1(args.silver_root, args.gold_root, args.public_root, args.output_dir)
+    manifest = prepare_silver_task1(args.silver_root, args.gold_root, args.public_root, args.output_dir,
+                                    status_path=args.status_file)
     print(json.dumps({key: value for key, value in manifest.items() if key != "excluded"},
                      ensure_ascii=False, indent=2))
 

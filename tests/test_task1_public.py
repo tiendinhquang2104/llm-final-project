@@ -9,7 +9,7 @@ from src.data.loader import DIMENSIONS, Dataset, Sample
 from src.llm.api_client import QuotaExhausted
 from src.task1.evaluator import validate_predictions
 from src.task1.pipeline import Task1Pipeline
-from src.task1.public_predict import PUBLIC_EXAMS, inspect_public, predict_public
+from src.task1.public_predict import PUBLIC_EXAMS, PUBLIC_SAMPLES, inspect_public, predict_public
 from src.utils.config import load_config
 
 
@@ -62,7 +62,8 @@ def synthetic_public(root: Path) -> Dataset:
         "BattleName,Location\n", encoding="utf-8")
     exams = {}
     samples = []
-    for exam_id in sorted(PUBLIC_EXAMS):
+    per_exam = [PUBLIC_SAMPLES // 6 + (i < PUBLIC_SAMPLES % 6) for i in range(6)]
+    for exam_id, n_samples in zip(sorted(PUBLIC_EXAMS), per_exam):
         exam_type = "single_problem" if exam_id.startswith("Class03") else "multi_problem"
         exams[exam_id] = {"exam_id": exam_id, "exam_type": exam_type, "statement": "Test",
                           "problems": [{"pid": "P1", "max_score": 10}] if exam_type == "single_problem"
@@ -70,7 +71,7 @@ def synthetic_public(root: Path) -> Dataset:
                                  "is_prerequisite_for": ["P2", "P3", "P4"]},
                                 {"pid": "P2", "max_score": 4}, {"pid": "P3", "max_score": 2},
                                 {"pid": "P4", "max_score": 3}]}
-        for n in range(60):
+        for n in range(n_samples):
             sid = f"{exam_id}-S{n:02d}"
             samples.append(Sample(sid, exam_id, exam_type, "cpp11", f"{sid}.cpp",
                                   "int main() {}", "", None))
@@ -102,7 +103,7 @@ class FakeBackend:
 def test_public_resume_and_exact_submission(tmp_path):
     ds = synthetic_public(tmp_path / "data")
     summary = inspect_public(ds)
-    assert summary["samples"] == 360 and len(summary["exams"]) == 6
+    assert summary["samples"] == PUBLIC_SAMPLES and len(summary["exams"]) == 6
     cfg = load_config(Path(__file__).parents[1] / "configs" / "task1" / "e2_zero_shot_structured.yaml")
     cfg["retry_on_parse_fail"] = 0
     pipe = Task1Pipeline(ds, None, cfg)
@@ -113,8 +114,8 @@ def test_public_resume_and_exact_submission(tmp_path):
     assert partial["completed"] == 5 and partial["submission_path"] is None
     second = FakeBackend()
     complete = predict_public(ds, cfg, second, tmp_path / "out")
-    assert complete["completed"] == 360 and second.calls == 355
-    assert complete["usage_total"]["api_calls"] == 360
+    assert complete["completed"] == PUBLIC_SAMPLES and second.calls == PUBLIC_SAMPLES - 5
+    assert complete["usage_total"]["api_calls"] == PUBLIC_SAMPLES
     submission = json.loads(Path(complete["submission_path"]).read_text(encoding="utf-8"))
     assert not validate_predictions(submission, [s.sample_id for s in ds.samples])
     third = FakeBackend()

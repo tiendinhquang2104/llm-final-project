@@ -78,7 +78,7 @@ def test_public_release_prompts_if_present():
     if not (root / "task1_grading.json").exists():
         pytest.skip("public test release not extracted locally")
     prompts = load_unlabelled_prompts(root)
-    assert len(prompts) == 360 and len({p["exam_id"] for p in prompts}) == 6
+    assert len(prompts) == 328 and len({p["exam_id"] for p in prompts}) == 6  # current official release
 
 
 def test_validation_error_report(tmp_path):
@@ -114,3 +114,20 @@ def test_compile_log_is_cut_like_the_organizer_logs():
     assert long_log.strip()[:COMPILE_LOG_MAX_CHARS] in user
     assert long_log.strip()[:COMPILE_LOG_MAX_CHARS + 50] not in user
     assert "(không có compile log)" in build_task1_prompt(prompt_sample(compile_log="  "))[1]["content"]
+
+
+def test_plain_template_scores_multi_problem_and_float_error_report():
+    from src.evaluation.error_analysis import to_markdown
+    from src.task1.pipeline import valid_parsed
+    from src.task1.scorer import parse_output
+
+    plain = parse_output(json.dumps({"compilable": 1, "io_format": 1, "logic": 2, "edge_case": 1,
+                                     "complexity": 1, "code_quality": 1}))
+    assert valid_parsed(plain, "multi_problem", "plain")  # e1 asks for six scores only
+    assert not valid_parsed(plain, "multi_problem", "structured")  # structured still needs the P1 verdict
+    report = {"n": 1, "threshold": 2, "n_big": 1, "by_exam": {}, "tag_counts": {}, "cases": [{
+        "sample_id": "X", "gold_total": 7.5, "pred_total": 4.25, "llm_total": 4.25, "diff": -3.25,
+        "dim_diff": {"logic": -2.25, "edge_case": -1.0}, "compile": "", "tests": "", "problems": {}, "tags": [],
+        "rule_trace": [], "rationale": ""}]}
+    text = to_markdown(report, "t")
+    assert "logic-2.25" in text and "| -3.25 |" in text

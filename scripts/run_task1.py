@@ -86,7 +86,7 @@ def main() -> None:
     ap.add_argument("--output-dir", help="Private output directory")
     ap.add_argument("--preflight", action="store_true", help="Check data, prompts, split and call count without API")
     ap.add_argument("--smoke", action="store_true", help="Run one validation sample per selected experiment")
-    ap.add_argument("--predict-only", action="store_true", help="Predict the unlabeled 360-sample public release")
+    ap.add_argument("--predict-only", action="store_true", help="Predict the unlabeled public release (328 samples)")
     ap.add_argument("--predict-root", help="Extracted public release, or its parent directory")
     ap.add_argument("--predict-experiment", default="e2_zero_shot_structured")
     ap.add_argument("--predict-ids", help="Comma-separated public sample IDs for a smoke run")

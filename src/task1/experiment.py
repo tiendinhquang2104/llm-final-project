@@ -70,7 +70,8 @@ def _complete(record: dict) -> bool:
     if not outputs or (len(outputs) > 1 and not all(t.strip() for t in outputs)):
         return False
     for text in outputs + retry:
-        if valid_parsed(parse_output(text), record.get("exam_type", "single_problem")):
+        if valid_parsed(parse_output(text), record.get("exam_type", "single_problem"),
+                        record.get("template", "structured")):
             return True
     return False
 
