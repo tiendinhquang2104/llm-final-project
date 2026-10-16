@@ -1,0 +1,16 @@
+# Task 3 defaults (Pedagogical Feedback Generation).
+extends: ../base.yaml
+task: task3
+seed: 42
+prompt:
+  template: default
+  use_compile_log: true
+  max_code_chars: 12000
+generation:
+  temperature: 0.0
+  max_new_tokens: 1024
+  enable_thinking: false
+  n: 1
+guard:
+  enable_pedagogical_guard: true
+  strict_mode: true

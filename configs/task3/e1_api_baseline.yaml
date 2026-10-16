@@ -1,0 +1,9 @@
+# Task 3 Experiment 1: API baseline with Pedagogical Guard
+extends: base.yaml
+name: e1_api_baseline
+description: "Zero-shot pedagogical feedback generation with pedagogical guard enforcement"
+prompt:
+  template: default
+generation:
+  temperature: 0.0
+  max_new_tokens: 1024
