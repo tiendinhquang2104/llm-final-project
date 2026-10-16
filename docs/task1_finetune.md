@@ -18,17 +18,8 @@ Mỗi task có **một adapter LoRA riêng**. Tài liệu này mô tả adapter 
 Bài nào model trả JSON hỏng thì nhận điểm trung vị rubric của các bài gold cùng dạng đề, có đánh dấu
 `fallback_used`. Số bài bị fallback được ghi trong `run_info.json`.
 
-**Rule câu tiên quyết (giống hướng API).** Với đề nhiều câu, adapter trả thêm trạng thái từng câu:
-`{"problems":[{"pid":"P1","status":"wrong"},...],"rubric":{...},"total_score":n}`. Code áp chính sách đề bằng
-`apply_rules`: P1 sai thì P2–P4 không được chấm, và áp compile gate. Áp dụng cả khi chọn adapter trên gold validation
-lẫn khi dự đoán public. `metrics.before_rules` và `--no-rules` cho số liệu khi không áp rule (ablation).
-
-Nhãn trạng thái để train lấy từ silver. `generate-dataset.zip` thiếu `provenance.jsonl` của tập train, nên
-`scripts/derive_task1_silver_status.py` **chạy lại đúng harness của bộ sinh** (`src/synth/`, lấy từ nhánh
-`task-1-synth`) trên code của từng bài silver nhiều câu, lấy trạng thái P1–P4 khi chạy thật. Script chỉ giữ trạng
-thái khi rubric suy ra từ đó **trùng nhãn đã lưu**, và dừng hẳn nếu dưới 90% bài khớp. Bước này cần `g++` (Kaggle có
-sẵn). Gold không có nhãn trạng thái, nên đáp án gold chỉ có rubric. `--no-status` (script một lệnh) quay về phiên
-bản chỉ có rubric.
+**Khác với hướng API:** adapter không trả trạng thái từng câu P1–P4, nên **không áp rule câu tiên quyết bằng code**.
+Model phải tự học chính sách này từ điểm của dữ liệu. Đây là một dòng ablation để so sánh với hướng API (có rule).
 
 ## Chạy bằng một lệnh
 
@@ -123,5 +114,4 @@ Bỏ `--preflight` để chạy. Với tập private test, đổi `--public-root
 - **Chọn adapter trên 6 bài gold val** nên rất nhiễu. Chênh lệch QWK nhỏ giữa hai nhánh có thể không có ý nghĩa.
 - **Silver là nhãn tổng hợp,** chấm theo rulebook. Đề tổng hợp có trọng số 2,5 điểm mỗi câu, còn đề thật là 1/4/2/3.
 - **Tín hiệu đầu vào không đồng đều:** gold có `compile_log`/`test_report` của ban tổ chức, còn silver và public thì không.
-- **Trạng thái P1–P4 chỉ học từ silver:** chính sách 2,5 điểm mỗi câu và kết quả chạy harness tự động. Gold không có
-  nhãn trạng thái. Model báo sai P1 thì rule áp sai theo.
+- **Không có rule câu tiên quyết bằng code** (xem phần Thiết kế).

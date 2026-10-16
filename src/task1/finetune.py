@@ -29,10 +29,8 @@ def _validate_target(target: str, sample_id: str) -> None:
     try:
         obj = json.loads(target)
         rubric = obj["rubric"]
-        if set(obj) - {"problems"} != {"rubric", "total_score"} or set(rubric) != set(DIMENSIONS):
+        if set(obj) != {"rubric", "total_score"} or set(rubric) != set(DIMENSIONS):
             raise ValueError("incorrect Task 1 target keys")
-        if "problems" in obj and _problem_statuses(obj["problems"]) is None:
-            raise ValueError("invalid problems list")
         total = sum(to_cents(rubric[d], DIM_MAX[d]) for d in DIMENSIONS)
         if to_cents(obj["total_score"], 10) != total:
             raise ValueError("total_score differs from rubric sum")
@@ -138,44 +136,6 @@ def strip_code_fence(text: str) -> str:
     return t.strip()
 
 
-def _problem_statuses(problems: Any) -> dict[str, str] | None:
-    """[{"pid": "P1", "status": "wrong"}, ...] -> {"P1": "wrong"}; None if malformed or an unknown status."""
-    from src.task1.prerequisite_rules import STATUSES
-
-    if not isinstance(problems, list):
-        return None
-    out = {}
-    for item in problems:
-        if not isinstance(item, dict) or item.get("status") not in STATUSES or not str(item.get("pid", "")).strip():
-            return None
-        out[str(item["pid"]).strip()] = item["status"]
-    return out
-
-
-def parse_generated(text: str) -> tuple[dict[str, Any] | None, dict[str, str], bool, bool]:
-    """(prediction, per-problem statuses, JSON parse flag, strict output-valid flag).
-
-    Statuses are optional (multi_problem answers); a malformed `problems` list only drops the statuses
-    (the prerequisite rule then cannot fire) and marks the output as not strictly valid.
-    """
-    prediction, json_ok, strict_ok = parse_generated_score(text)
-    if prediction is None:
-        return None, {}, json_ok, strict_ok
-    obj = json.loads(strip_code_fence(text))
-    statuses = _problem_statuses(obj["problems"]) if "problems" in obj else {}
-    if statuses is None:
-        return prediction, {}, json_ok, False
-    return prediction, statuses, json_ok, strict_ok
-
-
-def apply_policy(prediction: dict[str, Any], statuses: dict[str, str], exam: dict) -> tuple[dict[str, Any], list[str]]:
-    """Exam policy on a parsed answer: prerequisite rule (needs the P1 verdict) and compile gate, as in the API path."""
-    from src.task1.prerequisite_rules import RuleConfig, apply_rules, policy_from_exam
-
-    rubric, total, trace = apply_rules(prediction["rubric"], statuses, policy_from_exam(exam), RuleConfig())
-    return {"rubric": rubric, "total_score": total}, trace
-
-
 def parse_generated_score(text: str) -> tuple[dict[str, Any] | None, bool, bool]:
     """Return a normalized score, JSON parse flag, and strict output-valid flag.
 
@@ -205,39 +165,27 @@ def parse_generated_score(text: str) -> tuple[dict[str, Any] | None, bool, bool]
         raw_total = to_cents(obj["total_score"], 10)
     except (KeyError, ValueError):
         raw_total = None
-    strict_valid = set(obj) - {"problems"} == {"rubric", "total_score"} and raw_total == total_cents
+    strict_valid = set(obj) == {"rubric", "total_score"} and raw_total == total_cents
     return prediction, True, strict_valid
 
 
-def evaluate_generations(records: list[ChatMLRecord], raw_by_id: dict[str, str],
-                         exams: dict[str, dict] | None = None) -> tuple[dict, list[dict]]:
-    """Metrics of generated answers on gold records. With `exams` the exam policy (prerequisite rule + compile
-    gate) is applied like in the API pipeline; `before_rules` keeps the raw-model metrics either way."""
+def evaluate_generations(records: list[ChatMLRecord], raw_by_id: dict[str, str]) -> tuple[dict, list[dict]]:
     expected = {rec.sample_id for rec in records}
     if set(raw_by_id) != expected:
         raise ValueError("Generated sample_ids do not match validation IDs")
-    gold = {rec.sample_id: {k: v for k, v in json.loads(rec.target).items() if k != "problems"} for rec in records}
+    gold = {rec.sample_id: json.loads(rec.target) for rec in records}
     predictions: dict[str, dict] = {}
-    raw_predictions: dict[str, dict] = {}
     details: list[dict] = []
     for rec in records:
         raw = raw_by_id[rec.sample_id]
-        pred, statuses, json_ok, strict_ok = parse_generated(raw)
-        before, trace = pred, []
+        pred, json_ok, strict_ok = parse_generated_score(raw)
         if pred is not None:
-            raw_predictions[rec.sample_id] = pred
-            if exams is not None:
-                pred, trace = apply_policy(pred, statuses, exams[rec.exam_id])
             predictions[rec.sample_id] = pred
         details.append(
             {"sample_id": rec.sample_id, "exam_id": rec.exam_id, "raw_output": raw, "prediction": pred,
-             "prediction_before_rules": before, "problems": statuses, "rule_trace": trace,
              "gold": gold[rec.sample_id], "json_ok": json_ok, "strict_output_ok": strict_ok}
         )
     metrics = evaluate(gold, predictions)
-    before_rules = evaluate(gold, raw_predictions)
-    metrics["before_rules"] = {k: before_rules[k] for k in ("qwk", "mae", "exact_total")}
-    metrics["rules_applied"] = exams is not None
     metrics["json_parse_rate"] = sum(x["json_ok"] for x in details) / len(details)
     metrics["valid_output_rate"] = sum(x["strict_output_ok"] for x in details) / len(details)
     metrics["n_normalized_total"] = sum(

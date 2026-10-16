@@ -3,9 +3,8 @@
     python scripts/run_task1_finetune.py --gold-root <sample_dataset> --public-root <public_test_release> \
         --silver-root <generate-dataset> --work-dir <empty dir> [--smoke] [--preflight]
 
-Steps (each is an existing, tested script): gold ChatML + fixed 26/6 split (must equal data/splits) -> P1..P4
-run states of the silver code (scripts/derive_task1_silver_status.py, g++) -> audited silver with those states ->
-training preflight -> QLoRA gold-only vs silver->gold, adapter chosen on gold validation -> error analysis
+Steps (each is an existing, tested script): gold ChatML + fixed 26/6 split (must equal data/splits) -> audited
+silver -> training preflight -> QLoRA gold-only vs silver->gold, adapter chosen on gold validation -> error analysis
 of the chosen adapter -> prediction of the release with best_adapter (task1_predictions.json, format-checked).
 """
 
@@ -36,8 +35,6 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--source-manifest", type=Path, help="optional ZIP hash manifest copied into the run")
     ap.add_argument("--smoke", action="store_true", help="1 step per stage, 1 validation sample, 1 public sample/exam")
     ap.add_argument("--preflight", action="store_true", help="data + token checks only, no GPU")
-    ap.add_argument("--no-status", action="store_true",
-                    help="skip the P1..P4 silver states (adapter then answers rubric only: no prerequisite rule)")
     return ap.parse_args()
 
 
@@ -59,15 +56,11 @@ def main() -> None:
         committed = json.loads((ROOT / "data/splits" / f"{part}_ids.json").read_text(encoding="utf-8"))
         if committed != json.loads((splits / f"{part}_ids.json").read_text(encoding="utf-8")):
             sys.exit(f"gold {part} split differs from data/splits/{part}_ids.json")
-    status_file = work / "silver_status.jsonl"
-    if not a.no_status and not status_file.exists():  # P1..P4 run states of the silver code (needs g++)
-        run("scripts/derive_task1_silver_status.py", "--silver-root", a.silver_root, "--out", status_file)
     if not (silver / "silver_manifest.json").exists():
         run("scripts/prepare_task1_silver.py", "--silver-root", a.silver_root, "--gold-root", a.gold_root,
-            "--public-root", a.public_root, "--output-dir", silver,
-            *([] if a.no_status else ["--status-file", status_file]))
+            "--public-root", a.public_root, "--output-dir", silver)
     train = ["scripts/train_task1.py", "--config", a.config, "--processed-dir", processed, "--splits-dir", splits,
-             "--silver-processed-dir", silver, "--output-dir", out, "--gold-root", a.gold_root]
+             "--silver-processed-dir", silver, "--output-dir", out]
     if a.source_manifest:
         train += ["--source-manifest", a.source_manifest]
     run(*train, "--preflight")

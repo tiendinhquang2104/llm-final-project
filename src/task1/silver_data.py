@@ -29,24 +29,6 @@ class PromptSample:
     test_report: list[dict[str, Any]] | None
     rubric: dict[str, int | float]
     total_score: int | float
-    problem_status: dict[str, str] | None = None
-
-
-# Generator run states (src/synth/multi.py) -> Task 1 problem statuses (src/task1/prerequisite_rules.STATUSES)
-STATE_TO_STATUS = {"ok": "correct", "edge": "partial", "partial": "partial", "fail": "wrong",
-                   "crash": "runtime_error", "missing": "not_attempted"}
-
-
-def load_status_file(path: str | Path | None) -> dict[str, dict[str, str]]:
-    """{sample_id: {pid: status}} from scripts/derive_task1_silver_status.py (records that reproduced their rubric)."""
-    if not path:
-        return {}
-    out = {}
-    for line in Path(path).read_text(encoding="utf-8").splitlines():
-        row = json.loads(line) if line.strip() else None
-        if row and row.get("observed_states"):
-            out[row["sample_id"]] = {pid: STATE_TO_STATUS[st] for pid, st in sorted(row["observed_states"].items())}
-    return out
 
 
 def code_hash(code: str) -> str:
@@ -96,16 +78,11 @@ def _quality_reasons(report: str, rubric: dict[str, int | float], total: int | f
     return reasons
 
 
-def _is_multi(record: ChatMLRecord, exams: dict) -> bool:
-    return exams[record.exam_id]["exam_type"] == "multi_problem"
-
-
 def prepare_silver_task1(
     silver_root: str | Path,
     gold_root: str | Path,
     public_root: str | Path,
     output_dir: str | Path,
-    status_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Write accepted silver JSONL and an audit of every excluded Task 1 record.
 
@@ -113,7 +90,6 @@ def prepare_silver_task1(
     route into the training file. `exec_report` is used solely for quality checks.
     """
     root = resolve_dataset_root(silver_root)
-    statuses = load_status_file(status_path)
     gold_ids, gold_hashes = _source_fingerprints(gold_root)
     public_ids, public_hashes = _source_fingerprints(public_root)
     exams = load_exams(root)
@@ -169,7 +145,6 @@ def prepare_silver_task1(
             grading_policy=exams[exam_id].get("grading_policy"),
             compile_log=inp.get("compile_log"), test_report=inp.get("test_report"),
             rubric=rubric, total_score=total,
-            problem_status=statuses.get(sid) if inp["exam_type"] == "multi_problem" else None,
         )
         messages, target = build_task1_messages(sample)
         rec = ChatMLRecord(
@@ -195,9 +170,6 @@ def prepare_silver_task1(
         "n_heldout_not_read": len(heldout_ids),
         "n_task3_only_not_read": len(task3_only_ids),
         "gold_public_overlap_checked": True, "exec_report_used_as_prompt": False,
-        "status_file": str(status_path) if status_path else None,
-        "n_multi_accepted": sum(1 for r in accepted if _is_multi(r, exams)),
-        "n_with_problem_status": sum(1 for r in accepted if '"problems"' in r.target),
     }
     (out / "silver_manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

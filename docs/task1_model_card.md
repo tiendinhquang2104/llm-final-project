@@ -39,8 +39,8 @@ Public test (360 bài, 6 đề mới) không có nhãn: chỉ có điểm leader
 ## Giới hạn
 - **Đánh giá trên 6 bài:** chọn adapter dựa trên 6 bài gold validation thuộc 2 đề, nên số đo rất nhiễu và có thể lạc quan.
   Các đề thi là 6 đề khác hẳn.
-- **Rule câu tiên quyết phụ thuộc trạng thái P1 do model đưa ra.** Trạng thái này chỉ được dạy từ silver (harness
-  tự động chạy code), vì gold không có nhãn trạng thái. Model báo sai P1 thì rule áp sai theo.
+- **Không áp rule câu tiên quyết bằng code:** model không trả trạng thái P1–P4, nên chính sách "P1 sai thì các câu sau
+  không được tính" chỉ được học ngầm từ điểm. Hướng API có rule này bằng code.
 - **Silver là nhãn tổng hợp:** chấm theo rulebook, trọng số câu 2,5 điểm (đề thật 1/4/2/3), không có `compile_log`;
   model có thể học theo bộ sinh dữ liệu thay vì theo cách giảng viên chấm.
 - **Nhãn gold có mâu thuẫn:** 3 bài EX01 cho điểm câu sau dù P1 sai (`scripts/audit_task1_labels.py`).
