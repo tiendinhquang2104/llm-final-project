@@ -64,6 +64,8 @@ python scripts/run_task3.py --config configs/task3/baseline.yaml --split real-va
 
 `--taxonomy-source gold` is oracle mode and is prohibited for public records. `task2-json` is the separate predicted-label mode. Accepted taxonomy files are a map `{"TEST-ID": []}`, an official array `[{"sample_id":"TEST-ID","output":{"taxonomy_error":[]}}]`, or the team's internal array/map with `labels` and successful `parse_ok`. Invalid/duplicate labels, duplicate IDs, missing/extra IDs and `parse_ok:false` fail. An explicitly supplied empty list is retained; missing values never become `[]`. Self-diagnosis is not enabled: use Task 2 predictions for public inference.
 
+Every item in an array-form Task 2 export is checked for a valid, unique ID before projecting the selected IDs; extra prediction bodies are not interpreted, and their count/hash are recorded. Legacy label-only exports without `parse_ok` provenance are rejected by default. Use `--allow-unverified-task2-export` only when the source is a known legacy Task 2 writer; the run manifest explicitly marks provenance as unknown. This opt-in does not waive taxonomy validation or ID coverage checks.
+
 ```bash
 # Fails before model loading if predictions are absent/invalid
 python scripts/run_task3.py --config configs/task3/baseline.yaml --split public --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.json --dry-run
@@ -77,7 +79,11 @@ Dry-run still validates taxonomy coverage, then uses a TEST-ONLY generic mock ba
 [{"sample_id":"TEST-ONLY-001","output":{"taxonomy_error":[],"feedback":"Em tự kiểm tra lại bài làm nhé."}}]
 ```
 
-No official validator was present among the local release files. Final leaderboard acceptance awaits that validator. Inference stores `.run.json`, `.traces.json`, `.metrics.json` and an ID-only `.review.csv` beside the prediction file. Raw guard violations, retries and fallback use are recorded without copying raw generated failures into the trace. Generated tokens/latency include all retries. Mock byte-token counts are clearly marked, use a separate smoke budget, and are never represented as Qwen measurements.
+No official validator was present among the local release files. Final leaderboard acceptance awaits that validator. Inference stores `.run.json`, `.traces.json`, `.metrics.json` and an ID-only `.review-template.csv` beside the prediction file. Raw guard violations, retries and fallback use are recorded without copying raw generated failures into the trace. Generated tokens/latency include all retries. Mock byte-token counts are clearly marked, use a separate smoke budget, and are never represented as Qwen measurements.
+
+Inference preflight measures both the initial prompt and the strict-retry prompt, including the fixed retry hint and reserved output-token budget. A sample whose essential initial prompt cannot fit blocks generation; a sample that fits initially but not with the retry prompt is marked `passed_with_retry_fallback` and uses the conservative fallback if a retry is needed. The progress cache is bound to the exact prompt messages, tokenizer/chat-template identity, model/revision, adapter, inference settings, taxonomy, input and prepared-manifest hash. Completed rows are validated; malformed completed rows and duplicate IDs fail closed, while an incomplete final JSONL line is ignored and disclosed in trace audit metadata. Progress files are private and rewritten atomically.
+
+Review CSVs are generated as `.review-template.csv` and contain no student code or target text. Existing nonempty templates are preserved by default; `--force-review-template` first retains a timestamped backup. When predictions and a run manifest are supplied, each row binds the annotations to the prediction hash, sample order and run identity. Scoring annotations requires a matching manifest (`--run-manifest`, or the adjacent `<predictions>.run.json`); unreviewed IDs and empty review rows do not count as completed reviews. Oracle-mode evaluation rejects predictions whose taxonomy differs from the supplied gold taxonomy.
 
 ## Linux/WSL2 CUDA QLoRA
 
@@ -108,7 +114,9 @@ The actual tokenizer audit on this strict pool found **13/537** training/validat
 
 For masking, the assistant-generation prefix must exactly equal the prefix of the fully templated prompt-plus-completion. Every prefix token gets label `-100`; completion/end-of-turn tokens remain supervised. The collator pads labels with `-100`. Templates without that prefix property fail explicitly. No `assistant_only_loss=True` assumption is made. Tests verify this with synthetic tokenizers and the real cached Qwen tokenizer when available. Sequence construction never truncates targets. Real feedback is used as the assistant target only.
 
-`checkpoints/task3/<experiment>/` receives PEFT adapters, tokenizer, training/validation loss history, configuration, dataset hash, git commit, package versions, device/CUDA, tokens, wall time and peak GPU memory. Remote trainer reporting is disabled. Dry-run writes `dry-run.json` with `training_succeeded:false`; it never claims a checkpoint was trained. CPU-only dependency/API and masking validation does not verify CUDA kernels, VRAM fit or learning quality.
+`checkpoints/task3/<experiment>/` receives PEFT adapters, tokenizer, training/validation loss history, configuration, dataset hash, git commit, package versions, device/CUDA, tokens, wall time and peak GPU memory. Run metadata also records optimizer-step timing percentiles, session-only sample and supervised-token throughput, effective sample/step counts, and finite nonzero LoRA gradient/update audits. Resume requires a complete Trainer checkpoint, including adapter/model weights and optimizer, scheduler and RNG state, compatible config/model/data hashes, and matching step limits. Remote trainer reporting is disabled. Dry-run writes `dry-run.json` with `training_succeeded:false`; it never claims a checkpoint was trained. CPU-only dependency/API and masking validation does not verify CUDA kernels, VRAM fit or learning quality.
+
+The explicit training path performs a runtime safety check before model loading. With the 5090 config it requires exactly one visible GPU, an NVIDIA GeForce RTX 5090 name, BF16 support, at least 24 GiB free, and a successful `nvidia-smi` check showing no competing compute process. If workload status cannot be verified or another GPU process is present, training stops without terminating or disturbing it. `stage2_learning_rate` defaults to `2e-5`; staged training uses that rate for the real-data adaptation stage, starts a fresh optimizer, and requires an explicit total `--max-steps`.
 
 ## Compliance and diagnosis evaluation
 
@@ -141,13 +149,13 @@ Additional ablations: strict vs unfiltered synthetic quality, attention-only vs 
 
 ## Verification in this workspace
 
-- Task 3 offline regressions: **120 passed, 1 skipped**.
+- Current implementation-pass verification: Task 3 offline tests **147 passed, 1 skipped**; all five Task 3 CLI `--help` entry points passed. GPU preflight, real Qwen smoke/training and human review are separate authorized/manual actions. Earlier hardware measurements below are historical and were not revalidated by offline tests.
 - Relevant existing Task 1/2 regressions: **39 passed**.
 - Full `tests/` suite: **397 passed, 24 skipped, 4 failed**. Failures are in the untouched Colab Task 1 secret-cell tests (2) and synthetic labeler-gate tests (2). Task 3 targeted tests pass; these failures are not attributed to the Task 3 changes and were not reproduced against a clean baseline in this run.
 - Actual local preparation and manifest verification passed. The official 26/6 IDs are disjoint; all 32 real teacher targets passed their heuristic Level 1–3 compliance checks (4 Level 1, 18 Level 2 and 10 Level 3). Strict preparation retained 505 synthetic train and 47 heldout records; the additional 95 synthetic train examples were quarantined by the strict quality filter. Public records have no completion targets. Three unique overlapping groups were identified and audited. No local `predictions_full.json` was present.
 - The pinned tokenizer audit passed for the 537 real train/validation records: 524 fit 2048 tokens and all 537 fit 4096 (maximum observed length 3,755); selected context length is 4096. Tokenizer revision: `c03e6d358207e414f1eca0bb1891e29f1db0e242`.
-- RTX 5090 CUDA preflight passed: driver `590.48.01`, CUDA runtime `12.8`, PyTorch `2.8.0+cu128` includes `sm_120`, capability `12.0`, BF16 supported. CUDA matmul and tiny NF4-LoRA forward/backward/optimizer update passed. Preflight measured 32,607 MiB total and 11,445 MiB free. This tiny synthetic layer test is **not** a Qwen training test.
-- A 20-step Qwen training smoke test was **NOT RUN**: only about 11.2 GiB was free at the last check, with the rest of the 32 GiB GPU in use by other workloads. Avoid competing for shared VRAM; recheck availability before starting. Thus full-model peak VRAM and training throughput are **NOT MEASURED**. No Qwen model weights were downloaded, no full training or real inference was started, and human annotation scores/leaderboard results remain **NOT RUN**.
+- Previously recorded RTX 5090 measurements (driver `590.48.01`, CUDA `12.8`, PyTorch `2.8.0+cu128`, BF16 and a tiny NF4-LoRA update) are historical and were **not rechecked in this implementation pass**. The tiny synthetic layer test is not a Qwen training test. The new training gate requires 24 GiB free and no other compute process for the `qlora_5090` configuration.
+- A 20-step Qwen training smoke test was **NOT RUN**. No GPU utility was queried and no Qwen model weights were downloaded during this implementation pass. Full-model peak VRAM and training throughput are **NOT MEASURED**. No full training or real inference was started, and human annotation scores/leaderboard results remain **NOT RUN**.
 - The benchmark `JSON`, `CSV` and `Markdown` templates were initialized with every experiment marked `NOT RUN`.
 - `ruff check` and `pip check` passed. Mock inference and CLI tests exercise the TEST-ONLY paths only.
 
@@ -166,25 +174,34 @@ Use the prepared local Python environment and run these commands from the reposi
 .venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --audit-tokenizer
 
 # Optional bounded real Qwen training smoke: exactly 20 optimizer steps.
-# Run only after confirming ample free VRAM and no conflict with other GPU users.
+# Run only after the configured runtime gate confirms >=24 GiB free and no competing workload.
 .venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --output-dir checkpoints/task3/qlora_5090_smoke --max-steps 20 --smoke-test
 ```
 
-Do not run the 20-step smoke on a busy/shared GPU. It uses the real model, strict mixed-balanced data, the selected 4096-token context, and checks finite loss, nonzero LoRA gradients, optimizer steps and adapter reload. The current 11,445 MiB free measurement is insufficient evidence that it can run safely alongside existing GPU workloads.
+Do not run the 20-step smoke on a busy/shared GPU. It uses the real model, strict mixed-balanced data, the selected 4096-token context, and checks finite loss, finite nonzero LoRA gradients and parameter updates, exact optimizer-step completion and adapter reload. The runtime gate fails closed when it cannot verify GPU isolation; it never terminates other processes.
 
-After the GPU is available, the explicit full-training command is:
+After the GPU is available and the smoke has been reviewed, the full three-epoch training runs can be launched separately. Use a distinct output directory for each experiment:
 
 ```bash
-.venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml
+.venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --experiment synthetic --output-dir checkpoints/task3/qlora_5090_synthetic
+.venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --experiment real --output-dir checkpoints/task3/qlora_5090_real
+.venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --experiment mixed --output-dir checkpoints/task3/qlora_5090_mixed
+.venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --experiment mixed_balanced --output-dir checkpoints/task3/qlora_5090_mixed_balanced
 ```
 
-This starts the configured three-epoch `mixed_balanced` QLoRA run and is intentionally **not** run by preparation, preflight or dry-run. It writes under `checkpoints/task3/qlora_5090/`; it should be launched only after reviewing the tokenizer audit, preflight and available VRAM. To resume, pass a complete compatible Trainer checkpoint directory while keeping the same config and step-limit arguments used by that run:
+Each command starts the configured three-epoch QLoRA run and is intentionally **not** run by preparation, preflight or dry-run. `mixed_balanced` is the default configured 5090 experiment; the other commands are distinct source-data comparisons. Review the tokenizer audit, runtime gate, and resulting run manifest for every experiment. For a two-stage synthetic-to-real adaptation experiment, choose an explicit total step budget; stage 2 uses `stage2_learning_rate` and starts a fresh optimizer:
+
+```bash
+.venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --experiment staged --output-dir checkpoints/task3/qlora_5090_staged --max-steps 1000
+```
+
+The staged example requests 1,000 total optimizer steps (750 synthetic, 250 real with the default 0.75 fraction); replace the total if a different budget is intended. It is step-capped by design, not an epoch-based run. To resume a single-stage run, pass a complete compatible Trainer checkpoint directory while keeping the same config and step-limit arguments used by that run:
 
 ```bash
 .venv-task3/bin/python scripts/train_task3.py --config configs/task3/qlora_5090.yaml --resume-from-checkpoint checkpoints/task3/qlora_5090/checkpoint-N
 ```
 
-Replace `N` with the saved optimizer step. Resume rejects incomplete checkpoints or model/config/data-manifest mismatches. The staged experiment deliberately starts a fresh optimizer between its synthetic and real stages and does not support checkpoint resume.
+Replace `N` with the saved optimizer step. Resume rejects incomplete checkpoints or model/config/data-manifest mismatches. Staged checkpoints cannot be resumed through the single-stage resume option.
 
 ## Privacy and limitations
 

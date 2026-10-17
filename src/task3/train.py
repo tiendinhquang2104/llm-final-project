@@ -130,6 +130,14 @@ def validate_resume_checkpoint(path, metadata):
     required = ("optimizer.pt", "scheduler.pt", "trainer_state.json", "rng_state.pth")
     if not path.is_dir() or any(not (path / name).is_file() for name in required):
         raise ValueError("resume requires a complete Trainer checkpoint with optimizer, scheduler, trainer and RNG state")
+    model_state_names = (
+        "model.safetensors",
+        "pytorch_model.bin",
+        "adapter_model.safetensors",
+        "adapter_model.bin",
+    )
+    if not any((path / name).is_file() for name in model_state_names):
+        raise ValueError("resume checkpoint has no model or adapter weights")
     stored_path = path / "task3_resume_metadata.json"
     if not stored_path.is_file():
         raise ValueError("resume checkpoint has no Task 3 compatibility metadata")
@@ -179,6 +187,120 @@ def sequence_audit(records, tokenizer):
     return {"tokenizer": tokenizer_metadata(tokenizer), "candidates": trials, "selected": chosen}
 
 
+def _validate_execution_modes(dry_run, audit_only, smoke_test, max_steps):
+    if sum((bool(dry_run), bool(audit_only), bool(smoke_test))) > 1:
+        raise ValueError("dry-run, tokenizer audit, and GPU smoke test are mutually exclusive")
+    if max_steps is not None and (not isinstance(max_steps, int) or isinstance(max_steps, bool) or max_steps <= 0):
+        raise ValueError("max_steps must be a positive optimizer-step count")
+
+
+def _validate_prepared_manifest(root, manifest):
+    for name, expected_hash in manifest["processed_sha256"].items():
+        file = root / name
+        if not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest() != expected_hash:
+            raise ValueError("prepared data changed after manifest creation; prepare again")
+    return hashlib.sha256((root / "manifest.json").read_bytes()).hexdigest()
+
+
+def _validate_experiment_data(root, manifest, experiment):
+    if experiment in {"mixed", "mixed_uniform", "mixed_balanced", "synthetic"} and manifest["filter_synthetic"] != "strict":
+        raise ValueError("synthetic/mixed training requires preparation with --filter-synthetic strict")
+    return training_records(root, experiment)
+
+
+def _training_gpu_preflight(torch, config):
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA unavailable: QLoRA training NOT RUN; use --dry-run")
+    device_count = torch.cuda.device_count()
+    if device_count < 1 or config.get("single_gpu", False) and device_count != 1:
+        raise RuntimeError("configured single-GPU training requires exactly one visible CUDA device")
+    device = torch.cuda.current_device()
+    device_name = torch.cuda.get_device_name(device)
+    expected_name = config.get("expected_gpu_name")
+    if expected_name and expected_name not in device_name:
+        raise RuntimeError("selected CUDA device does not match expected_gpu_name")
+    bf16_supported = bool(torch.cuda.is_bf16_supported())
+    if config.get("require_bf16", False) and not bf16_supported:
+        raise RuntimeError("selected CUDA device does not support required BF16 training")
+    free_bytes, total_bytes = torch.cuda.mem_get_info(device)
+    from src.task3.gpu_preflight import gpu_workload_status
+
+    workload = gpu_workload_status()
+    if workload["status"] != "available":
+        raise RuntimeError("cannot verify competing GPU workloads; training stopped safely")
+    if workload["external_process_count"]:
+        raise RuntimeError("another GPU workload is active; training stopped without disturbing it")
+    try:
+        minimum_free_gib = float(config.get("min_free_vram_gib", 20))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("min_free_vram_gib must be a positive number") from exc
+    if not math.isfinite(minimum_free_gib) or minimum_free_gib <= 0:
+        raise ValueError("min_free_vram_gib must be a positive number")
+    minimum_free_bytes = int(minimum_free_gib * 1024**3)
+    if free_bytes < minimum_free_bytes:
+        raise RuntimeError("insufficient free VRAM for configured QLoRA training; training stopped safely")
+    return {
+        "device_count": device_count,
+        "selected_device": device,
+        "selected_device_name": device_name,
+        "bf16_supported": bf16_supported,
+        "free_vram_bytes": int(free_bytes),
+        "total_vram_bytes": int(total_bytes),
+        "minimum_free_vram_bytes": minimum_free_bytes,
+        "external_gpu_process_count": workload["external_process_count"],
+        "external_gpu_memory_mib": workload["external_memory_mib"],
+    }
+
+
+def _session_throughput(final_step, resume_start_step, step_times, samples_per_step, tokens_per_sample):
+    start_step = resume_start_step or 0
+    session_steps = final_step - start_step
+    if session_steps < 0:
+        raise ValueError("final optimizer step is below the resume checkpoint step")
+    duration = sum(step_times)
+    return {
+        "cumulative_optimizer_steps": final_step,
+        "session_optimizer_steps": session_steps,
+        "session_samples_per_second": (
+            session_steps * samples_per_step / duration if duration and session_steps else None
+        ),
+        "session_supervised_tokens_per_second": (
+            session_steps * samples_per_step * tokens_per_sample / duration
+            if duration and session_steps
+            else None
+        ),
+        "session_optimizer_step_wall_time_s": duration,
+    }
+
+
+def _audit_lora_parameter_updates(parameters_before, model):
+    import torch
+
+    current = dict(model.named_parameters())
+    deltas = [
+        (current[name].detach() - before).abs()
+        for name, before in parameters_before.items()
+        if name in current
+    ]
+    finite = bool(deltas) and all(bool(torch.isfinite(delta).all()) for delta in deltas)
+    nonzero = finite and any(bool(torch.count_nonzero(delta)) for delta in deltas)
+    maximum_delta = max((float(delta.max().item()) for delta in deltas), default=0.0)
+    return {
+        "checked": True,
+        "finite_nonzero_lora_update": bool(nonzero),
+        "max_abs_delta": maximum_delta,
+    }
+
+
+def _free_vram_or_none(torch):
+    try:
+        if torch.cuda.is_available():
+            return int(torch.cuda.mem_get_info()[0])
+    except (RuntimeError, OSError):
+        return None
+    return None
+
+
 def run_training(
     config,
     dry_run=False,
@@ -188,54 +310,124 @@ def run_training(
     resume_from_checkpoint=None,
     smoke_test=False,
 ):
+    _validate_execution_modes(dry_run, audit_only, smoke_test, max_steps)
+    experiment = config.get("experiment", "mixed_uniform")
+    if experiment == "staged" and resume_from_checkpoint:
+        raise ValueError("staged training uses a fresh stage-2 optimizer; staged checkpoint resume is unsupported")
+    if experiment == "staged" and smoke_test:
+        raise ValueError("staged GPU smoke test is unsupported; run a single-stage smoke test")
+
     root = Path(config.get("data_dir", "data/processed/task3"))
     manifest = read_json(root / "manifest.json")
-    experiment = config.get("experiment", "mixed_uniform")
     if experiment == "staged":
-        if resume_from_checkpoint:
-            raise ValueError("staged training starts a fresh optimizer at each stage; it is not checkpoint resume")
-        total_steps = max_steps or config.get("max_steps")
-        if total_steps is None or total_steps < 2:
+        total_steps = max_steps if max_steps is not None else config.get("max_steps")
+        if not isinstance(total_steps, int) or isinstance(total_steps, bool) or total_steps < 2:
             raise ValueError("staged experiment requires an explicit total --max-steps of at least 2")
-        first_steps = int(config.get("stage1_fraction", 0.75) * total_steps)
-        first_steps = min(max(1, first_steps), total_steps - 1)
+        try:
+            stage1_fraction = float(config.get("stage1_fraction", 0.75))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("stage1_fraction must be a number strictly between 0 and 1") from exc
+        if not math.isfinite(stage1_fraction) or not 0 < stage1_fraction < 1:
+            raise ValueError("stage1_fraction must be strictly between 0 and 1")
+        first_steps = int(stage1_fraction * total_steps)
+        if not 1 <= first_steps < total_steps:
+            raise ValueError("stage1_fraction must allocate at least one optimizer step to each stage")
+        try:
+            stage2_learning_rate = float(config.get("stage2_learning_rate", 2e-5))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("stage2_learning_rate must be a positive number") from exc
+        if not math.isfinite(stage2_learning_rate) or stage2_learning_rate <= 0:
+            raise ValueError("stage2_learning_rate must be a positive number")
+
+        synthetic_train, val = _validate_experiment_data(root, manifest, "synthetic")
+        real_train, _ = _validate_experiment_data(root, manifest, "real")
+        data_manifest_sha256 = _validate_prepared_manifest(root, manifest)
         output = Path(config.get("output_dir", "checkpoints/task3/qlora"))
-        output.mkdir(parents=True, exist_ok=True, mode=0o700)
-        output.chmod(0o700)
+        stage1_output = output / "stage-synthetic"
+        stage2_output = output / "stage-real"
+        if stage1_output.resolve() == stage2_output.resolve():
+            raise ValueError("staged training requires separate stage output directories")
+        if stage1_output.exists() or stage2_output.exists():
+            raise ValueError("staged output directory already exists; choose a new output directory to avoid overwrite")
+
+        if dry_run:
+            result = runtime_manifest(config)
+            result.update(
+                status="DRY RUN — GPU training NOT RUN",
+                training_succeeded=False,
+                experiment="staged",
+                data_manifest_sha256=data_manifest_sha256,
+                requested_max_optimizer_steps=total_steps,
+                stage1_optimizer_steps=first_steps,
+                stage2_optimizer_steps=total_steps - first_steps,
+                stages={
+                    "stage-synthetic": {"train_records": len(synthetic_train), "val_records": len(val)},
+                    "stage-real": {"train_records": len(real_train), "val_records": len(val)},
+                },
+                tokenizer_audit="NOT RUN: use --audit-tokenizer for the pinned tokenizer",
+            )
+            write_json(output / "staged-dry-run.json", result)
+            return result
+
+        if audit_only:
+            tokenizer = load_tokenizer(config)
+            audit = {
+                "status": "AUDIT ONLY — GPU training NOT RUN",
+                "experiment": "staged",
+                "data_manifest_sha256": data_manifest_sha256,
+                "tokenizer": tokenizer_metadata(tokenizer),
+                "stages": {
+                    "stage-synthetic": sequence_audit(synthetic_train + val, tokenizer),
+                    "stage-real": sequence_audit(real_train + val, tokenizer),
+                },
+                "training_succeeded": False,
+            }
+            write_json(output / "staged-tokenizer-audit.json", audit)
+            return {
+                **runtime_manifest(config, tokenizer),
+                **audit,
+                "audit_path": str(output / "staged-tokenizer-audit.json"),
+            }
+
         first_config = {
             **config,
             "experiment": "synthetic",
-            "output_dir": str(output / "stage-synthetic"),
+            "output_dir": str(stage1_output),
         }
         first = run_training(first_config, max_steps=first_steps)
         second_config = {
             **config,
             "experiment": "real",
-            "output_dir": str(output / "stage-real"),
+            "output_dir": str(stage2_output),
             "staged_adapter": first["checkpoint_path"],
             "stage_name": "real-adaptation-fresh-optimizer",
+            "learning_rate": stage2_learning_rate,
         }
         second = run_training(second_config, max_steps=total_steps - first_steps)
+        completed_steps = first.get("optimizer_steps", 0) + second.get("optimizer_steps", 0)
+        stages_complete = (
+            first.get("status") == "COMPLETE"
+            and second.get("status") == "COMPLETE"
+            and first.get("optimizer_steps") == first_steps
+            and second.get("optimizer_steps") == total_steps - first_steps
+        )
         return {
-            "status": "COMPLETE" if second["status"] == "COMPLETE" else "FAILED",
+            "status": "COMPLETE" if stages_complete else "FAILED",
+            "training_succeeded": stages_complete,
             "experiment": "staged",
             "stage1": first,
             "stage2": second,
-            "optimizer_steps": first.get("optimizer_steps", 0) + second.get("optimizer_steps", 0),
+            "requested_optimizer_steps": total_steps,
+            "stage1_requested_optimizer_steps": first_steps,
+            "stage2_requested_optimizer_steps": total_steps - first_steps,
+            "optimizer_steps": completed_steps,
             "checkpoint_path": second.get("checkpoint_path"),
+            "data_manifest_sha256": data_manifest_sha256,
         }
-    if max_steps is not None and max_steps <= 0:
-        raise ValueError("max_steps must be a positive optimizer-step count")
     if smoke_test and (max_steps is None or not 10 <= max_steps <= 20):
         raise ValueError("GPU smoke test requires --max-steps between 10 and 20")
-    if experiment in {"mixed", "mixed_uniform", "mixed_balanced", "synthetic"} and manifest["filter_synthetic"] != "strict":
-        raise ValueError("synthetic/mixed training requires preparation with --filter-synthetic strict")
-    train, val = training_records(root, experiment)
-    for name, expected_hash in manifest["processed_sha256"].items():
-        file = root / name
-        if not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest() != expected_hash:
-            raise ValueError("prepared data changed after manifest creation; prepare again")
-    data_manifest_sha256 = hashlib.sha256((root / "manifest.json").read_bytes()).hexdigest()
+    train, val = _validate_experiment_data(root, manifest, experiment)
+    data_manifest_sha256 = _validate_prepared_manifest(root, manifest)
     checkpoint_metadata = _checkpoint_metadata(
         {
             **config,
@@ -261,6 +453,8 @@ def run_training(
         requested_max_optimizer_steps=max_steps,
         resume_from_checkpoint=str(resume_from_checkpoint) if resume_from_checkpoint else None,
         resume_start_optimizer_step=resume_step,
+        stage_name=config.get("stage_name", "single-stage"),
+        learning_rate=config.get("learning_rate", 1e-4),
     )
     output = Path(config.get("output_dir", "checkpoints/task3/qlora"))
     if dry_run:
@@ -274,16 +468,29 @@ def run_training(
         )
         write_json(output / "dry-run.json", result)
         return result
+    gpu_audit = None
     if not audit_only:
         import torch
 
-        if not torch.cuda.is_available():
-            raise RuntimeError("CUDA unavailable: QLoRA training NOT RUN; use --dry-run")
+        try:
+            gpu_audit = _training_gpu_preflight(torch, config)
+        except (RuntimeError, ValueError) as exc:
+            result.update(
+                status="FAILED",
+                training_succeeded=False,
+                error_type=type(exc).__name__,
+                failed_optimizer_step=resume_step or 0,
+                failure_config_sha256=checkpoint_metadata["config_sha256"],
+                failure_data_manifest_sha256=data_manifest_sha256,
+                free_vram_at_failure_bytes=_free_vram_or_none(torch),
+            )
+            write_json(output / "run.json", result)
+            raise
     tokenizer = load_tokenizer(config)
     audit = sequence_audit(train + val, tokenizer)
     write_json(output / "tokenizer-audit.json", audit)
     if audit_only:
-        return {**result, "audit": audit}
+        return {**result, "audit": audit, "gpu_training": "NOT RUN"}
     max_length = config.get("max_seq_length", "auto")
     if max_length == "auto":
         max_length = audit["selected"]
@@ -343,8 +550,10 @@ def run_training(
             status="FAILED",
             training_succeeded=False,
             error_type=type(exc).__name__,
+            failed_optimizer_step=resume_step or 0,
             failure_config_sha256=checkpoint_metadata["config_sha256"],
-            free_vram_at_failure_bytes=torch.cuda.mem_get_info()[0],
+            failure_data_manifest_sha256=data_manifest_sha256,
+            free_vram_at_failure_bytes=_free_vram_or_none(torch),
         )
         write_json(output / "run.json", result)
         raise
@@ -385,6 +594,12 @@ def run_training(
         def __init__(self):
             self.started = None
             self.gradient_audit = {"checked": False, "finite_nonzero_lora_gradient": False}
+            self.lora_before_step = None
+            self.parameter_update_audit = {
+                "checked": False,
+                "finite_nonzero_lora_update": False,
+                "max_abs_delta": None,
+            }
 
         def on_step_begin(self, args, state, control, **kwargs):
             torch.cuda.synchronize()
@@ -394,6 +609,11 @@ def run_training(
             torch.cuda.synchronize()
             if self.started is not None:
                 step_times.append(time.perf_counter() - self.started)
+            return control
+
+        def on_train_end(self, args, state, control, **kwargs):
+            if smoke_test and self.lora_before_step is not None:
+                self.parameter_update_audit = _audit_lora_parameter_updates(self.lora_before_step, model)
             return control
 
         def on_pre_optimizer_step(self, args, state, control, model=None, **kwargs):
@@ -411,6 +631,12 @@ def run_training(
                 "finite_nonzero_lora_gradient": finite_nonzero,
                 "trainable_lora_tensors_with_gradient": len(gradients),
             }
+            if smoke_test and self.lora_before_step is None:
+                self.lora_before_step = {
+                    name: parameter.detach().clone()
+                    for name, parameter in model.named_parameters()
+                    if "lora_" in name and parameter.requires_grad
+                }
             if smoke_test and not finite_nonzero:
                 raise RuntimeError("GPU smoke test found no finite nonzero LoRA gradient")
             return control
@@ -466,6 +692,7 @@ def run_training(
     start = time.perf_counter()
     result.update(
         tokenizer=tokenizer_metadata(tokenizer),
+        gpu_preflight=gpu_audit,
         max_seq_length=max_length,
         token_audit={"train": train_audit, "val": val_audit},
         precision="bf16" if bf16 else "fp16",
@@ -502,35 +729,46 @@ def run_training(
         samples_per_step = (
             arguments["per_device_train_batch_size"] * arguments["gradient_accumulation_steps"]
         )
-        samples_per_second = steps_completed * samples_per_step / duration if duration else None
         average_supervised_tokens_per_sample = supervised_tokens_per_epoch / len(train_rows)
+        throughput = _session_throughput(
+            steps_completed,
+            resume_step,
+            step_times,
+            samples_per_step,
+            average_supervised_tokens_per_sample,
+        )
         result.update(
             status="COMPLETE",
             training_succeeded=True,
+            stage_name=config.get("stage_name", "single-stage"),
+            learning_rate=config.get("learning_rate", 1e-4),
             train_metrics=trained.metrics,
             validation_metrics=metrics,
             loss_history=trainer.state.log_history,
             checkpoint_path=str(output / "adapter"),
             optimizer_steps=steps_completed,
+            **throughput,
             step_time_mean_s=mean_step,
             step_time_p50_s=p50_step,
             step_time_p95_s=p95_step,
-            samples_per_second=samples_per_second,
-            supervised_tokens_per_second=(
-                steps_completed * samples_per_step * average_supervised_tokens_per_sample / duration
-                if duration
-                else None
-            ),
+            samples_per_second=throughput["session_samples_per_second"],
+            supervised_tokens_per_second=throughput["session_supervised_tokens_per_second"],
             optimizer_step_wall_time_s=duration,
             peak_gpu_memory_allocated_bytes=torch.cuda.max_memory_allocated(),
             peak_gpu_memory_reserved_bytes=torch.cuda.max_memory_reserved(),
             gradient_audit=callback.gradient_audit,
+            parameter_update_audit=callback.parameter_update_audit,
         )
         if smoke_test:
             if steps_completed != max_steps:
                 raise RuntimeError("GPU smoke stopped before the requested optimizer-step limit")
             if not callback.gradient_audit["checked"] or not callback.gradient_audit["finite_nonzero_lora_gradient"]:
                 raise RuntimeError("GPU smoke did not verify a finite nonzero LoRA gradient")
+            if (
+                not callback.parameter_update_audit["checked"]
+                or not callback.parameter_update_audit["finite_nonzero_lora_update"]
+            ):
+                raise RuntimeError("GPU smoke did not verify a finite nonzero LoRA parameter update")
             if not math.isfinite(float(trained.metrics["train_loss"])):
                 raise RuntimeError("GPU smoke produced a non-finite training loss")
             train_peak_allocated = result["peak_gpu_memory_allocated_bytes"]
@@ -558,7 +796,8 @@ def run_training(
             error_type=type(exc).__name__,
             failed_optimizer_step=failed_step,
             failure_config_sha256=checkpoint_metadata["config_sha256"],
-            free_vram_at_failure_bytes=torch.cuda.mem_get_info()[0],
+            failure_data_manifest_sha256=data_manifest_sha256,
+            free_vram_at_failure_bytes=_free_vram_or_none(torch),
         )
         raise
     finally:

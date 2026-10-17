@@ -17,4 +17,7 @@ save_steps: 20
 save_total_limit: 2
 load_best_model_at_end: true
 single_gpu: true
+expected_gpu_name: NVIDIA GeForce RTX 5090
+require_bf16: true
+min_free_vram_gib: 24
 report_to: []

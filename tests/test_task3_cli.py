@@ -102,6 +102,7 @@ def test_public_cli_mock_export_shape_and_separate_filename(tmp_path, monkeypatc
             "task2-json",
             "--taxonomy-json",
             str(taxonomy),
+            "--allow-unverified-task2-export",
             "--output",
             str(output),
             "--dry-run",
@@ -128,6 +129,50 @@ def test_dry_training_never_loads_tokenizer_or_claims_success(tmp_path, monkeypa
     assert result["training_succeeded"] is False
     assert result["mask_smoke_test"]
     assert "NOT RUN" in capsys.readouterr().out
+
+
+def test_staged_dry_run_is_safe_through_script_entrypoint(tmp_path):
+    from dataclasses import asdict
+
+    data, config_path = fixture_prepared(tmp_path)
+    synthetic = record(
+        "TEST-ONLY-SYNTH", source="synthetic", split="synthetic-train", group_key="synthetic"
+    )
+    synthetic_path = data / "synthetic-train.jsonl"
+    synthetic_path.write_text(json.dumps({"record": asdict(synthetic)}) + "\n", encoding="utf-8")
+
+    manifest = read_json(data / "manifest.json")
+    manifest["processed_sha256"][synthetic_path.name] = hashlib.sha256(synthetic_path.read_bytes()).hexdigest()
+    write_json(data / "manifest.json", manifest)
+
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    config.update(
+        experiment="staged",
+        stage1_fraction=0.75,
+        output_dir=str(tmp_path / "staged-checkpoint"),
+    )
+    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "train_task3.py"),
+            "--config",
+            str(config_path),
+            "--max-steps",
+            "100",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.returncode == 0, result.stderr
+    assert not (tmp_path / "staged-checkpoint/stage-synthetic").exists()
+    assert not (tmp_path / "staged-checkpoint/stage-real").exists()
+    assert not (tmp_path / "staged-checkpoint/stage-real").exists()
 
 
 def test_manifest_tampering_rejected_before_generation(tmp_path):

@@ -10,7 +10,7 @@ from pathlib import Path
 from src.task3.dataset import load_prepared, prepare, read_json, write_json
 from src.task3.evaluator import evaluate, write_benchmark, write_review_csv
 from src.task3.inference import HFBackend, MockBackend, MockTokenizer, load_tokenizer, tokenizer_metadata
-from src.task3.pipeline import audit_prompts, export_predictions, infer, load_taxonomy_predictions
+from src.task3.pipeline import _adapter_hash, audit_prompts, export_predictions, infer, load_taxonomy_predictions
 from src.task3.runtime import runtime_manifest
 from src.utils.config import load_config
 
@@ -69,8 +69,14 @@ def run_main(argv=None):
     p.add_argument("--split", choices=["real-val", "synthetic-heldout", "public"], default="real-val")
     p.add_argument("--taxonomy-source", choices=["gold", "task2-json"], default="gold")
     p.add_argument("--taxonomy-json")
+    p.add_argument(
+        "--allow-unverified-task2-export",
+        action="store_true",
+        help="allow legacy Task2 label-only files whose parse_ok provenance is unknowable",
+    )
     p.add_argument("--adapter")
     p.add_argument("--output")
+    p.add_argument("--force-review-template", action="store_true")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--resume-progress", action="store_true")
     p.add_argument("--progress-file")
@@ -93,7 +99,10 @@ def run_main(argv=None):
         raise ValueError("selected split is empty")
     if args.taxonomy_json:
         predicted, taxonomy_audit = load_taxonomy_predictions(
-            args.taxonomy_json, [r.sample_id for r in records], return_audit=True
+            args.taxonomy_json,
+            [r.sample_id for r in records],
+            return_audit=True,
+            allow_unverified=args.allow_unverified_task2_export,
         )
     else:
         predicted, taxonomy_audit = None, None
@@ -161,12 +170,20 @@ def run_main(argv=None):
         tokenizer_preflight=prompt_audit["status"],
         tokenizer_preflight_sha256=hashlib.sha256(audit_path.read_bytes()).hexdigest(),
         progress_file=str(progress_path),
+        adapter_sha256=_adapter_hash(config),
         official_validator="not supplied; strict local schema validation only",
     )
     write_json(output.with_suffix(".run.json"), provenance)
     write_json(output.with_suffix(".traces.json"), traces)
     write_json(output.with_suffix(".metrics.json"), metrics)
-    write_review_csv(output.with_suffix(".review.csv"), records, traces)
+    review_template = write_review_csv(
+        output.with_suffix(".review-template.csv"),
+        records,
+        traces,
+        predictions=predictions,
+        run_manifest=provenance,
+        force=args.force_review_template,
+    )
     print(
         json.dumps(
             {
@@ -175,6 +192,7 @@ def run_main(argv=None):
                 "output": str(output),
                 "diagnosis_quality": "not automatically measured",
                 "gpu_training": "NOT RUN",
+                "review_template": review_template["status"],
             },
             ensure_ascii=False,
         )
@@ -193,7 +211,6 @@ def train_main(argv=None):
     p.add_argument("--output-dir")
     p.add_argument("--max-steps", type=int)
     p.add_argument("--resume-from-checkpoint")
-    p.add_argument("--smoke-test", action="store_true", help="run only a 10-20 optimizer-step GPU validation")
     group = p.add_mutually_exclusive_group()
     group.add_argument("--dry-run", action="store_true")
     group.add_argument(
@@ -201,6 +218,7 @@ def train_main(argv=None):
         action="store_true",
         help="download only pinned tokenizer and measure 2048/4096 fit; no training",
     )
+    group.add_argument("--smoke-test", action="store_true", help="run only a 10-20 optimizer-step GPU validation")
     args = p.parse_args(argv)
     config = load_config(args.config)
     if args.experiment:
@@ -247,8 +265,10 @@ def evaluate_main(argv=None):
     p.add_argument("--traces")
     p.add_argument("--taxonomy-source", choices=["gold", "task2-json"])
     p.add_argument("--annotations")
+    p.add_argument("--run-manifest")
     p.add_argument("--output", default="outputs/task3/evaluation.json")
     p.add_argument("--init-benchmark-template", action="store_true")
+    p.add_argument("--force-review-template", action="store_true")
     args = p.parse_args(argv)
     if args.init_benchmark_template:
         from src.task3.schema import MODEL_ID
@@ -261,14 +281,27 @@ def evaluate_main(argv=None):
     verify_prepared(args.data_dir)
     records = load_prepared(args.data_dir, args.split)
     predictions = read_json(args.predictions)
+    run_manifest_path = Path(args.run_manifest) if args.run_manifest else Path(args.predictions).with_suffix(".run.json")
+    run_manifest = read_json(run_manifest_path) if run_manifest_path.is_file() else None
+    if args.annotations and run_manifest is None:
+        raise ValueError("human annotations require --run-manifest matching the predictions")
     metrics = evaluate(
         records,
         predictions,
         read_json(args.traces) if args.traces else (),
         args.taxonomy_source,
         annotations=args.annotations,
+        run_manifest=run_manifest,
     )
     metrics["test_only_mock"] = "mock" in Path(args.predictions).stem.lower()
+    review_template = write_review_csv(
+        Path(args.output).with_suffix(".review-template.csv"),
+        records,
+        read_json(args.traces) if args.traces else (),
+        predictions=predictions,
+        run_manifest=run_manifest,
+        force=args.force_review_template,
+    )
+    metrics["review_template"] = review_template["status"]
     write_json(args.output, metrics)
-    write_review_csv(Path(args.output).with_suffix(".review.csv"), records, read_json(args.traces) if args.traces else ())
     print(json.dumps(metrics, ensure_ascii=False))

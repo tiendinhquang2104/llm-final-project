@@ -5,7 +5,7 @@ import pytest
 
 from src.synth.feedback import FEEDBACK_LEVELS
 from src.task3.inference import MockTokenizer
-from src.task3.prompts import ContextTooLong, budget_prompt, build_messages, select_exemplars
+from src.task3.prompts import RETRY_HINT, ContextTooLong, budget_prompt, build_messages, select_exemplars
 from tests.test_task3_dataset import record
 
 
@@ -96,6 +96,39 @@ def test_long_logs_trim_before_student_code():
     payload = json.loads(result.messages[-1]["content"].split("\n")[1])
     assert payload["student_code"] == r.code
     assert payload["target_feedback_level"] == r.target_feedback_level
+
+
+def test_retry_context_budget_removes_demonstrations_before_essential_input():
+    target = record(
+        "TEST-TARGET",
+        source="real",
+        split="real-val",
+        group_key="eval",
+        code="int main(){return 12;}",
+    )
+    demo = record(
+        "TEST-DEMO",
+        source="real",
+        split="real-train",
+        group_key="demo",
+        code="int main(){return 13;}",
+        gold_feedback="TEST demonstration with enough text to consume context.",
+    )
+    tokenizer = MockTokenizer()
+    initial_with_demo = budget_prompt(target, [], tokenizer, 100000, 100, [demo])
+    retry_with_demo = budget_prompt(target, [], tokenizer, 100000, 100, [demo], strict_hint=RETRY_HINT)
+    retry_without_demo = budget_prompt(target, [], tokenizer, 100000, 100, [], strict_hint=RETRY_HINT)
+    context_limit = max(initial_with_demo.input_tokens + 100, retry_without_demo.input_tokens + 100)
+    assert context_limit < retry_with_demo.input_tokens + 100
+
+    retry = budget_prompt(target, [], tokenizer, context_limit, 100, [demo], strict_hint=RETRY_HINT)
+
+    assert retry.examples_used == 0
+    assert retry.input_tokens + 100 <= context_limit
+    payload = json.loads(retry.messages[-1]["content"].split("\n")[1])
+    assert payload["student_code"] == target.code
+    assert payload["statement"] == target.statement
+    assert payload["target_feedback_level"] == target.target_feedback_level
 
 
 def test_overlength_raises_without_code_truncation():

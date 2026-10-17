@@ -1,5 +1,6 @@
 import csv
 import json
+from pathlib import Path
 
 import pytest
 
@@ -7,7 +8,14 @@ from src.synth.feedback import FEEDBACK_LEVELS
 from src.task3.dataset import write_json
 from src.task3.evaluator import aggregate_annotations, evaluate, write_benchmark, write_review_csv
 from src.task3.inference import Generation, MockBackend
-from src.task3.pipeline import export_predictions, infer, load_taxonomy_predictions, taxonomy_for, validate_predictions
+from src.task3.pipeline import (
+    audit_prompts,
+    export_predictions,
+    infer,
+    load_taxonomy_predictions,
+    taxonomy_for,
+    validate_predictions,
+)
 from tests.test_task3_dataset import record
 
 
@@ -30,13 +38,15 @@ def test_task2_json_formats(tmp_path, form):
     }[form]
     path = tmp_path / "taxonomy.json"
     write_json(path, data)
-    assert load_taxonomy_predictions(path, ["TEST"]) == {"TEST": []}
+    assert load_taxonomy_predictions(path, ["TEST"], allow_unverified=True) == {"TEST": []}
 
 
 def test_task2_extra_ids_are_audited_projection_not_a_task3_failure(tmp_path):
     path = tmp_path / "taxonomy.json"
     write_json(path, {"TEST": [], "EXTRA": ["Lỗi logic"]})
-    predictions, audit = load_taxonomy_predictions(path, ["TEST"], return_audit=True)
+    predictions, audit = load_taxonomy_predictions(
+        path, ["TEST"], return_audit=True, allow_unverified=True
+    )
     assert predictions == {"TEST": []}
     assert audit["ignored_extra_id_count"] == 1
     assert audit["ignored_extra_ids_sha256"]
@@ -50,7 +60,9 @@ def test_task2_write_submission_fixture_integrates_with_task3_projection(tmp_pat
 
     path = tmp_path / "task2-predictions.json"
     write_submission(path, {"TEST": ["Lỗi logic"], "EXTRA": []}, ["TEST", "EXTRA"])
-    projected, audit = load_taxonomy_predictions(path, ["TEST"], return_audit=True)
+    projected, audit = load_taxonomy_predictions(
+        path, ["TEST"], return_audit=True, allow_unverified=True
+    )
     assert projected == {"TEST": ["Lỗi logic"]}
     assert audit["ignored_extra_id_count"] == 1
 
@@ -74,6 +86,72 @@ def test_missing_invalid_failed_predictions_rejected(tmp_path, data):
     write_json(path, data)
     with pytest.raises(ValueError):
         load_taxonomy_predictions(path, ["TEST"])
+
+
+def test_taxonomy_projection_requires_provenance_unless_explicitly_allowed(tmp_path):
+    path = tmp_path / "taxonomy.json"
+    write_json(path, [{"sample_id": "TEST", "output": {"taxonomy_error": []}}])
+
+    with pytest.raises(ValueError, match="provenance is unknown"):
+        load_taxonomy_predictions(path, ["TEST"])
+
+    projected, audit = load_taxonomy_predictions(
+        path, ["TEST"], return_audit=True, allow_unverified=True
+    )
+    assert projected == {"TEST": []}
+    assert audit["provenance_status"] == "provenance_unknown"
+    assert audit["provenance_unknown_required_count"] == 1
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        [
+            {"sample_id": "TEST", "labels": [], "parse_ok": True},
+            {"sample_id": "EXTRA", "labels": ["NOT A TAXONOMY"], "parse_ok": False},
+        ],
+        [
+            {"sample_id": "TEST", "output": {"taxonomy_error": []}, "parse_ok": True},
+            {"sample_id": "EXTRA", "output": None, "parse_ok": False},
+        ],
+    ],
+)
+def test_failed_or_malformed_extra_predictions_do_not_block_requested_ids(tmp_path, data):
+    path = tmp_path / "taxonomy.json"
+    write_json(path, data)
+    projected, audit = load_taxonomy_predictions(path, ["TEST"], return_audit=True)
+    assert projected == {"TEST": []}
+    assert audit["ignored_extra_id_count"] == 1
+
+
+def test_duplicate_extra_ids_fail_before_projection(tmp_path):
+    path = tmp_path / "taxonomy.json"
+    write_json(
+        path,
+        [
+            {"sample_id": "TEST", "labels": [], "parse_ok": True},
+            {"sample_id": "EXTRA", "labels": [], "parse_ok": True},
+            {"sample_id": "EXTRA", "parse_ok": False},
+        ],
+    )
+    with pytest.raises(ValueError, match="duplicate"):
+        load_taxonomy_predictions(path, ["TEST"])
+
+
+def test_rich_task2_full_export_with_parse_status(tmp_path):
+    path = tmp_path / "predictions_full.json"
+    write_json(
+        path,
+        [
+            {
+                "sample_id": "TEST",
+                "labels": [],
+                "probs": {"Lỗi logic": 0.0},
+                "parse_ok": True,
+            }
+        ],
+    )
+    assert load_taxonomy_predictions(path, ["TEST"]) == {"TEST": []}
 
 
 def test_mock_public_export_order_and_no_completion(tmp_path):
@@ -160,6 +238,198 @@ def test_inference_progress_resumes_only_matching_valid_rows(tmp_path):
     assert len(progress.read_text().splitlines()) == 2
 
 
+def test_cache_identity_tracks_system_and_selected_demonstrations(tmp_path, monkeypatch):
+    from dataclasses import replace
+
+    import src.task3.prompts as prompts
+
+    target = record(
+        "TEST-TARGET",
+        source="real",
+        split="real-val",
+        group_key="eval",
+        code="int main(){return 12;}",
+    )
+    demo = record(
+        "TEST-DEMO",
+        source="real",
+        split="real-train",
+        group_key="demo",
+        code="int main(){return 13;}",
+        gold_feedback="TEST demonstration A",
+    )
+
+    class CountingBackend(MockBackend):
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            return super().generate(messages, config)
+
+    def count_calls(path, demo_pool):
+        backend = CountingBackend()
+        infer(
+            [target],
+            backend,
+            {"context_limit": 10000, "max_retries": 0, "few_shot_k": 1},
+            progress_path=path,
+            resume=True,
+            cache_context="TEST-manifest",
+            demo_pool=demo_pool,
+        )
+        return backend.calls
+
+    progress = tmp_path / "system.progress.jsonl"
+    first = CountingBackend()
+    infer(
+        [target],
+        first,
+        {"context_limit": 10000, "max_retries": 0, "few_shot_k": 1},
+        progress_path=progress,
+        cache_context="TEST-manifest",
+        demo_pool=[demo],
+    )
+    assert count_calls(progress, [demo]) == 0
+
+    original_system = prompts.SYSTEM
+    monkeypatch.setattr(prompts, "SYSTEM", original_system + " TEST policy revision")
+    assert count_calls(progress, [demo]) == 1
+
+    demo_progress = tmp_path / "demo.progress.jsonl"
+    baseline = CountingBackend()
+    monkeypatch.setattr(prompts, "SYSTEM", original_system)
+    infer(
+        [target],
+        baseline,
+        {"context_limit": 10000, "max_retries": 0, "few_shot_k": 1},
+        progress_path=demo_progress,
+        cache_context="TEST-manifest",
+        demo_pool=[demo],
+    )
+    updated_demo = replace(demo, gold_feedback="TEST demonstration B")
+    assert count_calls(demo_progress, [updated_demo]) == 1
+
+
+def test_cache_invalidates_for_adapter_config_input_taxonomy_and_manifest(tmp_path):
+    from dataclasses import replace
+
+    class CountingBackend(MockBackend):
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            return super().generate(messages, config)
+
+    r = record("TEST-CACHE", source="public")
+    adapter = tmp_path / "adapter.bin"
+    adapter.write_bytes(b"TEST adapter A")
+    config = {"context_limit": 10000, "max_retries": 0, "adapter": str(adapter)}
+    progress = tmp_path / "cache.progress.jsonl"
+
+    def call(rows, run_config, taxonomy, context):
+        backend = CountingBackend()
+        infer(
+            rows,
+            backend,
+            run_config,
+            "task2-json",
+            taxonomy,
+            progress_path=progress,
+            resume=True,
+            cache_context=context,
+        )
+        return backend.calls
+
+    assert call([r], config, {r.sample_id: []}, "TEST-manifest") == 1
+    assert call([r], config, {r.sample_id: []}, "TEST-manifest") == 0
+    assert call([r], {**config, "max_new_tokens": 123}, {r.sample_id: []}, "TEST-manifest") == 1
+    assert call([replace(r, code="TEST changed input")], config, {r.sample_id: []}, "TEST-manifest") == 1
+    assert call([r], config, {r.sample_id: ["Lỗi logic"]}, "TEST-manifest") == 1
+    adapter.write_bytes(b"TEST adapter B")
+    assert call([r], config, {r.sample_id: []}, "TEST-manifest") == 1
+    assert call([r], config, {r.sample_id: []}, "TEST-manifest-changed") == 1
+
+
+def test_retry_context_overflow_uses_conservative_fallback_and_is_audited():
+    from src.task3.prompts import RETRY_HINT, budget_prompt
+
+    r = record()
+    tokenizer = MockBackend.tokenizer
+    initial = budget_prompt(r, r.gold_taxonomy, tokenizer, 10000, 100)
+    retry = budget_prompt(r, r.gold_taxonomy, tokenizer, 10000, 100, strict_hint=RETRY_HINT)
+    context_limit = retry.input_tokens + 99
+    assert initial.input_tokens + 100 <= context_limit
+
+    config = {"context_limit": context_limit, "max_new_tokens": 100, "max_retries": 1}
+    audit = audit_prompts([r], tokenizer, config)
+    assert audit["blocked_initial_count"] == 0
+    assert audit["retry_context_blocked_count"] == 1
+    assert audit["status"] == "passed_with_retry_fallback"
+
+    class BadBackend(MockBackend):
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            return Generation("```cpp\nreturn 0;\n```", 10, 0.1)
+
+    backend = BadBackend()
+    predictions, traces = infer([r], backend, config)
+    assert backend.calls == 1
+    assert predictions[0]["output"]["feedback"] != "```cpp\nreturn 0;\n```"
+    assert traces[0]["retry_context_blocked"] is True
+    assert traces[0]["fallback_reason"] == "retry_context_too_long"
+
+
+def test_partial_final_progress_line_is_ignored_and_audited(tmp_path):
+    r = record()
+    progress = tmp_path / "recover.progress.jsonl"
+    infer([r], MockBackend(), {"context_limit": 10000}, progress_path=progress)
+    with progress.open("a", encoding="utf-8") as stream:
+        stream.write('{"status":"partial"')
+
+    class CountingBackend(MockBackend):
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            return super().generate(messages, config)
+
+    backend = CountingBackend()
+    _, traces = infer(
+        [r],
+        backend,
+        {"context_limit": 10000},
+        progress_path=progress,
+        resume=True,
+    )
+    assert backend.calls == 0
+    assert traces[0]["progress_recovery"] == {"ignored_partial_final_line": True}
+    assert progress.stat().st_mode & 0o777 == 0o600
+
+
+@pytest.mark.parametrize("corruption", ["malformed_complete", "duplicate_id"])
+def test_complete_corrupt_or_duplicate_progress_rows_fail_closed(tmp_path, corruption):
+    r = record()
+    progress = tmp_path / f"{corruption}.progress.jsonl"
+    infer([r], MockBackend(), {"context_limit": 10000}, progress_path=progress)
+    if corruption == "malformed_complete":
+        with progress.open("a", encoding="utf-8") as stream:
+            stream.write('{"status":"failed"}\n')
+    else:
+        with progress.open("a", encoding="utf-8") as stream:
+            stream.write(progress.read_text(encoding="utf-8"))
+
+    with pytest.raises(ValueError, match="invalid inference progress record"):
+        infer(
+            [r],
+            MockBackend(),
+            {"context_limit": 10000},
+            progress_path=progress,
+            resume=True,
+        )
+
+
 def test_level_swap_backend_contract_changes_disclosure_preserves_core_diagnosis():
     """Scripted fixture checks plumbing; this is NOT evidence of Qwen semantic consistency."""
 
@@ -195,6 +465,84 @@ def test_human_review_worklist_does_not_copy_private_text(tmp_path):
     text = path.read_text()
     assert "PRIVATE_TARGET" not in text and "PRIVATE_CODE" not in text
     assert r.sample_id in text
+
+
+def test_review_template_preserves_existing_file_and_backs_up_forced_replacement(tmp_path):
+    r = record(source="real", split="real-val")
+    path = tmp_path / "review-template.csv"
+    assert write_review_csv(path, [r])["status"] == "created"
+    original = path.read_text(encoding="utf-8")
+    path.write_text(original + "TEST reviewer edit\n", encoding="utf-8")
+
+    preserved = write_review_csv(path, [r])
+    assert preserved["status"] == "preserved_existing"
+    assert path.read_text(encoding="utf-8") == original + "TEST reviewer edit\n"
+
+    replaced = write_review_csv(path, [r], force=True)
+    assert replaced["status"] == "created"
+    assert replaced["backup"]
+    assert Path(replaced["backup"]).read_text(encoding="utf-8") == original + "TEST reviewer edit\n"
+    assert "TEST reviewer edit" not in path.read_text(encoding="utf-8")
+
+
+def test_review_annotations_are_bound_to_exact_predictions_and_run(tmp_path):
+    r = record(source="real", split="real-val")
+    predictions, traces = infer([r], MockBackend(), {"context_limit": 10000})
+    run_manifest = {
+        "config": {"model_id": "TEST-model", "revision": "TEST-revision"},
+        "split": "real-val",
+        "taxonomy_source": "gold",
+        "data_manifest_sha256": "TEST-data-hash",
+    }
+    path = tmp_path / "annotations.csv"
+    write_review_csv(
+        path,
+        [r],
+        traces,
+        predictions=predictions,
+        run_manifest=run_manifest,
+    )
+    with path.open(encoding="utf-8", newline="") as stream:
+        reader = csv.DictReader(stream)
+        fields = reader.fieldnames
+        row = next(reader)
+    row["reviewer1_id"] = "reviewer-a"
+    row["reviewer1_diagnosis_correctness"] = "2"
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        writer.writerow(row)
+
+    result = evaluate(
+        [r],
+        predictions,
+        traces,
+        annotations=path,
+        run_manifest=run_manifest,
+    )
+    human = result["human_diagnosis_assessment"]
+    assert human["n_template_rows"] == 1
+    assert human["n_reviewed_ids"] == 1
+    assert human["n_empty_annotation_records"] == 0
+    assert human["n_reviewer_ratings"] == 1
+
+    changed_predictions = [
+        {
+            **predictions[0],
+            "output": {**predictions[0]["output"], "feedback": "TEST altered prediction"},
+        }
+    ]
+    with pytest.raises(ValueError, match="predictions_sha256"):
+        evaluate(
+            [r],
+            changed_predictions,
+            traces,
+            annotations=path,
+            run_manifest=run_manifest,
+        )
+    changed_run = {**run_manifest, "config": {**run_manifest["config"], "revision": "TEST-other-revision"}}
+    with pytest.raises(ValueError, match="run_identity_sha256"):
+        evaluate([r], predictions, traces, annotations=path, run_manifest=changed_run)
 
 
 def test_human_annotation_aggregation_and_explicit_missingness(tmp_path):
@@ -276,6 +624,14 @@ def test_taxonomy_agreement_only_for_prediction_mode():
     preds, traces = infer([r], MockBackend(), {"context_limit": 10000})
     assert evaluate([r], preds)["taxonomy_agreement"].startswith("not applicable")
     assert evaluate([r], preds, taxonomy_source="task2-json")["taxonomy_agreement"]["exact_match"] == 1
+
+
+def test_oracle_evaluation_rejects_prediction_taxonomy_that_differs_from_gold():
+    r = record(gold_taxonomy=[])
+    predictions, _ = infer([r], MockBackend(), {"context_limit": 10000})
+    predictions[0]["output"]["taxonomy_error"] = ["Lỗi logic"]
+    with pytest.raises(ValueError, match="oracle prediction taxonomy"):
+        evaluate([r], predictions, taxonomy_source="gold")
 
 
 @pytest.mark.parametrize("data", [[None], [{"sample_id": "TEST", "output": None}], {"TEST": {"output": None}}])
