@@ -75,6 +75,11 @@ _ALIASES = {
     "thuật toán": "Lỗi thuật toán", "algorithm": "Lỗi thuật toán",
     "hard-code": "Lỗi hard-code", "hardcode": "Lỗi hard-code", "hard code": "Lỗi hard-code",
     "style": "Lỗi style",
+    # English glosses used by the prompt.lang: en prompt (a trailing "error" is dropped first, see coerce_label)
+    "compilation": "Lỗi biên dịch", "input/output": "Lỗi nhập/xuất", "io": "Lỗi nhập/xuất",
+    "array/string": "Lỗi mảng/chuỗi", "array": "Lỗi mảng/chuỗi", "string": "Lỗi mảng/chuỗi",
+    "function misuse": "Lỗi hàm", "hard-coding": "Lỗi hard-code", "hardcoding": "Lỗi hard-code",
+    "hard-coded": "Lỗi hard-code", "hardcoded": "Lỗi hard-code",
 }
 
 
@@ -89,12 +94,14 @@ def coerce_label(x) -> list[str]:
         return [exact]
     k = _key(x)
     k = k[4:] if k.startswith("lỗi ") else k
+    k = re.sub(r"\s+errors?$", "", k) if k not in _ALIASES else k  # "Logic error" -> "logic"
     if k in _ALIASES:
         return [_ALIASES[k]]
     parts = [p for p in re.split(r"\s*(?:,|;|\bvà\b|\band\b|\+)\s*", k) if p]
     found = []
     for p in parts:
         p = p[4:] if p.startswith("lỗi ") else p
+        p = re.sub(r"\s+errors?$", "", p) if p not in _ALIASES else p
         lab = _BY_KEY.get(_key("lỗi " + p)) or _ALIASES.get(p)
         if lab is None:
             return []  # any unknown part -> do not guess

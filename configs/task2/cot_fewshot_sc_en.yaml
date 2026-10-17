@@ -1,0 +1,5 @@
+extends: cot_fewshot_sc.yaml
+name: task2_cot_fewshot_sc_en
+description: Như task2_cot_fewshot_sc nhưng prompt bằng tiếng Anh (prompt.lang en); demo vẫn là bài gold/silver, dòng CONCLUSION giữ tên nhãn tiếng Việt.
+prompt:
+  lang: en

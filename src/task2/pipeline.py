@@ -4,7 +4,7 @@ from __future__ import annotations
 from src.task2.compile import has_compile_error
 from src.task2.labels import LABELS, coerce_labels, normalize_labels
 from src.task2.prompts import RESPONSE_SCHEMA, build_messages, select_demos
-from src.task2.prompts_cot import FINAL_MARKER, build_cot_messages
+from src.task2.prompts_cot import build_cot_messages, split_final
 from src.utils.json_extractor import extract_json_objects
 
 RETRY_MSG = ("Câu trả lời trên không phải JSON hợp lệ theo schema yêu cầu. "
@@ -21,12 +21,13 @@ def parse_labels(text: str, lenient: bool = False) -> list[str] | None:
 
 
 def parse_cot_labels(text: str) -> list[str] | None:
-    """CoT answer: labels from the JSON after the last `KẾT LUẬN:`; else from the last line naming
+    """CoT answer: labels from the JSON after the last `KẾT LUẬN:` / `CONCLUSION:`; else from the last line naming
     `taxonomy_error`; else anywhere (bare-JSON retry answers). Reasoning may quote code with braces,
     so the whole text is the last resort only."""
     text = text or ""
-    if FINAL_MARKER in text:
-        got = parse_labels(text.rsplit(FINAL_MARKER, 1)[1], lenient=True)
+    tail = split_final(text)[1]
+    if tail is not None:
+        got = parse_labels(tail, lenient=True)
         if got is not None:
             return got
     lines = [ln for ln in text.splitlines() if "taxonomy_error" in ln]

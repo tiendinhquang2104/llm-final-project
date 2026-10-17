@@ -1,8 +1,9 @@
 extends: base.yaml
 name: task2_cot_zero_shot
-description: Zero-shot chain-of-thought, vai giảng viên, 7 bước chấm rồi dòng KẾT LUẬN; có compile_log tự compile; Lỗi biên dịch lấy từ compile_log; không demo, không test_report.
+description: Zero-shot chain-of-thought, vai giảng viên, 9 bước chấm rồi dòng KẾT LUẬN; có compile_log tự compile; Lỗi biên dịch lấy từ compile_log; không demo, không test_report.
 prompt:
   style: cot
+  lang: vi              # ngôn ngữ của prompt (persona, quy tắc, các bước): vi | en; đề + code giữ nguyên, nhãn luôn tiếng Việt
   few_shot_k: 0
   max_code_chars: 12000
   use_aux_signals: true

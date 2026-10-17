@@ -65,9 +65,9 @@ class TestCotPrompt(unittest.TestCase):
             self.assertIn(lab, system)
         self.assertIn("was not declared", user)       # compile_log block
         self.assertIn(FINAL_MARKER, user)
-        self.assertIn("7. Style:", user)              # seven grading steps, as a fill-in template
+        self.assertIn("8. Style:", user)              # nine grading steps, as a fill-in template
         self.assertNotIn("đúng một dòng", user)      # read as "answer in one line" -> no reasoning
-        self.assertLess(user.index("7. Style: <"), user.rindex(FINAL_MARKER))
+        self.assertLess(user.index("8. Style: <"), user.rindex(FINAL_MARKER))
         self.assertNotIn("feedback", (system + user).lower())
 
     def test_json_style_unchanged(self):
@@ -601,13 +601,32 @@ class TestExamRequirements(unittest.TestCase):
         self.assertNotIn("File dữ liệu", r)
         self.assertNotIn("Hàm bắt buộc", r)
 
-    def test_prompt_has_requirements_and_eight_steps(self):
+    def test_metadata_fields(self):
+        from src.task2.prompts_cot import exam_requirements
+        r = exam_requirements({"exam_id": "Z", "exam_type": "single_problem", "language": "cpp11", "topic": ["Hàm"],
+                               "learning_outcome": "Vận dụng hàm.", "has_hidden_testcases": True,
+                               "bloom_level": ["Analyze"], "difficulty_teacher": "D3 - Trung bình"})
+        self.assertIn("Chuẩn ngôn ngữ: C++11.", r)
+        self.assertIn("Trọng tâm đề: Vận dụng hàm. (chủ đề: Hàm)", r)
+        self.assertIn("test ẩn", r)
+        for unused in ("Analyze", "D3"):
+            self.assertNotIn(unused, r)
+        r = exam_requirements({"exam_id": "W", "exam_type": "multi_problem", "has_hidden_testcases": False})
+        self.assertNotIn("test ẩn", r)
+
+    def test_teacher_guide_covers_every_label(self):
+        from src.task2.prompts_cot import TEACHER_GUIDE
+        self.assertEqual(set(TEACHER_GUIDE), set(LABELS))
+        self.assertIn("toàn bộ code của bài nằm trong comment", SYSTEM_COT)
+
+    def test_prompt_has_requirements_and_nine_steps(self):
         with tempfile.TemporaryDirectory() as tmp:
             ds = load_task2(make_dataset(Path(tmp), [("B1", "EXB", [])]))
             user = Task2ApiPipeline(ds, None, COT_CFG).build_request(ds.samples[0])["messages"][1]["content"]
             self.assertIn("## YÊU CẦU CỦA ĐỀ", user)
             self.assertLess(user.index("YÊU CẦU CỦA ĐỀ"), user.index("BÀI NỘP CẦN PHÂN LOẠI"))
-            self.assertIn("8. Rà lại: <", user)
+            self.assertIn("9. Rà lại: <", user)
+            self.assertIn("2. Phạm vi chấm: <", user)
 
 
 class TestAbstentionVote(unittest.TestCase):
@@ -624,3 +643,61 @@ class TestAbstentionVote(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPromptLang(unittest.TestCase):
+    EN = {**COT_CFG, "prompt": {**COT_CFG["prompt"], "lang": "en", "strip_comments": True}}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.ds = load_task2(make_dataset(Path(self.tmp.name), [("B1", "EXB", ["Lỗi logic"])]))
+        self.ds.samples[0].compile_log = "student.cpp:3:5: error: 'x' was not declared in this scope"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_english_prompt(self):
+        from src.task2.prompts_cot import FINAL_MARKER_EN, SYSTEM_COT_EN
+        req = Task2ApiPipeline(self.ds, None, self.EN).build_request(self.ds.samples[0])
+        system, user = req["messages"][0]["content"], req["messages"][1]["content"]
+        self.assertEqual(system, SYSTEM_COT_EN)
+        for lab in LABELS:                                  # labels stay the official Vietnamese names
+            self.assertIn(f'"{lab}"', system)
+        for head in ("## EXAM (", "## EXAM REQUIREMENTS", "## SUBMISSION TO GRADE", "## HOW TO GRADE",
+                     "9. Review: <", "2. Scope: <", FINAL_MARKER_EN, "was not declared"):
+            self.assertIn(head, user)
+        for vi in ("## ĐỀ BÀI", "## BÀI NỘP", "## CÁCH CHẤM", "YÊU CẦU CỦA ĐỀ", FINAL_MARKER):
+            self.assertNotIn(vi, user)
+
+    def test_same_rules_in_both_languages(self):
+        from src.task2.prompts_cot import STEPS, STEPS_EN, TEACHER_GUIDE_EN, _REQ
+        self.assertEqual(len(STEPS), len(STEPS_EN))
+        self.assertEqual(set(TEACHER_GUIDE_EN), set(LABELS))
+        self.assertEqual(set(_REQ["vi"]), set(_REQ["en"]))
+
+    def test_default_is_vietnamese_and_bad_lang_fails(self):
+        req = Task2ApiPipeline(self.ds, None, COT_CFG).build_request(self.ds.samples[0])
+        self.assertEqual(req["messages"][0]["content"], SYSTEM_COT)
+        bad = {**COT_CFG, "prompt": {**COT_CFG["prompt"], "lang": "fr"}}
+        with self.assertRaises(ValueError):
+            Task2ApiPipeline(self.ds, None, bad).build_request(self.ds.samples[0])
+
+    def test_parse_english_answer(self):
+        text = ('1. Compilation: none.\n4. Loops: `for (;;) {}` never stops.\n'
+                'CONCLUSION: {"taxonomy_error": ["Loop error", "Lỗi logic"]}')
+        self.assertEqual(parse_cot_labels(text), ["Lỗi logic", "Lỗi vòng lặp"])
+
+    def test_last_marker_of_either_language_wins(self):
+        from src.task2.prompts_cot import split_final
+        reasoning, tail = split_final('KẾT LUẬN: {"taxonomy_error": []}\nCONCLUSION: {"taxonomy_error": ["Lỗi hàm"]}')
+        self.assertIn("KẾT LUẬN", reasoning)
+        self.assertIn("Lỗi hàm", tail)
+        self.assertEqual(split_final("no marker"), ("no marker", None))
+
+    def test_bundle_records_the_language(self):
+        from src.task2.cot_bundle import prompt_sha256
+        self.assertNotEqual(prompt_sha256("vi"), prompt_sha256("en"))
+        b = export_bundle(Path(self.tmp.name) / "bundle", self.EN, "mlx", {"model": "m"}, None)
+        meta = load_bundle(b)
+        self.assertTrue(meta["prompt_matches_code"])
+        self.assertIn("CONCLUSION", (b / "prompt_instruction.txt").read_text(encoding="utf-8"))

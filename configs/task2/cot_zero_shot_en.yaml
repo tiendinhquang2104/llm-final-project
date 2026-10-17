@@ -1,0 +1,5 @@
+extends: cot_zero_shot.yaml
+name: task2_cot_zero_shot_en
+description: Như task2_cot_zero_shot nhưng prompt (persona, quy tắc, 9 bước, yêu cầu đề) bằng tiếng Anh, model chấm bằng tiếng Anh, dòng CONCLUSION giữ tên nhãn tiếng Việt. A/B với bản tiếng Việt.
+prompt:
+  lang: en

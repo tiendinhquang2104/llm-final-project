@@ -13,7 +13,7 @@ from src.llm.local_backend import OOM_MARK
 from src.task2.evaluator import f1_scores
 from src.task2.labels import LABELS
 from src.task2.pipeline import parse_cot_labels
-from src.task2.prompts_cot import FINAL_MARKER
+from src.task2.prompts_cot import split_final
 
 MIN_REASONING_CHARS = 80  # less text before KẾT LUẬN = the model skipped the step-by-step part
 
@@ -51,7 +51,7 @@ def build_rows(out_dir, samples: list, postprocess=None) -> list[dict]:
         p = postprocess(rec) if (postprocess and rec) else preds.get(s.sample_id)
         p = p or {"labels": [], "probs": {}, "parse_ok": False, "n_parsed": 0}
         votes = list((usage.get(s.sample_id) or {}).values())
-        reasoning = min((len(o.rsplit(FINAL_MARKER, 1)[0].strip()) for o in rec.get("outputs", [])), default=None)
+        reasoning = min((len(split_final(o)[0].strip()) for o in rec.get("outputs", [])), default=None)
         gold = list(s.labels) if s.has_gold else None
         pred = list(p["labels"])
         row = {"sample_id": s.sample_id, "exam_id": s.exam_id, "gold": gold, "pred": pred,

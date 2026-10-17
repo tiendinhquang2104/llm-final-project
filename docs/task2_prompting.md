@@ -137,6 +137,77 @@ Report có thêm: demo đã dùng (nguồn:sample_id:độ giống) và nguồn 
 Kiểm tra local (MLX, 3 bài gold từng sai): quy tắc compile bỏ đúng `Lỗi biên dịch` bịa ở cả 3 bài; few-shot + SC
 giảm EX02-S209 từ 7 nhãn (greedy) còn 4. Số trên 3 bài không dùng để chọn cấu hình.
 
+## Prompt theo quy luật giảng viên (2026-10-17)
+
+Zero-shot CoT trên public chỉ được khoảng 0.20 macro-F1. Bộ nhãn tham khảo (chỉ dùng chạy thử, không nộp final)
+được gán bằng các quy luật trong `docs/task2_teacher_rules.md` kèm bằng chứng chạy thật, và đạt 0.3514 macro /
+0.4930 micro trên leaderboard. Kết quả này cho thấy các quy luật rút từ 32 bài gold đúng với cách thầy gán nhãn.
+Vì vậy prompt CoT hiện tại được sửa tại chỗ, không tạo bản v2. Mọi quy luật chỉ lấy từ gold; không lấy gì từ nhãn
+public.
+
+- **Mô tả nhãn riêng cho CoT** (`TEACHER_GUIDE` trong `src/task2/prompts_cot.py`) mô tả cách thầy dùng từng nhãn.
+  - `Lỗi hàm` là gọi/dùng hàm sai (`stoi`/`stof`, gọi hàm thiếu đối số, hàm phụ trả sai), không phải "thiếu hàm".
+  - `Lỗi nhập/xuất` là sai hoa thường hoặc dấu cách; câu nhắc nhập không bị tính.
+  - `Lỗi edge case` rất hiếm.
+  - `Lỗi style` dùng khi toàn bộ bài nằm trong comment.
+  - `DESCRIPTIONS` trong `labels.py` (dùng chung cho Hướng 2 và augment) giữ nguyên.
+- **Nguyên tắc mới:**
+  - chỉ ghi 1-2 lỗi chính (tối đa 3);
+  - câu chưa làm thì không có nhãn;
+  - câu tiên quyết sai thì chỉ ghi lỗi của câu đó;
+  - lỗi biên dịch được kèm tối đa 1 nhãn nguyên nhân;
+  - vòng lặp vô hạn ghi cả `Lỗi vòng lặp` và `Lỗi logic`;
+  - bài comment toàn bộ là `Lỗi style`.
+- **Thêm trường từ `exams.json` vào mục YÊU CẦU CỦA ĐỀ:**
+  - `language` → chuẩn C++;
+  - `learning_outcome` + `topic` → "Trọng tâm đề", kèm câu dặn: nhãn vẫn gán theo dòng code gây sai, không theo
+    chủ đề;
+  - `has_hidden_testcases: true` → output phải khớp chính xác, chỉ đúng ví dụ mẫu vẫn bị trừ điểm.
+
+  Không đưa vào: `programming_skill` (trùng `topic`), `bloom_level` và `difficulty_teacher` (không cho biết bài sai
+  ở đâu), `problem_type` (trùng thông tin suy ra từ `note`). Silver không có các trường này, nên trên silver các
+  dòng tương ứng tự bỏ trống; tác động của chúng chỉ đo được trên gold.
+- **9 bước thay cho 8:** thêm bước "2. Phạm vi chấm" (liệt kê câu đã làm / chưa làm, kiểm tra câu tiên quyết trước).
+  Bước Hàm hỏi "dùng hàm sai" thay vì "có trong bài không".
+
+**Tùy chọn `prompt.lang: vi | en`** (mặc định `vi`). Đây là cùng một phiên bản prompt với cùng quy tắc, chỉ khác
+ngôn ngữ, dùng để A/B.
+
+- **Bản tiếng Anh:** persona, quy tắc, 9 bước, các dòng yêu cầu đề, tiêu đề mục và demo few-shot được viết bằng
+  tiếng Anh. Model chấm bằng tiếng Anh và kết thúc bằng dòng `CONCLUSION:`.
+- **Giữ nguyên:** đề bài, giá trị trong `exams.json` và code sinh viên. Tên nhãn luôn là tiếng Việt nguyên văn (có
+  chú thích tiếng Anh trong system prompt).
+- **Parser:** đọc được cả `KẾT LUẬN:` và `CONCLUSION:`. `coerce_labels` map được "Loop error", "Function misuse"…
+  về nhãn chuẩn.
+- **Config:** `cot_zero_shot_en.yaml` và `cot_fewshot_sc_en.yaml`. Bundle ghi `prompt_sha256` theo ngôn ngữ.
+- **Token đo trên 360 bài public:**
+
+  | Bản | Trung vị | Lớn nhất |
+  |---|---|---|
+  | vi | 3143 | 7069 |
+  | en | 2841 | 6765 |
+
+  Chỉ giảm khoảng 10%, vì tên nhãn vẫn tiếng Việt và phần lớn prompt là đề và code.
+- **Chạy thử 4 bài gold (MLX, không dùng để kết luận):**
+  - bản en đúng `Lỗi logic` ở S206 và nhận ra bài in sai hoa thường ở bước 3, nhưng không gán `Lỗi nhập/xuất`;
+  - cả hai bản đều lặp câu đến `max_new_tokens` ở S105;
+  - cả hai bản đều không thấy lỗi của S215.
+
+  Phải chọn ngôn ngữ dựa trên gold và silver chạy trên Kaggle.
+
+Chạy lại zero-shot với lệnh cũ (`scripts/run_task2_cot.py`, notebook `kaggle/task2_cot.ipynb`). Prompt đầy đủ của
+một bài được xuất vào `outputs/task2/prompt_preview/` (gitignored vì có code sinh viên). Các bundle trong
+`bundles/task2_cot/` đã cũ (khác `prompt_sha256`), cần export lại sau khi chạy.
+
+Chạy thử local (MLX, 4 bài gold S105/S114/S206/S215; chỉ để kiểm tra định dạng, không dùng để chọn cấu hình):
+model viết đủ 9 bước và liệt kê đúng câu đã làm / chưa làm. Tuy vậy nó vẫn không tự thấy lỗi ngữ nghĩa:
+- S215: không thấy hàm mũ sai;
+- S206: không thấy in TRUE thay vì True;
+- S114: không thấy `stoi` lỗi.
+
+Có 1 bài bị lặp chuỗi số dòng đến `max_new_tokens`. Kết luận: chỉ sửa prompt là chưa đủ, cần thêm bằng chứng chạy
+thật (xem đề xuất trong phần trả lời 2026-10-17).
+
 ## Ví dụ prompt (vai giáo viên chấm bài)
 
 Bài code dưới đây là ví dụ tự viết để minh họa, không lấy từ tập public. Định nghĩa nhãn lấy từ `src/task2/labels.py`.

@@ -9,13 +9,17 @@ import time
 from pathlib import Path
 
 from src.task1.experiment import _git_commit
-from src.task2.prompts_cot import SYSTEM_COT, cot_instruction
+from src.task2.prompts_cot import cot_instruction, prompt_lang, system_prompt
 
 FORMAT = "task2-cot-bundle/1"
 
 
-def prompt_sha256() -> str:
-    return hashlib.sha256((SYSTEM_COT + "\n" + cot_instruction()).encode("utf-8")).hexdigest()
+def prompt_sha256(lang: str = "vi") -> str:
+    return hashlib.sha256((system_prompt(lang) + "\n" + cot_instruction(lang)).encode("utf-8")).hexdigest()
+
+
+def _lang(cfg: dict) -> str:
+    return prompt_lang(cfg.get("prompt"))
 
 
 def export_bundle(bundle_dir, cfg: dict, kind: str, backend_info: dict, compile_cfg: dict | None,
@@ -38,7 +42,7 @@ def export_bundle(bundle_dir, cfg: dict, kind: str, backend_info: dict, compile_
         "weights": weights, "hardware_used": backend_info.get("hardware"),
         "experiment": {k: cfg[k] for k in ("name", "description", "prompt", "generation", "retry_on_parse_fail",
                                            "checkpoint_every", "seed", "demos") if k in cfg},
-        "compile": compile_cfg, "prompt_sha256": prompt_sha256(),
+        "compile": compile_cfg, "prompt_sha256": prompt_sha256(_lang(cfg)),
         "gold_metrics": ({**{k: api.get(k) for k in ("n", "macro_f1", "micro_f1", "exact_match")},
                           "partial": partial} if api else None),
         "demo_pools": demo_pools,
@@ -48,8 +52,8 @@ def export_bundle(bundle_dir, cfg: dict, kind: str, backend_info: dict, compile_
         (bundle / "demos.json").write_text(json.dumps(demos, ensure_ascii=False, indent=1), encoding="utf-8")
         meta["demos_file"] = "demos.json"
     (bundle / "bundle.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-    (bundle / "prompt_system.txt").write_text(SYSTEM_COT, encoding="utf-8")
-    (bundle / "prompt_instruction.txt").write_text(cot_instruction(), encoding="utf-8")
+    (bundle / "prompt_system.txt").write_text(system_prompt(_lang(cfg)), encoding="utf-8")
+    (bundle / "prompt_instruction.txt").write_text(cot_instruction(_lang(cfg)), encoding="utf-8")
     (bundle / "README.md").write_text(_readme(meta), encoding="utf-8")
     return bundle
 
@@ -86,7 +90,7 @@ def load_bundle(bundle_dir) -> dict:
     meta = json.loads((bundle / "bundle.json").read_text(encoding="utf-8"))
     if meta.get("format") != FORMAT:
         raise ValueError(f"{bundle}: unknown bundle format {meta.get('format')!r}")
-    meta["prompt_matches_code"] = meta.get("prompt_sha256") == prompt_sha256()
+    meta["prompt_matches_code"] = meta.get("prompt_sha256") == prompt_sha256(_lang(meta.get("experiment") or {}))
     if meta.get("weights"):
         meta["weights_path"] = str(bundle / meta["weights"])
     return meta
