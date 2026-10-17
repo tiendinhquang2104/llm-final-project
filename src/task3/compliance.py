@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from typing import Callable
 
 from src.synth.compliance import _strip_compile_log, level_of
 from src.synth.compliance import check as synth_check
+
+
+def _without_diacritics(value: str) -> str:
+    decomposed = unicodedata.normalize("NFD", value)
+    return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").replace("đ", "d").replace("Đ", "D")
 
 
 @dataclass(frozen=True)
@@ -45,16 +51,18 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
     )
     if lvl <= 2 and code:
         violations.append("code_solution_leak")
+    normalized = _without_diacritics(text).casefold()
     if lvl <= 2 and re.search(
-        r"(?:hãy|em cần|bạn cần|nên)\s+(?:thêm|đổi|thay|sửa|dùng|cập nhật|khai báo|xóa|xoá|bỏ|khởi tạo)|cách sửa|lời giải(?: là|:) |đáp án\s*(?:là|:)|để sửa|fix(?: it)? by",
-        text,
-        re.I,
+        r"\b(?:hay|nen|can|phai)\s+(?:(?:em|ban)\s+)?"
+        r"(?:them|doi|thay|sua|dieu chinh|tang|nang|dung|cap nhat|khai bao|xoa|bo|khoi tao|viet lai)\b"
+        r"|cach sua|loi giai(?: la|:)|dap an\s*(?:la|:)|de sua|fix(?: it)? by",
+        normalized,
     ):
         violations.append("repair_guidance")
     if lvl == 2 and re.search(
-        r"\b(?:thay|đổi|sửa|doi|sua|replace|change)\b.{0,100}\b(?:thành|bằng|thanh|bang|to|with)\b",
-        text,
-        re.I | re.S,
+        r"\b(?:thay|doi|sua|replace|change)\b.{0,100}\b(?:thanh|bang|to|with)\b",
+        normalized,
+        re.S,
     ):
         violations.append("repair_guidance")
     if lvl == 1 and re.search(
@@ -90,4 +98,4 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
 
 def fallback(level):
     level_of(level)
-    return "Em hãy đối chiếu bài làm với yêu cầu đề và tự kiểm tra lại kết quả. Chưa đủ cơ sở để đưa ra nhận xét cụ thể đáng tin cậy."
+    return "Chưa đủ cơ sở để đưa ra nhận xét cụ thể đáng tin cậy. Cảm ơn em đã chia sẻ bài làm."

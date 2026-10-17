@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
 import subprocess
 from importlib import metadata
@@ -39,6 +40,36 @@ def _nvidia_smi():
                     }
                 )
         return {"status": "available", "devices": devices}
+    except (OSError, subprocess.SubprocessError, ValueError) as exc:
+        return {"status": "failed", "error_type": type(exc).__name__}
+
+
+def gpu_workload_status():
+    try:
+        output = subprocess.check_output(
+            [
+                "nvidia-smi",
+                "--query-compute-apps=pid,used_memory",
+                "--format=csv,noheader,nounits",
+            ],
+            text=True,
+            stderr=subprocess.STDOUT,
+            timeout=10,
+        )
+        external = []
+        for line in output.splitlines():
+            fields = [field.strip() for field in line.split(",")]
+            if len(fields) != 2:
+                raise ValueError("unexpected nvidia-smi process output")
+            pid = int(fields[0])
+            used_memory = 0 if fields[1] in {"N/A", "[N/A]"} else int(fields[1])
+            if pid != os.getpid():
+                external.append(used_memory)
+        return {
+            "status": "available",
+            "external_process_count": len(external),
+            "external_memory_mib": sum(external),
+        }
     except (OSError, subprocess.SubprocessError, ValueError) as exc:
         return {"status": "failed", "error_type": type(exc).__name__}
 
@@ -103,6 +134,26 @@ def collect_preflight(smoke_4bit=False):
         report["cuda"]["supported_precisions"] = ["fp32", "fp16"] + (
             ["bf16"] if report["cuda"]["bf16_supported"] else []
         )
+        free_bytes, total_bytes = torch.cuda.mem_get_info()
+        workload = gpu_workload_status()
+        report["cuda"]["free_memory_bytes"] = int(free_bytes)
+        report["cuda"]["total_memory_bytes"] = int(total_bytes)
+        report["cuda"]["workload_isolation"] = workload
+        if workload["status"] != "available" or workload["external_process_count"] or free_bytes < 1024**3:
+            reason = (
+                "workload_check_failed"
+                if workload["status"] != "available"
+                else "competing_gpu_workload"
+                if workload["external_process_count"]
+                else "insufficient_free_vram"
+            )
+            report["cuda"]["matmul"] = {"status": "not_run", "reason": reason}
+            report["checks"]["cuda_matmul"] = "not_run"
+            if smoke_4bit:
+                outcome = {"status": "not_run", "reason": reason}
+                report["cuda"]["nf4_lora_smoke"] = outcome
+                report["checks"]["nf4_lora_forward_backward_update"] = "not_run"
+            return report
         try:
             device = torch.device("cuda:0")
             left = torch.randn((16, 16), device=device, requires_grad=True)
@@ -154,12 +205,23 @@ def collect_preflight(smoke_4bit=False):
                 )
                 if not bool(torch.isfinite(loss)) or not gradients_ok:
                     raise RuntimeError("NF4/LoRA smoke produced non-finite loss or empty gradients")
+                lora_before = [parameter.detach().clone() for parameter in (lora_a, lora_b)]
                 optimizer.step()
                 torch.cuda.synchronize(device)
+                deltas = [
+                    (parameter.detach() - before).abs()
+                    for parameter, before in zip((lora_a, lora_b), lora_before)
+                ]
+                update_ok = all(bool(torch.isfinite(delta).all()) for delta in deltas) and any(
+                    bool(torch.count_nonzero(delta)) for delta in deltas
+                )
+                if not update_ok:
+                    raise RuntimeError("NF4/LoRA smoke produced no finite nonzero parameter update")
                 outcome = {
                     "status": "passed",
                     "loss_finite": True,
                     "lora_gradients_finite_nonzero": True,
+                    "lora_parameter_update_finite_nonzero": True,
                     "optimizer_update": "passed",
                     "trainable_parameters": int(lora_a.numel() + lora_b.numel()),
                     "base_parameters_frozen": not base.weight.requires_grad,
