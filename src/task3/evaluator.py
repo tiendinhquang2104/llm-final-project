@@ -1,0 +1,302 @@
+"""Heuristic feedback checks and auditable human diagnosis assessment."""
+
+from __future__ import annotations
+
+import csv
+import json
+import statistics
+from collections import defaultdict
+from pathlib import Path
+
+from src.task3.compliance import check
+from src.task3.dataset import write_json
+from src.task3.pipeline import validate_predictions
+
+_REVIEWABLE_SPLITS = {"real-val", "synthetic-heldout"}
+_RUBRIC = {
+    "diagnosis_correctness": {"0", "1", "2"},
+    "code_evidence_support": {"0", "1", "2"},
+    "hallucinated_error": {"yes", "no"},
+    "prerequisite_reasoning": {"yes", "no", "na"},
+    "level_violation": {"yes", "no"},
+}
+_AGREEMENT_FIELDS = tuple(_RUBRIC)
+
+
+def _review_fields():
+    fields = ["sample_id", "source", "split", "exam_id", "exam_type", "level", "fallback_used"]
+    for reviewer in (1, 2):
+        prefix = f"reviewer{reviewer}"
+        fields.append(f"{prefix}_id")
+        fields.extend(f"{prefix}_{name}" for name in _RUBRIC)
+        fields.extend((f"{prefix}_level_violation_type", f"{prefix}_notes_no_student_text"))
+    return fields
+
+
+def write_review_csv(path, records, traces=()):
+    """Write an ID-only two-reviewer worklist; never copy code or target feedback."""
+    fields = _review_fields()
+    trace_map = {row["sample_id"]: row for row in traces}
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, fields)
+        writer.writeheader()
+        for record in records:
+            if record.split not in _REVIEWABLE_SPLITS:
+                continue
+            row = {
+                "sample_id": record.sample_id,
+                "source": record.source,
+                "split": record.split,
+                "exam_id": record.exam_id,
+                "exam_type": record.exam_type,
+                "level": record.target_feedback_level,
+                "fallback_used": (
+                    str(bool(trace_map[record.sample_id].get("fallback_used", trace_map[record.sample_id].get("fallback")))).lower()
+                    if record.sample_id in trace_map
+                    else ""
+                ),
+            }
+            writer.writerow(row)
+    path.chmod(0o600)
+
+
+def _load_annotations(path):
+    path = Path(path)
+    if path.suffix.lower() == ".csv":
+        with path.open(encoding="utf-8-sig", newline="") as stream:
+            return list(csv.DictReader(stream))
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict):
+        payload = payload.get("annotations")
+    if not isinstance(payload, list) or any(not isinstance(row, dict) for row in payload):
+        raise ValueError("annotations must be a JSON array or an object with an annotations array")
+    return payload
+
+
+def _clean_value(value):
+    if value is None:
+        return ""
+    return str(value).strip().lower()
+
+
+def aggregate_annotations(path, records):
+    """Validate and summarize reviewer entries without returning notes or per-example judgments."""
+    expected = {
+        record.sample_id: record for record in records if record.split in _REVIEWABLE_SPLITS
+    }
+    rows = _load_annotations(path)
+    seen = set()
+    observations = []
+    for row in rows:
+        sid = row.get("sample_id")
+        if not isinstance(sid, str) or sid not in expected or sid in seen:
+            raise ValueError("annotation IDs must be unique and belong to the supplied evaluation splits")
+        seen.add(sid)
+        record = expected[sid]
+        if row.get("source") != record.source:
+            raise ValueError("annotation source does not match split provenance")
+        if row.get("split") != record.split:
+            raise ValueError("annotation split does not match split provenance")
+        if row.get("exam_id") != record.exam_id:
+            raise ValueError("annotation exam ID does not match source record")
+        if row.get("exam_type") != record.exam_type:
+            raise ValueError("annotation exam type does not match source record")
+        if row.get("level") != record.target_feedback_level:
+            raise ValueError("annotation level does not match source record")
+        fallback_used = _clean_value(row.get("fallback_used"))
+        if fallback_used not in {"", "true", "false"}:
+            raise ValueError("fallback_used must be true, false or blank")
+        for reviewer in (1, 2):
+            prefix = f"reviewer{reviewer}"
+            rater = _clean_value(row.get(f"{prefix}_id"))
+            values = {name: _clean_value(row.get(f"{prefix}_{name}")) for name in _RUBRIC}
+            violation_type = str(row.get(f"{prefix}_level_violation_type") or "").strip()
+            notes = str(row.get(f"{prefix}_notes_no_student_text") or "").strip()
+            if not rater and (any(values.values()) or violation_type or notes):
+                raise ValueError("reviewer ID is required when reviewer fields are filled")
+            if not rater:
+                continue
+            if reviewer == 2 and rater == _clean_value(row.get("reviewer1_id")):
+                raise ValueError("reviewer IDs must be independent")
+            for name, value in values.items():
+                if value and value not in _RUBRIC[name]:
+                    raise ValueError(f"invalid {name} rubric value")
+            if values["level_violation"] == "yes" and not violation_type:
+                raise ValueError("level_violation_type is required when a violation is marked yes")
+            if len(record.code) >= 20 and record.code in notes:
+                raise ValueError("review notes contain student source text")
+            if record.gold_feedback and len(record.gold_feedback) >= 20 and record.gold_feedback in notes:
+                raise ValueError("review notes contain instructor target text")
+            observations.append(
+                {
+                    "sample_id": sid,
+                    "reviewer": reviewer,
+                    "rater_id": rater,
+                    "level": record.target_feedback_level,
+                    "exam_type": record.exam_type,
+                    "fallback_used": fallback_used or "unknown",
+                    **values,
+                }
+            )
+    by_key = defaultdict(list)
+    numeric = ("diagnosis_correctness", "code_evidence_support")
+    for observation in observations:
+        by_key[("level", observation["level"])].append(observation)
+        by_key[("exam_type", observation["exam_type"])].append(observation)
+        by_key[("fallback_used", observation["fallback_used"])].append(observation)
+
+    def summarize(values):
+        summary = {"n_ratings": len(values), "scores": {}}
+        for field in numeric:
+            present = [int(item[field]) for item in values if item[field]]
+            summary["scores"][field] = {
+                "n": len(present),
+                "mean": statistics.mean(present) if present else None,
+            }
+        for field in ("hallucinated_error", "prerequisite_reasoning", "level_violation"):
+            present = [item[field] for item in values if item[field]]
+            summary[field] = {
+                "n": len(present),
+                "counts": {value: present.count(value) for value in sorted(set(present))},
+            }
+        return summary
+
+    agreements = {}
+    indexed = {row["sample_id"]: row for row in rows}
+    for field in _AGREEMENT_FIELDS:
+        pairs = []
+        for sid, row in indexed.items():
+            left = _clean_value(row.get(f"reviewer1_{field}"))
+            right = _clean_value(row.get(f"reviewer2_{field}"))
+            if left and right:
+                pairs.append((left, right))
+        item = {"n_pairs": len(pairs), "exact_agreement": None}
+        if pairs:
+            item["exact_agreement"] = sum(left == right for left, right in pairs) / len(pairs)
+        if field in numeric:
+            item["mean_absolute_difference"] = (
+                statistics.mean(abs(int(left) - int(right)) for left, right in pairs) if pairs else None
+            )
+        agreements[field] = item
+    diagnosis_n = sum(bool(item["diagnosis_correctness"]) for item in observations)
+    return {
+        "status": "measured" if diagnosis_n else "not_measured",
+        "n_annotated_ids": len(seen),
+        "n_expected_ids": len(expected),
+        "coverage": len(seen) / len(expected) if expected else None,
+        "n_reviewer_ratings": len(observations),
+        "per_level": {key[1]: summarize(value) for key, value in by_key.items() if key[0] == "level"},
+        "per_exam_type": {key[1]: summarize(value) for key, value in by_key.items() if key[0] == "exam_type"},
+        "fallback_stratified": {
+            key[1]: summarize(value) for key, value in by_key.items() if key[0] == "fallback_used"
+        },
+        "pairwise_agreement": agreements,
+        "missingness_policy": "blank scores are missing, not zero; unreviewed IDs are excluded from score denominators",
+        "confidence_caveat": "report coverage and counts; six real validation examples do not support precise population confidence",
+    }
+
+
+def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotations=None):
+    validate_predictions(predictions, [r.sample_id for r in records])
+    trace_map = {r["sample_id"]: r for r in traces}
+    per_level = defaultdict(list)
+    for record, pred in zip(records, predictions):
+        result = check(pred["output"]["feedback"], record.target_feedback_level)
+        per_level[result.level].append(result)
+    all_results = [item for values in per_level.values() for item in values]
+    low = [item for item in all_results if item.level <= 2]
+
+    def rate(values):
+        return statistics.mean(values) if values else None
+
+    result = {
+        "n": len(records),
+        "taxonomy_source": taxonomy_source,
+        "heuristic_compliance": rate([item.heuristic_compliance for item in all_results]),
+        "semantic_compliance": "not_measured",
+        "compliance": rate([item.ok for item in all_results]),
+        "compliance_per_level": {
+            str(level): {"n": len(values), "rate": rate([item.ok for item in values])}
+            for level, values in sorted(per_level.items())
+        },
+        "guard_method": "rule-based heuristic; not a semantic correctness guarantee",
+        "severe_solution_leak_rate_level12": rate([item.severe for item in low]),
+        "severe_solution_leak": rate([item.severe for item in low]),
+        "empty_response_rate": rate([not prediction["output"]["feedback"].strip() for prediction in predictions]),
+        "mean_response_chars": rate([len(prediction["output"]["feedback"]) for prediction in predictions]),
+        "diagnosis_quality": "not_measured",
+        "diagnosis_quality_status": "not_measured",
+        "taxonomy_agreement": "not applicable: oracle labels" if taxonomy_source == "gold" else "no gold available",
+    }
+    if traces:
+        if set(trace_map) != {record.sample_id for record in records} or len(trace_map) != len(traces):
+            raise ValueError("trace IDs must exactly match evaluation records")
+        first_attempts = [trace_map[record.sample_id]["attempts"][0] for record in records]
+        first_low = [
+            trace_map[record.sample_id]["attempts"][0]
+            for record in records
+            if record.target_feedback_level.startswith(("Level 1", "Level 2"))
+        ]
+        fallback_flags = [trace_map[record.sample_id].get("fallback_used", False) for record in records]
+        result.update(
+            raw_first_attempt_compliance=rate([attempt["heuristic_compliance"] for attempt in first_attempts]),
+            raw_first_attempt_severe_leak_rate_level12=rate([attempt["severe"] for attempt in first_low]),
+            post_guard_compliance=result["heuristic_compliance"],
+            fallback_rate=rate(fallback_flags),
+            retry_count=sum(trace_map[record.sample_id].get("retry_count", 0) for record in records),
+            mean_latency_s=rate([trace_map[record.sample_id]["latency_s"] for record in records]),
+            generated_tokens=sum(trace_map[record.sample_id]["output_tokens"] for record in records),
+        )
+    if taxonomy_source != "gold":
+        paired = [
+            (record.gold_taxonomy, prediction["output"]["taxonomy_error"])
+            for record, prediction in zip(records, predictions)
+            if record.gold_taxonomy is not None
+        ]
+        if paired:
+            result["taxonomy_agreement"] = {
+                "n": len(paired),
+                "exact_match": rate([set(gold) == set(predicted) for gold, predicted in paired]),
+            }
+    if annotations is not None:
+        human = aggregate_annotations(annotations, records)
+        result["human_diagnosis_assessment"] = human
+        result["diagnosis_quality_status"] = human["status"]
+    return result
+
+
+def benchmark_template(model_id, revision):
+    modes = (
+        "zero_shot",
+        "few_shot",
+        "synthetic_only",
+        "real_only",
+        "mixed_uniform",
+        "mixed_balanced",
+        "staged",
+        "guarded",
+    )
+    return {
+        "model_id": model_id,
+        "model_revision": revision,
+        "runs": [{"mode": mode, "status": "NOT RUN", "metrics": None} for mode in modes],
+    }
+
+
+def write_benchmark(directory, model_id, revision):
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    benchmark = benchmark_template(model_id, revision)
+    write_json(directory / "benchmark.json", benchmark)
+    with (directory / "benchmark.csv").open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, ("mode", "status", "metrics"))
+        writer.writeheader()
+        writer.writerows(
+            {"mode": row["mode"], "status": row["status"], "metrics": ""}
+            for row in benchmark["runs"]
+        )
+    lines = ["# Task 3 benchmark status", "", f"Model: `{model_id}`", f"Revision: `{revision}`", "", "| Mode | Status |", "|---|---|"]
+    lines.extend(f"| {row['mode']} | {row['status']} |" for row in benchmark["runs"])
+    (directory / "benchmark.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

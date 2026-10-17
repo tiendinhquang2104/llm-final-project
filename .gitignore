@@ -81,7 +81,17 @@ checkpoints/*
 # Outputs (Keep directory structure via .gitkeep)
 outputs/*
 !outputs/.gitkeep
+*.progress.jsonl
+*.run.json
+*.traces.json
+*.review.csv
+*.metrics.json
+*.tokenizer-audit.json
 
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Task 3 isolated environments and downloaded archives
+.venv-task3/
+*.zip

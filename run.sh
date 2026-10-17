@@ -9,9 +9,10 @@ show_help() {
     echo "Usage: ./run.sh [OPTION]"
     echo "Options:"
     echo "  --prepare-data    Execute raw data preprocessing pipeline"
+    echo "                    Legacy Task 1/2 only; use scripts/task3_prepare.py for Task 3"
     echo "  --task1           Execute Task 1 inference / evaluation"
     echo "  --task2           Execute Task 2 training / inference"
-    echo "  --task3           Execute Task 3 training / inference"
+    echo "  --task3           Execute Task 3 inference (append --dry-run for offline smoke)"
     echo "  --test            Run test suite"
     echo "  --submission      Generate final submission package"
     echo "  --help            Display this help message"
@@ -37,7 +38,8 @@ case "$1" in
         ;;
     --task3)
         echo "Running Task 3..."
-        python scripts/run_task3.py
+        shift
+        python scripts/run_task3.py "$@"
         ;;
     --test)
         echo "Running tests..."

@@ -1,0 +1,11 @@
+extends: baseline.yaml
+experiment: mixed
+output_dir: checkpoints/task3/qlora
+max_seq_length: auto
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+learning_rate: 0.0001
+epochs: 3
+gradient_accumulation_steps: 4

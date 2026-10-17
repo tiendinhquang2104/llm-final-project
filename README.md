@@ -8,7 +8,7 @@ This repository provides an end-to-end pipeline designed for the LLM Grading Cha
 
 - **Task 1: Automated Rule & Rubric Scoring**: Combines deterministic prerequisite rule checks with LLM prompting pipelines to evaluate responses against structured rubrics.
 - **Task 2: Multi-label Error Classification**: Hướng 1 prompts an API LLM (Gemini/OpenAI) for the submission; Hướng 2 fine-tunes the CLM-8B heads (frozen Qwen3-8B, MLX locally / Kaggle GPU) on the 32 labelled samples plus bug-injection augmentation, evaluated by k-fold CV, with a linear-probe ablation. No labels are derived from the test set. See `docs/task2.md`.
-- **Task 3: Compliance & Constraint Verification**: Validates adherence to complex multi-condition instructions, factual consistency, and scoring criteria.
+- **Task 3: Controlled Pedagogical Feedback**: Generates Vietnamese C++ feedback at Levels 1–4 using local Qwen2.5-Coder, with independent oracle/public modes, compliance checks and CUDA QLoRA training. See [docs/task3.md](docs/task3.md).
 
 ## Repository Structure
 
@@ -26,7 +26,7 @@ llm-grading-challenge/
 │   ├── base.yaml
 │   ├── task1/ (base.yaml, e1..e6 experiments, final.yaml, run.yaml)
 │   ├── task2/ (baseline_api.yaml, lora.yaml)
-│   └── task3/ (baseline_api.yaml, lora.yaml)
+│   └── task3/ (baseline.yaml, few_shot.yaml, qlora.yaml)
 ├── data/
 │   ├── raw/ (Raw datasets - excluded from git)
 │   ├── processed/ (Preprocessed jsonl/csv files)
@@ -79,6 +79,10 @@ cp .env.example .env
 
 ### 2. Data Preparation
 
+The legacy preparation and split scripts below are for the existing Task 1/2 workflows only.
+Do not use them as Task 3 setup: Task 3 reads the checked-in 26/6 IDs without regenerating them.
+Prepare Task 3 with `scripts/task3_prepare.py` as shown in the Task 3 section below.
+
 Place the original datasets into `data/raw/`. Run the preprocessing and splitting pipeline:
 
 ```bash
@@ -106,14 +110,15 @@ python scripts/run_task2_clm.py --config configs/task2/clm_local.yaml
 python scripts/task2_benchmark.py
 .venv/bin/python scripts/run_task2_zeroshot.py --config configs/task2/clm_local_full.yaml  # zero-shot CLM (no training); then scripts/run_task1_zeroshot.py, see docs/task2_zeroshot.md
 
-# Run Task 3 (Compliance check)
-python scripts/run_task3.py --config configs/task3/baseline_api.yaml
+# Task 3: prepare without changing fixed split IDs; mock smoke test (no model download)
+python scripts/task3_prepare.py --filter-synthetic strict
+python scripts/run_task3.py --config configs/task3/baseline.yaml --split real-val --taxonomy-source gold --dry-run
 ```
 
 Alternatively, use the orchestration script:
 
 ```bash
-bash run.sh --all
+bash run.sh --task3 --dry-run
 ```
 
 ### 4. Running Tests
