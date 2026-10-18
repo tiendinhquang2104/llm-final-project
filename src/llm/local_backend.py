@@ -61,8 +61,8 @@ class LocalChatBackend(Backend):
                 self.usage["requests"] += 1
                 self.usage["prompt_tokens"] += p_tok
                 self.usage["output_tokens"] += o_tok
-                self.ledger.append({"sample_id": sid, "vote": k, "prompt_tokens": p_tok, "output_tokens": o_tok,
-                                    "seconds": round(dt, 2), "hit_max_tokens": o_tok >= max_tokens,
+                self.ledger.append({"sample_id": sid, "vote": k, **({"part": r["pid"]} if r.get("pid") else {}),
+                                    "prompt_tokens": p_tok, "output_tokens": o_tok, "seconds": round(dt, 2), "hit_max_tokens": o_tok >= max_tokens,
                                     "temperature": temperature, "top_p": self.top_p, "seed": sample_seed + k})
             total = time.time() - t0
             outs = [o for _, _, o, _ in res]
@@ -316,13 +316,15 @@ class VLLMChatBackend(LocalChatBackend):
         total = time.time() - t0
         n_out = 0
         for (i, sid, p_tok), seed, res in zip(sids, seeds, results):
+            part = {"part": requests[i]["pid"]} if requests[i].get("pid") else {}
             outs = [len(c.token_ids) for c in res.outputs]
             n_out += sum(outs)
             for k, o_tok in enumerate(outs):
                 self.usage["requests"] += 1
                 self.usage["prompt_tokens"] += p_tok
                 self.usage["output_tokens"] += o_tok
-                self.ledger.append({"sample_id": sid, "vote": k, "prompt_tokens": p_tok, "output_tokens": o_tok,
+                self.ledger.append({"sample_id": sid, "vote": k, **part, "prompt_tokens": p_tok,
+                                    "output_tokens": o_tok,
                                     "seconds": round(total / max(1, len(results) * n), 2),  # batch share
                                     "hit_max_tokens": o_tok >= max_tokens, "temperature": temperature,
                                     "top_p": self.top_p, "seed": seed + k if temperature > 0 else seed})

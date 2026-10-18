@@ -1,0 +1,7 @@
+extends: cot_zero_shot_en.yaml
+name: task2_cot_split_run_en
+description: Như task2_cot_zero_shot_en, thêm (1) đề nhiều câu chấm từng câu một (mỗi câu một prompt, ẩn code của câu khác; gộp theo is_prerequisite_for) và (2) đề stdin/stdout chạy bài với các ví dụ trong đề, kết quả đưa vào prompt.
+prompt:
+  split_problems: true   # multi_problem: một prompt cho mỗi câu (src/task2/split.py), không demo
+compile:
+  run_examples: true     # single_problem stdin/stdout: chạy binary với ví dụ trong đề (2s, 512MB, 1MB output) -> test_report

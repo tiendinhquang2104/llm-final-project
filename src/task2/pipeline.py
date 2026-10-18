@@ -6,6 +6,7 @@ from src.task2.compile import has_compile_error
 from src.task2.labels import LABELS, coerce_labels, normalize_labels
 from src.task2.prompts import RESPONSE_SCHEMA, build_messages, select_demos
 from src.task2.prompts_cot import build_cot_messages, split_final
+from src.task2.split import compile_error_lines, merge_parts, split_submission
 from src.utils.json_extractor import extract_json_objects
 
 RETRY_MSG = ("Câu trả lời trên không phải JSON hợp lệ theo schema yêu cầu. "
@@ -56,8 +57,23 @@ class Task2ApiPipeline:
         self.style = self.prompt_cfg.get("style", "json")
         self.parse = parse_cot_labels if self.style == "cot" else parse_labels
 
+    def parts(self, sample) -> list | None:
+        """Per-question parts when prompt.split_problems is on and the multi_problem submission can be split."""
+        if self.style != "cot" or not self.prompt_cfg.get("split_problems"):
+            return None
+        exam = self.ds.exams[sample.exam_id]
+        if exam.get("exam_type") != "multi_problem":
+            return None
+        return split_submission(sample.code, exam.get("problems") or [])
+
     def build_request(self, sample) -> dict:
         exam = self.ds.exams[sample.exam_id]
+        parts = self.parts(sample)
+        if parts:  # one prompt per question, no demos (they are whole submissions); "messages" only keys the cache
+            reqs = [{"sample": sample, "exam": exam, "pid": pt.pid, "schema": None, "schema_name": "task2_cot",
+                     "messages": build_cot_messages(exam, sample, self.prompt_cfg, (), pt)} for pt in parts]
+            return {"sample": sample, "exam": exam, "demos": [], "parts": reqs,
+                    "messages": [m for q in reqs for m in q["messages"]], "schema": None, "schema_name": "task2_cot"}
         if self.style == "cot":  # CoT: optional retrieved demos, free-text reasoning then the KẾT LUẬN line
             k = int(self.prompt_cfg.get("few_shot_k", 0))
             demos = self.retriever.select(sample)[:k] if (self.retriever and k > 0) else []
@@ -76,26 +92,38 @@ class Task2ApiPipeline:
 
     def infer(self, samples: list) -> list[dict]:
         reqs = [self.build_request(s) for s in samples]
-        outs = self.backend.generate(reqs, self.gen_cfg)
-        records = [{"sample_id": q["sample"].sample_id, "exam_id": q["sample"].exam_id, "demos": q["demos"],
-                    "outputs": texts, "retry_outputs": []} for q, texts in zip(reqs, outs)]
+        units = []  # (request index, part index or None, backend request): split questions run in the same batch
+        for i, q in enumerate(reqs):
+            units += [(i, k, pq) for k, pq in enumerate(q["parts"])] if q.get("parts") else [(i, None, q)]
+        outs = self.backend.generate([u[2] for u in units], self.gen_cfg)
+        res = [{"outputs": texts, "retry_outputs": []} for texts in outs]
         for _ in range(int(self.cfg.get("retry_on_parse_fail", 1))):
-            bad = [i for i, r in enumerate(records)
-                   if all(self.parse(t) is None for t in r["outputs"] + r["retry_outputs"])]
+            bad = [j for j, r in enumerate(res) if all(self.parse(t) is None for t in r["outputs"] + r["retry_outputs"])]
             if not bad:
                 break
             retry = []
-            for i in bad:
-                q = dict(reqs[i])
-                last = (records[i]["retry_outputs"] or records[i]["outputs"] or [""])[-1]
+            for j in bad:
+                q = dict(units[j][2])
+                last = (res[j]["retry_outputs"] or res[j]["outputs"] or [""])[-1]
                 if last.strip() and not last.startswith(OOM_MARK):  # answered but not valid JSON -> fix the format
                     # (an OOM placeholder is not an answer: resend the original prompt)
                     q["messages"] = q["messages"] + [{"role": "assistant", "content": last[-3000:]},
                                                      {"role": "user", "content": RETRY_MSG}]
                 retry.append(q)
             gen = {**self.gen_cfg, "n": 1, "temperature": 0.0, "enable_thinking": False}
-            for i, texts in zip(bad, self.backend.generate(retry, gen)):
-                records[i]["retry_outputs"].extend(texts)
+            for j, texts in zip(bad, self.backend.generate(retry, gen)):
+                res[j]["retry_outputs"].extend(texts)
+        records = [{"sample_id": q["sample"].sample_id, "exam_id": q["sample"].exam_id, "demos": q["demos"],
+                    "outputs": [], "retry_outputs": []} for q in reqs]
+        for (i, k, uq), r in zip(units, res):
+            rec = records[i]
+            if k is None:
+                rec["outputs"], rec["retry_outputs"] = r["outputs"], r["retry_outputs"]
+                continue
+            rec.setdefault("parts", []).append({"pid": uq["pid"], **r})
+            # flattened copies, headed by the question, for the debug report
+            rec["outputs"] += [f"### {uq['pid']}\n{t}" for t in r["outputs"]]
+            rec["retry_outputs"] += [f"### {uq['pid']}\n{t}" for t in r["retry_outputs"]]
         return records
 
     @staticmethod
@@ -104,6 +132,49 @@ class Task2ApiPipeline:
                 "probs": {lab: 0.0 for lab in LABELS}, "labels": []}
 
     def postprocess(self, record: dict) -> dict:
+        if record.get("parts"):
+            return self._postprocess_parts(record)
+        return self._postprocess_one(record)
+
+    def _postprocess_parts(self, record: dict) -> dict:
+        """Each question voted on its own; merged along is_prerequisite_for (src/task2/split.merge_parts).
+        "Lỗi biên dịch" stays a whole-file property (compile rule); a compiler error inside a question's own lines
+        makes that question fail as a prerequisite."""
+        sample = self._sample(record["sample_id"])
+        exam = self.ds.exams[sample.exam_id]
+        rule = bool(self.prompt_cfg.get("compile_rule")) and sample.compile_log is not None
+        split = {pt.pid: pt for pt in (split_submission(sample.code, exam.get("problems") or []) or [])}
+        err_lines = compile_error_lines(sample.compile_log) if rule else set()
+        part_labels, part_probs, info, n_parsed, ok = {}, {}, [], 0, True
+        for part in record["parts"]:
+            one = self._postprocess_one({"sample_id": record["sample_id"], "exam_id": record["exam_id"],
+                                         "outputs": part["outputs"], "retry_outputs": part["retry_outputs"]},
+                                        compile_rule=False)
+            labs = [lab for lab in one["labels"] if not (rule and lab == "Lỗi biên dịch")]
+            part_labels[part["pid"]], part_probs[part["pid"]] = labs, one["probs"]
+            n_parsed += one["n_parsed"]
+            ok = ok and one["parse_ok"]
+            info.append({"pid": part["pid"], "labels": labs, "parse_ok": one["parse_ok"]})
+        own_err = {pid for pid, pt in split.items() if pt.own & err_lines}
+        labels, graded = merge_parts(exam.get("problems") or [], part_labels, own_err)
+        for row in info:
+            row["graded"] = row["pid"] in graded
+            row["compile_error_here"] = row["pid"] in own_err
+        probs = {lab: max([part_probs[pid].get(lab, 0.0) for pid in graded] or [0.0]) for lab in LABELS}
+        for lab in LABELS:
+            if lab not in labels:
+                probs[lab] = min(probs[lab], 0.49)  # a label of a question that is not graded does not count
+        out = {"sample_id": record["sample_id"], "exam_id": record["exam_id"], "parse_ok": ok,
+               "n_parsed": n_parsed, "probs": probs, "parts": info}
+        if rule:
+            out["model_compile_vote"] = max((p.get("Lỗi biên dịch", 0.0) for p in part_probs.values()), default=0.0)
+            probs["Lỗi biên dịch"] = 1.0 if has_compile_error(sample.compile_log) else 0.0
+            out["compile_rule"] = True
+        out["labels"] = [lab for lab in LABELS if lab == "Lỗi biên dịch" and probs[lab] >= 0.5 or lab in labels]
+        return out
+
+    def _postprocess_one(self, record: dict, compile_rule: bool | None = None) -> dict:
+        rule_on = self.prompt_cfg.get("compile_rule") if compile_rule is None else compile_rule
         parsed = [p for p in map(self.parse, record["outputs"]) if p is not None]
         total = len(record["outputs"])
         if not parsed:
@@ -112,7 +183,7 @@ class Task2ApiPipeline:
         if not parsed:
             out = self.empty_prediction(self._sample(record["sample_id"]))
             log = self._sample(record["sample_id"]).compile_log
-            if self.prompt_cfg.get("compile_rule") and has_compile_error(log):  # the rule needs no model answer
+            if rule_on and has_compile_error(log):  # the rule needs no model answer
                 out["probs"]["Lỗi biên dịch"] = 1.0
                 out["labels"] = ["Lỗi biên dịch"]
                 out["compile_rule"] = True
@@ -124,7 +195,7 @@ class Task2ApiPipeline:
         out = {"sample_id": record["sample_id"], "exam_id": record["exam_id"], "parse_ok": True,
                "n_parsed": len(parsed), "probs": probs}
         log = self._sample(record["sample_id"]).compile_log
-        if self.prompt_cfg.get("compile_rule") and log is not None:
+        if rule_on and log is not None:
             # "Lỗi biên dịch" := the self-compiled log has a compiler error (warnings / missing main do not count);
             # the model's vote for it is kept in model_probs for the report
             out["model_compile_vote"] = probs["Lỗi biên dịch"]

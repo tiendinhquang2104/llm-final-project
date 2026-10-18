@@ -53,10 +53,11 @@ def tee_log(path):
 
 
 def load_with_compile(root, compile_cfg: dict | None, source: str, enabled: bool, project_root):
-    """Task 2 dataset with self-compiled (source='self') or shipped (source='dataset') compile logs."""
+    """Task 2 dataset with self-compiled (source='self') or shipped (source='dataset') compile logs; with
+    compile.run_examples also the test_report of the runs on the statement examples."""
     ds = load_task2(root, keep_empty_compile_log=source == "dataset")
     lists, compiler_id = attach_compile_logs(compile_cfg, [ds.samples], enabled=enabled, root=project_root,
-                                             source=source)
+                                             source=source, exams=ds.exams)
     ds.samples[:] = lists[0]
     return ds, compiler_id
 

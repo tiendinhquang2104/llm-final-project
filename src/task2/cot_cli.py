@@ -103,7 +103,8 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
     kind = a.backend or settings.get("backend", "mlx")
     run = settings["run"]
     base = load_config(config_dir / "base.yaml")
-    compile_cfg = base.get("compile")
+    # the experiment config extends base.yaml, so its compile section is base's plus overrides (run_examples)
+    compile_cfg = load_config(config_dir / f"{a.experiment}.yaml").get("compile") or base.get("compile")
     source = a.compile_source or (compile_cfg or {}).get("source", "self")
     compile_on = not (a.no_compile or a.preflight)
     shard = parse_shard(a.public_shard)

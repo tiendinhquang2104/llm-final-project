@@ -41,10 +41,10 @@ def build_rows(out_dir, samples: list, postprocess=None) -> list[dict]:
     out_dir = Path(out_dir)
     preds = {p["sample_id"]: p for p in _json(out_dir / "predictions_full.json", [])}
     raw = {r["sample_id"]: r["record"] for r in _jsonl(out_dir / "raw_outputs.jsonl")}
-    usage: dict[str, dict[int, dict]] = {}
+    usage: dict[str, dict[tuple, dict]] = {}
     for u in _jsonl(out_dir / "usage.jsonl"):
-        if "sample_id" in u:
-            usage.setdefault(u["sample_id"], {})[int(u.get("vote", 0))] = u
+        if "sample_id" in u:  # one entry per vote, and per question when multi_problem exams are split
+            usage.setdefault(u["sample_id"], {})[(u.get("part", ""), int(u.get("vote", 0)))] = u
     rows = []
     for s in samples:
         rec = raw.get(s.sample_id) or {}
@@ -69,6 +69,7 @@ def build_rows(out_dir, samples: list, postprocess=None) -> list[dict]:
                "compile_rule": bool(p.get("compile_rule")), "model_compile_vote": p.get("model_compile_vote"),
                "no_reasoning": reasoning is not None and reasoning < MIN_REASONING_CHARS,
                "oom": any(o.startswith(OOM_MARK) for o in rec.get("outputs", []) + rec.get("retry_outputs", [])),
+               "parts": p.get("parts") or [], "test_report": s.test_report,
                "compile_log": s.compile_log, "code": s.code}
         if gold is not None:
             row.update(tp=[x for x in pred if x in gold], fp=[x for x in pred if x not in gold],
@@ -221,7 +222,12 @@ r.fp.map(x=>`<span class="chip fp">${esc(x)}</span>`).join('')+r.fn.map(x=>`<spa
 .join('')||'<span class="chip nt">[] đúng</span>'};
 const numbered=c=>String(c||'').split('\n').map((l,i)=>String(i+1).padStart(3)+'  '+l).join('\n');
 function detail(r){let h='';const nv=r.outputs.length;
-if(nv>1){const np=Math.max(1,r.n_parsed);h+='<b>Phiếu bầu</b> (giữ nhãn có ≥ 50% phiếu)<table style="width:auto">';
+if(r.parts&&r.parts.length){h+='<b>Chấm từng câu</b> (câu không được chấm khi câu điều kiện của nó sai)<table style="width:auto">';
+for(const pt of r.parts){h+=`<tr><td>${esc(pt.pid)}</td><td>${pt.labels.map(x=>`<span class="chip nt">${esc(x)}</span>`).join('')||'[]'}
+</td><td>${pt.graded?'được chấm':'<span class="warn">không chấm (câu điều kiện sai)</span>'}${pt.compile_error_here?' · lỗi biên dịch trong câu này':''}${pt.parse_ok?'':' · <span class="warn">parse lỗi</span>'}</td></tr>`}h+='</table>'}
+if(r.test_report&&r.test_report.length){h+='<b>Chạy với ví dụ trong đề</b><table style="width:auto"><tr><th>input</th><th>mong đợi</th><th>thực tế</th><th>trạng thái</th></tr>';
+for(const t of r.test_report){h+=`<tr><td><pre>${esc(t.input)}</pre></td><td><pre>${esc(t.expected)}</pre></td><td><pre>${esc(t.actual)}</pre></td><td>${t.status==='pass'?'<span class="chip tp">pass</span>':`<span class="chip fp">${esc(t.status||(t.passed?'pass':'fail'))}</span>`}</td></tr>`}h+='</table>'}
+if(nv>1&&!(r.parts&&r.parts.length)){const np=Math.max(1,r.n_parsed);h+='<b>Phiếu bầu</b> (giữ nhãn có ≥ 50% phiếu)<table style="width:auto">';
 for(const l of L){const v=r.probs[l]||0;if(!v&&!(r.gold||[]).includes(l))continue;const k=Math.round(v*np);
 const g=(r.gold||[]).includes(l)?' <span class="chip tp">gold</span>':'';h+=`<tr><td>${esc(l)}${g}</td><td class="num">
 ${k}/${np}</td><td style="min-width:140px"><span class="bar" style="width:${v*100}%;min-width:${v?2:0}px;background:

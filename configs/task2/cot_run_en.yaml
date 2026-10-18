@@ -1,0 +1,5 @@
+extends: cot_zero_shot_en.yaml
+name: task2_cot_run_en
+description: Ablation — chỉ chạy bài stdin/stdout với ví dụ trong đề, không tách câu.
+compile:
+  run_examples: true

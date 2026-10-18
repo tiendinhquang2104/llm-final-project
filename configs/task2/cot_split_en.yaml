@@ -1,0 +1,5 @@
+extends: cot_zero_shot_en.yaml
+name: task2_cot_split_en
+description: Ablation — chỉ chấm từng câu (multi_problem), không chạy ví dụ.
+prompt:
+  split_problems: true

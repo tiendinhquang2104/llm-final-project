@@ -255,6 +255,41 @@ Token (tokenizer Qwen, 328 bài public, chưa tính compile_log):
 Giảm khoảng 16% ở trung vị, 10% ở bài dài nhất; bài lỗi biên dịch giảm thêm tới khoảng 400 token. Vẫn dài hơn bản cũ
 khoảng 300 token (khối yêu cầu đề). Phải chấm lại gold/silver trước khi dùng nhánh này để nộp.
 
+## Chấm từng câu + chạy ví dụ trong đề (2026-10-18, nhánh `task-2-split-run`)
+
+Lý do: chẩn đoán run `predictions_en.json` (0.18 trên leaderboard) cho thấy Qwen 7B không tự mô phỏng được code
+(khen bài sai, bắt lỗi bài đúng, bịa luật "thừa dấu cách", đọc ngược `True`/`TRUE`) và đề nhiều câu dồn cả 4 câu vào
+một prompt dài (7 bài OOM đều là Class01-Test2). Hai thay đổi, bật bằng config `cot_split_run_en`
+(ablation: `cot_split_en`, `cot_run_en`):
+
+**1. Chạy bài với ví dụ trong đề** (`compile.run_examples: true`, `src/task2/examples.py`, `src/task2/compile.py`)
+- Chỉ đề `single_problem` đọc stdin/in stdout (3 đề Class03 = 204/328 bài public; EX02 ở gold). Ví dụ lấy từ bảng
+  `| Input | Output |` của đề; nếu mục **Input:** liệt kê k dòng (gạch đầu dòng) thì k hàng liên tiếp là một ví dụ
+  (Class03-Midterm-2). Đây là ví dụ có sẵn trong đề, không phải nhãn hay test ẩn.
+- Compile và chạy trong CÙNG một job (cùng thư mục tạm, cùng cache): `g++` trên Kaggle/Linux, Docker trên macOS;
+  mỗi ví dụ 2 giây, 512 MB, tối đa 1 MB output. Bài compile lỗi thì không chạy. Cache key chỉ đổi với bài có ví dụ,
+  cache compile cũ vẫn dùng được.
+- So output (`compare_output`): `pass` (bỏ qua dấu cách cuối dòng / dòng trống cuối, như máy chấm),
+  `prompt_then_pass` (đúng nhưng in kèm câu nhắc nhập — gold EX02-S211 in "Input number: True" vẫn `[]`),
+  `whitespace`, `case`, `fail`, `timeout`, `runtime_error`. Kết quả thành `test_report` đưa vào prompt
+  ("Kết quả chạy chương trình với các ví dụ trong đề"); gold dùng cùng ví dụ của đề (test_report gốc của gold vẫn bị
+  xoá) nên gold/silver/public cùng điều kiện.
+
+**2. Đề nhiều câu: mỗi câu một prompt** (`prompt.split_problems: true`, `src/task2/split.py`)
+- Code: giữ mọi thứ ngoài thân hàm (include, struct, biến toàn cục, prototype) + `probK` + các hàm nó gọi (bắc cầu);
+  thân hàm của câu khác và hàm phụ không dùng tới bị ẩn thành một dòng `// ...(đã ẩn)`, số dòng giữ nguyên.
+  Không tìm thấy `probK` thì chỉ ẩn các câu khác và báo model. Bài không tách được (comment hết, không có hàm `probK`
+  nào) chấm cả bài như cũ. Public: tách được 127/139 bài nhiều câu.
+- Đề: bỏ phần của các câu SAU câu đang chấm (câu sau không bao giờ là điều kiện; câu trước giữ lại vì chứa struct /
+  danh sách câu sau dùng lại). compile_log chỉ giữ lỗi nằm trong các dòng đang hiện.
+- Gộp (`merge_parts`) theo `is_prerequisite_for` trong exams.json, bắc cầu: một câu chỉ được chấm khi mọi câu điều
+  kiện của nó không có lỗi; câu "có lỗi" = có nhãn, hoặc có lỗi compiler nằm trong chính thân hàm của nó. Nhãn = hợp
+  các câu được chấm. `Lỗi biên dịch` vẫn theo quy tắc compile_log trên cả file. Retry chỉ câu không parse được.
+- Không dùng demo few-shot khi tách câu (demo là cả bài). Các câu chạy chung một batch vLLM.
+- Report: bảng "Chấm từng câu" (nhãn từng câu, câu nào không được chấm) và bảng "Chạy với ví dụ trong đề".
+
+Cần đo trên gold/silver trước khi dùng cho public: hợp nhãn của 4 câu có thể làm thừa nhãn hơn (điểm yếu hiện tại).
+
 ## Ví dụ prompt (vai giáo viên chấm bài)
 
 Bài code dưới đây là ví dụ tự viết để minh họa, không lấy từ tập public. Định nghĩa nhãn lấy từ `src/task2/labels.py`.

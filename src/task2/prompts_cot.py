@@ -37,6 +37,7 @@ def split_final(text: str) -> tuple[str, str | None]:
     return text[:pos], text[pos + len(marker):]
 
 ALL_COMMENTED = "// (toàn bộ code của bài nằm trong comment)"
+HIDDEN = "\x00hidden\x00"  # a line of another question (src/task2/split.py); numbered_code shows a run of them once
 
 # How the instructor uses each label, read off the 32 gold samples (labels + rubric + feedback, never fed to the
 # model): docs/task2_teacher_rules.md. CoT-only; DESCRIPTIONS in labels.py stays the shared generic definition.
@@ -86,7 +87,7 @@ STEPS = (
     ("Biên dịch", "compile_log có error không? Nguyên nhân có rõ ràng thuộc nhãn khác không?"),
     ("Phạm vi chấm", "từng câu/hàm đề yêu cầu: \"đã làm\" hay \"chưa làm\"; câu tiên quyết (nếu có) đúng chưa. Đề một "
                      "câu thì ghi \"chấm toàn bài\"."),
-    ("Nhập/xuất", "đọc dữ liệu và chuỗi in ra có khớp đề không?"),
+    ("Nhập/xuất", "đọc dữ liệu và chuỗi in ra có khớp đề không? (có kết quả chạy ví dụ thì dựa vào đó)"),
     ("Vòng lặp và mảng/chuỗi", "chỉ số, điều kiện dừng, vòng lặp vô hạn, truy cập mảng/chuỗi có đúng không?"),
     ("Hàm", "có gọi/dùng hàm sai, hoặc khai báo khác prototype đề cho không?"),
     ("Logic và hard-code", "điều kiện/công thức, giả định về dữ liệu, giá trị ghi cứng?"),
@@ -172,7 +173,8 @@ STEPS_EN = (
     ("Compilation", "does compile_log contain an error? Is its cause clearly another label?"),
     ("Scope", 'each question/function the exam requires: "attempted" or "not attempted"; is the prerequisite '
               '(if any) right? Single-question exam: write "grade the whole program".'),
-    ("Input/output", "are the data read and the printed text what the statement asks for?"),
+    ("Input/output", "are the data read and the printed text what the statement asks for? (rely on the program "
+                     "run when there is one)"),
     ("Loops and arrays/strings", "are indices, stop conditions, infinite loops, array/string access right?"),
     ("Functions", "is a function called/used wrongly, or declared differently from the required prototype?"),
     ("Logic and hard-code", "conditions/formulas, assumptions about the data, hard-coded values?"),
@@ -342,10 +344,12 @@ def _view(sample, cfg: dict):
 _TEXT = {
     "vi": {"demos": "## VÍ DỤ BÀI ĐÃ ĐƯỢC GIẢNG VIÊN CHẤM (bài khác, chỉ để tham khảo cách gán nhãn: giảng viên chỉ "
                     "ghi những lỗi rõ ràng, có bằng chứng trong code)",
-           "demo": "### Ví dụ {i} (đề {exam})", "cut": "// ...(cắt bớt)", "marker": FINAL_MARKER},
+           "demo": "### Ví dụ {i} (đề {exam})", "cut": "// ...(cắt bớt)", "marker": FINAL_MARKER,
+           "hidden": "// ...(đã ẩn: code của câu khác / hàm không dùng tới)"},
     "en": {"demos": "## SUBMISSIONS ALREADY GRADED BY THE LECTURER (other submissions, only to show how labels are "
                     "assigned: the lecturer reports only clear errors with evidence in the code)",
-           "demo": "### Example {i} (exam {exam})", "cut": "// ...(truncated)", "marker": FINAL_MARKER_EN},
+           "demo": "### Example {i} (exam {exam})", "cut": "// ...(truncated)", "marker": FINAL_MARKER_EN,
+           "hidden": "// ...(hidden: code of other questions / unused functions)"},
 }
 _COMPILE_STATUS_EN = {"không có compile_log": "no compile_log",
                       "chỉ có cảnh báo (warning), không có lỗi": "warnings only, no error",
@@ -372,12 +376,17 @@ def exam_text_lang(exam: dict, lang: str = "vi") -> str:
 _DIAG_ERROR = re.compile(r"^\S+:\d+:\d+: (?:fatal )?error:")
 _DIAG_SOURCE = re.compile(r"^\s*\d*\s*\|")  # gcc's "   28 |     code" and "      |     ^~~~" lines
 _LOG_TEXT = {"vi": {"none": "(không có)", "empty": "(rỗng — không có lỗi hay cảnh báo)", "cut": "...(cắt bớt)",
-                    "more": "...(còn {n} lỗi khác)", "sub": "## BÀI NỘP CẦN PHÂN LOẠI"},
+                    "more": "...(còn {n} lỗi khác)", "sub": "## BÀI NỘP CẦN PHÂN LOẠI",
+                    "elsewhere": "(không có lỗi trong phần code của câu này; {n} lỗi nằm ở code của câu khác)"},
              "en": {"none": "(none)", "empty": "(empty — no error, no warning)", "cut": "...(truncated)",
-                    "more": "...({n} more errors)", "sub": "## SUBMISSION TO GRADE"}}
+                    "more": "...({n} more errors)", "sub": "## SUBMISSION TO GRADE",
+                    "elsewhere": "(no error in the code of this question; {n} errors are in other questions' code)"}}
 
 
-def compact_compile_log(log: str | None, max_chars: int = 800, lang: str = "vi") -> str:
+_DIAG_LINE = re.compile(r"^\S*?student\.cpp:(\d+):\d+:")
+
+
+def compact_compile_log(log: str | None, max_chars: int = 800, lang: str = "vi", lines: set | None = None) -> str:
     """compile_log for the prompt: the error diagnostics only, each with its source line and caret, first errors
     first, until max_chars; notes, include chains and warnings are dropped (a template error in getline() alone
     is ~50 kB of candidate notes). A log without errors is cut to max_chars. "Lỗi biên dịch" comes from the full
@@ -388,15 +397,21 @@ def compact_compile_log(log: str | None, max_chars: int = 800, lang: str = "vi")
     log = re.sub(r"/tmp/tmp\w+/", "", log).strip()
     if not log:
         return t["empty"]
-    blocks, cur = [], None
+    blocks, cur, elsewhere = [], None, 0
     for line in log.splitlines():
         if _DIAG_ERROR.match(line):
+            m = _DIAG_LINE.match(line)
+            if lines is not None and m and int(m.group(1)) not in lines:  # an error in another question's code
+                cur, elsewhere = None, elsewhere + 1
+                continue
             cur = [line]
             blocks.append(cur)
         elif cur is not None and _DIAG_SOURCE.match(line):
             cur.append(line)
         else:
             cur = None
+    if not blocks and elsewhere:
+        return t["elsewhere"].format(n=elsewhere)
     if not blocks:
         return log if len(log) <= max_chars else log[:max_chars] + "\n" + t["cut"]
     kept, used = [], 0
@@ -411,31 +426,123 @@ def compact_compile_log(log: str | None, max_chars: int = 800, lang: str = "vi")
     return "\n".join(kept)
 
 
-def numbered_code(code: str, max_chars: int = 12000, drop_blank: bool = False, cut: str = "// ...(cắt bớt)") -> str:
+def numbered_code(code: str, max_chars: int = 12000, drop_blank: bool = False, cut: str = "// ...(cắt bớt)",
+                  hidden: str = "// ...(đã ẩn)") -> str:
     """Code with its line numbers; `drop_blank` leaves out empty lines (comment-only lines become empty after
-    strip_comments) but keeps the original numbers, so evidence like "line 28" still points at the submission."""
-    if len(code) > max_chars:
-        code = code[:max_chars] + "\n" + cut
-    return "\n".join(f"{i:4d}| {line}" for i, line in enumerate(code.splitlines(), 1)
-                     if line.strip() or not drop_blank)
+    strip_comments) but keeps the original numbers, so evidence like "line 28" still points at the submission.
+    A run of HIDDEN lines (another question) is shown once as `hidden`; max_chars counts the visible code only."""
+    lines = code.split("\n")
+    if code.endswith("\n"):
+        lines = lines[:-1]
+    out, used, prev_hidden = [], 0, False
+    for i, line in enumerate(lines, 1):
+        if line == HIDDEN:
+            if not prev_hidden:
+                out.append(f"    | {hidden}")
+            prev_hidden = True
+            continue
+        if not line.strip() and (drop_blank or prev_hidden):  # a blank line does not end a hidden run
+            continue
+        prev_hidden = False
+        if used + len(line) + 1 > max_chars:
+            out.append(cut)
+            break
+        used += len(line) + 1
+        out.append(f"{i:4d}| {line}")
+    return "\n".join(out)
 
 
-def submission_text_lang(sample, cfg: dict, lang: str = "vi") -> str:
+_RUN_TEXT = {
+    "vi": {"head": "### Kết quả chạy chương trình với các ví dụ trong đề (hệ thống tự chạy, đáng tin cậy; chỉ là ví dụ "
+                   "mẫu, test ẩn còn nhiều hơn)",
+           "sum": "{p}/{n} ví dụ khớp output mong đợi.",
+           "row": "- Ví dụ {i}: {status}\n  input: {inp}\n  output mong đợi: {exp}\n  output thực tế: {act}",
+           "status": {"pass": "KHỚP",
+                      "prompt_then_pass": "đúng kết quả nhưng in kèm câu nhắc nhập (câu nhắc không tính là lỗi)",
+                      "whitespace": "SAI chỉ ở dấu cách / xuống dòng",
+                      "case": "SAI chỉ ở chữ hoa / chữ thường",
+                      "fail": "SAI kết quả",
+                      "timeout": "QUÁ THỜI GIAN ({t} giây; có thể vòng lặp vô hạn hoặc chờ nhập thêm)",
+                      "runtime_error": "LỖI KHI CHẠY (mã thoát {rc}; ví dụ truy cập ngoài mảng, chia cho 0)"}},
+    "en": {"head": "### Program run on the examples of the statement (run by the system, reliable; only the sample "
+                   "examples, the hidden tests are more)",
+           "sum": "{p}/{n} examples match the expected output.",
+           "row": "- Example {i}: {status}\n  input: {inp}\n  expected output: {exp}\n  actual output: {act}",
+           "status": {"pass": "MATCH",
+                      "prompt_then_pass": "right result, printed after an input prompt (the prompt is not an error)",
+                      "whitespace": "WRONG only in spaces / line breaks",
+                      "case": "WRONG only in letter case",
+                      "fail": "WRONG result",
+                      "timeout": "TIMEOUT ({t} s; maybe an infinite loop or waiting for more input)",
+                      "runtime_error": "RUNTIME ERROR (exit code {rc}; e.g. out-of-bounds access, division by zero)"}},
+}
+
+
+def _show(text: str, limit: int = 160) -> str:
+    text = str(text or "")
+    text = text if len(text) <= limit else text[:limit] + "..."
+    return json.dumps(text, ensure_ascii=False)
+
+
+def run_report_text(report: list[dict] | None, lang: str = "vi") -> str:
+    """test_report from compile.run_report (statuses), or "" when the program was not run."""
+    if not report:
+        return ""
+    from src.task2.compile import RUN_TIMEOUT
+    t = _RUN_TEXT[lang]
+    lines = [t["head"], t["sum"].format(p=sum(r.get("status") == "pass" for r in report), n=len(report))]
+    for i, r in enumerate(report, 1):
+        status = t["status"].get(r.get("status"), r.get("status", "?")).format(t=RUN_TIMEOUT, rc=r.get("returncode"))
+        lines.append(t["row"].format(i=i, status=status, inp=_show(r.get("input")), exp=_show(r.get("expected")),
+                                     act=_show(r.get("actual"))))
+    return "\n".join(lines) + "\n"
+
+
+def _is_run_report(report) -> bool:
+    return bool(report) and all(isinstance(r, dict) and "status" in r for r in report)
+
+
+_PART_TEXT = {
+    "vi": {"focus": "## CÂU CẦN CHẤM: {pid}{proto}\nChỉ chấm câu {pid}. Code của các câu khác và các hàm {pid} không "
+                    "dùng tới đã được ẩn (giữ số dòng gốc); các câu khác được chấm riêng, đừng gán nhãn cho chúng.",
+           "missing": "Bài nộp KHÔNG định nghĩa hàm `{func}` của câu này (có thể bỏ trống hoặc đặt tên/prototype "
+                      "khác): xem phần code còn lại để biết câu này có được làm hay không."},
+    "en": {"focus": "## QUESTION TO GRADE: {pid}{proto}\nGrade only question {pid}. The code of the other questions and "
+                    "the functions {pid} does not use are hidden (original line numbers kept); the other questions are "
+                    "graded separately, do not label them.",
+           "missing": "The submission does NOT define this question's function `{func}` (left out, or another "
+                      "name/prototype): look at the remaining code to tell whether the question was attempted."},
+}
+
+
+def part_text(part, problem: dict, lang: str = "vi") -> str:
+    t = _PART_TEXT[lang]
+    proto = f" (`{problem['prototype'].strip()}`)" if problem.get("prototype") else ""
+    s = t["focus"].format(pid=part.pid, proto=proto)
+    if not part.found:
+        s += "\n" + t["missing"].format(func=part.func)
+    return s + "\n"
+
+
+def submission_text_lang(sample, cfg: dict, lang: str = "vi", lines: set | None = None) -> str:
     """prompt.max_compile_log_chars (errors only, first ones first) and prompt.drop_blank_lines shorten the
     prompt; without them the block is the shared src.task2.prompts.submission_text one."""
-    if "max_compile_log_chars" not in cfg and not cfg.get("drop_blank_lines"):
+    if "max_compile_log_chars" not in cfg and not cfg.get("drop_blank_lines") \
+            and not _is_run_report(sample.test_report) and HIDDEN not in sample.code:
         s = submission_text(sample, cfg)
         return s.replace("## BÀI NỘP CẦN PHÂN LOẠI", "## SUBMISSION TO GRADE", 1) if lang == "en" else s
     t = _LOG_TEXT[lang]
     code = numbered_code(sample.code, cfg.get("max_code_chars", 12000), bool(cfg.get("drop_blank_lines")),
-                         _TEXT[lang]["cut"])
+                         _TEXT[lang]["cut"], _TEXT[lang]["hidden"])
     s = f"{t['sub']}\n```cpp\n{code}\n```\n"
     if cfg.get("use_aux_signals", False):
         if sample.compile_log is not None:
-            log = (compact_compile_log(sample.compile_log, int(cfg["max_compile_log_chars"]), lang)
+            log = (compact_compile_log(sample.compile_log, int(cfg["max_compile_log_chars"]), lang, lines)
                    if "max_compile_log_chars" in cfg else clean_compile_log(sample.compile_log))
             s += f"\n### compile_log\n```\n{log}\n```\n"
-        if sample.test_report:
+        if _is_run_report(sample.test_report):
+            s += "\n" + run_report_text(sample.test_report, lang)
+        elif sample.test_report:
             s += f"\n### test_report\n{format_test_report(sample.test_report)}\n"
     return s
 
@@ -457,9 +564,19 @@ def demos_text(demos: list, cfg: dict) -> str:
     return "\n".join(parts) + "\n"
 
 
-def build_cot_messages(exam: dict, sample, cfg: dict, demos=()) -> list[dict]:
+def build_cot_messages(exam: dict, sample, cfg: dict, demos=(), part=None) -> list[dict]:
+    """`part` (src/task2/split.Part): grade one question of a multi_problem submission; the sample's code is then the
+    part's (other questions hidden) and the compile_log keeps the errors of the visible lines only."""
     lang = prompt_lang(cfg)
+    focus, lines = "", None
+    if part is not None:
+        from src.task2.split import statement_for
+        problem = next((p for p in exam.get("problems") or [] if p.get("pid") == part.pid), {})
+        focus, lines = part_text(part, problem, lang), part.lines
+        exam = {**exam, "statement": statement_for(exam.get("statement") or "", exam.get("problems") or [], part.pid)}
+        sample = dataclasses.replace(sample, code=part.code)
     user = "\n".join(x for x in [exam_text_lang(exam, lang), exam_requirements(exam, lang),
-                                  demos_text(list(demos), cfg), submission_text_lang(_view(sample, cfg), cfg, lang),
+                                  demos_text(list(demos), cfg), focus,
+                                  submission_text_lang(_view(sample, cfg), cfg, lang, lines),
                                   cot_instruction(lang)] if x)
     return [{"role": "system", "content": system_prompt(lang)}, {"role": "user", "content": user}]
