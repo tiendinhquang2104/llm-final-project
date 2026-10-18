@@ -10,7 +10,9 @@ hf:
 vllm:                         # --backend vllm (Kaggle 2x T4): continuous batching, ~5-10x faster than hf
   model: Qwen/Qwen2.5-Coder-7B-Instruct
   dtype: half                 # T4 has no bf16
-  gpu_memory_utilization: 0.90
+  gpu_memory_utilization: 0.85  # 0.90 left too little for the sampler warm-up on T4 (OOM at engine start)
+  max_num_seqs: 32            # concurrent sequences; vLLM's default 256 OOMs in the sampler warm-up (256 x 152k-vocab
+                              # logits); 32 x ~4k-token prompts still fills the KV cache of 2x T4
   max_model_len: 16384        # prompt + max_new_tokens; longest few-shot prompt is well below
   checkpoint_every: 64        # samples per generate call (= per cache flush); overrides the config's 2-4
   attention_backend: TRITON_ATTN  # FlashInfer (vLLM's T4 default) fails its JIT link on Kaggle; null = auto
