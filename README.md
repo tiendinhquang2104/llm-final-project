@@ -113,6 +113,10 @@ python scripts/task2_benchmark.py
 # Task 3: prepare without changing fixed split IDs; mock smoke test (no model download)
 python scripts/task3_prepare.py --filter-synthetic strict
 python scripts/run_task3.py --config configs/task3/baseline.yaml --split real-val --taxonomy-source gold --dry-run
+
+# Task 3 API baselines (Gemini / OpenAI API):
+python scripts/run_task3.py --config configs/task3/gemini.yaml --split real-val --taxonomy-source gold
+python scripts/run_task3.py --config configs/task3/openai.yaml --split real-val --taxonomy-source gold
 ```
 
 Alternatively, use the orchestration script:

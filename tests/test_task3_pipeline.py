@@ -655,3 +655,64 @@ def test_all_taxonomy_inputs_validated_before_first_generation():
     with pytest.raises(ValueError):
         infer(rows, backend, {"context_limit": 10000}, "task2-json", {"TEST-1": []})
     assert backend.calls == 0
+
+
+def test_resolve_provider_and_api_backend_dispatch():
+    from unittest.mock import MagicMock
+    from src.task3.inference import (
+        GeminiBackend,
+        OpenAIBackend,
+        is_api_model,
+        load_backend,
+        resolve_provider,
+    )
+
+    # Explicit provider resolution
+    assert resolve_provider({"provider": "gemini"}) == "gemini"
+    assert resolve_provider({"provider": "openai"}) == "openai"
+    assert resolve_provider({"provider": "hf"}) == "hf"
+    # Default to "hf" when provider is not specified or empty (backward compatibility with teammate's configs)
+    assert resolve_provider({"model_id": "Qwen/Qwen2.5-Coder-7B-Instruct"}) == "hf"
+    assert resolve_provider({}) == "hf"
+    assert resolve_provider({"provider": ""}) == "hf"
+
+    assert is_api_model({"provider": "gemini"}) is True
+    assert is_api_model({"provider": "openai"}) is True
+    assert is_api_model({"provider": "hf"}) is False
+    assert is_api_model({}) is False
+
+    # Invalid provider raises explicit ValueError
+    with pytest.raises(ValueError, match="Unsupported provider"):
+        resolve_provider({"provider": "unsupported_provider"})
+
+
+def test_api_backends_generate_contract(monkeypatch):
+    import types
+    from src.task3.inference import GeminiBackend, Generation, OpenAIBackend, load_backend
+
+    # Mock core GeminiBackend
+    mock_gemini_mod = types.ModuleType("src.llm.api_client")
+    mock_gemini_core = MagicMock()
+    mock_gemini_core.return_value.generate.return_value = [["P1 đúng; P2 sai logic."]]
+    mock_gemini_mod.GeminiBackend = mock_gemini_core
+    monkeypatch.setattr("sys.modules", {**sys.modules, "src.llm.api_client": mock_gemini_mod})
+
+    g_backend = load_backend({"provider": "gemini", "model_id": "gemini-2.5-flash"})
+    assert isinstance(g_backend, GeminiBackend)
+    res_g = g_backend.generate([{"role": "user", "content": "hi"}], {})
+    assert isinstance(res_g, Generation)
+    assert res_g.text == "P1 đúng; P2 sai logic."
+
+    # Mock core OpenAIBackend
+    mock_openai_mod = types.ModuleType("src.llm.openai_client")
+    mock_openai_core = MagicMock()
+    mock_openai_core.return_value.generate.return_value = [["P1 đúng; P2 crash."]]
+    mock_openai_mod.OpenAIBackend = mock_openai_core
+    monkeypatch.setattr("sys.modules", {**sys.modules, "src.llm.openai_client": mock_openai_mod})
+
+    o_backend = load_backend({"provider": "openai", "model_id": "gpt-4o-mini"})
+    assert isinstance(o_backend, OpenAIBackend)
+    res_o = o_backend.generate([{"role": "user", "content": "hi"}], {})
+    assert isinstance(res_o, Generation)
+    assert res_o.text == "P1 đúng; P2 crash."
+

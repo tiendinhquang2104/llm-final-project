@@ -117,3 +117,95 @@ def tokenizer_metadata(tokenizer):
         or getattr(tokenizer, "init_kwargs", {}).get("_commit_hash"),
         "mock": isinstance(tokenizer, MockTokenizer),
     }
+
+
+SUPPORTED_PROVIDERS = ("hf", "gemini", "openai")
+
+
+def resolve_provider(config: dict) -> str:
+    """Resolve provider: 'gemini', 'openai', or default 'hf' (local HuggingFace Qwen)."""
+    provider = str(config.get("provider", "hf")).lower().strip()
+    if not provider:
+        provider = "hf"
+    if provider not in SUPPORTED_PROVIDERS:
+        raise ValueError(f"Unsupported provider '{provider}'. Expected one of {SUPPORTED_PROVIDERS}")
+    return provider
+
+
+def is_api_model(config: dict) -> bool:
+    """Return True if model resolves to an external API (Gemini or OpenAI)."""
+    return resolve_provider(config) in ("gemini", "openai")
+
+
+
+class GeminiBackend:
+    """Gemini API backend matching Task 3 Backend protocol."""
+
+    def __init__(self, config: dict, tokenizer=None):
+        from src.llm.api_client import GeminiBackend as CoreGeminiBackend
+
+        self.config = config
+        self.tokenizer = tokenizer or MockTokenizer()
+        self.client = CoreGeminiBackend(
+            model=config.get("model_id", "gemini-2.5-flash"),
+            rpm=config.get("rpm", 15),
+            tpm=config.get("tpm", 0),
+            max_requests=config.get("max_requests_per_run", 400),
+        )
+
+    def generate(self, messages: list[dict], config: dict) -> Generation:
+        start = time.perf_counter()
+        req = {"messages": messages}
+        gen_cfg = {
+            "max_new_tokens": config.get("max_new_tokens", 512),
+            "temperature": config.get("temperature", 0.0),
+            "n": 1,
+        }
+        res = self.client.generate([req], gen_cfg)
+        text = res[0][0] if res and res[0] else ""
+        elapsed = time.perf_counter() - start
+        tokens = len(self.tokenizer.encode(text)) if hasattr(self.tokenizer, "encode") else len(text.split())
+        return Generation(text.strip(), tokens, elapsed)
+
+
+class OpenAIBackend:
+    """OpenAI API backend matching Task 3 Backend protocol."""
+
+    def __init__(self, config: dict, tokenizer=None):
+        from src.llm.openai_client import OpenAIBackend as CoreOpenAIBackend
+
+        self.config = config
+        self.tokenizer = tokenizer or MockTokenizer()
+        self.client = CoreOpenAIBackend(
+            model=config.get("model_id", "gpt-4o-mini"),
+            rpm=config.get("rpm", 60),
+            tpm=config.get("tpm", 0),
+            max_requests=config.get("max_requests_per_run", 400),
+        )
+
+    def generate(self, messages: list[dict], config: dict) -> Generation:
+        start = time.perf_counter()
+        req = {"messages": messages}
+        gen_cfg = {
+            "max_new_tokens": config.get("max_new_tokens", 512),
+            "temperature": config.get("temperature", 0.0),
+            "n": 1,
+        }
+        res = self.client.generate([req], gen_cfg)
+        text = res[0][0] if res and res[0] else ""
+        elapsed = time.perf_counter() - start
+        tokens = len(self.tokenizer.encode(text)) if hasattr(self.tokenizer, "encode") else len(text.split())
+        return Generation(text.strip(), tokens, elapsed)
+
+
+def load_backend(config: dict, tokenizer=None):
+    """Switch-case to instantiate the requested backend (Gemini, OpenAI, or local HF)."""
+    match resolve_provider(config):
+        case "gemini":
+            return GeminiBackend(config, tokenizer)
+        case "openai":
+            return OpenAIBackend(config, tokenizer)
+        case "hf" | _:
+            return HFBackend(config, tokenizer)
+
+

@@ -9,10 +9,18 @@ from pathlib import Path
 
 from src.task3.dataset import load_prepared, prepare, read_json, write_json
 from src.task3.evaluator import evaluate, write_benchmark, write_review_csv
-from src.task3.inference import HFBackend, MockBackend, MockTokenizer, load_tokenizer, tokenizer_metadata
+from src.task3.inference import (
+    HFBackend,
+    MockBackend,
+    MockTokenizer,
+    is_api_model,
+    load_backend,
+    load_tokenizer,
+    tokenizer_metadata,
+)
 from src.task3.pipeline import _adapter_hash, audit_prompts, export_predictions, infer, load_taxonomy_predictions
 from src.task3.runtime import runtime_manifest
-from src.utils.config import load_config
+from src.utils.config import load_config, load_dotenv
 
 
 def prepare_main(argv=None):
@@ -118,7 +126,8 @@ def run_main(argv=None):
         output = output.with_name(output.stem + ".mock" + output.suffix)
     if args.audit_tokenizer and args.dry_run:
         p.error("--audit-tokenizer requires the pinned real Qwen tokenizer; it cannot use --dry-run")
-    tokenizer = MockTokenizer() if args.dry_run else load_tokenizer(config)
+    load_dotenv()
+    tokenizer = MockTokenizer() if args.dry_run or is_api_model(config) else load_tokenizer(config)
     prompt_audit = audit_prompts(records, tokenizer, config, args.taxonomy_source, predicted, demos)
     prompt_audit["tokenizer_metadata"] = tokenizer_metadata(tokenizer)
     audit_path = output.with_suffix(".tokenizer-audit.json")
@@ -140,8 +149,9 @@ def run_main(argv=None):
         raise ValueError(
             f"tokenizer preflight blocked {prompt_audit['blocked_count']} samples; see ID-only report {audit_path}"
         )
-    backend = MockBackend() if args.dry_run else HFBackend(config, tokenizer)
+    backend = MockBackend() if args.dry_run else load_backend(config, tokenizer)
     progress_path = Path(args.progress_file) if args.progress_file else output.with_suffix(".progress.jsonl")
+
     predictions, traces = infer(
         records,
         backend,

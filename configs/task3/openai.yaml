@@ -1,0 +1,11 @@
+model_id: gpt-4o-mini
+provider: openai
+seed: 42
+data_dir: data/processed/task3
+context_limit: 4096
+max_new_tokens: 512
+few_shot_k: 0
+max_retries: 2
+rpm: 60
+tpm: 0
+max_requests_per_run: 400

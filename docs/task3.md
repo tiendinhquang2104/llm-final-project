@@ -44,11 +44,11 @@ Connected groups combine original code-file identity, exact canonical token hash
 
 `--filter-synthetic strict` (CLI default) removes synthetic training records flagged for gold compliance, placeholder Level 4 or execution-signal contradictions. `none` retains these quality flags for an ablation; overlap quarantine still applies. Synthetic and mixed training require strict preparation. Originals are never modified. The current local audit yields **26 real train, 6 real validation, 505 synthetic train, 47 synthetic heldout, 328 public and 125 quarantine**. The quarantine comprises 30 cross-partition overlap exclusions plus 95 strict quality exclusions; 18 of the 65 original heldout records are quarantined for cross-partition group overlap. These counts depend on the checked input hashes and conservative grouping policy; they are data quality findings, not benchmark scores.
 
-## Local model inference and taxonomy modes
+## Model inference and taxonomy modes
 
-Configs pin `Qwen/Qwen2.5-Coder-7B-Instruct` to revision `c03e6d358207e414f1eca0bb1891e29f1db0e242`. `AutoTokenizer.apply_chat_template` provides the real template. Student code, comments, statement and logs are delimited as untrusted JSON data. Prompt instructions preserve problem IDs and prerequisite context, and explicitly say missing logs do not imply successful compilation. Prompt injection resistance is an instruction/data boundary, not a security proof.
+Configs pin `Qwen/Qwen2.5-Coder-7B-Instruct` to revision `c03e6d358207e414f1eca0bb1891e29f1db0e242` (`baseline.yaml`, `few_shot.yaml`, `qlora.yaml`), or commercial APIs (`gemini.yaml`, `openai.yaml`). For local models, `AutoTokenizer.apply_chat_template` provides the real template; API models use mock token counting to bypass local weight downloads. Student code, comments, statement and logs are delimited as untrusted JSON data. Prompt instructions preserve problem IDs and prerequisite context, and explicitly say missing logs do not imply successful compilation. Prompt injection resistance is an instruction/data boundary, not a security proof.
 
-Generation is greedy by default; config keys include `do_sample`, `temperature`, `top_p`, `context_limit`, `max_new_tokens`, `few_shot_k` and bounded `max_retries` (0–5). Few-shot examples come only from permitted training partitions and exclude IDs, code variants and groups overlapping any selected evaluation record. Examples are ordered deterministically, with same-Level preference. Tokenizer measurements trim logs/test reports before demonstrations; source, problem context and target Level are never silently cropped. Overlength essentials raise an ID/count-only error.
+Generation is greedy by default; config keys include `provider`, `model_id`, `do_sample`, `temperature`, `top_p`, `context_limit`, `max_new_tokens`, `few_shot_k` and bounded `max_retries` (0–5). Few-shot examples come only from permitted training partitions and exclude IDs, code variants and groups overlapping any selected evaluation record. Examples are ordered deterministically, with same-Level preference. Tokenizer measurements trim logs/test reports before demonstrations; source, problem context and target Level are never silently cropped. Overlength essentials raise an ID/count-only error.
 
 On Linux/WSL with the inference/training dependencies installed:
 
@@ -56,6 +56,8 @@ On Linux/WSL with the inference/training dependencies installed:
 # Oracle labels: same six fixed real validation IDs for every experiment
 python scripts/run_task3.py --config configs/task3/baseline.yaml --split real-val --taxonomy-source gold --output outputs/task3/zero.oracle.json
 python scripts/run_task3.py --config configs/task3/few_shot.yaml --split real-val --taxonomy-source gold --output outputs/task3/few.oracle.json
+python scripts/run_task3.py --config configs/task3/gemini.yaml --split real-val --taxonomy-source gold --output outputs/task3/gemini.oracle.json
+python scripts/run_task3.py --config configs/task3/openai.yaml --split real-val --taxonomy-source gold --output outputs/task3/openai.oracle.json
 # Unseen synthetic exams; only isolated, non-quarantined entries are evaluated
 python scripts/run_task3.py --config configs/task3/baseline.yaml --split synthetic-heldout --taxonomy-source gold --output outputs/task3/heldout.oracle.json
 # Error propagation: supply Task2 predictions for exactly the selected validation IDs
@@ -71,6 +73,7 @@ Every item in an array-form Task 2 export is checked for a valid, unique ID befo
 python scripts/run_task3.py --config configs/task3/baseline.yaml --split public --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.json --dry-run
 # Explicit real public generation: remove --dry-run only after supplying actual Task2 predictions
 python scripts/run_task3.py --config configs/task3/baseline.yaml --split public --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.json
+python scripts/run_task3.py --config configs/task3/gemini.yaml --split public --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.gemini.json
 ```
 
 Dry-run still validates taxonomy coverage, then uses a TEST-ONLY generic mock backend. A requested `predictions.json` is saved as `predictions.mock.json` during dry-run. Never submit mock predictions. The strict local validator checks exact ordered IDs, unique IDs, exact output keys, valid labels and nonempty feedback. Example schema, using artificial data only:
@@ -141,6 +144,8 @@ Level-swap tests hold exam/code/taxonomy constant across all four levels and che
 | Zero-shot | Baseline | Oracle | NOT RUN | NOT RUN | NOT RUN |
 | Zero-shot | Baseline | Task2 predicted | NOT RUN | NOT RUN | NOT RUN |
 | Few-shot | Baseline | Oracle / predicted, separate runs | NOT RUN | NOT RUN | NOT RUN |
+| Gemini API | Baseline | Oracle / predicted, separate runs | NOT RUN | NOT RUN | NOT RUN |
+| OpenAI API | Baseline | Oracle / predicted, separate runs | NOT RUN | NOT RUN | NOT RUN |
 | Synthetic SFT | Fine-tuned | Oracle / predicted, separate runs | NOT RUN | NOT RUN | NOT RUN |
 | Real SFT | Fine-tuned | Oracle / predicted, separate runs | NOT RUN | NOT RUN | NOT RUN |
 | Mixed clean SFT | Fine-tuned | Oracle / predicted, separate runs | NOT RUN | NOT RUN | NOT RUN |
