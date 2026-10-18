@@ -1,0 +1,18 @@
+extends: baseline.yaml
+context_limit: 8192
+few_shot_k: 2
+few_shot_source_allowlist:
+  - real
+few_shot_excluded_ids:
+  - EX02-S202
+  - EX02-S203
+  - EX02-S204
+few_shot_same_level_only: true
+prompt_strategy: few_shot_structured_cot
+cot_quality_version: 2
+seed: 42
+do_sample: false
+max_new_tokens: 512
+max_retries: 2
+cot_plan_max_new_tokens: 256
+cot_plan_max_retries: 1

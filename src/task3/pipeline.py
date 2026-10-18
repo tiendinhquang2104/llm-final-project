@@ -18,6 +18,7 @@ from src.task3.prompts import RETRY_HINT, ContextTooLong, budget_prompt, select_
 from src.task3.schema import validate_taxonomy
 from src.task3.strategy import (
     FINAL_PLAN_POLICY,
+    QUALITY_V2_FINAL_POLICY,
     budget_plan_prompt,
     plan_reserve_message,
     untrusted_plan_message,
@@ -114,13 +115,27 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
         config.get("prompt_strategy", "few_shot" if config.get("few_shot_k", 0) else "zero_shot")
     )
     structured = strategy in {"structured_cot", "few_shot_structured_cot"}
+    quality_version = config.get("cot_quality_version", 1)
+    if isinstance(quality_version, bool) or quality_version not in {1, 2}:
+        raise ValueError("cot_quality_version must be 1 or 2")
+    grounded_v2 = quality_version == 2
+    if grounded_v2 and not structured:
+        raise ValueError("cot_quality_version 2 requires a structured CoT strategy")
     plan_retries = config.get("cot_plan_max_retries", 1)
     plan_reserve = config.get("cot_plan_max_new_tokens", 256)
     measurements, blocked_initial, blocked_retry, blocked_plan = [], [], [], []
     for record in records:
         try:
             taxonomy = taxonomy_for(record, taxonomy_source, predicted)
-            demos = select_exemplars(demo_pool, record, config.get("few_shot_k", 0), forbidden=records)
+            demos = select_exemplars(
+                demo_pool,
+                record,
+                config.get("few_shot_k", 0),
+                forbidden=records,
+                source_allowlist=config.get("few_shot_source_allowlist"),
+                excluded_ids=config.get("few_shot_excluded_ids", ()),
+                same_level_only=config.get("few_shot_same_level_only", False),
+            )
             plan_prompts = []
             if structured:
                 if not isinstance(plan_retries, int) or not 0 <= plan_retries <= 2:
@@ -132,7 +147,7 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
                         plan_prompts.append(
                             budget_plan_prompt(
                                 record, taxonomy, tokenizer, config.get("context_limit", 4096), plan_reserve,
-                                strict_retry=retry_index > 0,
+                                strict_retry=retry_index > 0, grounded_v2=grounded_v2,
                             )
                         )
                     except ContextTooLong:
@@ -143,7 +158,7 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
                     blocked_initial.append(record.sample_id)
                     continue
                 additional_messages = [plan_reserve_message()]
-                system_addendum = FINAL_PLAN_POLICY
+                system_addendum = FINAL_PLAN_POLICY + ("\n" + QUALITY_V2_FINAL_POLICY if grounded_v2 else "")
             else:
                 additional_messages = []
                 system_addendum = ""
@@ -192,6 +207,8 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
                 "log_budget_chars": initial_prompt.log_budget,
                 "retry_log_budget_chars": retry_prompt.log_budget if retry_prompt is not None else None,
                 "examples_used": initial_prompt.examples_used,
+                "examples_requested": config.get("few_shot_k", 0),
+                "examples_selected_before_budget": len(demos),
                 "retry_examples_used": retry_prompt.examples_used if retry_prompt is not None else None,
                 "cot_plan_input_tokens": [p.input_tokens if p is not None else None for p in plan_prompts],
                 "cot_plan_context_limit": config.get("context_limit", 4096) if structured else None,
@@ -401,7 +418,7 @@ def _append_progress(path, row):
         os.fsync(stream.fileno())
 
 
-def _generate_structured_plan(record, backend, config, plan_prompts):
+def _generate_structured_plan(record, backend, config, plan_prompts, *, grounded_v2=False):
     """Run bounded planning calls; retain only validated concise JSON, never invalid raw output."""
     attempt_rows = []
     plan = None
@@ -423,14 +440,24 @@ def _generate_structured_plan(record, backend, config, plan_prompts):
             })
             continue
         try:
-            plan = validate_plan_text(generated.text, record)
+            plan = validate_plan_text(generated.text, record, grounded_v2=grounded_v2)
         except ValueError as exc:
             message = str(exc)
-            category = "json_parse_or_text_invalid" if "JSON" in message or "character bound" in message else "schema_validation_failed"
+            if "JSON" in message or "character bound" in message:
+                category = "json_parse_or_text_invalid"
+            elif "source_span" in message or "function_name" in message:
+                category = "source_grounding_failed"
+            elif "problem ID" in message:
+                category = "problem_linkage_failed"
+            elif "CJK" in message:
+                category = "language_validation_failed"
+            else:
+                category = "schema_validation_failed"
             attempt_rows.append({
                 "attempt_index": attempt_index,
                 "status": "validation_failed",
                 "failure_category": category,
+                "validation_reason": message,
                 "error_type": "ValueError",
                 "input_tokens": prompt.input_tokens,
                 "output_tokens": generated.output_tokens,
@@ -490,6 +517,12 @@ def infer(
         config.get("prompt_strategy", "few_shot" if config.get("few_shot_k", 0) else "zero_shot")
     )
     structured = strategy in {"structured_cot", "few_shot_structured_cot"}
+    quality_version = config.get("cot_quality_version", 1)
+    if isinstance(quality_version, bool) or quality_version not in {1, 2}:
+        raise ValueError("cot_quality_version must be 1 or 2")
+    grounded_v2 = quality_version == 2
+    if grounded_v2 and not structured:
+        raise ValueError("cot_quality_version 2 requires a structured CoT strategy")
     plan_retries = config.get("cot_plan_max_retries", 1)
     plan_reserve = config.get("cot_plan_max_new_tokens", 256)
     if structured and (not isinstance(plan_retries, int) or not 0 <= plan_retries <= 2):
@@ -512,7 +545,15 @@ def infer(
     prepared = {}
     for record in records:
         taxonomy = taxonomy_for(record, taxonomy_source, predicted)
-        demos = select_exemplars(demo_pool, record, config.get("few_shot_k", 0), forbidden=records)
+        demos = select_exemplars(
+            demo_pool,
+            record,
+            config.get("few_shot_k", 0),
+            forbidden=records,
+            source_allowlist=config.get("few_shot_source_allowlist"),
+            excluded_ids=config.get("few_shot_excluded_ids", ()),
+            same_level_only=config.get("few_shot_same_level_only", False),
+        )
         plan_prompts = []
         if structured:
             for retry_index in range(plan_retries + 1):
@@ -520,13 +561,13 @@ def infer(
                     plan_prompts.append(
                         budget_plan_prompt(
                             record, taxonomy, backend.tokenizer, config.get("context_limit", 4096), plan_reserve,
-                            strict_retry=retry_index > 0,
+                            strict_retry=retry_index > 0, grounded_v2=grounded_v2,
                         )
                     )
                 except ContextTooLong:
                     plan_prompts.append(None)
             additional_messages = [plan_reserve_message()]
-            system_addendum = FINAL_PLAN_POLICY
+            system_addendum = FINAL_PLAN_POLICY + ("\n" + QUALITY_V2_FINAL_POLICY if grounded_v2 else "")
         else:
             additional_messages = []
             system_addendum = ""
@@ -614,7 +655,9 @@ def infer(
         plan_failure = False
         cot_plan_audit = None
         if structured:
-            plan, cot_plan_audit = _generate_structured_plan(record, backend, config, item["plan_prompts"])
+            plan, cot_plan_audit = _generate_structured_plan(
+                record, backend, config, item["plan_prompts"], grounded_v2=grounded_v2
+            )
             if plan is None:
                 plan_failure = True
                 attempts.append(
@@ -636,7 +679,7 @@ def infer(
                         config.get("max_new_tokens", 512),
                         demos,
                         additional_messages=[untrusted_plan_message(plan)],
-                        system_addendum=FINAL_PLAN_POLICY,
+                        system_addendum=FINAL_PLAN_POLICY + ("\n" + QUALITY_V2_FINAL_POLICY if grounded_v2 else ""),
                     )
                 except ContextTooLong:
                     plan_failure = True
@@ -662,7 +705,7 @@ def infer(
                         demos,
                         strict_hint=RETRY_HINT,
                         additional_messages=[untrusted_plan_message(cot_plan_audit["validated_plan"])] if structured else (),
-                        system_addendum=FINAL_PLAN_POLICY if structured else "",
+                        system_addendum=(FINAL_PLAN_POLICY + ("\n" + QUALITY_V2_FINAL_POLICY if grounded_v2 else "")) if structured else "",
                     )
                 except ContextTooLong:
                     retry_context_blocked = True
@@ -745,6 +788,8 @@ def infer(
             "prompt_sha256": trace_prompt_digest,
             "completed": True,
             "examples_used": prompt.examples_used,
+            "examples_requested": config.get("few_shot_k", 0),
+            "examples_selected_before_budget": len(demos),
             "log_budget": prompt.log_budget,
         }
         if progress_audit["ignored_partial_final_line"]:

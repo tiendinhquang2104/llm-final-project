@@ -62,9 +62,20 @@ def user_context(record: Task3Record, taxonomy, log_chars=8000, report_chars=800
     )
 
 
-def select_exemplars(pool, target, k, forbidden=()):
+def select_exemplars(
+    pool,
+    target,
+    k,
+    forbidden=(),
+    *,
+    source_allowlist=None,
+    excluded_ids=(),
+    same_level_only=False,
+):
     if k < 0:
         raise ValueError("few_shot_k must be nonnegative")
+    allowed_sources = set(source_allowlist) if source_allowlist is not None else None
+    excluded_sample_ids = set(excluded_ids)
     blocked_ids = {target.sample_id, target.original_submission_id}
     blocked_hashes = {target.code_hash, code_hash(target.code, renamed=True)}
     blocked_groups = {target.group_key} if target.group_key else set()
@@ -78,6 +89,10 @@ def select_exemplars(pool, target, k, forbidden=()):
         for r in pool
         if r.split in {"real-train", "synthetic-train"}
         and r.source != "public"
+        and (allowed_sources is None or r.source in allowed_sources)
+        and r.sample_id not in excluded_sample_ids
+        and r.original_submission_id not in excluded_sample_ids
+        and (not same_level_only or r.target_feedback_level == target.target_feedback_level)
         and r.gold_taxonomy is not None
         and r.gold_feedback
         and not ({r.sample_id, r.original_submission_id} & blocked_ids)
