@@ -224,8 +224,8 @@ Lần chạy public trên Kaggle (HF backend, 2x T4) phải retry 258/328 bài v
   - attention dùng `TRITON_ATTN`: trên T4 vLLM tự chọn FlashInfer, mà FlashInfer phải tự build kernel và bị lỗi
     link trên Kaggle (`ld: cannot find -lcuda`); sampler FlashInfer cũng tắt vì cùng lý do.
 
-  Hai notebook mặc định dùng `BACKEND = 'vllm'` và cài bản vLLM mới nhất cho Python của Kaggle (3.13: vLLM 0.9.x
-  không cài được). Cell cài đặt thử `import vllm`; nếu lỗi thì in lỗi pip và chuyển `BACKEND = 'hf'`. Thư mục kết quả có `__vllm__` nên không dùng chung cache với
+  Hai notebook mặc định dùng `BACKEND = 'vllm'` và cài `vllm==0.11.0` (torch 2.8, CUDA 12.8; bản vLLM mới nhất kéo
+  torch CUDA 13 làm hỏng torchaudio của Kaggle) và gỡ `torchaudio` (không dùng). Cell cài đặt thử `import vllm`; nếu lỗi thì in lỗi pip và chuyển `BACKEND = 'hf'`. Thư mục kết quả có `__vllm__` nên không dùng chung cache với
   `__hf__`. Kết quả greedy có thể lệch nhẹ so với HF, nên cần chấm lại 32 gold trước khi nộp.
 
 ## Ví dụ prompt (vai giáo viên chấm bài)
