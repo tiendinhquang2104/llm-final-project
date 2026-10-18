@@ -12,6 +12,7 @@ from src.task3.evaluator import evaluate, write_benchmark, write_review_csv
 from src.task3.inference import HFBackend, MockBackend, MockTokenizer, load_tokenizer, tokenizer_metadata
 from src.task3.pipeline import _adapter_hash, audit_prompts, export_predictions, infer, load_taxonomy_predictions
 from src.task3.runtime import runtime_manifest
+from src.task3.strategy import PROMPT_STRATEGIES, resolve_strategy_config
 from src.utils.config import load_config
 
 
@@ -82,8 +83,14 @@ def run_main(argv=None):
     p.add_argument("--progress-file")
     p.add_argument("--audit-tokenizer", action="store_true")
     p.add_argument("--seed", type=int)
+    p.add_argument(
+        "--prompt-strategy",
+        choices=sorted(PROMPT_STRATEGIES),
+        help="override the configured prompting method; default preserves legacy zero/few-shot behavior",
+    )
     args = p.parse_args(argv)
     config = load_config(args.config)
+    config = resolve_strategy_config(config, args.prompt_strategy)
     if args.adapter:
         config["adapter"] = args.adapter
     if args.seed is not None:

@@ -96,9 +96,19 @@ def select_exemplars(pool, target, k, forbidden=()):
     return selected if k else []
 
 
-def build_messages(record, taxonomy, exemplars=(), *, log_chars=8000, report_chars=8000):
+def build_messages(
+    record,
+    taxonomy,
+    exemplars=(),
+    *,
+    log_chars=8000,
+    report_chars=8000,
+    additional_messages=(),
+    system_addendum="",
+):
     validate_taxonomy(taxonomy)
-    messages = [{"role": "system", "content": SYSTEM}]
+    system_content = SYSTEM + ("\n" + system_addendum if system_addendum else "")
+    messages = [{"role": "system", "content": system_content}]
     for demo in exemplars:
         # Enforce training origin even if callers bypass select_exemplars.
         if demo not in select_exemplars([demo], record, 1):
@@ -109,6 +119,7 @@ def build_messages(record, taxonomy, exemplars=(), *, log_chars=8000, report_cha
                 {"role": "assistant", "content": demo.gold_feedback},
             ]
         )
+    messages.extend(additional_messages)
     messages.append({"role": "user", "content": user_context(record, taxonomy, log_chars, report_chars)})
     return messages
 
@@ -125,13 +136,32 @@ class BudgetedPrompt:
     examples_used: int
 
 
-def budget_prompt(record, taxonomy, tokenizer, context_limit, max_new_tokens, exemplars=(), strict_hint=""):
+def budget_prompt(
+    record,
+    taxonomy,
+    tokenizer,
+    context_limit,
+    max_new_tokens,
+    exemplars=(),
+    strict_hint="",
+    *,
+    additional_messages=(),
+    system_addendum="",
+):
     if context_limit <= max_new_tokens or max_new_tokens <= 0:
         raise ValueError("context_limit must exceed positive max_new_tokens")
     demos = list(exemplars)
     # Trim noisy logs/reports first, then remove demonstrations. Never trim source or Level.
     for cap in (8000, 2000, 500, 0):
-        messages = build_messages(record, taxonomy, demos, log_chars=cap, report_chars=cap)
+        messages = build_messages(
+            record,
+            taxonomy,
+            demos,
+            log_chars=cap,
+            report_chars=cap,
+            additional_messages=additional_messages,
+            system_addendum=system_addendum,
+        )
         if strict_hint:
             messages[0]["content"] += "\n" + strict_hint
         ids = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
@@ -139,7 +169,15 @@ def budget_prompt(record, taxonomy, tokenizer, context_limit, max_new_tokens, ex
             return BudgetedPrompt(messages, len(ids), cap, len(demos))
     while demos:
         demos.pop()
-        messages = build_messages(record, taxonomy, demos, log_chars=0, report_chars=0)
+        messages = build_messages(
+            record,
+            taxonomy,
+            demos,
+            log_chars=0,
+            report_chars=0,
+            additional_messages=additional_messages,
+            system_addendum=system_addendum,
+        )
         if strict_hint:
             messages[0]["content"] += "\n" + strict_hint
         ids = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)

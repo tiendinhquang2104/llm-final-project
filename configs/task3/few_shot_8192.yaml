@@ -1,0 +1,8 @@
+extends: baseline.yaml
+context_limit: 8192
+few_shot_k: 2
+prompt_strategy: few_shot
+seed: 42
+do_sample: false
+max_new_tokens: 512
+max_retries: 2

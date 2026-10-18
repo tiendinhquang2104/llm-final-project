@@ -355,16 +355,25 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
     if traces:
         if set(trace_map) != {record.sample_id for record in records} or len(trace_map) != len(traces):
             raise ValueError("trace IDs must exactly match evaluation records")
-        first_attempts = [trace_map[record.sample_id]["attempts"][0] for record in records]
-        first_low = [
-            trace_map[record.sample_id]["attempts"][0]
+        first_attempts = [
+            next(
+                (attempt for attempt in trace_map[record.sample_id]["attempts"] if attempt.get("model_generated") is True),
+                None,
+            )
             for record in records
-            if record.target_feedback_level.startswith(("Level 1", "Level 2"))
+        ]
+        first_generated = [attempt for attempt in first_attempts if attempt is not None]
+        first_low = [
+            attempt
+            for record, attempt in zip(records, first_attempts)
+            if attempt is not None and record.target_feedback_level.startswith(("Level 1", "Level 2"))
         ]
         fallback_flags = [trace_map[record.sample_id].get("fallback_used", False) for record in records]
         result.update(
-            raw_first_attempt_compliance=rate([attempt["heuristic_compliance"] for attempt in first_attempts]),
+            raw_first_attempt_compliance=rate([attempt["heuristic_compliance"] for attempt in first_generated]),
+            raw_first_attempt_compliance_n=len(first_generated),
             raw_first_attempt_severe_leak_rate_level12=rate([attempt["severe"] for attempt in first_low]),
+            raw_first_attempt_severe_leak_level12_n=len(first_low),
             post_guard_compliance=result["heuristic_compliance"],
             fallback_rate=rate(fallback_flags),
             retry_count=sum(trace_map[record.sample_id].get("retry_count", 0) for record in records),
