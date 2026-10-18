@@ -1,3 +1,4 @@
+import os
 import sys
 import types
 import unittest
@@ -45,9 +46,11 @@ def req(sid, content):
 class TestVLLMBackend(unittest.TestCase):
     def setUp(self):
         FakeLLM.calls = []
-        patcher = mock.patch.dict(sys.modules, {"vllm": fake_vllm()})
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        for patcher in (mock.patch.dict(sys.modules, {"vllm": fake_vllm()}), mock.patch.dict(os.environ)):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        os.environ.pop("VLLM_ATTENTION_BACKEND", None)
+        os.environ.pop("VLLM_USE_FLASHINFER_SAMPLER", None)
         with mock.patch("src.llm.local_backend._hub_revision", return_value="abc"):
             self.be = make_local_backend("vllm", {"vllm": {"model": "m", "max_model_len": 20,
                                                            "tensor_parallel_size": 2}})
@@ -85,6 +88,10 @@ class TestVLLMBackend(unittest.TestCase):
     def test_is_a_vllm_backend(self):
         self.assertIsInstance(self.be, VLLMChatBackend)
         self.assertEqual(self.be.llm.kw["tensor_parallel_size"], 2)
+
+    def test_triton_attention_by_default(self):
+        self.assertEqual(os.environ.get("VLLM_ATTENTION_BACKEND"), "TRITON_ATTN")
+        self.assertEqual(os.environ.get("VLLM_USE_FLASHINFER_SAMPLER"), "0")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ vllm:                         # --backend vllm (Kaggle 2x T4): continuous batchi
   gpu_memory_utilization: 0.90
   max_model_len: 16384        # prompt + max_new_tokens; longest few-shot prompt is well below
   checkpoint_every: 64        # samples per generate call (= per cache flush); overrides the config's 2-4
+  attention_backend: TRITON_ATTN  # FlashInfer (vLLM's T4 default) fails its JIT link on Kaggle; null = auto
 run:
   experiment: cot_zero_shot   # evaluated on all 32 gold (zero-shot: nothing is tuned on gold)
   smoke_sample_ids: [EX02-S201]

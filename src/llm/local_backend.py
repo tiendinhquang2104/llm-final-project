@@ -257,8 +257,13 @@ class VLLMChatBackend(LocalChatBackend):
     def __init__(self, model: str = "Qwen/Qwen2.5-Coder-7B-Instruct", dtype: str = "half", revision: str | None = None,
                  hardware: str = "", tensor_parallel_size: int | None = None, gpu_memory_utilization: float = 0.90,
                  max_model_len: int = 16384, max_num_seqs: int | None = None, enforce_eager: bool = False,
-                 checkpoint_every: int = 64):
+                 checkpoint_every: int = 64, attention_backend: str | None = "TRITON_ATTN"):
+        """`attention_backend`: on T4 vLLM picks FlashInfer, which JIT-compiles its kernels and fails to link on
+        Kaggle (no libcuda.so for `ld`); Triton attention needs no build step. None = let vLLM choose."""
         super().__init__(model, hardware)
+        if attention_backend:  # read by vLLM at import and inherited by its worker processes
+            os.environ.setdefault("VLLM_ATTENTION_BACKEND", attention_backend)
+            os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")  # same JIT build for top-p sampling
         import torch
         import vllm
         from vllm import LLM
@@ -277,7 +282,8 @@ class VLLMChatBackend(LocalChatBackend):
         if torch.cuda.is_available() and not hardware:
             self.hardware = f"{torch.cuda.get_device_name(0)} x{torch.cuda.device_count()}"
         print(f"vllm {vllm.__version__}: tensor_parallel {tp}, max_model_len {max_model_len}, "
-              f"gpu_memory_utilization {gpu_memory_utilization}", flush=True)
+              f"gpu_memory_utilization {gpu_memory_utilization}, "
+              f"attention {os.environ.get('VLLM_ATTENTION_BACKEND', 'auto')}", flush=True)
 
     def generate(self, requests: list[dict], gen: dict) -> list[list[str]]:
         from vllm import SamplingParams

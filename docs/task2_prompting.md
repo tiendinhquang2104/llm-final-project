@@ -221,9 +221,11 @@ Lần chạy public trên Kaggle (HF backend, 2x T4) phải retry 258/328 bài v
   - mỗi lần gọi model gửi `checkpoint_every: 64` bài (thay cho 2–4 của config) và cache được ghi sau mỗi lô;
   - n câu SC của một bài dùng chung phần prefill; seed của từng bài giống các backend khác;
   - prompt dài hơn `max_model_len` nhận placeholder `[OOM]` để không làm hỏng cả lô.
+  - attention dùng `TRITON_ATTN`: trên T4 vLLM tự chọn FlashInfer, mà FlashInfer phải tự build kernel và bị lỗi
+    link trên Kaggle (`ld: cannot find -lcuda`); sampler FlashInfer cũng tắt vì cùng lý do.
 
-  Hai notebook mặc định dùng `BACKEND = 'vllm'` và cài `vllm==0.9.2`. Bản này được chọn vì còn hỗ trợ T4
-  (compute 7.5); **chưa chạy thử trên Kaggle**. Thư mục kết quả có `__vllm__` nên không dùng chung cache với
+  Hai notebook mặc định dùng `BACKEND = 'vllm'` và cài bản vLLM mới nhất cho Python của Kaggle (3.13: vLLM 0.9.x
+  không cài được). Cell cài đặt thử `import vllm`; nếu lỗi thì in lỗi pip và chuyển `BACKEND = 'hf'`. Thư mục kết quả có `__vllm__` nên không dùng chung cache với
   `__hf__`. Kết quả greedy có thể lệch nhẹ so với HF, nên cần chấm lại 32 gold trước khi nộp.
 
 ## Ví dụ prompt (vai giáo viên chấm bài)
