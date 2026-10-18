@@ -7,6 +7,12 @@ hf:
   dtype: float16
   load_in_4bit: false         # true nếu GPU < 16 GB
   gpu_reserve_gb: 4.0         # để trống trên mỗi GPU khi đặt trọng số (KV cache + attention prompt dài ~5.8k token)
+vllm:                         # --backend vllm (Kaggle 2x T4): continuous batching, ~5-10x faster than hf
+  model: Qwen/Qwen2.5-Coder-7B-Instruct
+  dtype: half                 # T4 has no bf16
+  gpu_memory_utilization: 0.90
+  max_model_len: 16384        # prompt + max_new_tokens; longest few-shot prompt is well below
+  checkpoint_every: 64        # samples per generate call (= per cache flush); overrides the config's 2-4
 run:
   experiment: cot_zero_shot   # evaluated on all 32 gold (zero-shot: nothing is tuned on gold)
   smoke_sample_ids: [EX02-S201]

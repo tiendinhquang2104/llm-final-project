@@ -72,7 +72,8 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
     ap = argparse.ArgumentParser(description=doc)
     ap.add_argument("--run-config", default=str(config_dir / "run_cot.yaml"))
     ap.add_argument("--experiment", default=experiment, help=f"Config in configs/task2 (default: {experiment})")
-    ap.add_argument("--backend", choices=("mlx", "hf"))
+    ap.add_argument("--baseline", default=baseline, help=f"Run to compare against on gold (default: {baseline})")
+    ap.add_argument("--backend", choices=("mlx", "hf", "vllm"))
     ap.add_argument("--gold-root", help="Labelled set to score instead of the 32 gold")
     ap.add_argument("--silver", action="store_true", help="Score the synthetic silver set (data/synth/v1, fetched "
                     "from Drive via SILVER_DRIVE_ID if missing) to tune the prompt")
@@ -167,8 +168,8 @@ def main(root: Path, experiment: str, baseline: str | None = None, argv=None, do
             api = m["systems"].get("api") or {}
             print(f"{cfg['name']}: macro-F1={api.get('macro_f1')} micro-F1={api.get('micro_f1')} "
                   f"parse_fail={m['parse_failures']}")
-            if baseline:
-                compare(run_dir, out / run_name(config_dir, baseline, kind, settings[kind]["model"], a.smoke,
+            if a.baseline:
+                compare(run_dir, out / run_name(config_dir, a.baseline, kind, settings[kind]["model"], a.smoke,
                                                 data_tag))
         if public_samples:
             pcfg = {**cfg, "name": cfg["name"] + "_predict"}

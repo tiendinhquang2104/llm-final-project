@@ -1,0 +1,5 @@
+extends: cot_self_consistency.yaml
+name: task2_cot_sc_en
+description: Như task2_cot_sc nhưng prompt bằng tiếng Anh (prompt.lang en); dòng CONCLUSION giữ tên nhãn tiếng Việt.
+prompt:
+  lang: en

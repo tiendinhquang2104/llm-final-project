@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
-from src.llm.local_backend import LocalChatBackend
+from src.llm.local_backend import OOM_MARK, LocalChatBackend
 from src.task2.cot_bundle import backend_settings, export_bundle, load_bundle
 from src.task2.cot_runner import run_and_report, tee_log
 from src.task2.api_experiment import run_api
@@ -84,6 +84,13 @@ class TestCotPrompt(unittest.TestCase):
         self.assertEqual(p1["labels"], ["Lỗi logic"])
         self.assertTrue(p2["parse_ok"])               # recovered by the retry
         self.assertEqual(p2["labels"], [])
+
+    def test_oom_retry_resends_original_prompt(self):
+        backend = FakeBackend([f"{OOM_MARK} CUDA out of memory, prompt ~4000 token", cot_answer("Lỗi logic")])
+        pipe = Task2ApiPipeline(self.ds, backend, COT_CFG)
+        rec = pipe.infer([self.by["A1"]])[0]
+        self.assertEqual(backend.calls[1]["messages"], backend.calls[0]["messages"])  # no "[OOM]" turn, no fix-JSON ask
+        self.assertEqual(pipe.postprocess(rec)["labels"], ["Lỗi logic"])
 
 
 class ScriptedLocal(LocalChatBackend):

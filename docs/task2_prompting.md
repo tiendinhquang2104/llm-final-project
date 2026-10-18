@@ -208,6 +208,24 @@ model viết đủ 9 bước và liệt kê đúng câu đã làm / chưa làm. 
 Có 1 bài bị lặp chuỗi số dòng đến `max_new_tokens`. Kết luận: chỉ sửa prompt là chưa đủ, cần thêm bằng chứng chạy
 thật (xem đề xuất trong phần trả lời 2026-10-17).
 
+## Backend vLLM và retry sau OOM (2026-10-18)
+
+Lần chạy public trên Kaggle (HF backend, 2x T4) phải retry 258/328 bài vì CUDA OOM. Hai thay đổi:
+
+- **Retry sau OOM:** trước đây câu `[OOM] ...` bị coi là câu trả lời của model, rồi model được yêu cầu "sửa lại
+  JSON". Kết quả là nhãn từ một JSON trơn, không có suy luận. Giờ bài OOM được gửi lại bằng prompt gốc
+  (`src/task2/pipeline.py`).
+- **`--backend vllm`** (`VLLMChatBackend` trong `src/llm/local_backend.py`, mục `vllm:` trong `run_cot.yaml`):
+  - continuous batching + paged KV cache được giữ trước (`gpu_memory_utilization`), nên prompt dài phải chờ
+    chỗ trống chứ không OOM; `tensor_parallel_size` = số GPU;
+  - mỗi lần gọi model gửi `checkpoint_every: 64` bài (thay cho 2–4 của config) và cache được ghi sau mỗi lô;
+  - n câu SC của một bài dùng chung phần prefill; seed của từng bài giống các backend khác;
+  - prompt dài hơn `max_model_len` nhận placeholder `[OOM]` để không làm hỏng cả lô.
+
+  Hai notebook mặc định dùng `BACKEND = 'vllm'` và cài `vllm==0.9.2`. Bản này được chọn vì còn hỗ trợ T4
+  (compute 7.5); **chưa chạy thử trên Kaggle**. Thư mục kết quả có `__vllm__` nên không dùng chung cache với
+  `__hf__`. Kết quả greedy có thể lệch nhẹ so với HF, nên cần chấm lại 32 gold trước khi nộp.
+
 ## Ví dụ prompt (vai giáo viên chấm bài)
 
 Bài code dưới đây là ví dụ tự viết để minh họa, không lấy từ tập public. Định nghĩa nhãn lấy từ `src/task2/labels.py`.

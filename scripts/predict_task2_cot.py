@@ -59,7 +59,7 @@ def main() -> None:
     ap.add_argument("--data-root", help="Folder (or zip) with exams.json + task2_error_taxonomy.json "
                     "(default: the 360 public samples)")
     ap.add_argument("--out", help="Default: outputs/task2/predict_cot/<bundle>")
-    ap.add_argument("--backend", choices=("auto", "mlx", "hf"), default="auto",
+    ap.add_argument("--backend", choices=("auto", "mlx", "hf", "vllm"), default="auto",
                     help="auto: MLX on Apple Silicon with mlx_lm installed, else transformers")
     ap.add_argument("--compile-source", choices=("self", "dataset"), help="Default: the bundle's")
     ap.add_argument("--no-compile", action="store_true")

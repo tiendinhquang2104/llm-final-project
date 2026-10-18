@@ -246,6 +246,100 @@ class HFChatBackend(LocalChatBackend):
         return sum(t.cuda.max_memory_allocated(i) for i in range(t.cuda.device_count())) / 2**30
 
 
+class VLLMChatBackend(LocalChatBackend):
+    """vLLM (Kaggle GPUs): continuous batching over a paged KV cache reserved up front, so a long prompt waits for
+    room instead of OOMing. One generate() call schedules all its requests together (the n answers of a prompt
+    share its prefill), hence `checkpoint_every`: run_api passes that many samples per call instead of the
+    config's 2-4. Greedy answers can differ slightly from the HF backend (batched kernels), so runs are named
+    `__vllm__` and never share the HF cache."""
+    name = "vllm"
+
+    def __init__(self, model: str = "Qwen/Qwen2.5-Coder-7B-Instruct", dtype: str = "half", revision: str | None = None,
+                 hardware: str = "", tensor_parallel_size: int | None = None, gpu_memory_utilization: float = 0.90,
+                 max_model_len: int = 16384, max_num_seqs: int | None = None, enforce_eager: bool = False,
+                 checkpoint_every: int = 64):
+        super().__init__(model, hardware)
+        import torch
+        import vllm
+        from vllm import LLM
+
+        tp = tensor_parallel_size or max(1, torch.cuda.device_count())
+        kw = {"model": model, "revision": revision, "dtype": dtype, "tensor_parallel_size": tp,
+              "gpu_memory_utilization": gpu_memory_utilization, "max_model_len": max_model_len,
+              "enforce_eager": enforce_eager, "disable_custom_all_reduce": True}  # T4 pairs have no NVLink/P2P
+        if max_num_seqs:
+            kw["max_num_seqs"] = max_num_seqs
+        self.llm = LLM(**kw)
+        self.tok = self.llm.get_tokenizer()
+        self.max_model_len = max_model_len
+        self.checkpoint_every = checkpoint_every
+        self.revision = revision or _hub_revision(model)
+        if torch.cuda.is_available() and not hardware:
+            self.hardware = f"{torch.cuda.get_device_name(0)} x{torch.cuda.device_count()}"
+        print(f"vllm {vllm.__version__}: tensor_parallel {tp}, max_model_len {max_model_len}, "
+              f"gpu_memory_utilization {gpu_memory_utilization}", flush=True)
+
+    def generate(self, requests: list[dict], gen: dict) -> list[list[str]]:
+        from vllm import SamplingParams
+
+        n = int(gen.get("n", 1))
+        temperature = float(gen.get("temperature", 0.0))
+        max_tokens = int(gen.get("max_new_tokens", 1024))
+        base = int(gen.get("seed", 42))
+        self.top_p = float(gen.get("top_p", 1.0))
+        if n > 1 and temperature <= 0:
+            raise ValueError("n > 1 cần temperature > 0 (greedy cho ra n câu trả lời giống nhau)")
+        sids, seeds, prompts, params, out = [], [], [], [], [None] * len(requests)
+        for i, r in enumerate(requests):
+            sid = getattr(r.get("sample"), "sample_id", f"#{i}")
+            seed = base + (zlib.crc32(sid.encode()) % 100_000) * 10  # same per-sample seed as the other backends
+            ids = self.tok.apply_chat_template(r["messages"], add_generation_prompt=True, tokenize=True)
+            ids = list(ids["input_ids"] if hasattr(ids, "keys") else ids)  # newer transformers return a dict
+            room = min(max_tokens, self.max_model_len - len(ids))
+            if room <= 0:  # vLLM rejects the whole call for one over-long prompt: answer it with a placeholder
+                print(f"  {sid}: prompt {len(ids)} token > max_model_len {self.max_model_len}, bỏ qua", flush=True)
+                out[i] = [f"{OOM_MARK} prompt {len(ids)} token > max_model_len {self.max_model_len}"] * n
+                continue
+            sids.append((i, sid, len(ids)))
+            seeds.append(seed)
+            prompts.append({"prompt_token_ids": ids})
+            params.append(SamplingParams(n=n, temperature=temperature, max_tokens=room,
+                                         **({"top_p": self.top_p, "seed": seed} if temperature > 0 else {})))
+        t0 = time.time()
+        results = self.llm.generate(prompts, params, use_tqdm=False) if prompts else []
+        total = time.time() - t0
+        n_out = 0
+        for (i, sid, p_tok), seed, res in zip(sids, seeds, results):
+            outs = [len(c.token_ids) for c in res.outputs]
+            n_out += sum(outs)
+            for k, o_tok in enumerate(outs):
+                self.usage["requests"] += 1
+                self.usage["prompt_tokens"] += p_tok
+                self.usage["output_tokens"] += o_tok
+                self.ledger.append({"sample_id": sid, "vote": k, "prompt_tokens": p_tok, "output_tokens": o_tok,
+                                    "seconds": round(total / max(1, len(results) * n), 2),  # batch share
+                                    "hit_max_tokens": o_tok >= max_tokens, "temperature": temperature,
+                                    "top_p": self.top_p, "seed": seed + k if temperature > 0 else seed})
+            cut = sum(o >= max_tokens for o in outs)
+            print(f"  {sid}" + (f" x{n}" if n > 1 else "") + f": vào {p_tok} token, ra " + "/".join(map(str, outs))
+                  + " token" + (f" ({cut} câu chạm max_new_tokens)" if cut else ""), flush=True)
+            out[i] = [c.text for c in res.outputs]
+        if results:
+            print(f"  batch {len(results)} bài: {total:.1f}s, {n_out / max(total, 1e-9):.0f} tok/s ra", flush=True)
+        return out
+
+
+def _hub_revision(model: str) -> str | None:
+    """Commit of a Hub model id (None for a local path or offline)."""
+    if Path(model).exists():
+        return _snapshot_revision(model)
+    try:
+        from huggingface_hub import HfApi
+        return HfApi().model_info(model).sha
+    except Exception:  # noqa: BLE001 - offline / gated: the bundle just records no revision
+        return None
+
+
 def make_local_backend(kind: str, settings: dict) -> LocalChatBackend:
-    cls = {"mlx": MLXChatBackend, "hf": HFChatBackend}[kind]
+    cls = {"mlx": MLXChatBackend, "hf": HFChatBackend, "vllm": VLLMChatBackend}[kind]
     return cls(**settings.get(kind, {}))

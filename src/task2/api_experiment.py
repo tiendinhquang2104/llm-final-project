@@ -46,7 +46,7 @@ def run_api(cfg: dict, dataset, samples: list, backend, out_dir, demo_pool=(), r
     usage_before = dict(info.get("usage") or {})
     ledger_before = len(getattr(backend, "ledger", []))
     t0 = time.time()
-    chunk = max(1, int(cfg.get("checkpoint_every", 4)))
+    chunk = max(1, int(getattr(backend, "checkpoint_every", None) or cfg.get("checkpoint_every", 4)))  # vLLM: big batches
     if todo and cache_path.exists() and cache_path.stat().st_size and not cache_path.read_bytes().endswith(b"\n"):
         with cache_path.open("a", encoding="utf-8") as f:  # end a truncated last line so new rows stay parseable
             f.write("\n")

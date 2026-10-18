@@ -1,6 +1,7 @@
 """Task 2 Hướng 1: prompt -> LLM -> parse labels -> self-consistency vote -> probabilities and labels."""
 from __future__ import annotations
 
+from src.llm.local_backend import OOM_MARK
 from src.task2.compile import has_compile_error
 from src.task2.labels import LABELS, coerce_labels, normalize_labels
 from src.task2.prompts import RESPONSE_SCHEMA, build_messages, select_demos
@@ -87,7 +88,8 @@ class Task2ApiPipeline:
             for i in bad:
                 q = dict(reqs[i])
                 last = (records[i]["retry_outputs"] or records[i]["outputs"] or [""])[-1]
-                if last.strip():  # answered but not valid JSON -> ask to fix the format
+                if last.strip() and not last.startswith(OOM_MARK):  # answered but not valid JSON -> fix the format
+                    # (an OOM placeholder is not an answer: resend the original prompt)
                     q["messages"] = q["messages"] + [{"role": "assistant", "content": last[-3000:]},
                                                      {"role": "user", "content": RETRY_MSG}]
                 retry.append(q)

@@ -99,12 +99,12 @@ def load_bundle(bundle_dir) -> dict:
 def backend_settings(meta: dict, kind: str | None = None) -> tuple[str, dict]:
     """(kind, settings for make_local_backend) reproducing the bundle's backbone."""
     kind = kind or meta["backend"]
-    if kind == "hf":
+    if kind in ("hf", "vllm"):  # same fp16 Hub weights
         if meta.get("weights_path"):
-            return kind, {"hf": {"model": meta["weights_path"]}}
-        model = meta["model"] if meta["backend"] == "hf" else "Qwen/Qwen2.5-Coder-7B-Instruct"
-        rev = meta.get("revision") if meta["backend"] == "hf" else None
-        return kind, {"hf": {"model": model, "revision": rev}}
+            return kind, {kind: {"model": meta["weights_path"]}}
+        same = meta["backend"] in ("hf", "vllm")
+        model = meta["model"] if same else "Qwen/Qwen2.5-Coder-7B-Instruct"
+        return kind, {kind: {"model": model, "revision": meta.get("revision") if same else None}}
     model = meta["model"] if meta["backend"] == "mlx" else "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
     return kind, {"mlx": {"model": model}}
 
