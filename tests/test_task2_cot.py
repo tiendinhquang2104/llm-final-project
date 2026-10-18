@@ -577,6 +577,56 @@ class TestStripComments(unittest.TestCase):
             self.assertIn("isArm", user_off)
             self.assertEqual(ds.by_id()["A1"].code, self.CODE)     # the dataset itself is untouched
 
+    def test_drop_blank_lines_keeps_original_numbers(self):
+        from src.task2.prompts_cot import numbered_code
+        out = numbered_code("int a;\n\n   \nint b;", drop_blank=True)
+        self.assertEqual(out, "   1| int a;\n   4| int b;")
+        self.assertEqual(numbered_code("a\n\nb").count("|"), 3)    # off by default
+
+
+class TestCompactCompileLog(unittest.TestCase):
+    LOG = ("student.cpp: In function 'int f()':\n"
+           "student.cpp:28:12: error: no matching function for call to 'getline(a, b, c)'\n"
+           "   28 |     getline(fin, line, \"\\n\");\n"
+           "      |     ~~~~~~~^~~~~~~~~~~~~\n"
+           "In file included from /usr/include/c++/13/string:55,\n"
+           "/usr/include/c++/13/bits/basic_string.tcc:899:5: note: candidate: 'template<...> getline(...)'\n"
+           "  899 |     getline(basic_istream<_CharT, _Traits>& __in,\n"
+           "student.cpp:9:5: warning: unused variable 'x'\n"
+           "student.cpp:40:3: error: 'y' was not declared in this scope\n"
+           "   40 |   y = 1;\n")
+
+    def test_errors_only_with_their_source_lines(self):
+        from src.task2.prompts_cot import compact_compile_log
+        out = compact_compile_log(self.LOG, 800)
+        self.assertEqual(out.splitlines(), self.LOG.splitlines()[1:4] + self.LOG.splitlines()[8:10])
+        for dropped in ("note:", "In file included", "warning", "In function"):
+            self.assertNotIn(dropped, out)
+
+    def test_cut_after_the_first_errors(self):
+        from src.task2.prompts_cot import compact_compile_log
+        out = compact_compile_log(self.LOG, 50, "en")
+        self.assertIn("28:12: error", out)                          # the first error always stays
+        self.assertNotIn("40:3", out)
+        self.assertTrue(out.endswith("...(1 more errors)"))
+
+    def test_no_error_log_is_cut(self):
+        from src.task2.prompts_cot import compact_compile_log
+        self.assertEqual(compact_compile_log("a.cpp:1:1: warning: w", 800), "a.cpp:1:1: warning: w")
+        self.assertTrue(compact_compile_log("w" * 900, 800).endswith("...(cắt bớt)"))
+        self.assertEqual(compact_compile_log(None, 800, "en"), "(none)")
+
+    def test_prompt_uses_it_when_configured(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ds = load_task2(make_dataset(Path(tmp), [("A1", "EXA", [])]))
+            ds.samples[0].compile_log = self.LOG
+            cfg = {**COT_CFG, "prompt": {**COT_CFG["prompt"], "max_compile_log_chars": 800}}
+            user = Task2ApiPipeline(ds, None, cfg).build_request(ds.samples[0])["messages"][1]["content"]
+            self.assertIn("'y' was not declared", user)
+            self.assertNotIn("note: candidate", user)
+            full = Task2ApiPipeline(ds, None, COT_CFG).build_request(ds.samples[0])["messages"][1]["content"]
+            self.assertIn("note: candidate", full)                   # unset: the shared block, unchanged
+
 
 
 class TestExamRequirements(unittest.TestCase):
@@ -597,11 +647,20 @@ class TestExamRequirements(unittest.TestCase):
         self.assertIn("`Student* readAll(string path_to_file, int& n);` (điều kiện để chấm P2)", r)
         self.assertIn("`students-2027.txt`", r)
         self.assertIn("tham số `path_to_file`", r)
-        self.assertIn("Thư viện được phép: iostream, fstream, string.", r)
-        self.assertIn("Hàm bị cấm: `sort`, `vector`.", r)
+        self.assertIn("Ràng buộc: không được dùng vector", r)
+        for repeated in ("Thư viện được phép", "Hàm bị cấm"):  # already in the statement / constraints line
+            self.assertNotIn(repeated, r)
         self.assertIn("KHÔNG có main là đúng", r)
         for leaked in ("50-best", "prob1", "General", "filename", "thêm"):
             self.assertNotIn(leaked, r)
+
+    def test_prototype_quoted_in_statement_is_not_repeated(self):
+        from src.task2.prompts_cot import exam_requirements
+        exam = {**self.PRIVATE, "statement": self.PRIVATE["statement"] + "\nP1: Student*  readAll(string "
+                "path_to_file, int& n);"}
+        r = exam_requirements(exam)
+        self.assertIn("  - P1: `readAll(...)` (điều kiện để chấm P2)", r)
+        self.assertIn("  - P2: `double avg(Student* s, int n);`", r)   # not in the statement: kept in full
 
     def test_missing_fields_give_no_lines(self):
         from src.task2.prompts_cot import exam_requirements

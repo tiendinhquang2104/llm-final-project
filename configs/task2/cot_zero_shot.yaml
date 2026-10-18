@@ -8,6 +8,8 @@ prompt:
   max_code_chars: 12000
   use_aux_signals: true
   strip_comments: true   # bỏ code trong comment (giữ số dòng) trước khi đưa vào prompt
+  drop_blank_lines: true  # bỏ dòng trống (kể cả dòng chỉ có comment), vẫn giữ số dòng gốc
+  max_compile_log_chars: 800  # compile_log: chỉ các lỗi (error + dòng code + dấu ^), lỗi đầu trước; note/warning bỏ
   compile_rule: true     # "Lỗi biên dịch" := compile_log có lỗi compiler (warning / thiếu main không tính), thay cho phiếu của model
   max_prompt_chars: 24000  # ~8k token; prompt dài hơn thì bỏ bớt demo (T4: OOM với prompt dài)
 generation:

@@ -228,6 +228,33 @@ Lần chạy public trên Kaggle (HF backend, 2x T4) phải retry 258/328 bài v
   torch CUDA 13 làm hỏng torchaudio của Kaggle) và gỡ `torchaudio` (không dùng). Cell cài đặt thử `import vllm`; nếu lỗi thì in lỗi pip và chuyển `BACKEND = 'hf'`. Thư mục kết quả có `__vllm__` nên không dùng chung cache với
   `__hf__`. Kết quả greedy có thể lệch nhẹ so với HF, nên cần chấm lại 32 gold trước khi nộp.
 
+## Rút gọn prompt (2026-10-18, nhánh `task-2-prompt-slim`)
+
+Prompt dài thêm khoảng 700–900 token so với bản tạo `predictions_zeroshot.json`, nên Kaggle OOM nhiều hơn. Bốn
+thay đổi; mô tả nhãn rút từ gold, các quy tắc và 9 bước chấm vẫn giữ nguyên ý:
+
+1. Bỏ chỗ lặp: các bước chấm chỉ còn câu hỏi, ví dụ đã có trong mô tả nhãn của system prompt; bước "Rà lại" tham
+   chiếu NGUYÊN TẮC CHẤM thay vì nhắc lại; khung trả lời dùng `<...>`; danh sách nhãn chỉ có trong system prompt.
+2. *(Không làm ở nhánh này: rút ngắn 9 bước / câu trả lời, để A/B riêng.)*
+3. Khối yêu cầu đề không lặp lại đề bài: bỏ dòng thư viện được phép và hàm bị cấm (lấy từ chính đề, hoặc đã có ở
+   dòng Ràng buộc); prototype đã có nguyên văn trong đề chỉ ghi tên hàm + câu tiên quyết.
+4. `prompt.max_compile_log_chars: 800`: compile_log chỉ giữ các lỗi (error + dòng code + dấu ^), lỗi đầu trước,
+   rồi `...(còn N lỗi khác)`; note / include / warning bỏ. 139 log có lỗi trong cache: trung vị 323 → 247 ký tự,
+   tối đa 2013 → 812. `Lỗi biên dịch` vẫn lấy từ log đầy đủ (`compile_rule`).
+5. `prompt.drop_blank_lines: true`: bỏ dòng trống (kể cả dòng chỉ có comment sau `strip_comments`), giữ số dòng gốc.
+
+Token (tokenizer Qwen, 328 bài public, chưa tính compile_log):
+
+| | system | hướng dẫn | tổng trung vị | p95 | max |
+|---|---|---|---|---|---|
+| vi trước | 1123 | 862 | 3143 | 5223 | 7069 |
+| vi sau | 991 | 543 | 2639 | 4605 | 6309 |
+| en trước | 1011 | 713 | 2841 | 4919 | 6765 |
+| en sau | 899 | 423 | 2386 | 4353 | 6057 |
+
+Giảm khoảng 16% ở trung vị, 10% ở bài dài nhất; bài lỗi biên dịch giảm thêm tới khoảng 400 token. Vẫn dài hơn bản cũ
+khoảng 300 token (khối yêu cầu đề). Phải chấm lại gold/silver trước khi dùng nhánh này để nộp.
+
 ## Ví dụ prompt (vai giáo viên chấm bài)
 
 Bài code dưới đây là ví dụ tự viết để minh họa, không lấy từ tập public. Định nghĩa nhãn lấy từ `src/task2/labels.py`.

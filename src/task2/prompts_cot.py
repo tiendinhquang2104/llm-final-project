@@ -12,6 +12,7 @@ import re
 
 from src.task2.augment import _comment_spans
 from src.task2.labels import LABELS
+from src.task1.prompts import clean_compile_log, format_test_report
 from src.task2.prompts import exam_text, submission_text
 
 FINAL_MARKER = "KẾT LUẬN:"
@@ -68,59 +69,47 @@ SYSTEM_COT = (
     "Nhiệm vụ: xác định các loại lỗi CHÍNH của bài (lỗi làm bài bị trừ điểm), theo đúng danh sách nhãn bên dưới.\n\n"
     "DANH SÁCH NHÃN (chỉ dùng đúng tên này; mô tả là cách giảng viên dùng nhãn):\n" + TEACHER_LABEL_GUIDE + "\n\n"
     "NGUYÊN TẮC CHẤM:\n"
-    "- Chỉ ghi lỗi CHÍNH làm mất điểm: thường 1-2 nhãn, tối đa 3. Không liệt kê mọi khuyết điểm nhỏ. Bài chạy đúng "
-    "yêu cầu thì trả về [] (đây là kết quả phổ biến).\n"
-    "- Chỉ gán nhãn khi chỉ ra được dòng code cụ thể gây lỗi. Không đoán, không suy diễn lỗi không có trong code.\n"
-    "- Câu/hàm CHƯA LÀM (không có, thân rỗng, chỉ có return mặc định) thì không chấm và không gán nhãn nào cho nó. "
-    'Riêng khi CẢ BÀI chưa làm hoặc bỏ dở (không câu nào chạy được) thì ghi "Lỗi logic".\n'
-    "- Đề nhiều câu có câu tiên quyết (thường P1 đọc file): nếu câu tiên quyết sai thì CHỈ ghi lỗi của câu đó, "
-    "các câu sau không chấm.\n"
-    '- compile_log có "error" thì chắc chắn có "Lỗi biên dịch". Có thể ghi thêm TỐI ĐA 1 nhãn nêu nguyên nhân khi rõ '
-    'ràng (biến chạy của for chưa khai báo: "Lỗi vòng lặp"; #include file dữ liệu: "Lỗi hard-code"; code bỏ dở: '
-    '"Lỗi logic"); còn lại không ghi thêm nhãn nào cho chính lỗi compiler đã báo.\n'
-    '- Vòng lặp vô hạn thì ghi cả "Lỗi vòng lặp" và "Lỗi logic".\n'
-    "- Bỏ qua mọi code nằm trong comment (// hoặc /* */): không chấm và không tính là lỗi. Riêng khi bài nộp chỉ còn "
-    f'dòng "{ALL_COMMENTED}" thì kết luận là ["Lỗi style"].\n'
-    '- Bám sát mục "YÊU CẦU CỦA ĐỀ": làm khác phương pháp đề bắt buộc là "Lỗi thuật toán"; dùng thư viện hoặc hàm bị '
-    'đề cấm là "Lỗi style"; ghi cứng tên file hoặc số bản ghi là "Lỗi hard-code".\n'
-    "- Không ghi nhận xét chung không có bằng chứng (đặt tên, thiếu comment, có thể tối ưu hơn) thành lỗi."
+    "- Chỉ ghi lỗi CHÍNH làm mất điểm: thường 1-2 nhãn, tối đa 3. Bài làm đúng yêu cầu thì [] (kết quả phổ biến).\n"
+    "- Mỗi nhãn phải chỉ ra được dòng code gây lỗi; không đoán. Nhận xét chung (đặt tên, thiếu comment, có thể "
+    "tối ưu hơn) không phải lỗi.\n"
+    "- Câu/hàm CHƯA LÀM (không có, thân rỗng, chỉ return mặc định): không chấm, không gán nhãn. Riêng khi CẢ BÀI "
+    'chưa làm hoặc bỏ dở thì ghi "Lỗi logic".\n'
+    "- Câu tiên quyết (thường P1 đọc file) sai thì CHỈ ghi lỗi của câu đó, các câu sau không chấm.\n"
+    '- Có "Lỗi biên dịch" thì thêm TỐI ĐA 1 nhãn cho nguyên nhân khi rõ ràng (biến chạy của for chưa khai báo: '
+    '"Lỗi vòng lặp"; #include file dữ liệu: "Lỗi hard-code"; code bỏ dở: "Lỗi logic").\n'
+    '- Vòng lặp vô hạn: ghi cả "Lỗi vòng lặp" và "Lỗi logic".\n'
+    f'- Code trong comment không chấm; bài chỉ còn dòng "{ALL_COMMENTED}" thì kết luận ["Lỗi style"].\n'
+    '- Đối chiếu mục "YÊU CẦU CỦA ĐỀ" (phương pháp bắt buộc, thư viện/hàm bị cấm, file dữ liệu).'
 )
 
 STEPS = (
-    ("Biên dịch", "compile_log có lỗi (error) không? Nếu có, nguyên nhân có rõ ràng thuộc nhãn khác không?"),
-    ("Phạm vi chấm", "liệt kê từng câu/hàm đề yêu cầu và ghi \"đã làm\" hoặc \"chưa làm\" (không có, thân rỗng). "
-                     "Nếu đề có câu tiên quyết, kiểm tra nó trước: sai thì chỉ chấm câu đó. Cả bài chưa làm/bỏ dở thì "
-                     "là \"Lỗi logic\". Đề một câu thì ghi \"chấm toàn bài\"."),
-    ("Nhập/xuất", "đọc dữ liệu (stdin hoặc file) và chuỗi in ra có khớp đề không (hoa thường, dấu cách)?"),
-    ("Vòng lặp và mảng/chuỗi", "chỉ số, điều kiện dừng, kích thước có đúng không? Có vòng lặp vô hạn không? Có trả "
-                               "về mảng cục bộ không?"),
-    ("Hàm", "có gọi/dùng hàm sai không (stoi/stof trên chuỗi không phải số, gọi hàm thiếu đối số, hàm phụ tự viết "
-            "trả sai, khai báo khác prototype đề cho)? Câu chưa làm không tính ở đây."),
-    ("Logic và hard-code", "có điều kiện/công thức sai, giả định sai về dữ liệu, hoặc ghi cứng tên file/kích thước/"
-                           "số bản ghi không?"),
+    ("Biên dịch", "compile_log có error không? Nguyên nhân có rõ ràng thuộc nhãn khác không?"),
+    ("Phạm vi chấm", "từng câu/hàm đề yêu cầu: \"đã làm\" hay \"chưa làm\"; câu tiên quyết (nếu có) đúng chưa. Đề một "
+                     "câu thì ghi \"chấm toàn bài\"."),
+    ("Nhập/xuất", "đọc dữ liệu và chuỗi in ra có khớp đề không?"),
+    ("Vòng lặp và mảng/chuỗi", "chỉ số, điều kiện dừng, vòng lặp vô hạn, truy cập mảng/chuỗi có đúng không?"),
+    ("Hàm", "có gọi/dùng hàm sai, hoặc khai báo khác prototype đề cho không?"),
+    ("Logic và hard-code", "điều kiện/công thức, giả định về dữ liệu, giá trị ghi cứng?"),
     ("Thuật toán", "cách tính cốt lõi và cấu trúc dữ liệu có đúng yêu cầu đề không?"),
-    ("Style", "có toàn bộ bài nằm trong comment, dùng thư viện/hàm bị cấm, hoặc hàm phức tạp không cần thiết không?"),
-    ("Rà lại", "giữ 1-2 lỗi chính (tối đa 3), mỗi nhãn nêu 1 dòng code làm bằng chứng. Bỏ nhãn nếu: nằm ở câu chưa "
-               "làm hoặc ở câu phụ thuộc khi câu tiên quyết sai; lỗi compiler đã báo mà không phải nguyên nhân rõ "
-               "ràng; chỉ là nhận xét chung; dòng đó đã được tính cho nhãn khác; \"Lỗi edge case\" không thật rõ."),
+    ("Style", "bài toàn comment, thư viện/hàm bị cấm, hàm phức tạp không cần thiết?"),
+    ("Rà lại", "giữ 1-2 lỗi chính (tối đa 3), mỗi nhãn 1 dòng code làm bằng chứng; bỏ nhãn trái NGUYÊN TẮC CHẤM, "
+               "trùng dòng với nhãn khác, hoặc \"Lỗi edge case\" không thật rõ."),
 )
 
 
 def _cot_instruction_vi() -> str:
     k = len(STEPS)
     steps = "\n".join(f"{i}. {name}: {q}" for i, (name, q) in enumerate(STEPS, 1))
-    template = "\n".join(f"{i}. {name}: <nhận xét, dẫn số dòng hoặc đoạn code làm bằng chứng>"
-                          for i, (name, _) in enumerate(STEPS, 1))
+    template = "\n".join(f"{i}. {name}: <...>" for i, (name, _) in enumerate(STEPS, 1))
     return (f"## CÁCH CHẤM\nChấm lần lượt {k} bước sau:\n"
             f"{steps}\n\n"
             "## ĐỊNH DẠNG TRẢ LỜI (bắt buộc)\n"
-            f"Viết đủ {k} mục theo đúng khung dưới đây, mỗi mục 1-3 câu, rồi mới đến dòng KẾT LUẬN ở cuối cùng. "
-            f"Không được bỏ mục nào và không được viết KẾT LUẬN trước khi xong {k} mục.\n\n"
+            f"Viết đủ {k} mục theo khung dưới đây, mỗi mục 1-3 câu dẫn số dòng làm bằng chứng, rồi mới đến dòng "
+            f"KẾT LUẬN ở cuối cùng (không bỏ mục nào, không viết KẾT LUẬN sớm).\n\n"
             f"{template}\n"
             f'{FINAL_MARKER} {{"taxonomy_error": ["<nhãn>", ...]}}\n\n'
-            "Trong dòng KẾT LUẬN chỉ được dùng các nhãn sau, viết nguyên văn (kể cả chữ \"Lỗi\"), không dùng tên "
-            f"mục chấm: {json.dumps(list(LABELS), ensure_ascii=False)}. Chỉ ghi các nhãn còn lại sau bước Rà lại; "
-            "[] nếu bài không có lỗi.")
+            "KẾT LUẬN chỉ chứa nhãn còn lại sau bước Rà lại, viết nguyên văn tên nhãn trong DANH SÁCH NHÃN (kể cả "
+            "chữ \"Lỗi\", không dùng tên mục chấm); [] nếu bài không có lỗi.")
 
 
 # English version of the same rules (prompt.lang: en). Label names stay the official Vietnamese strings; the gloss in
@@ -163,67 +152,50 @@ SYSTEM_COT_EN = (
     "LABELS (copy the label names exactly, in Vietnamese; each description says how the lecturer uses the label):\n"
     + TEACHER_LABEL_GUIDE_EN + "\n\n"
     "GRADING RULES:\n"
-    "- Report only the MAIN errors that cost points: usually 1-2 labels, at most 3. Do not list every small flaw. "
-    "A submission that does what is asked gets [] (a common outcome).\n"
-    "- Only assign a label when you can point to a specific line of code that causes the error. Do not guess, do "
-    "not infer errors that are not in the code.\n"
-    "- A question/function NOT ATTEMPTED (missing, empty body, only a default return) is not graded and gets no "
-    'label. Only when the WHOLE submission is unattempted or abandoned (nothing runs) assign "Lỗi logic".\n'
-    "- Multi-question exams with a prerequisite question (usually P1, reading the file): if the prerequisite is "
-    "wrong, report ONLY its errors; later questions are not graded.\n"
-    '- If compile_log contains "error", "Lỗi biên dịch" is certain. You may add AT MOST 1 label for its cause when '
-    'clear (loop variable of a for not declared: "Lỗi vòng lặp"; #include of the data file: "Lỗi hard-code"; '
-    'abandoned code: "Lỗi logic"); otherwise add no other label for an error the compiler already reported.\n'
+    "- Report only the MAIN errors that cost points: usually 1-2 labels, at most 3. A submission that does what is "
+    "asked gets [] (a common outcome).\n"
+    "- Every label must point to the line of code that causes it; do not guess. General remarks (naming, missing "
+    "comments, could be faster) are not errors.\n"
+    "- A question/function NOT ATTEMPTED (missing, empty body, only a default return): not graded, no label. Only "
+    'when the WHOLE submission is unattempted or abandoned assign "Lỗi logic".\n'
+    "- If a prerequisite question (usually P1, reading the file) is wrong, report ONLY its errors; later questions "
+    "are not graded.\n"
+    '- With "Lỗi biên dịch", add AT MOST 1 label for its cause when clear (loop variable of a for not declared: '
+    '"Lỗi vòng lặp"; #include of the data file: "Lỗi hard-code"; abandoned code: "Lỗi logic").\n'
     '- An infinite loop gets both "Lỗi vòng lặp" and "Lỗi logic".\n'
-    "- Ignore all code inside comments (// or /* */): not graded and not an error. Except: when the submission is "
-    f'only the line "{ALL_COMMENTED}" (= the whole code is commented out), conclude ["Lỗi style"].\n'
-    '- Follow "EXAM REQUIREMENTS": not using the method the statement requires is "Lỗi thuật toán"; using a '
-    'library or function the statement forbids is "Lỗi style"; a hard-coded file name or record count is '
-    '"Lỗi hard-code".\n'
-    "- Do not turn general remarks without evidence (naming, missing comments, could be faster) into errors."
+    f'- Code inside comments is not graded; a submission that is only the line "{ALL_COMMENTED}" (whole code '
+    'commented out) gets ["Lỗi style"].\n'
+    '- Check against "EXAM REQUIREMENTS" (required method, forbidden libraries/functions, data file).'
 )
 
 STEPS_EN = (
-    ("Compilation", "does compile_log contain an error? If so, is its cause clearly another label?"),
-    ("Scope", 'list each question/function the exam requires and mark it "attempted" or "not attempted" '
-              "(missing, empty body). If there is a prerequisite question, check it first: if it is wrong, grade "
-              'only that question. Whole submission unattempted/abandoned: "Lỗi logic". Single-question exam: '
-              'write "grade the whole program".'),
-    ("Input/output", "is the data read correctly (stdin or file) and does the printed text match the statement "
-                     "(letter case, spaces)?"),
-    ("Loops and arrays/strings", "are indices, stop conditions and sizes right? Any infinite loop? Is a local "
-                                 "array returned?"),
-    ("Functions", "is a function called/used wrongly (stoi/stof on a non-numeric string, a call without its "
-                  "arguments, a helper returning wrong results, a declaration that differs from the required "
-                  "prototype)? Unattempted questions do not count here."),
-    ("Logic and hard-code", "any wrong condition/formula, wrong assumption about the data, or hard-coded file "
-                            "name/size/record count?"),
+    ("Compilation", "does compile_log contain an error? Is its cause clearly another label?"),
+    ("Scope", 'each question/function the exam requires: "attempted" or "not attempted"; is the prerequisite '
+              '(if any) right? Single-question exam: write "grade the whole program".'),
+    ("Input/output", "are the data read and the printed text what the statement asks for?"),
+    ("Loops and arrays/strings", "are indices, stop conditions, infinite loops, array/string access right?"),
+    ("Functions", "is a function called/used wrongly, or declared differently from the required prototype?"),
+    ("Logic and hard-code", "conditions/formulas, assumptions about the data, hard-coded values?"),
     ("Algorithm", "are the core computation and the data structure what the statement asks for?"),
-    ("Style", "is the whole submission commented out, a forbidden library/function used, or a function needlessly "
-              "complex?"),
-    ("Review", "keep the 1-2 main errors (at most 3), each with 1 line of code as evidence. Drop a label if: it is "
-               "in an unattempted question, or in a dependent question when the prerequisite is wrong; it is an "
-               "error the compiler reported and not a clear cause; it is only a general remark; the same line is "
-               'already counted for another label; "Lỗi edge case" is not really clear.'),
+    ("Style", "whole code commented out, forbidden library/function, needlessly complex function?"),
+    ("Review", "keep the 1-2 main errors (at most 3), each with 1 line of code as evidence; drop labels that break "
+               'the GRADING RULES, reuse a line already counted, or are an unclear "Lỗi edge case".'),
 )
 
 
 def _cot_instruction_en() -> str:
     k = len(STEPS_EN)
     steps = "\n".join(f"{i}. {name}: {q}" for i, (name, q) in enumerate(STEPS_EN, 1))
-    template = "\n".join(f"{i}. {name}: <remark, citing line numbers or code as evidence>"
-                         for i, (name, _) in enumerate(STEPS_EN, 1))
+    template = "\n".join(f"{i}. {name}: <...>" for i, (name, _) in enumerate(STEPS_EN, 1))
     return (f"## HOW TO GRADE\nGo through these {k} steps in order:\n"
             f"{steps}\n\n"
             "## ANSWER FORMAT (mandatory)\n"
-            f"Write all {k} items in English using exactly the template below, 1-3 sentences each, and only then "
-            f"the CONCLUSION line at the very end. Do not skip any item and do not write CONCLUSION before the {k} "
-            "items are done.\n\n"
+            f"Write all {k} items in English with the template below, 1-3 sentences each citing line numbers as "
+            "evidence, and only then the CONCLUSION line at the very end (skip no item, no early CONCLUSION).\n\n"
             f"{template}\n"
             f'{FINAL_MARKER_EN} {{"taxonomy_error": ["<label>", ...]}}\n\n'
-            "In the CONCLUSION line use only these labels, copied exactly (Vietnamese, including \"Lỗi\"), never the "
-            f"step names or English glosses: {json.dumps(list(LABELS), ensure_ascii=False)}. Only the labels left "
-            "after the Review step; [] if the submission has no error.")
+            "CONCLUSION holds only the labels left after Review, copied exactly from LABELS (Vietnamese, including "
+            "\"Lỗi\"; never step names or English glosses); [] if the submission has no error.")
 
 
 def system_prompt(lang: str = "vi") -> str:
@@ -236,40 +208,22 @@ def cot_instruction(lang: str = "vi") -> str:
     return _cot_instruction_en() if lang == "en" else _cot_instruction_vi()
 
 
-_LIB_SENTENCE = re.compile(r"[^\n]*(?:thư viện|librar)[^\n]*", re.I)
-_NOT_USE = r"(?:không được dùng|không được sử dụng|không dùng|do not use|don't use)[\s*_]*(?:hàm|function)?[\s*_]*"
-_BANNED_TICK = re.compile(_NOT_USE + r"`([A-Za-z_]\w*)`", re.I)        # statement: only a `name` in backticks
-_BANNED_BARE = re.compile(_NOT_USE + r"`?([A-Za-z_]\w*)`?", re.I)       # constraints field: short, structured
 _PARAM = re.compile(r"\bstring\s*&?\s*([A-Za-z_]\w*)")
+_FUNC_NAME = re.compile(r"([A-Za-z_]\w*)\s*\(")
 
 
-def allowed_libraries(statement: str) -> list[str]:
-    """Libraries from a sentence like "Chỉ được dùng các thư viện: `a, b`" / "only `a, b,` and `c` library is
-    allowed"; [] when no such sentence (the line is then left out of the prompt rather than guessed)."""
-    sentences = [x for line in _LIB_SENTENCE.findall(statement or "") for x in re.split(r"(?<=[.!?])\s+", line)]
-    for sent in sentences:
-        if not re.search(r"thư viện|librar", sent, re.I):
-            continue
-        if not re.search(r"chỉ|only", sent, re.I):
-            continue
-        libs = [x.strip() for chunk in re.findall(r"`([^`]+)`", sent) for x in chunk.split(",")]
-        libs = [x for x in libs if re.fullmatch(r"[A-Za-z_][\w./]*", x)]
-        if libs:
-            return libs
-    return []
+def _squash(text: str) -> str:
+    return re.sub(r"\s+", "", text or "")
 
 
-def banned_functions(exam: dict) -> list[str]:
-    """Functions the exam forbids: `name` in backticks after "không được dùng / do not use" in the statement (prose
-    like "không dùng thêm mảng" is not a function), or any name after it in a problem's constraints field."""
-    found = []
-    for name in _BANNED_TICK.findall(exam.get("statement") or ""):
-        found.append(name)
-    for p in exam.get("problems") or []:
-        for name in _BANNED_BARE.findall(str(p.get("constraints") or "")):
-            if re.fullmatch(r"[a-z_]\w*", name) and name not in {"thêm", "các", "mảng", "the", "any", "extra"}:
-                found.append(name)
-    return list(dict.fromkeys(found))
+def _proto_line(p: dict, statement: str, dep: str) -> str:
+    """Full prototype, or only the function name when the statement already quotes the prototype verbatim
+    (the requirements block adds what the statement does not say: which question is a prerequisite)."""
+    proto = p["prototype"].strip()
+    name = _FUNC_NAME.search(proto)
+    if name and _squash(proto).rstrip(";") in _squash(statement):
+        return f"  - {p['pid']}: `{name.group(1)}(...)`{dep}"
+    return f"  - {p['pid']}: `{proto}`{dep}"
 
 
 _REQ = {
@@ -288,8 +242,6 @@ _REQ = {
         "dep": " (điều kiện để chấm {deps})",
         "policy": "Chính sách chấm: {policy}",
         "cons": "Ràng buộc: {cons}",
-        "libs": "Thư viện được phép: {libs}. Dùng thư viện khác là vi phạm.",
-        "banned": "Hàm bị cấm: {banned}.",
         "via_param": "tham số `{param}`", "via_any": "tham số nhận tên file",
         "sample_file": "đề cung cấp file mẫu `{file}`. ",
         "file": "File dữ liệu: {sample}Bài phải mở file qua {via} và đọc số bản ghi thực tế; ghi cứng tên file hoặc "
@@ -312,8 +264,6 @@ _REQ = {
         "dep": " (prerequisite for grading {deps})",
         "policy": "Grading policy: {policy}",
         "cons": "Constraints: {cons}",
-        "libs": "Allowed libraries: {libs}. Using any other library is a violation.",
-        "banned": "Forbidden functions: {banned}.",
         "via_param": "the parameter `{param}`", "via_any": "the file-name parameter",
         "sample_file": "the exam provides the sample file `{file}`. ",
         "file": "Data file: {sample}The program must open the file through {via} and read the actual number of "
@@ -323,9 +273,10 @@ _REQ = {
 
 
 def exam_requirements(exam: dict, lang: str = "vi") -> str:
-    """Checklist built only from structured exam fields (exams.json) and two narrow statement patterns; every line
-    is optional, nothing is specific to one exam, so an unseen (private) exam gets the lines its fields support.
-    Field values (grading_policy, constraints, learning_outcome...) are quoted as they are, in any language."""
+    """Checklist built only from structured exam fields (exams.json); every line is optional, nothing is specific
+    to one exam, so an unseen (private) exam gets the lines its fields support. Field values (grading_policy,
+    constraints, learning_outcome...) are quoted as they are, in any language. What the statement already says
+    (allowed libraries, forbidden functions, prototypes quoted verbatim) is not repeated."""
     t = _REQ[lang]
     problems = exam.get("problems") or []
     lines = []
@@ -352,18 +303,12 @@ def exam_requirements(exam: dict, lang: str = "vi") -> str:
         lines.append(t["protos"])
         for p in protos:
             dep = t["dep"].format(deps=", ".join(p["is_prerequisite_for"])) if p.get("is_prerequisite_for") else ""
-            lines.append(f"  - {p['pid']}: `{p['prototype'].strip()}`{dep}")
+            lines.append(_proto_line(p, exam.get("statement") or "", dep))
     if exam.get("grading_policy"):
         lines.append(t["policy"].format(policy=exam["grading_policy"].strip()))
     cons = [str(p["constraints"]).strip() for p in problems if p.get("constraints")]
     if cons:
         lines.append(t["cons"].format(cons=" | ".join(cons)))
-    libs = allowed_libraries(exam.get("statement") or "")
-    if libs:
-        lines.append(t["libs"].format(libs=", ".join(libs)))
-    banned = banned_functions(exam)
-    if banned:
-        lines.append(t["banned"].format(banned=", ".join(f"`{b}`" for b in banned)))
     params = [m for p in protos for m in _PARAM.findall(p["prototype"]) if "file" in m.lower()]
     if exam.get("data_file") or params:  # a file-reading exam: data_file given, or a prototype takes a file name
         via = t["via_param"].format(param=params[0]) if params else t["via_any"]
@@ -424,9 +369,75 @@ def exam_text_lang(exam: dict, lang: str = "vi") -> str:
             f"{exam.get('statement', '').strip()}\n")
 
 
+_DIAG_ERROR = re.compile(r"^\S+:\d+:\d+: (?:fatal )?error:")
+_DIAG_SOURCE = re.compile(r"^\s*\d*\s*\|")  # gcc's "   28 |     code" and "      |     ^~~~" lines
+_LOG_TEXT = {"vi": {"none": "(không có)", "empty": "(rỗng — không có lỗi hay cảnh báo)", "cut": "...(cắt bớt)",
+                    "more": "...(còn {n} lỗi khác)", "sub": "## BÀI NỘP CẦN PHÂN LOẠI"},
+             "en": {"none": "(none)", "empty": "(empty — no error, no warning)", "cut": "...(truncated)",
+                    "more": "...({n} more errors)", "sub": "## SUBMISSION TO GRADE"}}
+
+
+def compact_compile_log(log: str | None, max_chars: int = 800, lang: str = "vi") -> str:
+    """compile_log for the prompt: the error diagnostics only, each with its source line and caret, first errors
+    first, until max_chars; notes, include chains and warnings are dropped (a template error in getline() alone
+    is ~50 kB of candidate notes). A log without errors is cut to max_chars. "Lỗi biên dịch" comes from the full
+    log (prompt.compile_rule), so the cut never removes that label."""
+    t = _LOG_TEXT[lang]
+    if log is None:
+        return t["none"]
+    log = re.sub(r"/tmp/tmp\w+/", "", log).strip()
+    if not log:
+        return t["empty"]
+    blocks, cur = [], None
+    for line in log.splitlines():
+        if _DIAG_ERROR.match(line):
+            cur = [line]
+            blocks.append(cur)
+        elif cur is not None and _DIAG_SOURCE.match(line):
+            cur.append(line)
+        else:
+            cur = None
+    if not blocks:
+        return log if len(log) <= max_chars else log[:max_chars] + "\n" + t["cut"]
+    kept, used = [], 0
+    for b in blocks:
+        text = "\n".join(b)
+        if kept and used + len(text) > max_chars:
+            break
+        kept.append(text)
+        used += len(text) + 1
+    if len(kept) < len(blocks):
+        kept.append(t["more"].format(n=len(blocks) - len(kept)))
+    return "\n".join(kept)
+
+
+def numbered_code(code: str, max_chars: int = 12000, drop_blank: bool = False, cut: str = "// ...(cắt bớt)") -> str:
+    """Code with its line numbers; `drop_blank` leaves out empty lines (comment-only lines become empty after
+    strip_comments) but keeps the original numbers, so evidence like "line 28" still points at the submission."""
+    if len(code) > max_chars:
+        code = code[:max_chars] + "\n" + cut
+    return "\n".join(f"{i:4d}| {line}" for i, line in enumerate(code.splitlines(), 1)
+                     if line.strip() or not drop_blank)
+
+
 def submission_text_lang(sample, cfg: dict, lang: str = "vi") -> str:
-    s = submission_text(sample, cfg)
-    return s.replace("## BÀI NỘP CẦN PHÂN LOẠI", "## SUBMISSION TO GRADE", 1) if lang == "en" else s
+    """prompt.max_compile_log_chars (errors only, first ones first) and prompt.drop_blank_lines shorten the
+    prompt; without them the block is the shared src.task2.prompts.submission_text one."""
+    if "max_compile_log_chars" not in cfg and not cfg.get("drop_blank_lines"):
+        s = submission_text(sample, cfg)
+        return s.replace("## BÀI NỘP CẦN PHÂN LOẠI", "## SUBMISSION TO GRADE", 1) if lang == "en" else s
+    t = _LOG_TEXT[lang]
+    code = numbered_code(sample.code, cfg.get("max_code_chars", 12000), bool(cfg.get("drop_blank_lines")),
+                         _TEXT[lang]["cut"])
+    s = f"{t['sub']}\n```cpp\n{code}\n```\n"
+    if cfg.get("use_aux_signals", False):
+        if sample.compile_log is not None:
+            log = (compact_compile_log(sample.compile_log, int(cfg["max_compile_log_chars"]), lang)
+                   if "max_compile_log_chars" in cfg else clean_compile_log(sample.compile_log))
+            s += f"\n### compile_log\n```\n{log}\n```\n"
+        if sample.test_report:
+            s += f"\n### test_report\n{format_test_report(sample.test_report)}\n"
+    return s
 
 
 def demos_text(demos: list, cfg: dict) -> str:
