@@ -16,17 +16,22 @@ from src.task2.pipeline import Task2ApiPipeline
 
 
 class _Tee:
+    """Loggers may keep this object after tee_log exits (vLLM logs its engine shutdown at interpreter exit):
+    the closed log file is then skipped instead of raising "I/O operation on closed file"."""
+
     def __init__(self, *streams):
         self.streams = streams
 
     def write(self, s):
         for st in self.streams:
-            st.write(s)
+            if not st.closed:
+                st.write(s)
         return len(s)
 
     def flush(self):
         for st in self.streams:
-            st.flush()
+            if not st.closed:
+                st.flush()
 
     def __getattr__(self, name):  # encoding, isatty, ... from the console stream
         return getattr(self.streams[0], name)

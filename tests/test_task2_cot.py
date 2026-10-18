@@ -1,4 +1,5 @@
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -227,7 +228,10 @@ class TestReportAndBundle(unittest.TestCase):
     def test_tee_log(self):
         with tee_log(self.root / "logs" / "run.log"):
             print("xin chào log")
+            kept = sys.stdout  # a logger holding the tee (vLLM's shutdown log at exit)
         self.assertIn("xin chào log", (self.root / "logs" / "run.log").read_text(encoding="utf-8"))
+        kept.write("sau khi đóng\n")  # log file closed: skipped, no ValueError
+        kept.flush()
 
 
 
