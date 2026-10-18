@@ -327,10 +327,16 @@ def prepare(roots, output, repo, seed=42, filter_synthetic="none", *, require_of
     if filter_synthetic not in {"none", "strict"}:
         raise ValueError("filter_synthetic must be 'none' or 'strict'")
     records, data_manifest = [], {}
-    for source, root in roots.items():
+    for source, root in list(roots.items()):
+        if not root:
+            continue
+        root_path = Path(root)
+        if not root_path.exists():
+            if source == "real":
+                raise FileNotFoundError(f"missing required real dataset root: {root}")
+            continue
         source_records = load_task3(root, source)
         records.extend(source_records)
-        root_path = Path(root)
         source_files = {p for p in root_path.rglob("*") if p.is_file()}
         code_digests = sorted(
             hashlib.sha256(path.read_bytes()).hexdigest()
