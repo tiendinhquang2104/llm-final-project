@@ -63,7 +63,7 @@ def run(args: argparse.Namespace) -> dict:
         processed, splits, expected_train=cfg["data"]["expected_train"],
         expected_val=cfg["data"]["expected_val"],
     )
-    use_silver = args.stage != "gold_only_complete"
+    use_silver = args.stage in ("all", "silver_then_gold", "select")
     silver_manifest = None
     silver = []
     if use_silver:
