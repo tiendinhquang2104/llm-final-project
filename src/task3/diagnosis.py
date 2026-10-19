@@ -384,9 +384,10 @@ def attach_compiler_evidence(records, config):
         return [replace(record, provenance={**record.provenance, "_task3_compile_check": {"status": "disabled"}}) for record in records]
     compiler = config.get("cpp_compiler")
     timeout = config.get("compiler_timeout_s", 5.0)
+    standard = config.get("cpp_standard", "c++11")
     enriched = []
     for record in records:
-        result = check_cpp_syntax(record.code, compiler=compiler, timeout_s=timeout)
+        result = check_cpp_syntax(record.code, compiler=compiler, timeout_s=timeout, standard=standard)
         provenance = {**record.provenance, "_task3_compile_check": result}
         compile_log = result["diagnostic"] if result["status"] == "compile_error" else record.compile_log
         enriched.append(replace(record, compile_log=compile_log, provenance=provenance))

@@ -115,6 +115,8 @@ class HFBackend:
             "do_sample": config.get("do_sample", False),
             "pad_token_id": self.tokenizer.pad_token_id,
         }
+        if config.get("bad_words_ids"):
+            options["bad_words_ids"] = config["bad_words_ids"]
         if options["do_sample"]:
             options.update(temperature=config.get("temperature", 0.7), top_p=config.get("top_p", 0.9))
         start = time.perf_counter()

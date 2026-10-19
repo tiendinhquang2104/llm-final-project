@@ -12,7 +12,7 @@ MAX_SOURCE_CHARS = 200_000
 MAX_DIAGNOSTIC_CHARS = 8_000
 
 
-def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float = 5.0) -> dict:
+def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float = 5.0, standard: str = "c++17") -> dict:
     """Run a compiler in syntax-only mode; never execute or emit a binary."""
     if not isinstance(code, str):
         raise TypeError("C++ source must be text")
@@ -20,10 +20,12 @@ def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float
         return {"status": "source_too_large", "diagnostic": "", "latency_s": 0.0, "command": []}
     if isinstance(timeout_s, bool) or not isinstance(timeout_s, (int, float)) or timeout_s <= 0:
         raise ValueError("compiler timeout must be positive")
+    if standard not in {"c++11", "c++17"}:
+        raise ValueError("compiler standard must be c++11 or c++17")
     selected = compiler or next((shutil.which(name) for name in ("g++", "clang++", "c++") if shutil.which(name)), None)
     if not selected:
         return {"status": "unavailable", "diagnostic": "", "latency_s": 0.0, "command": []}
-    command = [selected, "-std=c++17", "-fsyntax-only", "-fno-diagnostics-color", "-x", "c++", "-"]
+    command = [selected, f"-std={standard}", "-fsyntax-only", "-fno-diagnostics-color", "-x", "c++", "-"]
     started = time.perf_counter()
     try:
         result = subprocess.run(
@@ -42,7 +44,7 @@ def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float
             text = text.decode("utf-8", "replace")
         return {
             "status": "timeout",
-            "diagnostic": text[-MAX_DIAGNOSTIC_CHARS:],
+            "diagnostic": text[:MAX_DIAGNOSTIC_CHARS],
             "latency_s": time.perf_counter() - started,
             "command": command,
         }
@@ -53,7 +55,7 @@ def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float
             "latency_s": time.perf_counter() - started,
             "command": command,
         }
-    diagnostic = (result.stderr or result.stdout or "")[-MAX_DIAGNOSTIC_CHARS:]
+    diagnostic = (result.stderr or result.stdout or "")[:MAX_DIAGNOSTIC_CHARS]
     return {
         "status": "compiled" if result.returncode == 0 else "compile_error",
         "diagnostic": diagnostic,

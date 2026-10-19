@@ -21,7 +21,7 @@ These internal review tags are not written into `taxonomy_error`. Official outpu
 | --- | --- | --- |
 | `syntax_error`, `undeclared_identifier` | Lỗi biên dịch | Map only when the source/compiler evidence supports a compile failure. |
 | `infinite_loop` | Lỗi vòng lặp | A loop with no progress is a loop defect. |
-| `off_by_one` | Lỗi edge case | Use this as the primary group. Add Lỗi vòng lặp only as the official secondary group for D14b when the loop-control defect is itself established. |
+| `off_by_one` | Lỗi vòng lặp | Use this as the agreed analysis mapping. Preserve the supplied gold labels unchanged; where gold uses Lỗi edge case for D14b, report that disagreement explicitly rather than silently changing either convention or reference data. |
 | `pointer_indexing` | Lỗi mảng/chuỗi | Only when a real bound/access defect exists. Pointer subscripting itself is valid C++. |
 | `hardcoded_filename` | Lỗi hard-code | A literal filename used instead of the supplied parameter. |
 | `extra_prompt_output` | Lỗi nhập/xuất | An interactive prompt on stdout violates the required output format. |
@@ -131,6 +131,12 @@ The reason-specific retry now states the exact allowed status values and require
 
 The Round 7 failure classes still describe those raw attempts; the new final run improved `EX01-S111` to a schema-valid uncertain diagnosis, while `EX01-S112`, `EX02-S201`, and `EX02-S211` still fail exact-evidence validation after one retry. The final raw records and prompt attempts remain private under `outputs/task3/`.
 
+### Round 8 review corrections and separate quality dimensions
+
+The agreed internal mapping assigns `off_by_one` to **Lỗi vòng lặp**. The unchanged D14b reference taxonomy uses **Lỗi edge case**; that is a mapping/reference disagreement to disclose when scoring, not a reason to edit gold or change the agreed mapping.
+
+For `EX02-S201`, digit traversal and repeated multiplication are appropriate, but `sum` is an `int`. At the valid input `999999999`, nine terms of `9^9` total **3,486,784,401**, above signed 32-bit `int`. This is a source-based overflow candidate for independent checking; it is not added to gold. For `EX02-S211`, stdout includes `Input number: ` although the required output is only `True` or `False`. This is a possible missing **Lỗi nhập/xuất** reference label; gold remains `[]` pending review.
+
 ### Final paired Qwen rerun
 
 The final arms used the same six `real-val` rows, pinned Qwen model/revision, greedy generation, and zero-shot configuration. Pipeline passed the current self-diagnosis context. Direct feedback used the same current label arrays without passing diagnosis context; its legacy Task 2-shaped handoff has unknown parse provenance. Oracle received unchanged gold labels and no predicted diagnosis. No public data, few-shot selection, or training was involved.
@@ -141,7 +147,7 @@ The final arms used the same six `real-val` rows, pinned Qwen model/revision, gr
 | Direct | 5/6 | 10 | 26,131 / 1,894 | 24.43 s | — | — |
 | Oracle | 4/6 | 8 | 22,578 / 1,956 | 24.86 s | — | — |
 
-Manual factual safety/accuracy and issue coverage were scored separately (0–2 per sample). Pipeline averaged **2.00/2 factual safety** and **0.17/2 issue coverage**; direct averaged **2.00/2** and **0.17/2**; oracle averaged **1.83/2** and **0.25/2**. Neutral fallback explains the high safety scores but provides no issue coverage. Human Level-contract review was **3/6 per arm**: both Level 1 fallbacks stayed within the no-specific-disclosure ceiling, all Level 2 rows failed the combined useful-diagnosis/accuracy review, and the supported `EX02-S212` Level 3 response met diagnosis-plus-direction requirements. Mechanical guard pass is not used as the quality score.
+These are separate review dimensions. **Factual safety/accuracy:** pipeline 2.00/2, direct 2.00/2, oracle 1.83/2. **Issue coverage:** computed from the per-sample table below, pipeline 0.33/2, direct 0.33/2, oracle 0.50/2. The former combined “Level-contract review” count of 3/6 mixed disclosure with answer adequacy, so it is not a Level-limit compliance rate; the Round 9 follow-up below reports disclosure-ceiling review separately. Neutral fallbacks explain the high factual safety scores but provide no issue coverage. The mechanical guard result is not used for any of these human scores.
 
 | Sample | Pipeline review | Direct review | Oracle review |
 | --- | --- | --- | --- |
@@ -168,3 +174,63 @@ Final reproduction commands and private artifacts:
 Final output predictions, traces, raw feedback attempts, raw diagnosis attempts, and direct-label handoff remain Git-ignored under `outputs/task3/`. No public inference, push, leaderboard submission, or training was performed.
 
 Final Round 8 verification: **341 passed, 7 skipped** for `tests/test_task3_*.py`. The repository-wide run recorded **618 passed, 30 skipped, 4 failed**: `tests/test_colab_task1_secrets.py::test_timeout_falls_back_to_hidden_input_once`, `tests/test_colab_task1_secrets.py::test_selected_provider_only_requires_its_key`, `tests/test_synth_gate.py::TestLabelerGate::test_known_noise_is_flagged`, and `tests/test_synth_gate.py::TestLabelerGate::test_observable_single_samples_all_match`. These failures are outside Task 3.
+
+## Round 9 follow-up: independent direct baseline, corrected review dimensions, and wider development stop
+
+This section records the current six-row rerun and the attempted wider development evaluation. It supersedes earlier Level-limit counts and identifies the former Round 8 direct-feedback arm as a feedback-only ablation: it reused pipeline labels and was not an independent taxonomy baseline.
+
+### Review mapping and source findings
+
+The agreed analysis map puts `off_by_one` under **Lỗi vòng lặp**. The supplied D14b gold uses **Lỗi edge case**. That is a gold/mapping disagreement; gold was left unchanged. For `EX02-S201`, `int sum` can overflow at the valid input `999999999`: nine terms of `9^9` total **3,486,784,401**, above signed 32-bit `int`. This remains a source-based candidate for independent validation and is not added to gold. For `EX02-S211`, the program prints `Input number: ` to stdout although the required output is only `True` or `False`. This may mean gold `[]` is missing **Lỗi nhập/xuất**; gold remains unchanged.
+
+### Three current six-row arms
+
+The runs used the same six `real-val` IDs, `Qwen/Qwen2.5-Coder-7B-Instruct` revision `c03e6d358207e414f1eca0bb1891e29f1db0e242`, seed 42, greedy decoding, 8192-token context, 512-token feedback/output limit, and two retries. Pipeline A used its separate 384-token diagnosis stage before feedback. Oracle C used gold labels only. Direct B received the statement, C++ source, requested Level, supplied compile/test evidence and allowed taxonomy names, then generated taxonomy and feedback in one call. B did not receive gold labels or instructor feedback. It shared guard version 2 and added a narrow Level 1 disclosure screen; it also blocks the markdown-fence token at Levels 1–3 to keep output directly parseable as JSON. These B-specific checks are intentional design differences.
+
+| Arm | Taxonomy result | Feedback fallback | Feedback tokens in/out | Feedback latency | Diagnosis tokens in/out | Diagnosis latency |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A. Current self-diagnosis pipeline | Exported `[]` for all six; scored as six actual empty predictions: macro-F1 0.00, micro-F1 0.00, exact match 2/6 (only the two unchanged empty gold rows match). | 5/6 | 26,661 / 1,895 | 24.36 s | 18,628 / 2,405 | 29.54 s |
+| B. Independent one-turn direct baseline | A complete earlier candidate parsed against public schema with six nonempty predictions; candidate macro-F1 0.00, micro-F1 0.00, exact match 0/6. A final strict rerun stopped at `EX02-S201` after three Level 1 violations and exported no predictions. | 0/6 in the candidate; no fallback substitution | 12,340 / 342 in the candidate | 5.17 s in the candidate | — | — |
+| C. Oracle feedback | Gold taxonomy copied by construction; not a model taxonomy score. | 4/6 | 22,578 / 1,956 | 24.83 s | — | — |
+
+The complete B candidate and raw attempts are retained as private review evidence under `outputs/task3/task3-round9e-direct-baseline-real-val.*`. The final strict run is recorded under `outputs/task3/task3-round9-final-direct-baseline-real-val.*`; it reports `failed_validation_no_predictions_exported`, identifies `EX02-S201`, and records 11,251 input tokens, 249 output tokens and 4.01 s through the stop. The earlier candidate is not the final accepted B artifact because the manual Level 1 review found technical disclosure and the final validator correctly rejected it. No complete strict B `predictions.json` was exported.
+
+### Manual review of each six-row candidate
+
+Scores below are human judgments: factual safety and issue coverage are separate 0–2 scales. “Level ceiling” checks over-disclosure only; an empty fallback can stay under the ceiling while failing coverage. Pipeline/oracle values are from the current Round 9 outputs, not guard pass rates.
+
+| Sample | Direct B candidate taxonomy and review | B factual / coverage | B Level ceiling | A and C review summary |
+| --- | --- | ---: | --- | --- |
+| `EX01-S106` | Predicted Lỗi nhập/xuất, while the reviewed issues are the non-advancing loop and invalid one-node allocation/indexing. CSV parsing feedback is unsupported; it also tells the learner what to do at Level 2. | 0 / 0 | Fail | A and C both used neutral fallback: 2/2 factual safety, 0/2 coverage; disclosure ceiling met. |
+| `EX01-S111` | Predicted Lỗi nhập/xuất and said `generals.csv` was not supplied. The statement supplies that file context; source has compile defects, including malformed `getline` and redeclarations. Compiler remained unavailable. | 0 / 0 | Pass | A fallback: 2/2, 0/2. C named some real redeclarations but also made a false claim about `d`: 1/2, 1/2. Both stayed within the Level 2 ceiling. |
+| `EX01-S112` | Predicted Lỗi nhập/xuất. Feedback correctly noticed the literal `"filename"` but named `general.csv` as the expected name, while the statement says `generals.csv`. Partial useful diagnosis. | 1 / 1 | Pass | A and C neutral fallback: 2/2, 0/2; ceiling met. |
+| `EX02-S201` | Predicted Lỗi logic. One attempt falsely criticized digit exponentiation; the accepted earlier candidate said to recheck the Armstrong condition and sum. That does not identify the `int` overflow candidate and still mentions specific computation, so final Level 1 validation rejected it after three attempts. | 2 / 0 | Fail | A and C neutral Level 1 fallback: 2/2, 0/2; ceiling met. |
+| `EX02-S211` | Predicted Lỗi logic. Feedback discussed the correct digit-count/exponent relation and named variable `d`, which is initialized and used correctly; it missed the stdout prompt candidate. The specific technical hint violates Level 1. | 1 / 0 | Fail | A and C neutral Level 1 fallback: 2/2, 0/2; ceiling met. |
+| `EX02-S212` | Predicted Lỗi logic, but the supported finding is undeclared `cnt` (compile), with a repair direction to use the existing digit count. The diagnosis and direction are source-supported; the taxonomy group is wrong. | 2 / 2 | Pass | A and C gave supported undeclared-`cnt` diagnosis and direction: 2/2, 2/2; Level 3 ceiling met. |
+
+Across the candidate outputs, direct B averaged **1.00/2 factual safety** and **0.50/2 issue coverage**; its Level ceiling passed **3/6**. Pipeline A averaged **2.00/2** factual safety and **0.33/2** coverage; oracle C averaged **1.83/2** and **0.50/2**. A and C each met the disclosure ceiling on **6/6** rows. These figures are distinct dimensions. In particular, the former Round 8 **3/6** combined Level/content count is not a Level-limit rate. A and C's high factual scores mainly reflect safe fallback text, while coverage remains low.
+
+Taxonomy was scored against unchanged references. A's exported empty arrays count as real predictions, not abstentions; its zero positive predictions leave six false negatives, although two empty rows exactly match. For B, all six raw candidate labels were nonempty and wrong against the references (three Lỗi nhập/xuất and three Lỗi logic), so candidate F1 is 0.00 and exact match 0/6. This candidate score is descriptive only: the final strict direct run did not export a complete predictions file. The possible S211 I/O omission and S201 overflow candidate do not alter gold-based scores.
+
+### Compiler, tokenizer, privacy and provenance
+
+All current arms attempted a C++11 syntax-only check with a five-second limit and no program execution. This runtime has no `g++`, `clang++` or `c++`, so every check is **unavailable**; no sample is called compile-correct on that basis. Long diagnostics now retain the first 8,000 characters. Direct baseline preflight measured each prompt with the pinned Qwen tokenizer and reserved the configured output limit; the checked rows fit. Run manifests record model/revision, seed, config, tokenizer, data manifest hash, tokens, latency and outcome. Raw prompts/attempts and generated source remain in Git-ignored `outputs/task3/` with owner-only permissions.
+
+### Wider non-public development evaluation
+
+The 47-row `synthetic-heldout` split has provenance on all 47 records. Before inference, IDs, original submission IDs, code hashes and group keys were checked against `real-train`, `real-val` and `synthetic-train`; all four overlap counts were zero. This is a disjoint synthetic development set, not public data.
+
+All three wider runs stopped under the fail-closed policy, so no full-split score is reported. Direct B stopped on `SYN-HO-SINGLE-0000` after three invalid Level attempts (2,782 input tokens, 141 output tokens, 2.12 s), with no prediction export. Pipeline A stopped at `SYN-HO-SINGLE-0014` because Level 3 diagnosis/direction retries were exhausted. Oracle C stopped at `SYN-HELDOUT-0010` for the same Level 3 adequacy gate. Partial outputs are not scored as complete validation. This confirms the method is not ready to freeze; no public inference was run.
+
+Round 9 verification: **353 passed, 7 skipped** for Task 3. Repository-wide: **630 passed, 30 skipped, 4 failed**. The four existing failures remain outside Task 3: two `tests/test_colab_task1_secrets.py` tests (`test_timeout_falls_back_to_hidden_input_once`, `test_selected_provider_only_requires_its_key`) and two `tests/test_synth_gate.py::TestLabelerGate` tests (`test_known_noise_is_flagged`, `test_observable_single_samples_all_match`).
+
+Round 9 reproduction commands (choose fresh output names; the direct runner refuses to overwrite existing artifacts):
+
+```bash
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split real-val --taxonomy-source self-diagnosis --output outputs/task3/repro-round9-pipeline.json
+.venv-task3/bin/python scripts/run_task3_direct_baseline.py --config configs/task3/self_diagnosis_zero_shot.yaml --split real-val --output outputs/task3/repro-round9-direct.json
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split real-val --taxonomy-source gold --output outputs/task3/repro-round9-oracle.json
+.venv-task3/bin/python scripts/run_task3_direct_baseline.py --config configs/task3/self_diagnosis_zero_shot.yaml --split synthetic-heldout --output outputs/task3/repro-round9-direct-heldout.json
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split synthetic-heldout --taxonomy-source self-diagnosis --output outputs/task3/repro-round9-pipeline-heldout.json
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split synthetic-heldout --taxonomy-source gold --output outputs/task3/repro-round9-oracle-heldout.json
+```

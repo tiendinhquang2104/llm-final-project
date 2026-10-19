@@ -24,3 +24,12 @@ def test_syntax_check_distinguishes_clean_code_from_unavailable_and_timeout(tmp_
     slow.write_text('#!/bin/sh\nsleep 2\n')
     slow.chmod(0o700)
     assert check_cpp_syntax('int main() {}', compiler=str(slow), timeout_s=0.05)['status'] == 'timeout'
+
+
+def test_syntax_check_can_target_cpp11_and_keeps_first_diagnostic(tmp_path):
+    compiler = tmp_path / 'diagnostics-c++'
+    compiler.write_text('#!/bin/sh\nprintf "first diagnostic\\nsecond diagnostic\\n" >&2\nexit 1\n')
+    compiler.chmod(0o700)
+    result = check_cpp_syntax('int main() {}', compiler=str(compiler), standard='c++11')
+    assert '-std=c++11' in result['command']
+    assert result['diagnostic'].startswith('first diagnostic')
