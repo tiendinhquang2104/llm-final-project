@@ -29,6 +29,20 @@ def test_load_requested_levels_accepts_rows_and_preserves_order(tmp_path):
     }
 
 
+def test_load_official_numeric_requested_level_schema_and_rejects_bool(tmp_path):
+    path = tmp_path / "requested.json"
+    path.write_text(json.dumps([
+        {"sample_id": "TEST-A", "requested_level": 1},
+        {"sample_id": "TEST-B", "requested_level": 4},
+    ]), encoding="utf-8")
+    assert load_requested_levels(path) == {"TEST-A": FEEDBACK_LEVELS[0], "TEST-B": FEEDBACK_LEVELS[3]}
+
+    for bad in (True, 0, 5, 1.0):
+        path.write_text(json.dumps([{"sample_id": "TEST-A", "requested_level": bad}]), encoding="utf-8")
+        with pytest.raises(ValueError, match="invalid"):
+            load_requested_levels(path)
+
+
 @pytest.mark.parametrize(
     "rows, message",
     [

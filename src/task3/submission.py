@@ -33,9 +33,14 @@ def load_requested_levels(path):
             sid, level = row
         elif isinstance(row, dict):
             sid = row.get("sample_id")
-            level = row.get("target_feedback_level", row.get("feedback_level", row.get("level")))
+            level = row.get(
+                "requested_level",
+                row.get("target_feedback_level", row.get("feedback_level", row.get("level"))),
+            )
         else:
             raise ValueError("invalid requested-level row")
+        if isinstance(level, int) and not isinstance(level, bool) and 1 <= level <= 4:
+            level = FEEDBACK_LEVELS[level - 1]
         if not isinstance(sid, str) or not sid.strip() or not isinstance(level, str) or level not in FEEDBACK_LEVELS:
             raise ValueError("invalid requested-level ID or Level")
         if sid in result:

@@ -74,6 +74,13 @@ def test_parse_taxonomy_diagnosis_requires_exact_source_evidence_and_label_union
     assert parse_taxonomy_diagnosis(f"```json\n{valid_diagnosis()}\n```", record()) == result
 
 
+def test_taxonomy_is_reconciled_from_explicit_supported_findings_when_array_is_omitted():
+    payload = json.loads(valid_diagnosis())
+    payload["taxonomy_error"] = []
+    result = parse_taxonomy_diagnosis(json.dumps(payload), record())
+    assert result["taxonomy_error"] == ["Lỗi logic"]
+
+
 def test_prerequisite_review_uses_only_supplied_problem_ids():
     row = record(
         "TEST-PREREQUISITE",
@@ -95,6 +102,56 @@ def test_prerequisite_review_uses_only_supplied_problem_ids():
     payload["prerequisite_review"][0]["depends_on"] = ["P9"]
     with pytest.raises(ValueError, match="prerequisite"):
         parse_taxonomy_diagnosis(json.dumps(payload), row)
+
+
+def test_file_wide_finding_may_use_null_problem_id_when_exam_has_problem_ids():
+    row = record("TEST-FILE-WIDE", problems=[{"pid": "P1"}, {"pid": "P2"}], compile_log="")
+    payload = json.loads(valid_diagnosis())
+    payload["findings"][0]["problem_id"] = None
+    result = parse_taxonomy_diagnosis(json.dumps(payload), row)
+    assert result["findings"][0]["problem_id"] is None
+
+
+def test_compile_error_requires_compiler_evidence():
+    row = record("TEST-NO-COMPILER", problems=[{"pid": "P1"}], compile_log="")
+    payload = json.loads(valid_diagnosis(label="Lỗi biên dịch", quote="return 17;"))
+    with pytest.raises(ValueError, match="compiler evidence"):
+        parse_taxonomy_diagnosis(json.dumps(payload), row)
+
+
+def test_unsubstantiated_compile_claim_is_removed_and_audited_not_accepted():
+    class Backend:
+        tokenizer = MockTokenizer()
+
+        def generate(self, messages, config):
+            return Generation(valid_diagnosis(label="Lỗi biên dịch", quote="return 17;"), 100, 0.2)
+
+    row = record("TEST-COMPILE-CLAIM", compile_log="")
+    predicted, audit = diagnose_taxonomies([row], Backend(), {"context_limit": 10000})
+    item = audit[row.sample_id]
+    assert predicted[row.sample_id] == []
+    assert item["diagnosis"]["status"] == "uncertain"
+    assert item["evidence_filter"]["status"] == "unsupported_findings_removed"
+    assert item["evidence_filter"]["findings"][0]["taxonomy_label"] == "Lỗi biên dịch"
+
+
+def test_unsupported_prerequisite_review_is_removed_without_dropping_grounded_finding():
+    class Backend:
+        tokenizer = MockTokenizer()
+
+        def generate(self, messages, config):
+            payload = json.loads(valid_diagnosis())
+            payload["prerequisite_review"] = [{
+                "problem_id": "P1", "depends_on": [], "status": "met", "basis": ""
+            }]
+            return Generation(json.dumps(payload, ensure_ascii=False), 100, 0.2)
+
+    row = record("TEST-BAD-PREREQ", problems=[{"pid": "P1"}])
+    predicted, audit = diagnose_taxonomies([row], Backend(), {"context_limit": 10000})
+    assert predicted[row.sample_id] == ["Lỗi logic"]
+    item = audit[row.sample_id]
+    assert item["diagnosis"]["prerequisite_review"] == []
+    assert item["evidence_filter"]["status"] == "unsupported_prerequisite_reviews_removed"
 
 
 @pytest.mark.parametrize(
@@ -163,9 +220,87 @@ def test_parse_failure_keeps_a_private_raw_attempt_journal(tmp_path):
     with pytest.raises(ValueError, match="diagnosis failed"):
         diagnose_taxonomies([record("TEST-INVALID-JOURNAL")], Backend(), {"context_limit": 10000}, attempt_journal_path=journal)
 
-    attempt = json.loads(journal.read_text(encoding="utf-8").splitlines()[0])
-    assert attempt["status"] == "parse_failed"
-    assert attempt["raw_text"] == "not JSON"
+    attempts = [json.loads(line) for line in journal.read_text(encoding="utf-8").splitlines()]
+    assert [attempt["status"] for attempt in attempts] == ["format_retry", "parse_failed"]
+    assert all(attempt["raw_text"] == "not JSON" for attempt in attempts)
+
+
+def test_diagnosis_retries_format_once_and_keeps_raw_and_final_attempts():
+    class Backend:
+        tokenizer = MockTokenizer()
+
+        def __init__(self):
+            self.calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            return Generation("not JSON" if self.calls == 1 else valid_diagnosis(), 10, 0.1)
+
+    backend = Backend()
+    predicted, audit = diagnose_taxonomies([record("TEST-FORMAT-RETRY")], backend, {"context_limit": 10000})
+    item = audit["TEST-FORMAT-RETRY"]
+    assert predicted["TEST-FORMAT-RETRY"] == ["Lỗi logic"]
+    assert backend.calls == 2
+    assert [attempt["status"] for attempt in item["attempts"]] == ["format_retry", "validated"]
+    assert item["attempts"][0]["raw_text"] == "not JSON"
+
+
+def test_string_null_problem_id_gets_only_a_format_retry():
+    class Backend:
+        tokenizer = MockTokenizer()
+
+        def __init__(self):
+            self.calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            payload = json.loads(valid_diagnosis())
+            if self.calls == 1:
+                payload["findings"][0]["problem_id"] = "null"
+            return Generation(json.dumps(payload, ensure_ascii=False), 40, 0.1)
+
+    backend = Backend()
+    row = record("TEST-STRING-NULL", problems=[{"pid": "P1"}])
+    predicted, audit = diagnose_taxonomies([row], backend, {"context_limit": 10000})
+    assert predicted[row.sample_id] == ["Lỗi logic"]
+    assert [a["status"] for a in audit[row.sample_id]["attempts"]] == ["format_retry", "validated"]
+
+
+def test_unknown_problem_id_is_not_retried_as_format_error():
+    class Backend:
+        tokenizer = MockTokenizer()
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            payload = json.loads(valid_diagnosis())
+            payload["findings"][0]["problem_id"] = "P9"
+            return Generation(json.dumps(payload, ensure_ascii=False), 40, 0.1)
+
+    backend = Backend()
+    with pytest.raises(ValueError, match="not supplied"):
+        diagnose_taxonomies([record("TEST-BAD-PID", problems=[{"pid": "P1"}])], backend, {"context_limit": 10000})
+    assert backend.calls == 1
+
+
+def test_schema_status_mismatch_gets_one_format_retry():
+    class Backend:
+        tokenizer = MockTokenizer()
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            payload = json.loads(valid_diagnosis())
+            if self.calls == 1:
+                payload["taxonomy_error"] = []
+                payload["findings"] = []
+                payload["status"] = "possible_errors"
+            return Generation(json.dumps(payload, ensure_ascii=False), 40, 0.1)
+
+    backend = Backend()
+    predicted, audit = diagnose_taxonomies([record("TEST-STATUS-RETRY")], backend, {"context_limit": 10000})
+    assert predicted["TEST-STATUS-RETRY"] == ["Lỗi logic"]
+    assert [a["status"] for a in audit["TEST-STATUS-RETRY"]["attempts"]] == ["format_retry", "validated"]
 
 
 def test_diagnosis_audit_round_trips_with_exact_order_and_validated_schema(tmp_path):
