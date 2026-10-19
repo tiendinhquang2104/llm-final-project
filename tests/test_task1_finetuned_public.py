@@ -8,8 +8,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.data.loader import DIMENSIONS, Dataset, Sample
+from src.data.loader import DIMENSIONS, DIM_MAX, Dataset, Sample
 from src.data.prompts import build_task1_messages
+from src.data.task1_rubric import DEFAULT_DESCRIPTIONS
 from src.task1.evaluator import validate_predictions
 from src.task1.finetune_public import (
     predict_finetuned_public,
@@ -52,7 +53,11 @@ def public_dataset(root):
         for index in range(60):
             samples.append(Sample(f"{exam_id}-S{index:02}", exam_id, exam_type,
                                   "cpp11", "code.cpp", "int main() {}", None, None))
-    return Dataset(root, exams, {}, samples)
+    label_space = {"rubric": {"dimensions": [
+        {"name": name, "range": [0, DIM_MAX[name]], "vi": DEFAULT_DESCRIPTIONS[name]}
+        for name in DIMENSIONS
+    ]}}
+    return Dataset(root, exams, label_space, samples[:328])
 
 
 TARGET = json.dumps({"rubric": {d: 0 for d in DIMENSIONS}, "total_score": 0})
@@ -92,7 +97,7 @@ def test_prompt_matches_training_and_does_not_include_assistant(tmp_path):
     context = SimpleNamespace(**vars(sample), exam_statement="A C++ problem",
                               grading_policy="P1 prerequisite", rubric={d: 0 for d in DIMENSIONS},
                               total_score=0)
-    training_messages, _ = build_task1_messages(context)
+    training_messages, _ = build_task1_messages(context, ds.label_space)
     assert public_messages(ds, sample) == training_messages[:2]
     assert [m["role"] for m in public_messages(ds, sample)] == ["system", "user"]
 
@@ -107,8 +112,8 @@ def test_preflight_checks_all_prompts_without_truncation(tmp_path):
             return [1] * 20
 
     inputs, report = prepare_public(ds, Tokenizer(), 30, 10)
-    assert len(inputs) == report["samples"] == 360
-    with pytest.raises(ValueError, match="360 public prompts exceed"):
+    assert len(inputs) == report["samples"] == 328
+    with pytest.raises(ValueError, match="328 public prompts exceed"):
         prepare_public(ds, Tokenizer(), 29, 10)
 
 
@@ -133,10 +138,10 @@ def test_resume_invalid_output_and_exact_submission(tmp_path):
                                        tmp_path / "out", {}, [sorted(inputs)[3]])
     assert invalid["completed"] == 3 and invalid["errors"]
     complete = predict_finetuned_public(ds, inputs, selection, valid, tmp_path / "out", {})
-    assert len(calls) == 360
+    assert len(calls) == 328
     rows = json.loads(Path(complete["submission_path"]).read_text())
     assert not validate_predictions(rows, sorted(inputs))
-    assert complete["completed"] == 360
+    assert complete["completed"] == 328
     # A new generation configuration must not reuse the completed submission.
     changed = predict_finetuned_public(ds, inputs, selection, valid, tmp_path / "out",
                                        {"max_new_tokens": 512}, selected[:1])

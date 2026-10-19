@@ -97,7 +97,7 @@ def prepare_public(dataset: Dataset, tokenizer, max_length: int, max_new_tokens:
 
 def predict_finetuned_public(dataset: Dataset, inputs: dict, selection: dict, generate,
                              out_root: str | Path, generation: dict, selected_ids: list[str] | None = None) -> dict:
-    """Persist valid generations and export only a complete 360-sample submission.
+    """Persist valid generations and export only a complete public submission.
 
     `generate(token_ids)` returns (raw_text, generated_token_count). No API prompt
     repair or API scoring rules are applied to the fine-tuned model's output.
@@ -155,7 +155,7 @@ def predict_finetuned_public(dataset: Dataset, inputs: dict, selection: dict, ge
                 _write_atomic(checkpoints / f"{sid}.json", detail)
                 done[sid], saved_rows[sid] = row, detail
                 (out / "invalid_outputs" / f"{sid}.json").unlink(missing_ok=True)
-            print(f"[{index}/{len(chosen)}] {sid}: {'OK' if sid in done else 'INVALID'} | {len(done)}/360", flush=True)
+            print(f"[{index}/{len(chosen)}] {sid}: {'OK' if sid in done else 'INVALID'} | {len(done)}/{len(expected)}", flush=True)
     except KeyboardInterrupt:
         stopped = "Interrupted; rerun to resume from valid checkpoints"
     except Exception as exc:

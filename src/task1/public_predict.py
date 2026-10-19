@@ -18,6 +18,8 @@ from src.task1.pipeline import Task1Pipeline, to_submission
 
 PUBLIC_EXAMS = {"Class03-Midterm-1", "Class03-Midterm-2", "Class03-Final-1",
                 "Class01-Test1", "Class01-Test2", "Class02-Test1"}
+# Current official public release: 328 submissions (an earlier copy had 360, 32 of them duplicates).
+PUBLIC_SAMPLES = 328
 
 
 def _digest(value: object) -> str:
@@ -64,8 +66,9 @@ def inspect_public(dataset: Dataset) -> dict:
     duplicates = [sid for sid, n in Counter(ids).items() if n > 1]
     if duplicates:
         raise ValueError(f"Duplicate public sample IDs: {duplicates[:5]}")
-    if len(ids) != 360 or set(dataset.exams) != PUBLIC_EXAMS:
-        raise ValueError(f"Expected 360 samples and six known public exams; got {len(ids)} and {sorted(dataset.exams)}")
+    if len(ids) != PUBLIC_SAMPLES or set(dataset.exams) != PUBLIC_EXAMS:
+        raise ValueError(f"Expected {PUBLIC_SAMPLES} samples and six known public exams; "
+                         f"got {len(ids)} and {sorted(dataset.exams)}")
     if {s.exam_id for s in dataset.samples} != PUBLIC_EXAMS:
         raise ValueError("Every public exam must have submissions")
     if any(s.has_gold for s in dataset.samples):

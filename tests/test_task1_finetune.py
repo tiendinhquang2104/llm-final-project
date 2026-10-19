@@ -103,6 +103,10 @@ def test_generated_json_decimal_sum_and_metrics():
     corrected, json_ok, strict_ok = parse_generated_score(wrong_total)
     assert json_ok and not strict_ok and corrected["total_score"] == 7.75
     assert parse_generated_score("not json") == (None, False, False)
+    fenced, json_ok, strict_ok = parse_generated_score("```json\n" + TARGET + "\n```")  # instruct-model habit
+    assert (json_ok, strict_ok) == (True, True) and fenced == pred
+    assert parse_generated_score("```\n" + TARGET + "\n```")[0] == pred
+    assert parse_generated_score("Here:\n```json\n" + TARGET + "\n```") == (None, False, False)  # extra prose
     invalid_step = json.dumps({"rubric": {**RUBRIC, "logic": 2.255}, "total_score": 7.755})
     assert parse_generated_score(invalid_step) == (None, True, False)
     metrics, details = evaluate_generations([rec], {"S2": TARGET})

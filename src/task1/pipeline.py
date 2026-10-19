@@ -19,8 +19,8 @@ PUBLIC_CSV = {"Class01-Test1": ("generals.csv", "50-best-european-generals-clean
               "Class02-Test1": ("battles.csv", "50-european-battles-first-20.csv")}
 
 
-def valid_parsed(parsed, exam_type: str) -> bool:
-    """Accept any valid six-dimension rubric; per-problem status is optional."""
+def valid_parsed(parsed, exam_type: str, template: str = "structured") -> bool:
+    """Accept a valid six-dimension rubric; per-problem status is optional."""
     if not parsed.ok or not parsed.rubric:
         return False
     if any(not isinstance(parsed.rubric.get(d), (int, float))
@@ -71,7 +71,7 @@ class Task1Pipeline:
             "template": self.prompt_cfg.get("template", "structured"),
             "demos": [d.sample_id for d in demos],
             "messages": build_messages(exam, sample, demos, self.prompt_cfg,
-                                        self.csv_headers.get(sample.exam_id, ""), self.ds.label_space),
+                                        self.csv_headers.get(sample.exam_id, "")),
         }
 
     def infer(self, samples: list[Sample]) -> list[dict]:
@@ -80,7 +80,7 @@ class Task1Pipeline:
         outs = self.backend.generate(reqs, self.gen_cfg)
         records = []
         for q, texts in zip(reqs, outs):
-            records.append({"sample_id": q["sample"].sample_id, "exam_type": q["sample"].exam_type,
+            records.append({"sample_id": q["sample"].sample_id, "exam_type": q["sample"].exam_type, "template": q.get("template", "structured"),
                             "demos": q["demos"], "outputs": texts,
                             "retry_outputs": []})
         n_retry = int(self.cfg.get("retry_on_parse_fail", 1))
@@ -108,7 +108,7 @@ class Task1Pipeline:
 
     # -- post-processing (pure; can be re-run with different rule configs) -------------------------
     def _valid(self, parsed, sample: Sample) -> bool:
-        return valid_parsed(parsed, sample.exam_type)
+        return valid_parsed(parsed, sample.exam_type, self.prompt_cfg.get("template", "structured"))
 
     def postprocess(self, record: dict, rule_cfg: RuleConfig | None = None) -> dict:
         rule_cfg = rule_cfg or self.rule_cfg

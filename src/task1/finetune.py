@@ -126,6 +126,16 @@ def encode_inference_prompt(record: ChatMLRecord, tokenizer: Any, max_length: in
     return ids
 
 
+def strip_code_fence(text: str) -> str:
+    """Remove one surrounding Markdown code fence (```json ... ```), which instruct models often add."""
+    t = (text or "").strip()
+    if t.startswith("```") and t.endswith("```") and t.count("```") == 2:
+        t = t[3:-3]
+        first, _, rest = t.partition("\n")
+        t = rest if first.strip().lower() in ("", "json") else t
+    return t.strip()
+
+
 def parse_generated_score(text: str) -> tuple[dict[str, Any] | None, bool, bool]:
     """Return a normalized score, JSON parse flag, and strict output-valid flag.
 
@@ -134,7 +144,7 @@ def parse_generated_score(text: str) -> tuple[dict[str, Any] | None, bool, bool]
     predictions in the evaluator; no score is silently fabricated here.
     """
     try:
-        obj = json.loads(text.strip())
+        obj = json.loads(strip_code_fence(text))
     except (TypeError, ValueError, json.JSONDecodeError):
         return None, False, False
     if not isinstance(obj, dict) or not isinstance(obj.get("rubric"), dict):
@@ -172,8 +182,8 @@ def evaluate_generations(records: list[ChatMLRecord], raw_by_id: dict[str, str])
         if pred is not None:
             predictions[rec.sample_id] = pred
         details.append(
-            {"sample_id": rec.sample_id, "raw_output": raw, "prediction": pred,
-             "json_ok": json_ok, "strict_output_ok": strict_ok}
+            {"sample_id": rec.sample_id, "exam_id": rec.exam_id, "raw_output": raw, "prediction": pred,
+             "gold": gold[rec.sample_id], "json_ok": json_ok, "strict_output_ok": strict_ok}
         )
     metrics = evaluate(gold, predictions)
     metrics["json_parse_rate"] = sum(x["json_ok"] for x in details) / len(details)
@@ -218,3 +228,91 @@ def choose_variant(gold_only: dict, silver_then_gold: dict) -> dict:
     gold_key = (gold_only["metrics"]["qwk"], -gold_only["metrics"]["mae"])
     silver_key = (silver_then_gold["metrics"]["qwk"], -silver_then_gold["metrics"]["mae"])
     return silver_then_gold if silver_key > gold_key else gold_only
+
+
+# -- public / private test prediction with the selected adapter ----------------------------------
+
+def load_unlabelled_prompts(root: str | Path, task_file: str = "task1_grading.json") -> list[dict[str, Any]]:
+    """Inference prompts for an unlabelled release (public or private test), built exactly like training.
+
+    Uses src.data.prompts.build_task1_prompt, so statement, code, compile log and test report are formatted as
+    in the gold/silver training records. Labels, if present, are never read.
+    """
+    from types import SimpleNamespace
+
+    from src.data.loader import load_code, load_exams, resolve_dataset_root
+    from src.data.prompts import build_task1_prompt
+
+    root = resolve_dataset_root(root)
+    exams = load_exams(root)
+    label_space_path = root / "label_space.json"
+    label_space = json.loads(label_space_path.read_text(encoding="utf-8")) if label_space_path.is_file() else None
+    rows = json.loads((root / task_file).read_text(encoding="utf-8"))["samples"]
+    ids = [row["sample_id"] for row in rows]
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"Duplicate sample_id in {root / task_file}")
+    prompts = []
+    for row in rows:
+        inp = row["input"]
+        if "feedback" in inp:
+            raise ValueError(f"Task 1 input of {row['sample_id']} carries teacher feedback; refusing to build a prompt")
+        exam = exams[inp["exam_id"]]
+        sample = SimpleNamespace(
+            exam_id=inp["exam_id"], exam_type=inp.get("exam_type") or exam["exam_type"],
+            language=inp.get("language") or exam.get("language", "cpp11"),
+            grading_policy=exam.get("grading_policy"), exam_statement=exam["statement"],
+            code=load_code(root, inp["code_file"]), compile_log=inp.get("compile_log"),
+            test_report=inp.get("test_report"),
+        )
+        prompts.append({"sample_id": row["sample_id"], "exam_id": sample.exam_id, "exam_type": sample.exam_type,
+                        "messages": build_task1_prompt(sample, label_space)})
+    return prompts
+
+
+def record_exam_type(record: ChatMLRecord) -> str | None:
+    """exam_type as written in the record's own prompt (src.data.prompts._shared_context)."""
+    for line in record.messages[1]["content"].splitlines():
+        if line.startswith("exam_type:"):
+            return line.split(":", 1)[1].strip()
+    return None
+
+
+def fallback_score(gold_records: list[ChatMLRecord], exam_type: str) -> dict[str, Any]:
+    """Median teacher rubric of gold training records of the same exam type (for an unparseable output).
+
+    The submission must contain every sample_id; such samples are flagged `fallback_used` and counted.
+    """
+    import statistics
+
+    pool = [json.loads(r.target)["rubric"] for r in gold_records if record_exam_type(r) == exam_type]
+    pool = pool or [json.loads(r.target)["rubric"] for r in gold_records]
+    cents = {d: int(statistics.median_low(to_cents(rub[d], DIM_MAX[d]) for rub in pool)) for d in DIMENSIONS}
+    return {"rubric": {d: from_cents(cents[d]) for d in DIMENSIONS}, "total_score": from_cents(sum(cents.values()))}
+
+
+def validation_error_report(output_dir: str | Path, threshold: float = 2.0) -> str:
+    """Markdown error analysis of the selected adapter on gold validation (|pred - gold| >= threshold or invalid)."""
+    out = Path(output_dir)
+    summary = json.loads((out / "training_summary.json").read_text(encoding="utf-8"))
+    variant, epoch = summary["selected_variant"], summary["selected_epoch"]
+    details = json.loads((out / variant / f"epoch_{epoch}" / "validation_predictions.json").read_text(encoding="utf-8"))
+    lines = [f"# Task 1 QLoRA — error analysis ({variant}, epoch {epoch}, gold validation)", "",
+             f"Selected metrics: QWK {summary['selected_metrics']['qwk']:.3f}, "
+             f"MAE {summary['selected_metrics']['mae']:.2f}, n {summary['selected_metrics']['n']}.", "",
+             "| sample_id | exam | gold total | predicted total | dimensions wrong | valid JSON |",
+             "|---|---|---|---|---|---|"]
+    flagged = 0
+    for d in details:
+        gold, pred = d.get("gold"), d.get("prediction")
+        if gold is None:
+            continue
+        diff = None if pred is None else abs(float(pred["total_score"]) - float(gold["total_score"]))
+        if pred is not None and diff < threshold:
+            continue
+        flagged += 1
+        wrong = "" if pred is None else ", ".join(
+            f"{k} {gold['rubric'][k]}→{pred['rubric'][k]}" for k in DIMENSIONS if pred["rubric"][k] != gold["rubric"][k])
+        lines.append(f"| {d['sample_id']} | {d.get('exam_id', '')} | {gold['total_score']} | "
+                     f"{'—' if pred is None else pred['total_score']} | {wrong or '—'} | {d['strict_output_ok']} |")
+    lines += ["", f"{flagged}/{len(details)} samples deviate by >= {threshold:g} points or produced no valid score."]
+    return "\n".join(lines) + "\n"
