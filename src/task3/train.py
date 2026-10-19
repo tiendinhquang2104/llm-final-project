@@ -231,7 +231,7 @@ def _training_gpu_preflight(torch, config):
     if workload["external_process_count"]:
         raise RuntimeError("another GPU workload is active; training stopped without disturbing it")
     try:
-        minimum_free_gib = float(config.get("min_free_vram_gib", 20))
+        minimum_free_gib = float(config.get("min_free_vram_gib", 10))
     except (TypeError, ValueError) as exc:
         raise ValueError("min_free_vram_gib must be a positive number") from exc
     if not math.isfinite(minimum_free_gib) or minimum_free_gib <= 0:
