@@ -876,6 +876,8 @@ def infer(
                 "LEVEL3_DIRECTION_REVIEW_CANDIDATE",
             }:
                 retry_reasons.append("level3_direction_candidate")
+            if result.ok and "SOURCE_CONTRADICTION_REVIEW_CANDIDATE" in quality_flags["flags"]:
+                retry_reasons.append("source_claim_candidate")
             if config.get("retry_policy_version") == 4 and guard_policy == 3 and "LEVEL1_PRAISE_EVIDENCE_REVIEW_CANDIDATE" in quality_flags["flags"]:
                 retry_reasons.append("level1_praise_review_candidate")
             retain_feedback(
@@ -902,7 +904,8 @@ def infer(
             if result.ok and not retry_reasons:
                 break
         adequacy_retry_exhausted = bool(adequacy_policy and "level3_direction_candidate" in retry_reasons)
-        used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete or adequacy_retry_exhausted
+        source_review_retry_exhausted = "source_claim_candidate" in retry_reasons
+        used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete or adequacy_retry_exhausted or source_review_retry_exhausted
         feedback = fallback(record.target_feedback_level) if used_fallback else generated.text.strip()
         final = check(feedback, record.target_feedback_level, version=guard_policy)
         if not final.ok and not used_fallback:
@@ -922,6 +925,8 @@ def infer(
             fallback_reason = "feedback_incomplete"
         elif adequacy_retry_exhausted:
             fallback_reason = "level3_adequacy_retries_exhausted"
+        elif source_review_retry_exhausted:
+            fallback_reason = "source_contradiction_retries_exhausted"
         elif used_fallback:
             fallback_reason = "guard_retries_exhausted"
         else:

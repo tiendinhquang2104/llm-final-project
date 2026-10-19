@@ -11,6 +11,7 @@ from src.task3.diagnosis import (
     diagnose_taxonomies,
     load_taxonomy_diagnosis_audit,
     parse_taxonomy_diagnosis,
+    diagnosis_failure_category,
     untrusted_diagnosis_message,
 )
 from src.task3.inference import Generation, MockBackend, MockTokenizer
@@ -72,6 +73,59 @@ def test_parse_taxonomy_diagnosis_requires_exact_source_evidence_and_label_union
     assert result["findings"][0]["confidence"] == "medium"
 
     assert parse_taxonomy_diagnosis(f"```json\n{valid_diagnosis()}\n```", record()) == result
+
+
+@pytest.mark.parametrize(
+    "reason, category",
+    [
+        ("diagnosis output must be one JSON object", "json_schema"),
+        ("diagnosis status conflicts with nonempty taxonomy", "json_schema"),
+        ("diagnosis quote is not an exact source excerpt", "evidence"),
+        ("compile-error finding requires compiler evidence confirmed by a compile error", "evidence"),
+        ("source claim contradicts initialized scalar", "content"),
+    ],
+)
+def test_diagnosis_failure_category_distinguishes_format_evidence_and_content(reason, category):
+    assert diagnosis_failure_category(reason) == category
+
+
+def test_status_schema_retry_names_the_only_valid_status_values():
+    class Backend:
+        tokenizer = MockTokenizer()
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            if self.calls == 1:
+                payload = json.loads(valid_diagnosis())
+                payload["status"] = "possible_errors|uncertain"
+                return Generation(json.dumps(payload, ensure_ascii=False), 90, 0.2)
+            assert "possible_errors" in messages[-1]["content"]
+            assert "uncertain" in messages[-1]["content"]
+            return Generation(valid_diagnosis(), 90, 0.2)
+
+    predicted, audit = diagnose_taxonomies([record("TEST-STATUS-RETRY")], Backend(), {"context_limit": 10000})
+    assert predicted["TEST-STATUS-RETRY"] == ["Lỗi logic"]
+    assert audit["TEST-STATUS-RETRY"]["status"] == "validated"
+
+
+def test_string_null_problem_id_retry_explains_json_null_literal():
+    class Backend:
+        tokenizer = MockTokenizer()
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            if self.calls == 1:
+                payload = json.loads(valid_diagnosis())
+                payload["findings"][0]["problem_id"] = "null"
+                return Generation(json.dumps(payload, ensure_ascii=False), 90, 0.2)
+            assert "JSON null" in messages[-1]["content"]
+            return Generation(valid_diagnosis(), 90, 0.2)
+
+    predicted, audit = diagnose_taxonomies([record("TEST-NULL-RETRY")], Backend(), {"context_limit": 10000})
+    assert predicted["TEST-NULL-RETRY"] == ["Lỗi logic"]
+    assert audit["TEST-NULL-RETRY"]["status"] == "validated"
 
 
 def test_taxonomy_is_reconciled_from_explicit_supported_findings_when_array_is_omitted():

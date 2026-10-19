@@ -40,6 +40,43 @@ _FORMAT_ERRORS = {
 }
 
 
+def diagnosis_failure_category(reason):
+    """Classify diagnosis failures without treating unsupported claims as formatting errors."""
+    value = str(reason).casefold()
+    if "quote" in value or "compiler evidence" in value or "prerequisite" in value or "source" in value and ("exact" in value or "evidence" in value):
+        return "evidence"
+    if any(marker in value for marker in ("json", "schema", "status conflicts", "taxonomy labels must", "empty taxonomy status")):
+        return "json_schema"
+    return "content"
+
+
+def _diagnosis_retry_instruction(reason):
+    category = diagnosis_failure_category(reason)
+    if "problem ID is not supplied" in str(reason):
+        return (
+            "Sửa problem_id: nếu finding ảnh hưởng toàn file hoặc không quy riêng được cho một câu, dùng đúng giá trị JSON null "
+            "không có dấu ngoặc kép (không dùng chuỗi `\"null\"`). Giữ nguyên kiểm tra ID được cung cấp; "
+            "chỉ trả một JSON object đúng schema, không markdown."
+        )
+    if "status conflicts" in str(reason):
+        return (
+            "Sửa lỗi schema: status chỉ được là đúng một giá trị `possible_errors` hoặc `uncertain`, không được ghép hai giá trị. "
+            "Có nhãn/finding thì dùng `possible_errors`; không còn nhãn/finding thì dùng `uncertain`. "
+            "Giữ nguyên các kiểm tra bằng chứng; trả một JSON object, không markdown."
+        )
+    if category == "evidence":
+        return (
+            "Sửa lỗi bằng chứng: source_quote phải được chép nguyên văn từ đúng source_field, gồm đúng tên biến, dấu câu và ký tự. "
+            "Không diễn giải lại hoặc sửa code trong quote. Nếu không tìm được đoạn khớp, bỏ finding đó và nhãn không còn finding; "
+            "taxonomy rỗng phải dùng status `uncertain`. Không nới lỏng kiểm tra bằng chứng. Chỉ trả một JSON object, không markdown."
+        )
+    return (
+        "Sửa JSON/schema: chỉ một object với đúng các trường bắt buộc và kiểu dữ liệu trong schema. "
+        "status là đúng một trong `possible_errors` hoặc `uncertain`; taxonomy_error phải khớp chính xác các nhãn trong findings. "
+        "Không thêm markdown hay văn bản ngoài JSON. Không đổi hoặc nới lỏng căn cứ của nhận định."
+    )
+
+
 def _unavailable_diagnosis(reason):
     return {
         "status": "uncertain", "taxonomy_error": [], "findings": [],
@@ -504,6 +541,7 @@ def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
                             retry_row = {
                                 "status": "format_retry" if attempt_index == 0 else "parse_failed",
                                 "failure_type": type(filter_exc).__name__,
+                                "failure_category": diagnosis_failure_category(filter_exc),
                                 "failure_reason": str(filter_exc),
                                 "raw_text": generation.text,
                                 "prompt_messages": generation_messages,
@@ -516,11 +554,7 @@ def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
                             if attempt_index == 0:
                                 generation_messages = prompt.messages + [{
                                     "role": "user",
-                                    "content": (
-                                        f"Sửa duy nhất lỗi định dạng ({filter_exc}); không thay đổi nội dung nhận định. "
-                                        "Mọi source_quote phải khớp chính xác với source_field; nếu không thể trích đúng thì bỏ finding và dùng uncertain. "
-                                        "Không nới lỏng bằng chứng."
-                                    ),
+                                    "content": _diagnosis_retry_instruction(filter_exc),
                                 }]
                                 continue
                             diagnosis = _unavailable_diagnosis(str(filter_exc))
@@ -529,6 +563,7 @@ def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
                             "sample_id": record.sample_id,
                             "status": "parse_failed",
                             "failure_type": type(filter_exc).__name__,
+                            "failure_category": diagnosis_failure_category(filter_exc),
                             "failure_reason": str(filter_exc),
                             "raw_text": generation.text,
                             "prompt_messages": generation_messages,
@@ -600,6 +635,7 @@ def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
                 attempt_row = {
                     "status": "format_retry" if format_error and attempt_index == 0 else "parse_failed",
                     "failure_type": type(exc).__name__,
+                    "failure_category": diagnosis_failure_category(exc),
                     "failure_reason": str(exc),
                     "raw_text": generation.text,
                     "prompt_messages": generation_messages,
@@ -612,12 +648,7 @@ def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
                 if format_error and attempt_index == 0:
                     generation_messages = prompt.messages + [{
                         "role": "user",
-                        "content": (
-                            "Đầu ra trước có lỗi định dạng JSON/schema hoặc source_quote. Hãy trả một JSON object đúng schema; không thêm markdown. "
-                            "Nếu problem_id không quy được cho câu cụ thể, giá trị phải là JSON null không có dấu ngoặc kép, không phải chuỗi 'null'. "
-                            "Mỗi source_quote phải là chuỗi con khớp chính xác với source_field; nếu không trích được chính xác thì bỏ finding đó và đặt status uncertain khi taxonomy rỗng. "
-                            "Không nới lỏng bằng chứng hoặc thay đổi kết luận vì lý do định dạng."
-                        ),
+                        "content": _diagnosis_retry_instruction(exc),
                     }]
                     continue
                 if format_error and attempt_index > 0:

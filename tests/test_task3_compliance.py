@@ -19,6 +19,8 @@ from src.task3.compliance import check, fallback
         (2, "Dieu kien vong lap khong dung.", True),
         (2, "Thay `i < n` thành `i <= n` là cách khắc phục.", False),
         (2, "P3 lặp vô tận vì con trỏ không dịch chuyển.", True),
+        (2, "P1 hard-code tên file. Cần sử dụng tham số `filename` thay cho chuỗi cố định.", False),
+        (2, "Tên file đang là chuỗi cố định thay vì sử dụng tham số `filename`.", False),
         (2, "Bạn thay bằng vòng lặp for.", False),
         (2, "Em cần cập nhật biến điều khiển.", False),
         (2, "Ban can dieu chinh bien dem de duyet du cac phan tu.", False),
@@ -82,3 +84,13 @@ def test_fallback_does_not_claim_diagnosis_and_semantics_are_unmeasured():
 )
 def test_irrelevant_topic_guard_accents_and_unaccented(text):
     assert "irrelevant_feedback" in check(text, 3).violations
+
+
+def test_level3_fenced_single_code_line_counts_code_not_language_tag():
+    text = (
+        "Biến `cnt` chưa được khai báo trong điều kiện vòng lặp. "
+        "Hãy đối chiếu số chữ số đã đếm với biến dùng làm giới hạn.\n\n"
+        "```cpp\nint cnt = numdigi;\n```"
+    )
+    result = check(text, 3)
+    assert result.ok

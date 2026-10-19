@@ -111,7 +111,13 @@ def check(feedback: str, level: str | int) -> ComplianceResult:
                 violations.append("identifier")
     elif lvl == 3:
         for block in blocks:
-            body = [ln for ln in block.strip("`").splitlines() if ln.strip()]
+            lines = block.splitlines()
+            if lines and _CODE_FENCE_OPEN.match(lines[0]):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            # A language tag belongs to the opening fence, not the code body.
+            body = [ln for ln in lines if ln.strip()]
             if len(body) > 1:
                 violations.append("code_block_gt_1_line")
                 break

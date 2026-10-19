@@ -40,6 +40,95 @@ def test_level_guards_reject_specific_level1_and_vague_level3_feedback():
     assert not {'LEVEL3_DIAGNOSIS_REVIEW_CANDIDATE', 'LEVEL3_DIRECTION_REVIEW_CANDIDATE'} & set(useful['flags'])
 
 
+def test_level3_direction_review_recognizes_specific_direction_after_heading():
+    text = (
+        'Biến `cnt` chưa được khai báo trong điều kiện vòng lặp. '
+        'Hướng sửa: Khởi tạo biến `cnt` bằng số chữ số đã đếm trước khi dùng nó làm giới hạn.'
+    )
+    result = quality_review_flags(record(target_feedback_level='Level 3 - Gợi ý sửa'), text)
+    assert 'LEVEL3_DIRECTION_REVIEW_CANDIDATE' not in result['flags']
+
+
+def test_feedback_source_review_catches_false_pointer_and_header_claims():
+    row = record(
+        target_feedback_level='Level 2 - Chẩn đoán',
+        code=(
+            'Node* a = new Node; a[n].next = nullptr;\n'
+            'fin.seekg(0); getline(fin, header); while (getline(fin, row)) {}'
+        ),
+    )
+    text = (
+        'Dùng toán tử [] trên con trỏ không hợp lệ. '
+        'Đọc lại tiêu đề khiến chương trình bỏ qua dữ liệu đầu tiên.'
+    )
+    result = quality_review_flags(row, text, version=2)
+    assert 'SOURCE_CONTRADICTION_REVIEW_CANDIDATE' in result['flags']
+    assert 'SOURCE_CONTRADICTION_REVIEW_CANDIDATE' in quality_review_flags(row, text, version=3)['flags']
+
+
+def test_feedback_source_review_rejects_false_d_and_p_claims_but_not_valid_claims():
+    row = record(
+        target_feedback_level='Level 2 - Chẩn đoán',
+        code='int d = 0; long long p = 1;',
+        statement='Input n is positive and n >= 1.',
+    )
+    bad = quality_review_flags(row, 'Biến d chưa được khởi tạo và p=1 là sai.', version=2)
+    good = quality_review_flags(row, 'Biến d=0 và p=1 được khởi tạo hợp lệ.', version=2)
+    assert 'SOURCE_CONTRADICTION_REVIEW_CANDIDATE' in bad['flags']
+    assert 'SOURCE_CONTRADICTION_REVIEW_CANDIDATE' not in good['flags']
+    d_claim = quality_review_flags(
+        row,
+        'Biến d được dùng làm chỉ số nhưng không được khởi tạo.',
+        version=2,
+    )
+    assert 'SOURCE_CONTRADICTION_REVIEW_CANDIDATE' in d_claim['flags']
+
+
+def test_feedback_source_review_does_not_treat_proposed_code_as_student_source():
+    row = record(
+        target_feedback_level='Level 3 - Gợi ý sửa',
+        code='int numdigi = 0; for (int i = 1; i <= cnt; i++) {}',
+    )
+    text = (
+        'Biến `cnt` chưa được khai báo. Hướng sửa: Khởi tạo biến `cnt` bằng `numdigi`.\n'
+        '```cpp\nint cnt = numdigi;\n```'
+    )
+    result = quality_review_flags(row, text, version=2)
+    assert 'SOURCE_CONTRADICTION_REVIEW_CANDIDATE' not in result['flags']
+
+
+def test_uninitialized_claim_matches_named_variable_not_other_initialized_identifier():
+    review = validate_code_claims(
+        'int numdigi = 0; for (int i = 1; i <= cnt; i++) {}',
+        [{'claim': 'Biến cnt chưa được khởi tạo; hãy dùng numdigi làm số lần lặp.', 'evidence': ''}],
+    )
+    assert review[0]['status'] == 'unverified'
+
+
+def test_source_contradiction_feedback_is_retried_before_export():
+    class CorrectingBackend(MockBackend):
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            text = (
+                'Đọc lại tiêu đề khiến chương trình bỏ qua dữ liệu đầu tiên.'
+                if self.calls == 1 else
+                'Phần đọc dữ liệu có bước đọc tiêu đề trước vòng lặp xử lý các dòng.'
+            )
+            return Generation(text, 20, 0.1)
+
+    backend = CorrectingBackend()
+    row = record(
+        target_feedback_level='Level 2 - Chẩn đoán',
+        code='fin.seekg(0); getline(fin, s); while (getline(fin, s)) {}',
+    )
+    predictions, traces = infer([row], backend, {'context_limit': 10000, 'max_retries': 1})
+    assert backend.calls == 2
+    assert traces[0]['attempts'][0]['retry_reasons'] == ['source_claim_candidate']
+    assert 'bỏ qua dữ liệu đầu tiên' not in predictions[0]['output']['feedback']
+
+
 def test_level3_exhausted_quality_retry_refuses_to_export_generic_fallback():
     class VagueBackend(MockBackend):
         calls = 0

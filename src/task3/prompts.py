@@ -128,7 +128,9 @@ def retry_hint(violations, level, version=1):
     if version != 2:
         raise ValueError("retry_policy_version must be 1, 2, 3 or 4")
     names = set(violations)
-    if names & {"code_fence", "code_like", "code_solution_leak", "complete_solution"}:
+    if "source_claim_candidate" in names:
+        detail = "Bỏ nhận định bị mâu thuẫn với mã nguồn; chỉ nêu nhận định khác khi có đoạn mã hỗ trợ trực tiếp."
+    elif names & {"code_fence", "code_like", "code_solution_leak", "complete_solution"}:
         detail = "Bỏ đoạn mã và lời giải vượt quá mức cho phép."
     elif names & {"repair_guidance", "imperative_fix"}:
         detail = "Bỏ chỉ dẫn sửa bài; chỉ chẩn đoán theo mức yêu cầu."

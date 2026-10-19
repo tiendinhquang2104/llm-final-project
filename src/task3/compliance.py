@@ -98,9 +98,14 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
         guidance_text = re.sub(r"\bbo sung\s+(?:kien thuc|ky nang|kinh nghiem)\b", "on luyen", guidance_text)
     if lvl <= 2 and re.search(
         r"\b(?:hay|nen|can|phai)\s+(?:(?:em|ban)\s+)?"
-        r"(?:them|doi|thay|sua|dieu chinh|tang|nang|dung|cap nhat|khai bao|xoa|bo|khoi tao|viet lai)\b"
+        r"(?:them|doi|thay|sua|dieu chinh|tang|nang|dung|su dung|cap nhat|khai bao|xoa|bo|khoi tao|viet lai)\b"
         r"|cach sua|loi giai(?: la|:)|dap an\s*(?:la|:)|de sua|fix(?: it)? by",
         guidance_text,
+    ):
+        violations.append("repair_guidance")
+    if lvl == 2 and re.search(
+        r"\bthay vi\s+(?:(?:em|ban)\s+)?(?:dung|su dung|dung den)\b.{0,80}\b(?:tham so|bien|ham|gia tri|code|ma|cach)\b",
+        normalized,
     ):
         violations.append("repair_guidance")
     if lvl == 2 and re.search(
