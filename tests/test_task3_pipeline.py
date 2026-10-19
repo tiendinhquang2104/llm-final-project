@@ -634,6 +634,30 @@ def test_oracle_evaluation_rejects_prediction_taxonomy_that_differs_from_gold():
         evaluate([r], predictions, taxonomy_source="gold")
 
 
+def test_predicted_taxonomy_reports_multilabel_metrics_and_empty_sets():
+    rows = [
+        record("TEST-METRIC-1", gold_taxonomy=["Lỗi logic"]),
+        record("TEST-METRIC-2", gold_taxonomy=[]),
+    ]
+    predictions = [
+        {"sample_id": "TEST-METRIC-1", "output": {"taxonomy_error": ["Lỗi logic"], "feedback": "đủ"}},
+        {"sample_id": "TEST-METRIC-2", "output": {"taxonomy_error": ["Lỗi hàm"], "feedback": "đủ"}},
+    ]
+
+    metrics = evaluate(rows, predictions, taxonomy_source="task2-json")["taxonomy_prediction_metrics"]
+
+    assert metrics["n"] == 2
+    assert metrics["macro_f1"] == pytest.approx(0.1)
+    assert metrics["micro_f1"] == pytest.approx(2 / 3)
+    assert metrics["per_label"]["Lỗi logic"]["precision"] == 1
+    assert metrics["per_label"]["Lỗi logic"]["recall"] == 1
+    assert metrics["per_label"]["Lỗi hàm"]["precision"] == 0
+    assert metrics["per_label"]["Lỗi hàm"]["recall"] is None
+    assert metrics["empty_reference_count"] == 1
+    assert metrics["empty_prediction_count"] == 0
+    assert metrics["empty_exact_match_count"] == 0
+
+
 @pytest.mark.parametrize("data", [[None], [{"sample_id": "TEST", "output": None}], {"TEST": {"output": None}}])
 def test_malformed_taxonomy_envelope_fails_cleanly(tmp_path, data):
     path = tmp_path / "bad.json"

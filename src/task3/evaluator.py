@@ -10,6 +10,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from src.synth.taxonomy import LABEL_SPACE
 from src.task3.compliance import check
 from src.task3.dataset import write_json
 from src.task3.pipeline import validate_predictions
@@ -23,6 +24,53 @@ _RUBRIC = {
     "level_violation": {"yes", "no"},
 }
 _AGREEMENT_FIELDS = tuple(_RUBRIC)
+
+
+def _taxonomy_prediction_metrics(pairs):
+    """Score predicted multi-label taxonomy only where reference labels exist."""
+    if not pairs:
+        return {"n": 0, "status": "no gold taxonomy available"}
+    per_label = {}
+    total_tp = total_fp = total_fn = 0
+    for label in LABEL_SPACE:
+        tp = fp = fn = 0
+        for gold, predicted in pairs:
+            is_gold, is_predicted = label in gold, label in predicted
+            tp += is_gold and is_predicted
+            fp += is_predicted and not is_gold
+            fn += is_gold and not is_predicted
+        precision_denominator = tp + fp
+        recall_denominator = tp + fn
+        f1_denominator = 2 * tp + fp + fn
+        per_label[label] = {
+            "precision": tp / precision_denominator if precision_denominator else None,
+            "recall": tp / recall_denominator if recall_denominator else None,
+            "f1": 2 * tp / f1_denominator if f1_denominator else None,
+            "support": tp + fn,
+            "n_predicted": tp + fp,
+        }
+        total_tp += tp
+        total_fp += fp
+        total_fn += fn
+    present_f1 = [row["f1"] for row in per_label.values() if row["f1"] is not None]
+    micro_denominator = 2 * total_tp + total_fp + total_fn
+    empty_gold = sum(not gold for gold, _ in pairs)
+    empty_predicted = sum(not predicted for _, predicted in pairs)
+    empty_both = sum(not gold and not predicted for gold, predicted in pairs)
+    return {
+        "n": len(pairs),
+        "status": "scored against available gold taxonomy",
+        "macro_f1": sum(row["f1"] or 0.0 for row in per_label.values()) / len(LABEL_SPACE),
+        "macro_f1_skip_absent": sum(present_f1) / len(present_f1) if present_f1 else None,
+        "micro_f1": 2 * total_tp / micro_denominator if micro_denominator else None,
+        "exact_match": sum(set(gold) == set(predicted) for gold, predicted in pairs) / len(pairs),
+        "empty_reference_count": empty_gold,
+        "empty_reference_rate": empty_gold / len(pairs),
+        "empty_prediction_count": empty_predicted,
+        "empty_prediction_rate": empty_predicted / len(pairs),
+        "empty_exact_match_count": empty_both,
+        "per_label": per_label,
+    }
 
 
 def _review_fields():
@@ -386,6 +434,7 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
                 "n": len(paired),
                 "exact_match": rate([set(gold) == set(predicted) for gold, predicted in paired]),
             }
+        result["taxonomy_prediction_metrics"] = _taxonomy_prediction_metrics(paired)
     if annotations is not None:
         if run_manifest is None:
             raise ValueError("a matching run manifest is required to evaluate bound human annotations")
