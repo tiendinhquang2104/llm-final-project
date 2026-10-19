@@ -33,7 +33,7 @@ class ComplianceResult:
         return "not_measured"
 
 
-def check(feedback: str, level: str | int, semantic_check: Callable | None = None):
+def check(feedback: str, level: str | int, semantic_check: Callable | None = None, allow_empty: bool = False):
     lvl = level_of(level)
     text = _strip_compile_log(feedback or "")
     # Instructor diagnoses quote identifiers/expressions; preserve actual fenced code detection.
@@ -41,7 +41,7 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
     violations = list(synth_check(calibrated, lvl).violations)
     if lvl == 1 and text.strip() != (feedback or "").strip():
         violations.append("specific_diagnosis")
-    if not (feedback or "").strip():
+    if not (feedback or "").strip() and not allow_empty:
         violations.append("empty_feedback")
     code = bool(
         re.search(

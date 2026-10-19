@@ -464,11 +464,16 @@ def infer(
             tokens += generated.output_tokens
             if result.ok:
                 break
-        used_fallback = retry_context_blocked or result is None or not result.ok
-        feedback = fallback(record.target_feedback_level) if used_fallback else generated.text.strip()
-        final = check(feedback, record.target_feedback_level)
-        if not final.ok:
-            raise RuntimeError("internal fallback failed guard")
+        if not taxonomy and config.get("empty_feedback_on_clean", False):
+            feedback = ""
+            final = check(feedback, record.target_feedback_level, allow_empty=True)
+            used_fallback = False
+        else:
+            used_fallback = retry_context_blocked or result is None or not result.ok
+            feedback = fallback(record.target_feedback_level) if used_fallback else generated.text.strip()
+            final = check(feedback, record.target_feedback_level)
+            if not final.ok:
+                raise RuntimeError("internal fallback failed guard")
         prediction = {"sample_id": record.sample_id, "output": {"taxonomy_error": taxonomy, "feedback": feedback}}
         trace = {
             "sample_id": record.sample_id,
@@ -528,8 +533,10 @@ def validate_predictions(predictions, expected_ids):
         if not isinstance(o, dict) or set(o) != {"taxonomy_error", "feedback"}:
             raise ValueError("output requires exactly taxonomy_error and feedback")
         validate_taxonomy(o["taxonomy_error"])
-        if not isinstance(o["feedback"], str) or not o["feedback"].strip():
-            raise ValueError("feedback must be nonempty text")
+        if not isinstance(o["feedback"], str):
+            raise ValueError("feedback must be a string")
+        if not o["feedback"].strip() and o["taxonomy_error"]:
+            raise ValueError("feedback must be nonempty text when taxonomy errors exist")
     if ids != list(expected_ids) or len(set(ids)) != len(ids):
         raise ValueError("prediction order/IDs must exactly match original input")
     return True

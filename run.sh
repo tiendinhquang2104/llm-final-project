@@ -13,6 +13,8 @@ show_help() {
     echo "  --task1           Execute Task 1 inference / evaluation"
     echo "  --task2           Execute Task 2 training / inference"
     echo "  --task3           Execute Task 3 inference (append --dry-run for offline smoke)"
+    echo "  --task3-train     Train Qwen QLoRA adapter for Task 3"
+    echo "  --task3-submission Build and validate final submission JSON for Task 3"
     echo "  --test            Run test suite"
     echo "  --submission      Generate final submission package"
     echo "  --help            Display this help message"
@@ -40,6 +42,16 @@ case "$1" in
         echo "Running Task 3..."
         shift
         python scripts/run_task3.py "$@"
+        ;;
+    --task3-train)
+        echo "Training Task 3 (QLoRA)..."
+        shift
+        python scripts/train_task3.py "$@"
+        ;;
+    --task3-submission)
+        echo "Building Task 3 submission..."
+        shift
+        python scripts/build_task3_submission.py "$@"
         ;;
     --test)
         echo "Running tests..."
