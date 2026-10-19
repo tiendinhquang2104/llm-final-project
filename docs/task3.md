@@ -79,6 +79,16 @@ Dry-run still validates taxonomy coverage, then uses a TEST-ONLY generic mock ba
 [{"sample_id":"TEST-ONLY-001","output":{"taxonomy_error":[],"feedback":"Em tự kiểm tra lại bài làm nhé."}}]
 ```
 
+When the public release includes `task3_requested_levels.json`, preparation merges its ID/Level pairs with `task3_feedback.json`, requires exact public ID coverage, and rejects any Level disagreement. Public records still have no taxonomy or feedback target. Validate a prediction bundle offline against that file before use:
+
+```bash
+python scripts/validate_task3_submission.py \
+  --predictions outputs/task3/public.predictions.json \
+  --requested-levels data/raw/public_test_release/task3_requested_levels.json
+```
+
+The validator checks UTF-8 JSON, exact row and field structure, requested ID order and coverage, taxonomy labels, and nonempty feedback. It reports only record and requested-Level counts.
+
 No official validator was present among the local release files. Final leaderboard acceptance awaits that validator. Inference stores `.run.json`, `.traces.json`, `.metrics.json` and an ID-only `.review-template.csv` beside the prediction file. Raw guard violations, retries and fallback use are recorded without copying raw generated failures into the trace. Generated tokens/latency include all retries. Mock byte-token counts are clearly marked, use a separate smoke budget, and are never represented as Qwen measurements.
 
 Inference preflight measures both the initial prompt and the strict-retry prompt, including the fixed retry hint and reserved output-token budget. A sample whose essential initial prompt cannot fit blocks generation; a sample that fits initially but not with the retry prompt is marked `passed_with_retry_fallback` and uses the conservative fallback if a retry is needed. The progress cache is bound to the exact prompt messages, tokenizer/chat-template identity, model/revision, adapter, inference settings, taxonomy, input and prepared-manifest hash. Completed rows are validated; malformed completed rows and duplicate IDs fail closed, while an incomplete final JSONL line is ignored and disclosed in trace audit metadata. Progress files are private and rewritten atomically.

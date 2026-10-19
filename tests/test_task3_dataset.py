@@ -96,6 +96,32 @@ def test_four_schemas_all_levels(tmp_path, source):
     assert (rows[0].synthetic_exec_report is not None) == source.startswith("synthetic")
 
 
+def test_public_requested_levels_are_merged_without_taxonomy_or_output(tmp_path):
+    root = make_root(tmp_path / "public", "public")
+    payload = read_json(root / "task3_feedback.json")
+    levels = {}
+    for sample in payload["samples"]:
+        levels[sample["sample_id"]] = sample["input"].pop("target_feedback_level")
+    write_json(root / "task3_feedback.json", payload)
+    write_json(root / "task3_requested_levels.json", {"requested_levels": levels})
+
+    rows = load_task3(root, "public")
+
+    assert [row.target_feedback_level for row in rows] == list(FEEDBACK_LEVELS)
+    assert all(row.gold_taxonomy is None and row.gold_feedback is None for row in rows)
+
+
+def test_public_requested_level_mismatch_fails_closed(tmp_path):
+    root = make_root(tmp_path / "public", "public")
+    write_json(
+        root / "task3_requested_levels.json",
+        {"TEST-0": FEEDBACK_LEVELS[1], "TEST-1": FEEDBACK_LEVELS[1], "TEST-2": FEEDBACK_LEVELS[2], "TEST-3": FEEDBACK_LEVELS[3]},
+    )
+
+    with pytest.raises(ValueError, match="requested Level"):
+        load_task3(root, "public")
+
+
 def test_heldout_inherits_parent_label_space(tmp_path):
     parent = make_root(tmp_path / "synthetic", "synthetic")
     child = make_root(parent / "heldout", "synthetic-heldout")

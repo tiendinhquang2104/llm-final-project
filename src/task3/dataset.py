@@ -59,7 +59,7 @@ def decode_code(path):
     raise ValueError("cannot decode source")
 
 
-def load_task3(root, source):
+def load_task3(root, source, requested_levels_path=None):
     root = Path(root).resolve()
     exams = read_json(root / "exams.json")["exams"]
     by_exam = {e["exam_id"]: e for e in exams}
@@ -86,6 +86,19 @@ def load_task3(root, source):
         fields = " ".join(payload.get("output_fields", []))
         if not all(k in fields for k in ("taxonomy_error", "feedback")):
             raise ValueError("public metadata must declare taxonomy_error and feedback")
+    requested_levels = None
+    if source == "public":
+        requested_path = Path(requested_levels_path) if requested_levels_path else root / "task3_requested_levels.json"
+        if requested_path.is_file():
+            # Imported lazily to avoid coupling the dataset module to submission validation at import time.
+            from src.task3.submission import load_requested_levels
+
+            requested_levels = load_requested_levels(requested_path)
+            sample_ids = [sample.get("sample_id") for sample in samples]
+            if any(not isinstance(sid, str) or not sid for sid in sample_ids):
+                raise ValueError("public samples contain an invalid sample_id")
+            if len(set(sample_ids)) != len(sample_ids) or set(sample_ids) != set(requested_levels):
+                raise ValueError("public sample IDs do not match requested-level IDs")
     seen, records = set(), []
     for s in samples:
         sid = s["sample_id"]
@@ -93,6 +106,14 @@ def load_task3(root, source):
             raise ValueError("missing or duplicate sample_id")
         seen.add(sid)
         i, o = s["input"], s.get("output") or {}
+        level = i.get("target_feedback_level")
+        if requested_levels is not None:
+            requested_level = requested_levels[sid]
+            if level is not None and level != requested_level:
+                raise ValueError(f"{sid}: public input Level does not match requested Level")
+            level = requested_level
+        if level is None:
+            raise ValueError(f"{sid}: missing requested feedback Level")
         e = by_exam[i["exam_id"]]
         if i.get("exam_type", e["exam_type"]) != e["exam_type"]:
             raise ValueError(f"{sid}: exam_type mismatch")
@@ -124,7 +145,7 @@ def load_task3(root, source):
                 code=decode_code(path),
                 compile_log=i.get("compile_log") or None,
                 test_report=i.get("test_report"),
-                target_feedback_level=i["target_feedback_level"],
+                target_feedback_level=level,
                 gold_taxonomy=tax,
                 gold_feedback=o.get("feedback"),
                 synthetic_exec_report=i.get("exec_report") if source.startswith("synthetic") else None,
