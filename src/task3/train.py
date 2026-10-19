@@ -518,13 +518,18 @@ def run_training(
     )
     model_load_start = time.perf_counter()
     try:
+        model_kwargs = {
+            "revision": config["revision"],
+            "trust_remote_code": False,
+            "quantization_config": quant,
+            "device_map": {"": torch.cuda.current_device()},
+            "dtype": dtype,
+        }
+        if config.get("attn_implementation") or getattr(torch.nn.functional, "scaled_dot_product_attention", None) is not None:
+            model_kwargs["attn_implementation"] = config.get("attn_implementation", "sdpa")
         model = AutoModelForCausalLM.from_pretrained(
             config["model_id"],
-            revision=config["revision"],
-            trust_remote_code=False,
-            quantization_config=quant,
-            device_map={"": torch.cuda.current_device()},
-            torch_dtype=dtype,
+            **model_kwargs,
         )
     except Exception as exc:
         result.update(
@@ -590,6 +595,7 @@ def run_training(
             torch.cuda.synchronize()
             if self.started is not None:
                 step_times.append(time.perf_counter() - self.started)
+            torch.cuda.empty_cache()
             if self.lora_before_step is not None and not self.parameter_update_audit["checked"]:
                 current = dict(model.named_parameters())
                 deltas = [
