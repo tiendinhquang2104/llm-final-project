@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.data.leakage_guard import assert_no_feedback_leakage
+from src.data.leakage_guard import assert_no_feedback_leakage, feedback_leaks_into_prompt
 from src.data.loader import DIM_MAX, DIMENSIONS
 from src.data.schema import ChatMLRecord
 from src.task1.evaluator import evaluate
@@ -79,11 +79,11 @@ def load_task1_splits(
     # feature. It is optional because per-task JSONL files are sufficient.
     joined_path = processed / "unified_samples.jsonl"
     if joined_path.is_file():
-        feedback = {row["sample_id"]: row.get("feedback", "") for row in _read_jsonl(joined_path)}
+        joined = {row["sample_id"]: row for row in _read_jsonl(joined_path)}
         for rec in partitions["train"] + partitions["val"]:
-            gold = feedback.get(rec.sample_id, "").strip()
+            sample = joined.get(rec.sample_id, {})
             prompt = rec.messages[0]["content"] + "\n" + rec.messages[1]["content"]
-            if len(gold) >= 20 and gold in prompt:
+            if feedback_leaks_into_prompt(prompt, sample.get("feedback"), sample.get("compile_log")):
                 raise ValueError(f"Teacher feedback leaked into Task 1 prompt for {rec.sample_id}")
 
     return partitions["train"], partitions["val"]

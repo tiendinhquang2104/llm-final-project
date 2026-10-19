@@ -12,6 +12,14 @@ class DataLeakageError(AssertionError):
     """Raised when teacher feedback leaks into Task 1/2 training inputs."""
 
 
+def feedback_leaks_into_prompt(prompt: str, feedback: str | None, compile_log: str | None) -> bool:
+    """Allow a feedback quote only when it is already present in compiler output."""
+    fb = (feedback or "").strip()
+    if len(fb) < 20:
+        return False
+    return prompt.count(fb) > _compile_log_text(compile_log).count(fb)
+
+
 def _user_content(record: ChatMLRecord) -> str:
     for m in record.messages:
         if m.get("role") == "user":
@@ -61,13 +69,10 @@ def assert_no_feedback_leakage(
         if samples_by_id is not None:
             sample = samples_by_id.get(rec.sample_id)
             if sample and sample.feedback:
-                fb = sample.feedback.strip()
-                # Skip ultra-short fragments that could collide with exam text
                 # A teacher may paste a compiler diagnostic verbatim as feedback.
                 # That same diagnostic is legitimate input when it comes from the
                 # independently compiled log; any additional copy is leakage.
-                allowed_log_copies = _compile_log_text(sample.compile_log).count(fb)
-                if len(fb) >= 20 and prompt.count(fb) > allowed_log_copies:
+                if feedback_leaks_into_prompt(prompt, sample.feedback, sample.compile_log):
                     raise DataLeakageError(
                         f"Gold feedback text leaked into {rec.task} prompt for {rec.sample_id}"
                     )

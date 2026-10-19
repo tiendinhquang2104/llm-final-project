@@ -82,6 +82,22 @@ def test_reject_mixed_task_or_feedback(tmp_path):
         load_task1_splits(processed, splits, expected_train=1, expected_val=1)
 
 
+def test_compiler_log_matching_teacher_feedback_is_not_leakage(tmp_path):
+    diagnostic = "student.cpp:4:3: error: expected expression\n    4 | x = ;"
+    processed, splits = write_fixture(
+        tmp_path, [record(prompt="Compile log\n" + diagnostic)], [record("S2", "val")]
+    )
+    (processed / "unified_samples.jsonl").write_text(
+        json.dumps({"sample_id": "S1", "feedback": diagnostic, "compile_log": diagnostic}) + "\n",
+        encoding="utf-8",
+    )
+    load_task1_splits(processed, splits, expected_train=1, expected_val=1)
+    write_fixture(tmp_path, [record(prompt="Compile log\n" + diagnostic + "\n" + diagnostic)],
+                  [record("S2", "val")])
+    with pytest.raises(ValueError, match="Teacher feedback leaked"):
+        load_task1_splits(processed, splits, expected_train=1, expected_val=1)
+
+
 def test_completion_only_mask_and_no_silent_truncation():
     tok = FakeTokenizer()
     rec = record()
