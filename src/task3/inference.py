@@ -15,6 +15,8 @@ class Generation:
     text: str
     output_tokens: int
     latency_s: float
+    finish_reason: str | None = None
+    eos_reached: bool | None = None
 
 
 class Backend(Protocol):
@@ -106,7 +108,11 @@ class HFBackend:
         with self.torch.inference_mode():
             outputs = self.model.generate(**inputs, **options)
         ids = outputs[0, inputs["input_ids"].shape[-1] :]
-        return Generation(self.tokenizer.decode(ids, skip_special_tokens=True), len(ids), time.perf_counter() - start)
+        eos_ids = self.model.generation_config.eos_token_id
+        eos_ids = [eos_ids] if isinstance(eos_ids, int) else (eos_ids or [])
+        eos = bool(len(ids) and int(ids[-1]) in eos_ids)
+        reason = "eos" if eos else "length" if len(ids) >= options["max_new_tokens"] else "unknown"
+        return Generation(self.tokenizer.decode(ids, skip_special_tokens=True), len(ids), time.perf_counter() - start, reason, eos)
 
 
 def tokenizer_metadata(tokenizer):

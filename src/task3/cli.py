@@ -10,7 +10,14 @@ from pathlib import Path
 from src.task3.dataset import load_prepared, prepare, read_json, write_json
 from src.task3.evaluator import evaluate, write_benchmark, write_review_csv
 from src.task3.inference import HFBackend, MockBackend, MockTokenizer, load_tokenizer, tokenizer_metadata
-from src.task3.pipeline import _adapter_hash, audit_prompts, export_predictions, infer, load_taxonomy_predictions
+from src.task3.pipeline import (
+    _adapter_hash,
+    audit_prompts,
+    export_predictions,
+    implementation_digest,
+    infer,
+    load_taxonomy_predictions,
+)
 from src.task3.runtime import runtime_manifest
 from src.task3.strategy import PROMPT_STRATEGIES, resolve_strategy_config
 from src.utils.config import load_config
@@ -62,12 +69,24 @@ def verify_prepared(root):
     return hashlib.sha256(manifest_path.read_bytes()).hexdigest()
 
 
+def select_sample_records(records, path):
+    ids = read_json(path)
+    if not isinstance(ids, list) or not ids or any(not isinstance(sid, str) or not sid for sid in ids) or len(set(ids)) != len(ids):
+        raise ValueError("pilot sample IDs must be a nonempty unique string list")
+    selected = [r for r in records if r.sample_id in set(ids)]
+    if set(ids) != {r.sample_id for r in selected}:
+        raise ValueError("pilot sample IDs are missing from the selected split")
+    if ids != [r.sample_id for r in selected]:
+        raise ValueError("pilot sample IDs must preserve prepared split order")
+    return selected
+
+
 def run_main(argv=None):
     p = argparse.ArgumentParser(
         description="Local Task3 oracle/public inference; --dry-run uses TEST-ONLY mocks, no downloads"
     )
     p.add_argument("--config", default="configs/task3/baseline.yaml")
-    p.add_argument("--split", choices=["real-val", "synthetic-heldout", "public"], default="real-val")
+    p.add_argument("--split", choices=["real-val", "synthetic-heldout", "public", "synthetic-train"], default="real-val")
     p.add_argument("--taxonomy-source", choices=["gold", "task2-json"], default="gold")
     p.add_argument("--taxonomy-json")
     p.add_argument(
@@ -82,6 +101,7 @@ def run_main(argv=None):
     p.add_argument("--resume-progress", action="store_true")
     p.add_argument("--progress-file")
     p.add_argument("--audit-tokenizer", action="store_true")
+    p.add_argument("--sample-ids", help="declared ordered subset for a mechanical pilot; never modifies data")
     p.add_argument("--seed", type=int)
     p.add_argument(
         "--prompt-strategy",
@@ -89,6 +109,8 @@ def run_main(argv=None):
         help="override the configured prompting method; default preserves legacy zero/few-shot behavior",
     )
     args = p.parse_args(argv)
+    if args.split == "synthetic-train" and not args.sample_ids:
+        p.error("synthetic-train requires --sample-ids for an explicitly declared train pilot")
     config = load_config(args.config)
     config = resolve_strategy_config(config, args.prompt_strategy)
     if args.adapter:
@@ -102,8 +124,12 @@ def run_main(argv=None):
     root = config.get("data_dir", "data/processed/task3")
     manifest_hash = verify_prepared(root)
     records = load_prepared(root, args.split)
+    if args.sample_ids:
+        records = select_sample_records(records, args.sample_ids)
     if not records:
         raise ValueError("selected split is empty")
+    if config.get("guard_policy_version", 1) >= 2:
+        config["runtime_implementation_sha256"] = implementation_digest()
     if args.taxonomy_json:
         predicted, taxonomy_audit = load_taxonomy_predictions(
             args.taxonomy_json,
@@ -159,6 +185,7 @@ def run_main(argv=None):
         progress_path=progress_path,
         resume=args.resume_progress,
         cache_context=manifest_hash,
+        attempt_journal_path=progress_path.with_suffix(".attempts.jsonl"),
     )
     export_predictions(output, predictions, records, mock=args.dry_run)
     metrics = evaluate(records, predictions, traces, args.taxonomy_source)
@@ -179,6 +206,8 @@ def run_main(argv=None):
         progress_file=str(progress_path),
         adapter_sha256=_adapter_hash(config),
         official_validator="not supplied; strict local schema validation only",
+        selected_ordered_ids=[r.sample_id for r in records],
+        pilot_sample_ids_sha256=hashlib.sha256(Path(args.sample_ids).read_bytes()).hexdigest() if args.sample_ids else None,
     )
     write_json(output.with_suffix(".run.json"), provenance)
     write_json(output.with_suffix(".traces.json"), traces)

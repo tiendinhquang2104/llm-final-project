@@ -46,6 +46,8 @@ Connected groups combine original code-file identity, exact canonical token hash
 
 ## Local model inference and taxonomy modes
 
+The prompt-first R7–R9 baselines are retained as versioned configs: `r7_direct_k0/k1/k2.yaml`, `r8_level1_prompt4_guard2/guard3.yaml`, and `r9_p4_json_k0_g2`, `r9_p5_json_k0_g2`, `r9_p6_read_k0_g2`, `r9_p6_read_k1_g2`. R9 changes only the Level-1 wording/presentation in v5/v6; Levels 2–4 delegate to the R7 prompt. Its historical private raw-output bundle remains in the prior R9 worktree and is not copied into source control. These are reproducible baselines, not a claim that the best end-to-end method has been selected.
+
 Configs pin `Qwen/Qwen2.5-Coder-7B-Instruct` to revision `c03e6d358207e414f1eca0bb1891e29f1db0e242`. `AutoTokenizer.apply_chat_template` provides the real template. Student code, comments, statement and logs are delimited as untrusted JSON data. Prompt instructions preserve problem IDs and prerequisite context, and explicitly say missing logs do not imply successful compilation. Prompt injection resistance is an instruction/data boundary, not a security proof.
 
 Generation is greedy by default; config keys include `do_sample`, `temperature`, `top_p`, `context_limit`, `max_new_tokens`, `few_shot_k` and bounded `max_retries` (0–5). Few-shot examples come only from permitted training partitions and exclude IDs, code variants and groups overlapping any selected evaluation record. Examples are ordered deterministically, with same-Level preference. Tokenizer measurements trim logs/test reports before demonstrations; source, problem context and target Level are never silently cropped. Overlength essentials raise an ID/count-only error.

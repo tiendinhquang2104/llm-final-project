@@ -1,0 +1,4 @@
+extends: r8_level1_prompt4_guard2.yaml
+experiment_id: R9-P4-JSON-K0-G2
+prompt_strategy: zero_shot
+few_shot_k: 0

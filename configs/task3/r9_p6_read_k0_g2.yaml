@@ -1,0 +1,3 @@
+extends: r9_p5_json_k0_g2.yaml
+experiment_id: R9-P6-READ-K0-G2
+prompt_policy_version: 6

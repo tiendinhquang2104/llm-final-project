@@ -14,6 +14,7 @@ from src.synth.taxonomy import LABEL_SPACE
 from src.task3.compliance import check
 from src.task3.dataset import write_json
 from src.task3.pipeline import validate_predictions
+from src.task3.quality_review import quality_review_flags
 
 _REVIEWABLE_SPLITS = {"real-val", "synthetic-heldout"}
 _RUBRIC = {
@@ -22,6 +23,10 @@ _RUBRIC = {
     "hallucinated_error": {"yes", "no"},
     "prerequisite_reasoning": {"yes", "no", "na"},
     "level_violation": {"yes", "no"},
+    "level_adequacy": {"0", "1", "2"},
+    "vietnamese_naturalness": {"0", "1", "2"},
+    "repair_solution_quality": {"0", "1", "2", "na"},
+    "false_praise": {"yes", "no", "na"},
 }
 _AGREEMENT_FIELDS = tuple(_RUBRIC)
 
@@ -293,7 +298,7 @@ def aggregate_annotations(path, records, *, expected_bundle=None):
         else:
             empty_annotation_records += 1
     by_key = defaultdict(list)
-    numeric = ("diagnosis_correctness", "code_evidence_support")
+    numeric = ("diagnosis_correctness", "code_evidence_support", "level_adequacy", "vietnamese_naturalness")
     for observation in observations:
         by_key[("level", observation["level"])].append(observation)
         by_key[("exam_type", observation["exam_type"])].append(observation)
@@ -307,7 +312,7 @@ def aggregate_annotations(path, records, *, expected_bundle=None):
                 "n": len(present),
                 "mean": statistics.mean(present) if present else None,
             }
-        for field in ("hallucinated_error", "prerequisite_reasoning", "level_violation"):
+        for field in ("hallucinated_error", "prerequisite_reasoning", "level_violation", "false_praise", "repair_solution_quality"):
             present = [item[field] for item in values if item[field]]
             summary[field] = {
                 "n": len(present),
@@ -356,9 +361,19 @@ def aggregate_annotations(path, records, *, expected_bundle=None):
 def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotations=None, *, run_manifest=None):
     validate_predictions(predictions, [r.sample_id for r in records])
     trace_map = {r["sample_id"]: r for r in traces}
+    guard_versions = {t.get("guard_policy_version", 1) for t in traces}
+    if len(guard_versions) > 1:
+        raise ValueError("evaluation cannot mix guard policy versions")
+    manifest_config = (run_manifest or {}).get("config", {})
+    manifest_guard = manifest_config.get("guard_policy_version", 1) if run_manifest is not None else None
+    if manifest_guard is not None and guard_versions and manifest_guard not in guard_versions:
+        raise ValueError("manifest and traces disagree on guard policy version")
+    guard_version = next(iter(guard_versions), manifest_guard if manifest_guard is not None else 1)
+    if isinstance(guard_version, bool) or guard_version not in (1, 2, 3):
+        raise ValueError("unsupported guard policy version")
     per_level = defaultdict(list)
     for record, pred in zip(records, predictions):
-        result = check(pred["output"]["feedback"], record.target_feedback_level)
+        result = check(pred["output"]["feedback"], record.target_feedback_level, version=guard_version)
         per_level[result.level].append(result)
     all_results = [item for values in per_level.values() for item in values]
     low = [item for item in all_results if item.level <= 2]
@@ -377,6 +392,7 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
             for level, values in sorted(per_level.items())
         },
         "guard_method": "rule-based heuristic; not a semantic correctness guarantee",
+        "guard_policy_version": guard_version,
         "severe_solution_leak_rate_level12": rate([item.severe for item in low]),
         "severe_solution_leak": rate([item.severe for item in low]),
         "empty_response_rate": rate([not prediction["output"]["feedback"].strip() for prediction in predictions]),
@@ -384,6 +400,25 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
         "diagnosis_quality": "not_measured",
         "diagnosis_quality_status": "not_measured",
         "taxonomy_agreement": "not applicable: oracle labels" if taxonomy_source == "gold" else "no gold available",
+        "semantic_dimensions": {
+            "level_disclosure": "heuristic_only",
+            "level_adequacy": "not_measured",
+            "natural_vietnamese": "not_measured",
+            "evidence_supported_diagnosis": "not_measured",
+            "hallucination_and_false_praise": "not_measured",
+            "repair_and_solution_quality": "not_measured",
+            "fallback_latency_tokens": "measured_if_traces_present",
+        },
+    }
+    review_rows = [
+        quality_review_flags(record, pred["output"]["feedback"], fallback_used=trace_map.get(record.sample_id, {}).get("fallback_used", False), version=3 if guard_version == 3 else 2 if guard_version == 2 else 1)
+        for record, pred in zip(records, predictions)
+    ]
+    result["quality_review_candidates"] = {
+        "warning_only": True,
+        "n_flagged": sum(bool(row["flags"]) for row in review_rows),
+        "flag_counts": dict(sorted({flag: sum(flag in row["flags"] for row in review_rows) for row in review_rows for flag in row["flags"]}.items())),
+        "semantic_quality": "NOT_MEASURED",
     }
     paired = [
         (record.gold_taxonomy, prediction["output"]["taxonomy_error"])
@@ -417,6 +452,21 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
             if attempt is not None and record.target_feedback_level.startswith(("Level 1", "Level 2"))
         ]
         fallback_flags = [trace_map[record.sample_id].get("fallback_used", False) for record in records]
+        plans = [trace_map[record.sample_id].get("cot_plan_audit") for record in records]
+        applicable_plans = [plan for plan in plans if isinstance(plan, dict)]
+        rejected_first = [attempt for attempt in first_generated if attempt.get("heuristic_compliance") is False]
+        rescued = [trace for trace in traces if trace.get("raw_first_attempt_compliance") is False and not trace.get("fallback_used")]
+        model_success = [not flag and any(a.get("model_generated") and a.get("heuristic_compliance") is True for a in trace_map[record.sample_id]["attempts"]) for record, flag in zip(records, fallback_flags)]
+        per_level_outcomes = {}
+        for level in sorted(per_level):
+            subset = [(record, trace_map[record.sample_id]) for record in records if int(record.target_feedback_level[6]) == level]
+            per_level_outcomes[str(level)] = {
+                "n": len(subset),
+                "first_model_pass": sum(t.get("raw_first_attempt_compliance") is True for _, t in subset),
+                "first_model_missing": sum(t.get("raw_first_attempt_compliance") is None for _, t in subset),
+                "retry_rescued": sum(t.get("raw_first_attempt_compliance") is False and not t.get("fallback_used") for _, t in subset),
+                "fallback": sum(bool(t.get("fallback_used")) for _, t in subset),
+            }
         result.update(
             raw_first_attempt_compliance=rate([attempt["heuristic_compliance"] for attempt in first_generated]),
             raw_first_attempt_compliance_n=len(first_generated),
@@ -427,6 +477,20 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
             retry_count=sum(trace_map[record.sample_id].get("retry_count", 0) for record in records),
             mean_latency_s=rate([trace_map[record.sample_id]["latency_s"] for record in records]),
             generated_tokens=sum(trace_map[record.sample_id]["output_tokens"] for record in records),
+            first_attempt_model_compliance_all_cases=rate([attempt is not None and attempt.get("heuristic_compliance") is True for attempt in first_attempts]),
+            plan_validation_success_rate=rate([plan.get("status") == "validated" for plan in applicable_plans]),
+            plan_validation_n=len(applicable_plans),
+            retry_rescue_rate=(len(rescued) / len(rejected_first)) if rejected_first else None,
+            retry_rescued_count=len(rescued),
+            fallback_reasons=dict(sorted({reason: sum(t.get("fallback_reason") == reason for t in traces) for reason in {t.get("fallback_reason") for t in traces if t.get("fallback_reason")}}.items())),
+            model_generated_feedback_success_rate=rate(model_success),
+            per_level_outcomes=per_level_outcomes,
+            feedback_tokens=sum(t.get("feedback_output_tokens", 0) for t in traces),
+            plan_tokens=sum(t.get("cot_plan_output_tokens", 0) for t in traces),
+            completion_retry_rescued_count=sum(bool(t.get("completion_retry_rescued")) for t in traces),
+            adequacy_retry_rescued_count=sum(bool(t.get("adequacy_retry_rescued")) for t in traces),
+            incomplete_feedback_attempt_count=sum(not a.get("mechanically_complete", True) for t in traces for a in t["attempts"] if a.get("model_generated")),
+            nonempty_validated_plan_count=sum(bool(p.get("finding_count")) for p in applicable_plans if p.get("status") == "validated"),
         )
     if taxonomy_source != "gold":
         if paired:

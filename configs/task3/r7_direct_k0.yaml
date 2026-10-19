@@ -1,0 +1,13 @@
+extends: baseline_8192.yaml
+experiment_id: R7-D-K0
+prompt_strategy: few_shot
+prompt_policy_version: 3
+guard_policy_version: 2
+retry_policy_version: 3
+completion_policy_version: 1
+adequacy_retry_policy_version: 1
+fallback_policy_version: 2
+few_shot_k: 0
+few_shot_source_allowlist: [real]
+few_shot_same_level_only: true
+few_shot_excluded_ids: [EX02-S202, EX02-S203, EX02-S204]

@@ -33,7 +33,9 @@ class ComplianceResult:
         return "not_measured"
 
 
-def check(feedback: str, level: str | int, semantic_check: Callable | None = None):
+def check(feedback: str, level: str | int, semantic_check: Callable | None = None, *, version=1):
+    if isinstance(version, bool) or version not in (1, 2, 3):
+        raise ValueError("guard policy version must be 1, 2 or 3")
     lvl = level_of(level)
     text = _strip_compile_log(feedback or "")
     # Instructor diagnoses quote identifiers/expressions; preserve actual fenced code detection.
@@ -52,11 +54,47 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
     if lvl <= 2 and code:
         violations.append("code_solution_leak")
     normalized = _without_diacritics(text).casefold()
+    if version >= 2 and lvl == 1 and re.search(
+        r"\b(?:in|xuat|dau ra|ket qua)\b.{0,45}\b(?:thua|thieu|sai|khong dung|khong chinh xac)\b"
+        r"|\b(?:thieu|thua|sai)\s+(?:dau\s+(?:cach|cham phay|phay|ngoac)|dinh dang|ky tu)\b"
+        r"|\b(?:loi bien dich|loi nhap xuat|loi dinh dang|truy cap ngoai|vong lap vo han)\b",
+        normalized,
+    ):
+        violations.append("specific_diagnosis")
+    if version == 3 and lvl == 1:
+        # Surface disclosure/accusation policy, never a correctness classifier.
+        if re.search(
+            r"\bhard[- ]?code\b|\b(?:viet cung|ma co dinh|gia tri co dinh|dau vao|dau ra|input|output|doc file|doc du lieu|nhap du lieu|xuat ket qua|in ket qua|hien thi ket qua|phep chia|phep lay du|vong lap|phan tu cuoi|comment)\b"
+            r"|\b(?:phan|doan|buoc)\s+(?:xu ly|doc|nhap|xuat|tinh)\b"
+            r"|\b(?:ham|chuc nang)\s+(?:con lai|bi thieu|chua hoan thien|chua hoan thanh)\b",
+            normalized,
+        ):
+            violations.append("level1_technical_disclosure")
+        if re.search(
+            r"\b(?:loai bo|bo sung|chinh sua|cai dat)\s+(?:(?:viec|cac|mot|nhung|phan|buoc)\s+){0,2}(?:hard[- ]?code|code|ma|ham|bien|dau|lenh|dong|dieu kien|vong lap|phep|thuat toan|doc|nhap|xuat|gia tri|return|tham so)\b"
+            r"|\b(?:dung|su dung|ap dung|chon)\s+(?:thuat toan|phep|ham|bien|cong thuc)\b"
+            r"|\b(?:thay|doi|chuyen)\s+(?:phep|ham|bien|gia tri|dau|lenh|ma|code|so|kieu|tham so)\b.{0,60}\b(?:thanh|bang|sang)\b"
+            r"|\bhoan thien\s+(?:cac\s+)?(?:ham|phan|chuc nang)\b",
+            normalized,
+        ):
+            violations.append("level1_repair_instruction")
+        if re.search(
+            r"`[^`\n]+`|\b(?:hàm|thủ tục)\s+(?!(?:của|và|trong|ngoài|còn|khác|những|này|đã|chưa)\b)[A-Za-z_][A-Za-z0-9_]*\b"
+            r"|\b(?:tên biến\s+[A-Za-z_][A-Za-z0-9_]*\b|biến\s+[A-Za-z_][A-Za-z0-9_]*\s+(?:chưa|không|bị|cần)\b)",
+            text, re.I,
+        ):
+            violations.append("level1_identifier_disclosure")
+        if re.search(r"\b(?:sao chep|dao van|copy(?:paste)?|plagiar\w*)\b", normalized):
+            violations.append("level1_copying_accusation")
+    guidance_text = normalized
+    if version == 3 and lvl == 1:
+        # Learning encouragement is not a code repair command. Preserve v1/v2.
+        guidance_text = re.sub(r"\bbo sung\s+(?:kien thuc|ky nang|kinh nghiem)\b", "on luyen", guidance_text)
     if lvl <= 2 and re.search(
         r"\b(?:hay|nen|can|phai)\s+(?:(?:em|ban)\s+)?"
         r"(?:them|doi|thay|sua|dieu chinh|tang|nang|dung|cap nhat|khai bao|xoa|bo|khoi tao|viet lai)\b"
         r"|cach sua|loi giai(?: la|:)|dap an\s*(?:la|:)|de sua|fix(?: it)? by",
-        normalized,
+        guidance_text,
     ):
         violations.append("repair_guidance")
     if lvl == 2 and re.search(
@@ -91,7 +129,7 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
     violations = tuple(dict.fromkeys(violations))
     severe = lvl <= 2 and bool(
         set(violations)
-        & {"code_fence", "code_like", "code_solution_leak", "imperative_fix", "repair_guidance"}
+        & {"code_fence", "code_like", "code_solution_leak", "imperative_fix", "repair_guidance", "level1_repair_instruction"}
     )
     return ComplianceResult(not violations, lvl, violations, severe, semantic_status)
 
