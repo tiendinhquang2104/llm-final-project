@@ -661,6 +661,7 @@ def run_training(
         "gradient_checkpointing_kwargs": {"use_reentrant": False},
         "bf16": bf16,
         "fp16": not bf16,
+        "optim": config.get("optim", "paged_adamw_8bit"),
         "eval_strategy": config.get("eval_strategy", "epoch"),
         "save_strategy": config.get("save_strategy", "epoch"),
         "logging_steps": config.get("logging_steps", 1),

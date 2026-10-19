@@ -7,7 +7,8 @@ max_seq_length: auto
 lora_r: 16
 lora_alpha: 32
 lora_dropout: 0.05
-target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+target_modules: [q_proj, k_proj, v_proj, o_proj]
+optim: paged_adamw_8bit
 learning_rate: 0.0001
 stage2_learning_rate: 0.00002
 epochs: 3
