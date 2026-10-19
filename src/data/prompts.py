@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from src.data.schema import ChatMLRecord, TaskId, UnifiedSample
@@ -67,10 +68,38 @@ def _format_test_report(test_report: list[dict[str, Any]] | None) -> str:
 COMPILE_LOG_MAX_CHARS = 2000
 
 
+_DIAGNOSTIC = re.compile(r"^\S+:\d+:\d+: (fatal error|error|warning|note):")
+_LINKER = re.compile(r"(^/usr/bin/ld|undefined reference|collect2: error|ld returned)")
+# Warnings-only log == compiled fine. Shown exactly like an absent log, the only form seen in training (the
+# current gold and silver ship no compile_log at all).
+NO_COMPILE_ERROR = "(không có compile log)"
+
+
+def compile_errors_only(log: str) -> str:
+    """Keep compiler errors (with their source excerpt) and linker errors; drop warnings/notes.
+
+    A log made only of warnings means the code compiles (the teacher grades e.g. `main()` without a type as
+    compilable), but a long block of text in the prompt otherwise reads as a failed build.
+    """
+    kept, keep = [], False
+    for line in log.splitlines():
+        m = _DIAGNOSTIC.match(line)
+        if m:
+            keep = m.group(1) in ("error", "fatal error")
+        elif _LINKER.search(line):
+            keep = True
+        elif line.startswith(("student.cpp: In ", "In file included")):
+            keep = False  # context header; the error line that follows carries its own location
+        if keep:
+            kept.append(line)
+    return "\n".join(kept).strip()
+
+
 def _compile_log_text(log: str | None) -> str:
     if not log or not log.strip():
         return "(không có compile log)"
-    return log.strip()[:COMPILE_LOG_MAX_CHARS]
+    errors = compile_errors_only(log.strip())
+    return errors[:COMPILE_LOG_MAX_CHARS] if errors else NO_COMPILE_ERROR
 
 
 def _shared_context(sample: Any, *, include_taxonomy: bool = False) -> str:

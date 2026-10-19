@@ -109,7 +109,7 @@ def test_validation_error_report(tmp_path):
 def test_compile_log_is_cut_like_the_organizer_logs():
     from src.data.prompts import COMPILE_LOG_MAX_CHARS
 
-    long_log = "error: x\n" * 5000
+    long_log = "student.cpp:1:1: error: x\n" * 5000
     user = build_task1_prompt(prompt_sample(compile_log=long_log))[1]["content"]
     assert long_log.strip()[:COMPILE_LOG_MAX_CHARS] in user
     assert long_log.strip()[:COMPILE_LOG_MAX_CHARS + 50] not in user
@@ -131,3 +131,17 @@ def test_plain_template_scores_multi_problem_and_float_error_report():
         "rule_trace": [], "rationale": ""}]}
     text = to_markdown(report, "t")
     assert "logic-2.25" in text and "| -3.25 |" in text
+
+
+def test_compile_log_keeps_errors_and_drops_warnings():
+    from src.data.prompts import NO_COMPILE_ERROR, compile_errors_only
+
+    warn = "student.cpp:6:1: warning: ISO C++ forbids declaration of 'main' with no type\n    6 | main()\n      | ^~~~\n"
+    err = "student.cpp:7:1: error: 'Battle' does not name a type\n    7 | Battle battle;\n      | ^~~~~~\n"
+    ctx = "student.cpp: In function 'int prob3()':\n"
+    link = "/usr/bin/ld: crt1.o: in function `_start':\n(.text+0x1b): undefined reference to `main'\ncollect2: error: ld returned 1 exit status\n"
+    assert compile_errors_only(warn) == ""
+    assert compile_errors_only(ctx + warn + err) == err.strip()  # error kept with its source excerpt
+    assert compile_errors_only(link).count("\n") == 2  # linker failure (no main) kept
+    user = build_task1_prompt(prompt_sample(compile_log=warn))[1]["content"]
+    assert NO_COMPILE_ERROR in user and "warning" not in user
