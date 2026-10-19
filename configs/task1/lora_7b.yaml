@@ -9,7 +9,7 @@ data:
 output_dir: outputs/task1/qwen25_coder7b_qlora_silver_gold
 training:
   max_length: 4096
-  epochs: 5
+  epochs: 3
   silver_epochs: 1
   batch_size: 1
   gradient_accumulation_steps: 4
