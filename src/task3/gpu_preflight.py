@@ -63,7 +63,7 @@ def gpu_workload_status():
                 raise ValueError("unexpected nvidia-smi process output")
             pid = int(fields[0])
             used_memory = 0 if fields[1] in {"N/A", "[N/A]"} else int(fields[1])
-            if pid != os.getpid():
+            if pid not in {os.getpid(), os.getppid()}:
                 external.append(used_memory)
         return {
             "status": "available",

@@ -228,7 +228,7 @@ def _training_gpu_preflight(torch, config):
     workload = gpu_workload_status()
     if workload["status"] != "available":
         raise RuntimeError("cannot verify competing GPU workloads; training stopped safely")
-    if workload["external_process_count"]:
+    if not config.get("ignore_competing_gpu_workload", False) and workload["external_process_count"]:
         raise RuntimeError("another GPU workload is active; training stopped without disturbing it")
     try:
         minimum_free_gib = float(config.get("min_free_vram_gib", 10))
