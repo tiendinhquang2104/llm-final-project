@@ -518,11 +518,14 @@ def run_training(
     )
     model_load_start = time.perf_counter()
     try:
+        device_map = config.get("device_map")
+        if device_map is None:
+            device_map = "auto" if torch.cuda.device_count() > 1 else {"": torch.cuda.current_device()}
         model_kwargs = {
             "revision": config["revision"],
             "trust_remote_code": False,
             "quantization_config": quant,
-            "device_map": {"": torch.cuda.current_device()},
+            "device_map": device_map,
             "dtype": dtype,
         }
         if config.get("attn_implementation") or getattr(torch.nn.functional, "scaled_dot_product_attention", None) is not None:
@@ -813,13 +816,16 @@ def _adapter_reload_smoke(config, quant, tokenizer, record, peft_model_class):
 
     torch.cuda.synchronize()
     adapter_dir = Path(config.get("output_dir", "checkpoints/task3/qlora")) / "adapter"
+    device_map = config.get("device_map")
+    if device_map is None:
+        device_map = "auto" if torch.cuda.device_count() > 1 else {"": torch.cuda.current_device()}
     base = AutoModelForCausalLM.from_pretrained(
         config["model_id"],
         revision=config["revision"],
         trust_remote_code=False,
         quantization_config=quant,
-        device_map={"": torch.cuda.current_device()},
-        torch_dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
+        device_map=device_map,
+        dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
     )
     model = peft_model_class.from_pretrained(base, adapter_dir, is_trainable=False)
     model.eval()
