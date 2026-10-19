@@ -413,7 +413,7 @@ def infer(
                 }
         _write_progress_snapshot(progress, retained, records)
         cached = retained
-    for record in records:
+    for idx, record in enumerate(records, start=1):
         taxonomy, demos, first_prompt, prompt_digest, key = prepared[record.sample_id]
         previous = cached.get(record.sample_id)
         if previous and previous["cache_key"] == key:
@@ -516,6 +516,8 @@ def infer(
                 progress,
                 {"status": "complete", "cache_key": key, "prediction": prediction, "trace": trace},
             )
+        if idx % 10 == 0 or idx == len(records) or used_fallback:
+            print(f"[{idx}/{len(records)}] {record.sample_id} ({record.target_feedback_level}) -> {tokens} tokens, {elapsed:.1f}s", flush=True)
     return outputs, traces
 
 

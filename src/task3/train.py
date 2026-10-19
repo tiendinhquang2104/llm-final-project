@@ -526,7 +526,7 @@ def run_training(
             "trust_remote_code": False,
             "quantization_config": quant,
             "device_map": device_map,
-            "dtype": dtype,
+            "torch_dtype": dtype,
         }
         if config.get("attn_implementation") or getattr(torch.nn.functional, "scaled_dot_product_attention", None) is not None:
             model_kwargs["attn_implementation"] = config.get("attn_implementation", "sdpa")
@@ -825,7 +825,7 @@ def _adapter_reload_smoke(config, quant, tokenizer, record, peft_model_class):
         trust_remote_code=False,
         quantization_config=quant,
         device_map=device_map,
-        dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
+        torch_dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
     )
     model = peft_model_class.from_pretrained(base, adapter_dir, is_trainable=False)
     model.eval()

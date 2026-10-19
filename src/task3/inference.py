@@ -70,12 +70,13 @@ class HFBackend:
         self.tokenizer = tokenizer or load_tokenizer(config)
         if not torch.cuda.is_available():
             raise RuntimeError("local 4-bit inference requires CUDA; use --dry-run for offline tests")
-        if torch.cuda.device_count() != 1:
-            raise RuntimeError("Task 3 inference requires exactly one visible CUDA device")
+        if torch.cuda.device_count() < 1:
+            raise RuntimeError("Task 3 inference requires at least one visible CUDA device")
+        device_map = config.get("device_map") or ("auto" if torch.cuda.device_count() > 1 else {"": torch.cuda.current_device()})
         options = {
             "revision": config["revision"],
             "trust_remote_code": False,
-            "device_map": {"": torch.cuda.current_device()},
+            "device_map": device_map,
         }
         if config.get("load_in_4bit", True):
             options["quantization_config"] = BitsAndBytesConfig(
@@ -106,7 +107,12 @@ class HFBackend:
         with self.torch.inference_mode():
             outputs = self.model.generate(**inputs, **options)
         ids = outputs[0, inputs["input_ids"].shape[-1] :]
-        return Generation(self.tokenizer.decode(ids, skip_special_tokens=True), len(ids), time.perf_counter() - start)
+        text = self.tokenizer.decode(ids, skip_special_tokens=True)
+        tokens_count = len(ids)
+        del inputs, outputs
+        if self.torch.cuda.is_available():
+            self.torch.cuda.empty_cache()
+        return Generation(text, tokens_count, time.perf_counter() - start)
 
 
 def tokenizer_metadata(tokenizer):

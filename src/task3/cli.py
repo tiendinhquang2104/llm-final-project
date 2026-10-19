@@ -222,6 +222,7 @@ def train_main(argv=None):
         choices=["synthetic", "real", "mixed", "mixed_uniform", "mixed_balanced", "staged"],
     )
     p.add_argument("--output-dir")
+    p.add_argument("--epochs", type=int)
     p.add_argument("--max-steps", type=int)
     p.add_argument("--resume-from-checkpoint")
     group = p.add_mutually_exclusive_group()
@@ -234,6 +235,8 @@ def train_main(argv=None):
     group.add_argument("--smoke-test", action="store_true", help="run only a 10-20 optimizer-step GPU validation")
     args = p.parse_args(argv)
     config = load_config(args.config)
+    if args.epochs is not None and args.epochs > 0:
+        config["epochs"] = args.epochs
     if args.experiment:
         config["experiment"] = args.experiment
     if args.output_dir:
