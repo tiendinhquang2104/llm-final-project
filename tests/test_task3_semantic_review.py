@@ -1,5 +1,9 @@
+import pytest
+
 from src.task3.quality_review import quality_review_flags, validate_code_claims
 from src.task3.compliance import check
+from src.task3.inference import Generation, MockBackend
+from src.task3.pipeline import infer
 from tests.test_task3_dataset import record
 
 
@@ -34,3 +38,22 @@ def test_level_guards_reject_specific_level1_and_vague_level3_feedback():
     assert {'LEVEL3_DIAGNOSIS_REVIEW_CANDIDATE', 'LEVEL3_DIRECTION_REVIEW_CANDIDATE'} <= set(vague['flags'])
     useful = quality_review_flags(record(target_feedback_level='Level 3 - Gợi ý sửa'), 'Sai số mũ ở vòng lặp tính lũy thừa; hãy dùng số chữ số vừa đếm làm số lần nhân.')
     assert not {'LEVEL3_DIAGNOSIS_REVIEW_CANDIDATE', 'LEVEL3_DIRECTION_REVIEW_CANDIDATE'} & set(useful['flags'])
+
+
+def test_level3_exhausted_quality_retry_refuses_to_export_generic_fallback():
+    class VagueBackend(MockBackend):
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            return Generation('Chương trình cần được kiểm tra lại.', 20, .1)
+
+    backend = VagueBackend()
+    row = record(target_feedback_level='Level 3 - Gợi ý sửa')
+    with pytest.raises(RuntimeError, match='Level 3.*generic fallback'):
+        infer([row], backend, {
+            'context_limit': 10000,
+            'adequacy_retry_policy_version': 1,
+            'max_retries': 1,
+        })
+    assert backend.calls == 2

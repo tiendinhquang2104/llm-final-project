@@ -901,7 +901,8 @@ def infer(
             feedback_tokens += generated.output_tokens
             if result.ok and not retry_reasons:
                 break
-        used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete
+        adequacy_retry_exhausted = bool(adequacy_policy and "level3_direction_candidate" in retry_reasons)
+        used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete or adequacy_retry_exhausted
         feedback = fallback(record.target_feedback_level) if used_fallback else generated.text.strip()
         final = check(feedback, record.target_feedback_level, version=guard_policy)
         if not final.ok and not used_fallback:
@@ -919,10 +920,16 @@ def infer(
             fallback_reason = "feedback_generation_failed"
         elif completion_incomplete:
             fallback_reason = "feedback_incomplete"
+        elif adequacy_retry_exhausted:
+            fallback_reason = "level3_adequacy_retries_exhausted"
         elif used_fallback:
             fallback_reason = "guard_retries_exhausted"
         else:
             fallback_reason = None
+        if used_fallback and record.target_feedback_level == "Level 3 - Gợi ý sửa":
+            raise RuntimeError(
+                f"{record.sample_id}: Level 3 failed diagnosis/direction review; refusing generic fallback ({fallback_reason})"
+            )
         trace_prompt_digest = _prompt_digest(prompt, tokenizer_identity, config) if not plan_failure else cache_prompt_digest
         trace = {
             "sample_id": record.sample_id,

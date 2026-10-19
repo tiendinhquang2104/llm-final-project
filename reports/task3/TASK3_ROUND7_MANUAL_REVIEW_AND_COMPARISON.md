@@ -81,6 +81,8 @@ Narrow source checks now reject known contradictions: a scalar declared with an 
 
 This method is **not frozen**. The predicted taxonomy has 0.00 F1 on supported labels, diagnosis formatting is unavailable on four records, feedback fallback is 50% in the pipeline and 83% in both direct and oracle, and Level 3 remains generic. No 328-record public inference was run, no public content influenced method selection, no public few-shot/training data was used, no training occurred, and nothing was submitted to a leaderboard.
 
+The three Qwen comparison artifacts above were generated immediately before adding the final fail-closed Level 3 gate. Their generic `EX02-S212` outputs are retained as review evidence; the strict current pipeline now raises an ID-specific error instead of exporting that Level 3 fallback after retries. The comparison therefore documents why the method is rejected, not a complete run accepted by the final strict gate. The exact Qwen comparison was not repeated after the gate because it would stop at that Level 3 case; no public inference was attempted.
+
 The six records are previously seen validation data; per-group estimates are unstable, there is one human reviewer, gold may be incomplete (especially `EX02-S211`), and the local compiler limitation prevented live compile diagnostics. These results are a stop signal for this method, not evidence of expected public performance.
 
 ## Reproduction and private artifacts
@@ -92,6 +94,6 @@ The six records are previously seen validation data; per-group estimates are uns
 .venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split real-val --taxonomy-source gold --output outputs/task3/task3-round7h-oracle-real-val.json
 ```
 
-Final Task 3 verification after implementation: **324 passed, 7 skipped**. The repository-wide run recorded **601 passed, 30 skipped, 4 failed**; the failures are the existing Task 1 Colab secret tests (2) and synthetic labeler gate tests (2), outside Task 3.
+Final Task 3 verification after implementation: **325 passed, 7 skipped**. The repository-wide run recorded **602 passed, 30 skipped, 4 failed**; the failures are the existing Task 1 Colab secret tests (2) and synthetic labeler gate tests (2), outside Task 3.
 
 Final prediction SHA-256: pipeline `4402c2c043456d1f44a9a57851fc7576d119c9f12a19f2b59ada141eaed2efa8`; direct `77e0370745787b802f0a69b07d60797912ca96aa2b62447ff438de1573d75475`; oracle `cec59e2a730c639f1e23e8c50e0942ebbb10944ea723814bd2f1ff3611a07fc6`. Predictions, traces, attempt journals, manual notes and label handoff live under ignored `outputs/task3/` with owner-only file permissions.
