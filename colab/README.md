@@ -7,10 +7,19 @@
 | [`03_task1_public_test.ipynb`](03_task1_public_test.ipynb) | Tải ZIP public test từ Drive, dự đoán 360 bài Task 1 và xuất file nộp |
 | [`04_task1_public_report.ipynb`](04_task1_public_report.ipynb) | Đọc output notebook 03 và vẽ điểm, rubric, trạng thái câu, rule, token |
 | [`05_task1_finetune.ipynb`](05_task1_finetune.ipynb) | QLoRA Task 1: đối chứng gold-only với silver→gold, chọn adapter bằng 6 bài gold validation |
+| [`06_task1_finetuned_public_test.ipynb`](06_task1_finetuned_public_test.ipynb) | Chạy 360 bài public test trên GPU bằng best adapter/epoch của notebook 05, có resume và xuất file nộp |
 
 ## Task 1 QLoRA
 
 Mở notebook 05 với runtime GPU sau khi push code mới lên branch `task-1`. Notebook clone branch vào thư mục mới trên Colab mỗi lần chạy để giữ checkout cũ, tải **mới** `public-test-cham-diem-phan-hoi-files.zip` và `generate-dataset.zip` từ Drive, ghi SHA-256 và chuẩn bị 26/6 gold cùng 422 silver Task 1. Silver được lọc trùng code, mâu thuẫn `exec_report` và trùng gold/public; 65 heldout cùng 150 ID chỉ có ở Task 3 không vào train. Preflight kiểm tra split, leakage và độ dài token. Smoke test chạy một bước ở mỗi giai đoạn và một lượt suy luận. Lượt đầy đủ so sánh gold-only 3 epoch với silver 1 epoch → gold 3 epoch, đánh giá từng epoch gold trên 6 bài validation và chọn theo QWK rồi MAE; hòa hoàn toàn giữ gold-only. Mỗi lượt có thư mục dữ liệu và output riêng dưới `MyDrive/LLM/Final Project/data/`, kèm manifest nguồn, dự đoán, metric và adapter. Notebook không tự nộp public test.
+
+## Task 1 public test sau fine-tune
+
+Notebook 06 chạy public test sau fine-tune: chọn runtime GPU, sửa `TRAINING_RUN` thành thư mục output của notebook 05 (mặc định là run `20261015T080908454574Z-637a033e-88eff95f`), rồi Run all sau khi push source mới lên `task-1`. Notebook đọc `training_summary.json` và `training_config.json`, load base model cùng `best_adapter` của epoch thắng gold validation; không dùng API key. Khi checkpoint gốc còn, SHA-256 của adapter phải khớp checkpoint được chọn.
+
+Preflight kiểm tra prompt cùng format lúc train cho đủ 360 bài, không cắt code khi vượt context. Smoke chạy trước lượt đầy đủ trên cùng model; checkpoint hợp lệ được dùng tiếp khi chạy lại. File nộp chỉ được xuất khi đủ 360 bài tại `data/outputs/task1/public/peft/<model>/<training-run>__<variant>__epoch_<n>/<fingerprint>/predictions.json`. File `progress.json` và `config.json` ghi rõ best epoch, adapter hash và cấu hình. Có thể dùng notebook 04 với `RUN_DIR` trỏ vào thư mục này để xem phân bố điểm/rubric; model không sinh trạng thái từng câu hay rule trace.
+
+Runner tương ứng: `python scripts/predict_task1_finetuned.py --training-run <training-output> --public-root <public-root> --output-root <outputs/task1> --preflight`. Bỏ `--preflight`, thêm `--smoke-first` để suy luận bằng GPU. `--max-length` cho phép tăng context rõ ràng nếu preflight phát hiện bài quá dài.
 
 ## Task 1 API baseline
 

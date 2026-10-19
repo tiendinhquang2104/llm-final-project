@@ -6,7 +6,7 @@ A modular, production-ready framework for automated grading, rubric scoring, fin
 
 This repository provides an end-to-end pipeline designed for the LLM Grading Challenge. The system is architected into three specialized tasks:
 
-- **Task 1: Automated Rule & Rubric Scoring**: Combines deterministic prerequisite rule checks with LLM prompting pipelines to evaluate responses against structured rubrics.
+- **Task 1: Automated Rubric Scoring**: Uses the six dimensions in `label_space.json`. For multi-problem exams, each problem has equal weight; P1 does not block the other problems. Optional prerequisite and compile gates remain available for rule ablations.
 - **Task 2: Model Fine-Tuning & Score Classification**: Implements Parameter-Efficient Fine-Tuning (PEFT/LoRA) and threshold calibration for granular essay/answer grading.
 - **Task 3: Compliance & Constraint Verification**: Validates adherence to complex multi-condition instructions, factual consistency, and scoring criteria.
 

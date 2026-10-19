@@ -20,8 +20,8 @@ generation:
   n: 1
 rules:
   clamp: true
-  prerequisite: true
-  compile_gate: true
+  prerequisite: false
+  compile_gate: false
   derive_logic: false
   prereq_strict: false
 retry_on_parse_fail: 1

@@ -40,6 +40,11 @@ def _dataset(root: Path, rows: list[tuple[str, str, str, dict, int]]) -> None:
         "exam_id": "EX1", "exam_type": "single_problem", "statement": "Add two integers",
         "grading_policy": "Evaluate rubric",
     }]}), encoding="utf-8")
+    (root / "label_space.json").write_text(json.dumps({"rubric": {"dimensions": [
+        {"name": name, "range": [0, maximum], "vi": name}
+        for name, maximum in (("compilable", 1), ("io_format", 1), ("logic", 4),
+                              ("edge_case", 2), ("complexity", 1), ("code_quality", 1))
+    ]}}), encoding="utf-8")
     samples = []
     for sid, code, report, rubric, total in rows:
         (root / "submissions" / f"{sid}.cpp").write_text(code, encoding="utf-8")
@@ -79,6 +84,7 @@ def test_silver_filters_and_prompt(tmp_path):
     records = load_silver_records(tmp_path / "out/task1_silver_train.jsonl", [], expected=1)
     assert [r.sample_id for r in records] == ["S1"]
     prompt = records[0].messages[1]["content"]
+    assert "trọng số bằng nhau" in records[0].messages[0]["content"]
     assert "(không có compile log)" in prompt
     assert "biên dịch OK" not in prompt
     assert "exec_report" not in prompt and "statement_examples" not in prompt

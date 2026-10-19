@@ -90,6 +90,8 @@ def prepare_silver_task1(
     route into the training file. `exec_report` is used solely for quality checks.
     """
     root = resolve_dataset_root(silver_root)
+    gold_dataset_root = resolve_dataset_root(gold_root)
+    label_space = json.loads((gold_dataset_root / "label_space.json").read_text(encoding="utf-8"))
     gold_ids, gold_hashes = _source_fingerprints(gold_root)
     public_ids, public_hashes = _source_fingerprints(public_root)
     exams = load_exams(root)
@@ -146,7 +148,7 @@ def prepare_silver_task1(
             compile_log=inp.get("compile_log"), test_report=inp.get("test_report"),
             rubric=rubric, total_score=total,
         )
-        messages, target = build_task1_messages(sample)
+        messages, target = build_task1_messages(sample, label_space)
         rec = ChatMLRecord(
             sample_id=sid, task="task1", exam_id=exam_id, split="silver",
             messages=messages, text=messages_to_chatml(messages), target=target,

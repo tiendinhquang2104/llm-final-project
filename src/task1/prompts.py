@@ -5,24 +5,8 @@ import json
 import re
 
 from src.data.loader import DIM_MAX, DIMENSIONS, Sample
+from src.data.task1_rubric import rubric_guide, statement_without_p1_gate
 from src.task1.prerequisite_rules import STATUSES
-
-RUBRIC_GUIDE = """\
-RUBRIC (6 chiều, tổng 0-10):
-- compilable (0-1): 1 nếu code biên dịch được theo yêu cầu của đề. compile_log chỉ là TÍN HIỆU PHỤ: \
-lỗi kiểu trình biên dịch MSVC (void main, dùng pow mà thiếu #include <cmath>, ...) giảng viên vẫn cho 1. \
-Lỗi cú pháp thật, dùng biến/hàm chưa khai báo, #include file dữ liệu, sai kiểu trả về nghiêm trọng -> 0.
-- io_format (0-1): đúng định dạng vào/ra. Đề stdin/stdout: in đúng chính xác chuỗi yêu cầu (ví dụ True/False, \
-đúng hoa thường, không thừa ký tự/khoảng trắng). Đề nhiều câu dạng hàm: đúng prototype, đọc/ghi dữ liệu đúng, \
-không crash khi parse dữ liệu (stoi/stof lỗi, ...).
-- logic (0-4): mức đúng của thuật toán chính. 4 = đúng hoàn toàn; 3 = gần đúng, sai nhỏ; 2 = đúng khoảng một nửa \
-(sai một phần đáng kể hoặc sai nhiều test); 1 = chỉ đúng rất ít; 0 = sai hoàn toàn / không làm / không chạy được. \
-Đề nhiều câu: tính theo tỷ lệ câu làm đúng có trọng số.
-- edge_case (0-2): xử lý trường hợp biên (số 1 chữ số, danh sách rỗng, phần tử đầu/cuối, dữ liệu đặc biệt...). \
-2 = đầy đủ, 1 = thiếu một số, 0 = không xử lý / logic sai hoàn toàn.
-- complexity (0-1): thuật toán có độ phức tạp hợp lý, không vòng lặp vô hạn rõ ràng.
-- code_quality (0-1): code rõ ràng, chia hàm hợp lý, tuân thủ ràng buộc của đề (thư viện cho phép, không dùng hàm bị cấm).
-"""
 
 STATUS_GUIDE = """\
 TRẠNG THÁI TỪNG CÂU (problems[].status):
@@ -33,23 +17,23 @@ TRẠNG THÁI TỪNG CÂU (problems[].status):
 - not_attempted: không làm / thân hàm rỗng / chỉ khai báo prototype
 """
 
-POLICY_IN_CODE = (
-    "Chấm TỪNG CÂU MỘT CÁCH ĐỘC LẬP theo đúng chất lượng code của câu đó. "
-    "KHÔNG tự áp dụng chính sách câu tiên quyết — hệ thống sẽ tự áp dụng sau."
-)
-
 SYSTEM_PLAIN = (
     "Bạn là giảng viên chấm bài lập trình C++ của sinh viên. Hãy chấm theo rubric 6 chiều: "
     "compilable (0-1), io_format (0-1), logic (0-4), edge_case (0-2), complexity (0-1), code_quality (0-1). "
-    'Chỉ trả về một object JSON dạng {"compilable": int, "io_format": int, "logic": int, '
-    '"edge_case": int, "complexity": int, "code_quality": int}.'
+    'Chỉ trả về một object JSON dạng {"compilable": số, "io_format": số, "logic": số, '
+    '"edge_case": số, "complexity": số, "code_quality": số}; cho phép hai chữ số thập phân. '
+    "Với đề nhiều câu, đánh giá sáu chiều cho từng câu; điểm mỗi chiều của bài là trung bình các câu với trọng số bằng nhau. "
+    "Không so sánh bài với bài khác để phát hiện sao chép."
 )
 
 SYSTEM_STRUCTURED = (
     "Bạn là giảng viên chấm bài lập trình C++ nhập môn, chấm nhất quán, công bằng và bám sát rubric. "
     "Bạn đọc đề, đọc code (có đánh số dòng), dùng compile_log/test_report làm tín hiệu phụ, "
     "rồi trả về DUY NHẤT một object JSON hợp lệ, không có văn bản nào khác.\n\n"
-    + RUBRIC_GUIDE + "\n" + STATUS_GUIDE
+    "Với đề nhiều câu, đánh giá sáu chiều cho từng câu; điểm mỗi chiều của bài là trung bình các câu với trọng số bằng nhau. "
+    "không dùng điểm P1–P4 hoặc max_score trong đề làm trọng số. "
+    "Không so sánh bài với bài khác để phát hiện sao chép.\n\n"
+    + STATUS_GUIDE
 )
 
 
@@ -89,20 +73,19 @@ def problem_ids(exam: dict) -> list[str]:
 
 def exam_block(exam: dict, policy_in_prompt: bool, csv_header: str = "") -> str:
     probs = "\n".join(
-        f"- {p['pid']}: trọng số {p.get('max_score')}"
+        f"- {p['pid']}"
         + (f"; prototype `{p['prototype']}`" if p.get("prototype") else "")
-        + (f"; là câu tiên quyết cho {', '.join(p['is_prerequisite_for'])}" if p.get("is_prerequisite_for") else "")
+        + (f"; là câu tiên quyết cho {', '.join(p['is_prerequisite_for'])}"
+           if policy_in_prompt and p.get("is_prerequisite_for") else "")
         for p in exam.get("problems", [])
     )
     s = (
         f"## ĐỀ BÀI ({exam['exam_id']}, loại {exam['exam_type']}, môn {exam.get('course', '')})\n"
-        f"{exam['statement'].strip()}\n\n### Các câu\n{probs}\n"
+        f"{statement_without_p1_gate(exam['statement'])}\n\n### Các câu\n{probs}\n"
     )
     if exam.get("grading_policy"):
         if policy_in_prompt:
             s += f"\n### Chính sách chấm (BẮT BUỘC áp dụng)\n{exam['grading_policy']}\n"
-        elif exam["exam_type"] == "multi_problem":
-            s += f"\n### Lưu ý\n{POLICY_IN_CODE}\n"
     if csv_header:
         s += f"\n### Tiêu đề cột của file dữ liệu được đề tham chiếu\n{csv_header}\n"
     return s
@@ -151,10 +134,13 @@ def output_instruction(exam: dict, template: str) -> str:
 
 
 def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict,
-                   csv_header: str = "") -> list[dict]:
+                   csv_header: str = "", label_space: dict | None = None) -> list[dict]:
     template = cfg.get("template", "structured")
     policy_in_prompt = cfg.get("policy_in_prompt", False)
     system = SYSTEM_PLAIN if template == "plain" else SYSTEM_STRUCTURED
+    if not policy_in_prompt:
+        system += "\nKhông áp điều kiện P1 lên các câu khác."
+    system += "\n" + rubric_guide(label_space)
     user = "\n".join(
         x for x in [
             exam_block(exam, policy_in_prompt, csv_header),

@@ -20,7 +20,7 @@ PUBLIC_CSV = {"Class01-Test1": ("generals.csv", "50-best-european-generals-clean
 
 
 def valid_parsed(parsed, exam_type: str) -> bool:
-    """Accept only an in-range rubric and a P1 verdict where prerequisite rules need it."""
+    """Accept any valid six-dimension rubric; per-problem status is optional."""
     if not parsed.ok or not parsed.rubric:
         return False
     if any(not isinstance(parsed.rubric.get(d), (int, float))
@@ -28,7 +28,7 @@ def valid_parsed(parsed, exam_type: str) -> bool:
            or not math.isfinite(parsed.rubric[d])
            or not _valid_score(parsed.rubric[d], DIM_MAX[d]) for d in DIMENSIONS):
         return False
-    return exam_type != "multi_problem" or bool(parsed.problems.get("P1"))
+    return True
 
 
 def _valid_score(value: object, maximum: int) -> bool:
@@ -71,7 +71,7 @@ class Task1Pipeline:
             "template": self.prompt_cfg.get("template", "structured"),
             "demos": [d.sample_id for d in demos],
             "messages": build_messages(exam, sample, demos, self.prompt_cfg,
-                                        self.csv_headers.get(sample.exam_id, "")),
+                                        self.csv_headers.get(sample.exam_id, ""), self.ds.label_space),
         }
 
     def infer(self, samples: list[Sample]) -> list[dict]:

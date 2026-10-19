@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Iterable
 
 from src.data.leakage_guard import assert_no_feedback_leakage
-from src.data.loader import load_dataset
+from src.data.loader import load_dataset, resolve_dataset_root
 from src.data.prompts import build_chatml_record
 from src.data.schema import ChatMLRecord, TaskId, UnifiedSample
 
@@ -37,12 +37,13 @@ def expand_to_chatml(
     samples: list[UnifiedSample],
     id_to_split: dict[str, str],
     tasks: Iterable[TaskId] = TASKS,
+    label_space: dict | None = None,
 ) -> list[ChatMLRecord]:
     records: list[ChatMLRecord] = []
     for sample in samples:
         split = id_to_split.get(sample.sample_id)
         for task in tasks:
-            records.append(build_chatml_record(sample, task, split=split))
+            records.append(build_chatml_record(sample, task, split=split, label_space=label_space))
     return records
 
 
@@ -89,12 +90,14 @@ def build_unified_jsonl(
         splits_path = out / "splits"
     splits_path.mkdir(parents=True, exist_ok=True)
 
-    samples = load_dataset(data_dir)
+    source_root = resolve_dataset_root(data_dir)
+    label_space = json.loads((source_root / "label_space.json").read_text(encoding="utf-8"))
+    samples = load_dataset(source_root)
     train_ids, val_ids = make_split([s.sample_id for s in samples], val_ratio=val_ratio, seed=seed)
     id_to_split = {i: "train" for i in train_ids}
     id_to_split.update({i: "val" for i in val_ids})
 
-    records = expand_to_chatml(samples, id_to_split)
+    records = expand_to_chatml(samples, id_to_split, label_space=label_space)
     samples_by_id = {s.sample_id: s for s in samples}
 
     if check_leakage:

@@ -6,6 +6,7 @@ import json
 from typing import Any
 
 from src.data.schema import ChatMLRecord, TaskId, UnifiedSample
+from src.data.task1_rubric import rubric_guide, statement_without_p1_gate
 
 IM_START = "<|im_start|>"
 IM_END = "<|im_end|>"
@@ -13,9 +14,10 @@ IM_END = "<|im_end|>"
 SYSTEM_TASK1 = (
     "Bạn là giáo viên chấm bài lập trình C++. "
     "Hãy chấm điểm theo rubric 6 chiều và trả về ĐÚNG một JSON object, không giải thích thêm. "
-    "Rubric: compilable (0-1), io_format (0-1), logic (0-4), edge_case (0-2), "
-    "complexity (0-1), code_quality (0-1); total_score (0-10) = tổng các chiều. "
-    "Với đề multi_problem: nếu câu tiên quyết (P1) sai/không biên dịch được thì các câu phụ thuộc nhận 0."
+    "Chấm mỗi chiều theo định nghĩa trong label_space.json; total_score (0-10) = tổng các chiều. "
+    "Với đề nhiều câu, đánh giá cả sáu chiều cho từng câu; điểm mỗi chiều của bài là trung bình các câu với trọng số bằng nhau. "
+    "không dùng điểm P1–P4 hoặc max_score trong đề làm trọng số. "
+    "Không áp điều kiện điểm của P1 lên các câu khác và không so sánh bài nộp với bài khác để phát hiện sao chép."
 )
 
 SYSTEM_TASK2 = (
@@ -61,16 +63,16 @@ def _format_test_report(test_report: list[dict[str, Any]] | None) -> str:
     return "\n".join(lines)
 
 
-def _shared_context(sample: Any, *, include_taxonomy: bool = False) -> str:
+def _shared_context(sample: Any, *, include_taxonomy: bool = False, task1: bool = False) -> str:
     """Build the user-visible context. NEVER includes teacher feedback."""
     parts = [
         f"exam_id: {sample.exam_id}",
         f"exam_type: {sample.exam_type}",
         f"language: {sample.language}",
-        f"grading_policy: {sample.grading_policy or '(không có)'}",
+        f"grading_policy: {'chấm độc lập theo sáu chiều rubric' if task1 else (sample.grading_policy or '(không có)')}",
         "",
         "## Đề bài",
-        sample.exam_statement.strip(),
+        statement_without_p1_gate(sample.exam_statement) if task1 else sample.exam_statement.strip(),
         "",
         "## Code sinh viên",
         "```cpp",
@@ -105,12 +107,13 @@ def messages_to_chatml(messages: list[dict[str, str]]) -> str:
     return "\n".join(chunks) + "\n"
 
 
-def build_task1_messages(sample: Any) -> tuple[list[dict[str, str]], str]:
+def build_task1_messages(sample: Any, label_space: dict | None = None) -> tuple[list[dict[str, str]], str]:
     user = (
-        _shared_context(sample)
+        _shared_context(sample, task1=True)
         + "\n\nHãy chấm điểm và trả về JSON đúng schema:\n"
-        '{"rubric":{"compilable":0|1,"io_format":0|1,"logic":0-4,'
-        '"edge_case":0-2,"complexity":0|1,"code_quality":0|1},"total_score":0-10}'
+        '{"rubric":{"compilable":0-1,"io_format":0-1,"logic":0-4,'
+        '"edge_case":0-2,"complexity":0-1,"code_quality":0-1},"total_score":0-10} '
+        '(điểm có thể có hai chữ số thập phân).'
     )
     target_obj = {
         "rubric": sample.rubric.model_dump() if hasattr(sample.rubric, "model_dump") else sample.rubric,
@@ -118,7 +121,7 @@ def build_task1_messages(sample: Any) -> tuple[list[dict[str, str]], str]:
     }
     target = json.dumps(target_obj, ensure_ascii=False, separators=(",", ":"))
     messages = [
-        {"role": "system", "content": SYSTEM_TASK1},
+        {"role": "system", "content": SYSTEM_TASK1 + "\n" + rubric_guide(label_space)},
         {"role": "user", "content": user},
         {"role": "assistant", "content": target},
     ]
@@ -166,8 +169,11 @@ _BUILDERS = {
 }
 
 
-def build_chatml_record(sample: UnifiedSample, task: TaskId, split: str | None = None) -> ChatMLRecord:
-    messages, target = _BUILDERS[task](sample)
+def build_chatml_record(sample: UnifiedSample, task: TaskId, split: str | None = None,
+                        label_space: dict | None = None) -> ChatMLRecord:
+    messages, target = (
+        build_task1_messages(sample, label_space) if task == "task1" else _BUILDERS[task](sample)
+    )
     return ChatMLRecord(
         sample_id=sample.sample_id,
         task=task,

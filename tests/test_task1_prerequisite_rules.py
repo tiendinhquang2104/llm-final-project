@@ -39,13 +39,13 @@ class TestPrerequisiteRule(unittest.TestCase):
         self.pol = policy_from_exam(EXAMS["EX01"])
 
     def test_prereq_correct_keeps_scores(self):
-        r, total, trace = apply_rules(FULL, OK4, self.pol)
+        r, total, trace = apply_rules(FULL, OK4, self.pol, RuleConfig(prerequisite=True))
         self.assertEqual(r, FULL)
         self.assertEqual(total, 10)
         self.assertEqual(trace, [])
 
     def test_prereq_wrong_zeroes_dependents(self):
-        r, total, trace = apply_rules(FULL, {**OK4, "P1": "wrong"}, self.pol)
+        r, total, trace = apply_rules(FULL, {**OK4, "P1": "wrong"}, self.pol, RuleConfig(prerequisite=True))
         # Matches the teacher pattern (e.g. EX01-S105..S107): only compilable + io_format survive.
         self.assertEqual(r, {"compilable": 1, "io_format": 1, "logic": 0, "edge_case": 0, "complexity": 0,
                              "code_quality": 0})
@@ -54,27 +54,27 @@ class TestPrerequisiteRule(unittest.TestCase):
 
     def test_prereq_wrong_zeroes_fractional_dependents(self):
         scores = {**FULL, "logic": 3.75, "edge_case": 1.25}
-        r, total, _ = apply_rules(scores, {**OK4, "P1": "wrong"}, self.pol)
+        r, total, _ = apply_rules(scores, {**OK4, "P1": "wrong"}, self.pol, RuleConfig(prerequisite=True))
         self.assertEqual((r["logic"], r["edge_case"], total), (0, 0, 2))
 
     def test_each_fail_status_triggers(self):
         for st in ("wrong", "runtime_error", "not_attempted"):
             with self.subTest(st=st):
-                _, total, _ = apply_rules(FULL, {**OK4, "P1": st}, self.pol)
+                _, total, _ = apply_rules(FULL, {**OK4, "P1": st}, self.pol, RuleConfig(prerequisite=True))
                 self.assertEqual(total, 2)
 
     def test_partial_prereq_passes_by_default_but_fails_in_strict_mode(self):
         st = {**OK4, "P1": "partial"}
-        self.assertEqual(apply_rules(FULL, st, self.pol)[1], 10)
-        self.assertEqual(apply_rules(FULL, st, self.pol, RuleConfig(prereq_strict=True))[1], 2)
+        self.assertEqual(apply_rules(FULL, st, self.pol, RuleConfig(prerequisite=True))[1], 10)
+        self.assertEqual(apply_rules(FULL, st, self.pol, RuleConfig(prerequisite=True, prereq_strict=True))[1], 2)
 
     def test_dependent_failure_does_not_trigger_rule(self):
-        _, total, trace = apply_rules(FULL, {**OK4, "P2": "wrong"}, self.pol)
+        _, total, trace = apply_rules(FULL, {**OK4, "P2": "wrong"}, self.pol, RuleConfig(prerequisite=True))
         self.assertEqual(total, 10)
         self.assertEqual(trace, [])
 
     def test_unknown_status_is_noop(self):
-        r, _, trace = apply_rules(FULL, {}, self.pol)
+        r, _, trace = apply_rules(FULL, {}, self.pol, RuleConfig(prerequisite=True))
         self.assertEqual(r, FULL)
         self.assertIn("prereq:P1:status_unknown->no_op", trace)
 
@@ -90,19 +90,22 @@ class TestPrerequisiteRule(unittest.TestCase):
     def test_generic_chain_policy(self):
         pol = ExamPolicy("X", "multi_problem", prerequisites={"P2": ("P3",)},
                          problem_weights={"P1": 1, "P2": 1, "P3": 1})
-        r, _, trace = apply_rules(FULL, {"P1": "correct", "P2": "wrong", "P3": "correct"}, pol)
+        r, _, trace = apply_rules(FULL, {"P1": "correct", "P2": "wrong", "P3": "correct"}, pol,
+                                  RuleConfig(prerequisite=True))
         self.assertEqual(r["logic"], 0)
         self.assertTrue(any("P3:not_graded" in t for t in trace))
 
 
 class TestCompileGate(unittest.TestCase):
     def test_ex01_not_compilable_is_all_zero(self):
-        _, total, _ = apply_rules({**FULL, "compilable": 0}, OK4, policy_from_exam(EXAMS["EX01"]))
+        _, total, _ = apply_rules({**FULL, "compilable": 0}, OK4, policy_from_exam(EXAMS["EX01"]),
+                                  RuleConfig(compile_gate=True))
         self.assertEqual(total, 0)
 
     def test_ex02_not_compilable_keeps_code_quality(self):
         # Teacher pattern on EX02 (S203, S212, S217): total 1 = code_quality only.
-        r, total, _ = apply_rules({**FULL, "compilable": 0}, {"P1": "wrong"}, policy_from_exam(EXAMS["EX02"]))
+        r, total, _ = apply_rules({**FULL, "compilable": 0}, {"P1": "wrong"}, policy_from_exam(EXAMS["EX02"]),
+                                  RuleConfig(compile_gate=True))
         self.assertEqual(total, 1)
         self.assertEqual(r["code_quality"], 1)
 

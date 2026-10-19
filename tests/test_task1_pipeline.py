@@ -20,7 +20,7 @@ SPLIT = load_split(ROOT / "data" / "splits")
 
 
 class FakeLLM(Backend):
-    """Returns P1=wrong + full marks; the code rules must turn EX01 into total 2."""
+    """Returns P1=wrong with a full six-dimension rubric for default-rule checks."""
 
     name = "fake"
 
@@ -80,19 +80,20 @@ class TestPrompts(unittest.TestCase):
         in_code = build_messages(DS.exams["EX01"], s, [], {"template": "structured"})[1]["content"]
         in_prompt = build_messages(DS.exams["EX01"], s, [], {"template": "structured",
                                                               "policy_in_prompt": True})[1]["content"]
-        self.assertIn("KHÔNG tự áp dụng", in_code)
+        self.assertNotIn("không được chấm", in_code)
+        self.assertNotIn("câu tiên quyết", in_code)
         self.assertIn("BẮT BUỘC", in_prompt)
 
 
 class TestPipeline(unittest.TestCase):
-    def test_rules_applied_after_llm(self):
+    def test_default_keeps_six_rubric_scores(self):
         by = DS.by_id()
         pipe = Task1Pipeline(DS, FakeLLM(), {"prompt": {}, "generation": {}}, [by[i] for i in SPLIT["train"]])
         _, preds = pipe.run([by["EX01-S101"], by["EX02-S201"]])
         p1, p2 = preds
         self.assertEqual(p1["total_llm"], 10)
-        self.assertEqual(p1["total_score"], 2)  # prerequisite rule fired
-        self.assertEqual(p2["total_score"], 10)  # single_problem: no prerequisite
+        self.assertEqual(p1["total_score"], 10)
+        self.assertEqual(p2["total_score"], 10)
 
     def test_retry_on_parse_failure(self):
         by = DS.by_id()

@@ -1,15 +1,7 @@
-"""Deterministic grading-policy rules, applied AFTER the LLM, independent of any prompt.
+"""Task 1 rubric validation and optional legacy policy-rule ablations.
 
-The LLM is asked to judge every problem on its own merits (status per problem + 6 rubric scores).
-This module then enforces the exam's grading policy in code, so the policy can never be "forgotten"
-by the model and can be ablated on/off without re-running inference:
-
-1. clamp      — every dimension is an int inside its range.
-2. derive     — (optional) recompute `logic` from per-problem statuses and problem weights.
-3. prereq     — if a prerequisite problem fails, the problems depending on it get no credit:
-                the dimensions in `zero_on_prereq_fail` are set to 0.
-4. compile    — if `compilable == 0`, the dimensions in `zero_on_not_compilable` are set to 0.
-5. total      — total_score = sum of the 6 dimensions (never trusted from the model).
+Default behavior preserves all six model scores and sums them. Explicit configs can
+enable prerequisite or compile gates for comparison with older experiments.
 """
 from __future__ import annotations
 
@@ -46,9 +38,9 @@ class ExamPolicy:
 class RuleConfig:
     clamp: bool = True
     derive_logic: bool = False
-    prerequisite: bool = True
+    prerequisite: bool = False
     prereq_strict: bool = False  # treat "partial" on a prerequisite as a failure
-    compile_gate: bool = True
+    compile_gate: bool = False
 
     @classmethod
     def from_dict(cls, d: dict | None) -> "RuleConfig":
