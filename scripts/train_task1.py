@@ -1,4 +1,4 @@
-"""Train Task 1 QLoRA gold-only and silver-to-gold arms on one data snapshot."""
+"""Train Task 1 QLoRA on gold by default; retain optional silver comparison."""
 
 from __future__ import annotations
 
@@ -24,14 +24,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=Path, default=ROOT / "configs/task1/lora_7b.yaml")
     parser.add_argument("--processed-dir", type=Path)
     parser.add_argument("--splits-dir", type=Path)
-    parser.add_argument("--silver-processed-dir", type=Path, required=True)
+    parser.add_argument("--silver-processed-dir", type=Path)
     parser.add_argument("--source-manifest", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument(
-        "--stage", choices=("all", "gold_only", "silver_then_gold", "select"), default="all",
-        help="all = both arms + selection in one process (default). On a 16 GB GPU run gold_only, "
+        "--stage", choices=("gold_only_complete", "all", "gold_only", "silver_then_gold", "select"),
+        default="gold_only_complete",
+        help="gold_only_complete = train/evaluate gold and save the best adapter (default); "
+             "all = both arms + selection. On a 16 GB GPU run gold_only, "
              "silver_then_gold and select as separate processes so each arm's GPU memory is fully released.",
     )
     return parser.parse_args()
@@ -61,15 +63,21 @@ def run(args: argparse.Namespace) -> dict:
         processed, splits, expected_train=cfg["data"]["expected_train"],
         expected_val=cfg["data"]["expected_val"],
     )
-    silver_manifest = json.loads(
-        (args.silver_processed_dir / "silver_manifest.json").read_text(encoding="utf-8")
-    )
-    silver = load_silver_records(
-        args.silver_processed_dir / "task1_silver_train.jsonl", gold_train + gold_val,
-        expected=silver_manifest["n_accepted"],
-    )
-    if not silver_manifest.get("gold_public_overlap_checked"):
-        raise ValueError("Silver source was not checked against gold/public")
+    use_silver = args.stage != "gold_only_complete"
+    silver_manifest = None
+    silver = []
+    if use_silver:
+        if args.silver_processed_dir is None:
+            raise ValueError("--silver-processed-dir is required for silver comparison stages")
+        silver_manifest = json.loads(
+            (args.silver_processed_dir / "silver_manifest.json").read_text(encoding="utf-8")
+        )
+        silver = load_silver_records(
+            args.silver_processed_dir / "task1_silver_train.jsonl", gold_train + gold_val,
+            expected=silver_manifest["n_accepted"],
+        )
+        if not silver_manifest.get("gold_public_overlap_checked"):
+            raise ValueError("Silver source was not checked against gold/public")
 
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
     if tokenizer.pad_token is None:
@@ -87,7 +95,7 @@ def run(args: argparse.Namespace) -> dict:
         "model": model_name, "gold_train_records": len(gold_train),
         "gold_val_records": len(gold_val), "silver_train_records": len(silver),
         "max_gold_tokens": max(row["total_tokens"] for row in gold_rows),
-        "max_silver_tokens": max(row["total_tokens"] for row in silver_rows),
+        "max_silver_tokens": max((row["total_tokens"] for row in silver_rows), default=None),
         "max_val_prompt_tokens": max(prompt_sizes), "max_length": max_length,
         "smoke": args.smoke,
     }
@@ -104,14 +112,16 @@ def run(args: argparse.Namespace) -> dict:
     if not torch.cuda.is_available():
         raise RuntimeError("QLoRA training requires a Colab CUDA GPU")
     done = {p.name for p in output.iterdir()} - {"smoke"} if output.exists() else set()
-    clash = {"all": done - {"training_config.json", "silver_manifest.json", "source_manifest.json"},
+    clash = {"gold_only_complete": done - {"training_config.json", "source_manifest.json"},
+             "all": done - {"training_config.json", "silver_manifest.json", "source_manifest.json"},
              "gold_only": done & {"gold_only"}, "silver_then_gold": done & {"silver_then_gold"},
              "select": done & {"best_adapter", "training_summary.json"}}[args.stage]
     if clash:
         raise FileExistsError(f"Output already contains {sorted(clash)}: {output}; use a fresh directory")
     output.mkdir(parents=True, exist_ok=True)
     _write(output / "training_config.json", cfg)
-    _write(output / "silver_manifest.json", silver_manifest)
+    if silver_manifest is not None:
+        _write(output / "silver_manifest.json", silver_manifest)
     if args.source_manifest:
         shutil.copy2(args.source_manifest, output / "source_manifest.json")
 
@@ -192,8 +202,8 @@ def run(args: argparse.Namespace) -> dict:
         clear_gpu()
         return paths
 
-    # Both arms begin from the same base weights and random seed.
-    if args.stage in ("all", "gold_only"):
+    # Comparison arms begin from the same base weights and random seed.
+    if args.stage in ("gold_only_complete", "all", "gold_only"):
         baseline_model = fresh_model()
         baseline_ckpts = train_stage(
             baseline_model, gold_rows, output / "gold_only" / "gold",
@@ -275,8 +285,8 @@ def run(args: argparse.Namespace) -> dict:
         return selected
 
     baseline_best = evaluate_arm("gold_only", baseline_ckpts)
-    silver_best = evaluate_arm("silver_then_gold", silver_gold_ckpts)
-    chosen = choose_variant(baseline_best, silver_best)
+    silver_best = evaluate_arm("silver_then_gold", silver_gold_ckpts) if use_silver else None
+    chosen = choose_variant(baseline_best, silver_best) if silver_best else baseline_best
     del eval_model, eval_base
     clear_gpu()
 
@@ -293,7 +303,8 @@ def run(args: argparse.Namespace) -> dict:
         "model": model_name, "seed": cfg["seed"], "selected_variant": chosen["variant"],
         "selected_epoch": chosen["epoch"], "selected_metrics": chosen["metrics"],
         "gold_only_best": baseline_best, "silver_then_gold_best": silver_best,
-        "silver_stage_checkpoint": str(silver_ckpts[-1]), "data": preflight,
+        "silver_stage_checkpoint": str(silver_ckpts[-1]) if silver_best else None,
+        "data": preflight,
         "versions": {
             "torch": torch.__version__, "transformers": transformers.__version__,
             "peft": peft.__version__,

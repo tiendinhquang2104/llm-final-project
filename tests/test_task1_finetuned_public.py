@@ -73,6 +73,24 @@ def test_selects_best_epoch_and_verifies_copied_weights(tmp_path):
         select_adapter(root)
 
 
+def test_selects_gold_only_run_without_silver_arm(tmp_path):
+    root = training_run(tmp_path / "run")
+    summary = json.loads((root / "training_summary.json").read_text())
+    summary["selected_variant"] = "gold_only"
+    summary["selected_epoch"] = 1
+    summary["silver_then_gold_best"] = None
+    write_json(root / "training_summary.json", summary)
+    (root / "best_adapter/adapter_model.safetensors").write_bytes(b"gold epoch one")
+    checkpoint = root / "gold_only/gold/checkpoint-7"
+    checkpoint.mkdir(parents=True)
+    (checkpoint / "adapter_model.safetensors").write_bytes(b"gold epoch one")
+    summary["gold_only_best"]["checkpoint"] = "/old/runtime/gold_only/gold/checkpoint-7"
+    write_json(root / "training_summary.json", summary)
+    selected = select_adapter(root)
+    assert (selected["selected_variant"], selected["selected_epoch"]) == ("gold_only", 1)
+    assert selected["checkpoint_verified"]
+
+
 def test_selection_rejects_base_mismatch_and_wrong_epoch(tmp_path):
     root = training_run(tmp_path / "run")
     write_json(root / "best_adapter/adapter_config.json", {"base_model_name_or_path": "wrong-base"})

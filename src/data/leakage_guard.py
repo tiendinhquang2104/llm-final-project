@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from src.data.prompts import _compile_log_text
 from src.data.schema import ChatMLRecord, UnifiedSample
 
 
@@ -62,7 +63,11 @@ def assert_no_feedback_leakage(
             if sample and sample.feedback:
                 fb = sample.feedback.strip()
                 # Skip ultra-short fragments that could collide with exam text
-                if len(fb) >= 20 and fb in prompt:
+                # A teacher may paste a compiler diagnostic verbatim as feedback.
+                # That same diagnostic is legitimate input when it comes from the
+                # independently compiled log; any additional copy is leakage.
+                allowed_log_copies = _compile_log_text(sample.compile_log).count(fb)
+                if len(fb) >= 20 and prompt.count(fb) > allowed_log_copies:
                     raise DataLeakageError(
                         f"Gold feedback text leaked into {rec.task} prompt for {rec.sample_id}"
                     )

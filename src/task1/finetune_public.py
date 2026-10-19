@@ -30,7 +30,8 @@ def select_adapter(training_run: str | Path) -> dict:
     config = json.loads((root / "training_config.json").read_text(encoding="utf-8"))
     if summary.get("data", {}).get("smoke") or root.name == "smoke":
         raise ValueError("Select a completed full training run, not a smoke run")
-    chosen = choose_variant(summary["gold_only_best"], summary["silver_then_gold_best"])
+    silver_best = summary.get("silver_then_gold_best")
+    chosen = choose_variant(summary["gold_only_best"], silver_best) if silver_best else summary["gold_only_best"]
     if (summary["selected_variant"], summary["selected_epoch"]) != (chosen["variant"], chosen["epoch"]):
         raise ValueError("training_summary.json does not identify the gold-validation winner")
     adapter = root / "best_adapter"

@@ -1,4 +1,4 @@
-# Task 1 gold-only baseline versus silver→gold QLoRA run.
+# Task 1 gold-only QLoRA by default; silver→gold comparison remains optional.
 model: Qwen/Qwen2.5-Coder-7B-Instruct
 seed: 42
 data:
@@ -6,7 +6,7 @@ data:
   splits_dir: data/splits
   expected_train: 26
   expected_val: 6
-output_dir: outputs/task1/qwen25_coder7b_qlora_silver_gold
+output_dir: outputs/task1/qwen25_coder7b_qlora_gold
 training:
   max_length: 4096
   epochs: 3

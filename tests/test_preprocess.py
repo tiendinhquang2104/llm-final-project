@@ -72,6 +72,16 @@ def test_leakage_guard_catches_injected_feedback(samples):
         assert_no_feedback_leakage([rec], {sample.sample_id: sample})
 
 
+def test_feedback_matching_compiler_log_is_allowed_once(samples):
+    diagnostic = "student.cpp:4:3: error: expected expression\n    4 | x = ;"
+    sample = samples[0].model_copy(update={"compile_log": diagnostic, "feedback": diagnostic})
+    rec = build_chatml_record(sample, "task1")
+    assert_no_feedback_leakage([rec], {sample.sample_id: sample})
+    next(m for m in rec.messages if m["role"] == "user")["content"] += "\n" + diagnostic
+    with pytest.raises(DataLeakageError):
+        assert_no_feedback_leakage([rec], {sample.sample_id: sample})
+
+
 def test_build_unified_jsonl(tmp_path, samples):
     root = _sample_root()
     out = tmp_path / "processed"
