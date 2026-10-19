@@ -110,8 +110,10 @@ def validate_predictions(preds, expected_ids=None) -> list[str]:
         for d in DIMENSIONS:
             try:
                 cents[d] = to_cents(rub[d], DIM_MAX[d])
+                if cents[d] % 100:
+                    raise ValueError
             except ValueError:
-                errs.append(f"{sid}: {d}={rub[d]!r} must be 0..{DIM_MAX[d]} in 0.01 increments")
+                errs.append(f"{sid}: {d}={rub[d]!r} must be an integer 0..{DIM_MAX[d]} (gold labels are integers)")
         try:
             total_cents = to_cents(out["total_score"], 10)
         except ValueError:

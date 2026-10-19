@@ -19,23 +19,23 @@ def row(sample_id="Class03-Final-1-S01", **scores):
     return {"sample_id": sample_id, "output": {"rubric": rubric, "total_score": sum(rubric.values())}}
 
 
-def test_submission_hundredths_and_invalid_values():
-    valid = row(logic=3.75, io_format=0.01)
+def test_submission_integers_and_invalid_values():
+    valid = row(logic=3, io_format=1)
     assert not validate_predictions([valid], [valid["sample_id"]])
-    for bad in (0.001, 4.01, float("nan"), True):
+    for bad in (3.75, 0.5, 0.001, 4.01, float("nan"), True):  # gold labels are integers: no fractional scores
         broken = row(logic=bad)
         assert validate_predictions([broken], [broken["sample_id"]])
     broken = row()
     del broken["output"]["rubric"]["logic"]
     assert validate_predictions([broken])
-    broken = row(logic=3.75)
-    broken["output"]["total_score"] = 3.74
+    broken = row(logic=3)
+    broken["output"]["total_score"] = 4
     assert validate_predictions([broken])
     assert validate_predictions([row(), row()])
     assert validate_predictions([row()], ["different-id"])
 
 
-def test_structured_pipeline_preserves_hundredths(tmp_path):
+def test_structured_pipeline_rounds_fractional_answers(tmp_path):
     ds = synthetic_public(tmp_path / "data")
     cfg = load_config(Path(__file__).parents[1] / "configs" / "task1" / "e2_zero_shot_structured.yaml")
 
@@ -49,8 +49,8 @@ def test_structured_pipeline_preserves_hundredths(tmp_path):
     sample = next(s for s in ds.samples if s.exam_type == "single_problem")
     _, preds = Task1Pipeline(ds, FractionalBackend(), cfg).run([sample])
     assert preds[0]["parse_ok"]
-    assert preds[0]["rubric"]["logic"] == 3.75
-    assert preds[0]["total_score"] == 4.76
+    assert preds[0]["rubric"]["logic"] == 4 and preds[0]["rubric"]["io_format"] == 0  # half up, 0.01 -> 0
+    assert preds[0]["total_score"] == 5 and any(t.startswith("round:") for t in preds[0]["rule_trace"])
 
 
 def synthetic_public(root: Path) -> Dataset:

@@ -145,3 +145,22 @@ def test_compile_log_keeps_errors_and_drops_warnings():
     assert compile_errors_only(link).count("\n") == 2  # linker failure (no main) kept
     user = build_task1_prompt(prompt_sample(compile_log=warn))[1]["content"]
     assert NO_COMPILE_ERROR in user and "warning" not in user
+
+
+def test_api_demo_fallback_for_unseen_exam():
+    from src.data.loader import Sample
+    from src.task1.prompts import demo_block, select_demos
+
+    def s(sid, exam, etype, total):
+        return Sample(sid, exam, etype, "cpp11", f"{sid}.cpp", "int main(){}", "", None,
+                      {"compilable": 1, "io_format": 1, "logic": 0, "edge_case": 0, "complexity": 0,
+                       "code_quality": 0}, total)
+
+    pool = [s("A1", "EX01", "multi_problem", 2), s("A2", "EX01", "multi_problem", 9),
+            s("B1", "EX02", "single_problem", 10)]
+    new = s("N1", "Class01-Test1", "multi_problem", None)
+    assert select_demos(pool, new, 3) == []  # default: same exam only
+    demos = select_demos(pool, new, 3, fallback="same_type")
+    assert [d.sample_id for d in demos] == ["A1", "A2"]  # never the other exam type
+    assert "ĐỀ KHÁC cùng dạng" in demo_block(demos, {}, new.exam_id)
+    assert "cùng đề" in demo_block(demos, {}, "EX01")

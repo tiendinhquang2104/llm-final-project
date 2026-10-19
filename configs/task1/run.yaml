@@ -34,6 +34,7 @@ run:
   test_sample_ids: [EX01-S106]
   experiments:                # file names in configs/task1/ (without .yaml)
     - e1_zero_shot_plain
+    - e2_zero_shot_structured     # zero-shot structured: same conditions as the unseen public exams
     - e3_few_shot_structured
   run_final: false            # zero-shot and few-shot baseline only; enable for submission run
   predict_file: null          # optional legacy trigger; prefer --predict-only --predict-root

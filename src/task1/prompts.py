@@ -118,10 +118,14 @@ def submission_block(sample: Sample, cfg: dict) -> str:
     return s
 
 
-def demo_block(demos: list[Sample], cfg: dict) -> str:
+def demo_block(demos: list[Sample], cfg: dict, exam_id: str = "") -> str:
     if not demos:
         return ""
-    parts = ["## VÍ DỤ ĐÃ ĐƯỢC GIẢNG VIÊN CHẤM (tham khảo mức điểm, cùng đề)"]
+    if all(d.exam_id == exam_id for d in demos):
+        parts = ["## VÍ DỤ ĐÃ ĐƯỢC GIẢNG VIÊN CHẤM (tham khảo mức điểm, cùng đề)"]
+    else:
+        parts = ["## VÍ DỤ ĐÃ ĐƯỢC GIẢNG VIÊN CHẤM (của một ĐỀ KHÁC cùng dạng — chỉ để tham khảo thang điểm "
+                 "và mức khắt khe của giảng viên; chấm bài nộp theo đề bài ở trên)"]
     for k, d in enumerate(demos, 1):
         code = d.code
         lim = cfg.get("demo_max_code_chars", 4000)
@@ -142,7 +146,7 @@ def output_instruction(exam: dict, template: str) -> str:
     example = {
         "rationale": "<tóm tắt 1-3 câu: lỗi chính / điểm mạnh>",
         "problems": [{"pid": pid, "status": "|".join(STATUSES), "note": "<ngắn gọn>"} for pid in pids],
-        "rubric": {d: f"<số 0-{DIM_MAX[d]}, bội số 0.01>" for d in DIMENSIONS},
+        "rubric": {d: f"<số nguyên 0-{DIM_MAX[d]}>" for d in DIMENSIONS},  # gold labels are integers
     }
     return (
         "## YÊU CẦU ĐẦU RA\nTrả về DUY NHẤT một object JSON đúng schema sau (problems có đủ các câu "
@@ -158,7 +162,7 @@ def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict,
     user = "\n".join(
         x for x in [
             exam_block(exam, policy_in_prompt, csv_header),
-            demo_block(demos, cfg),
+            demo_block(demos, cfg, sample.exam_id),
             submission_block(sample, cfg),
             output_instruction(exam, template),
         ] if x
@@ -166,15 +170,21 @@ def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict,
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
-def select_demos(pool: list[Sample], sample: Sample, k: int, strategy: str = "spread") -> list[Sample]:
+def select_demos(pool: list[Sample], sample: Sample, k: int, strategy: str = "spread",
+                 fallback: str = "none") -> list[Sample]:
     """Pick k labelled demos from the train pool of the same exam (never the sample itself).
 
     spread: evenly cover the score range so the model sees low/mid/high anchors. Deterministic.
+    fallback="same_type": an exam with no labelled demo (every public/private test exam) gets demos of other
+    exams of the same exam_type, as anchors for the score scale only.
     """
-    cands = sorted(
-        (s for s in pool if s.exam_id == sample.exam_id and s.sample_id != sample.sample_id and s.has_gold),
-        key=lambda s: (s.gold_total, s.sample_id),
-    )
+    def pick(same) -> list[Sample]:
+        return sorted((s for s in pool if same(s) and s.sample_id != sample.sample_id and s.has_gold),
+                      key=lambda s: (s.gold_total, s.sample_id))
+
+    cands = pick(lambda s: s.exam_id == sample.exam_id)
+    if not cands and fallback == "same_type":
+        cands = pick(lambda s: s.exam_type == sample.exam_type)
     if k <= 0 or not cands:
         return []
     if len(cands) <= k:

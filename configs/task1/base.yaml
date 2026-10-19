@@ -9,6 +9,7 @@ prompt:
   template: structured
   few_shot_k: 0
   demo_strategy: spread
+  demo_fallback: same_type   # unseen (test) exams: demos of another exam of the same type
   policy_in_prompt: false
   use_test_report: true
   max_code_chars: 12000

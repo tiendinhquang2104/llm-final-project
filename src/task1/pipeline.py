@@ -6,7 +6,7 @@ import math
 from src.data.loader import DIM_MAX, DIMENSIONS, Dataset, Sample
 from src.task1.prerequisite_rules import RuleConfig, apply_rules, clamp_rubric, policy_from_exam
 from src.task1.prompts import build_messages, select_demos
-from src.task1.scorer import aggregate, parse_output
+from src.task1.scorer import aggregate, parse_output, round_half_up
 from src.task1.score import to_cents
 
 RETRY_MSG = (
@@ -67,7 +67,8 @@ class Task1Pipeline:
     def build_request(self, sample: Sample) -> dict:
         exam = self.ds.exams[sample.exam_id]
         k = int(self.prompt_cfg.get("few_shot_k", 0))
-        demos = select_demos(self.demo_pool, sample, k, self.prompt_cfg.get("demo_strategy", "spread"))
+        demos = select_demos(self.demo_pool, sample, k, self.prompt_cfg.get("demo_strategy", "spread"),
+                             self.prompt_cfg.get("demo_fallback", "none"))
         return {
             "sample": sample,
             "exam": exam,
@@ -128,6 +129,11 @@ class Task1Pipeline:
                     "rubric": None, "total_score": None, "rule_trace": []}
         rubric_llm = clamp_rubric(rubric)
         final, total, trace = apply_rules(rubric, statuses, self.policies[sample.exam_id], rule_cfg)
+        # Teacher scores are integers on every dimension: round a fractional answer half up (counted in trace).
+        rounded = {d: round_half_up(float(v)) for d, v in final.items()}
+        if rounded != final:
+            trace = trace + [f"round:{d}:{final[d]}->{rounded[d]}" for d in final if rounded[d] != final[d]]
+            final, total = rounded, sum(rounded.values())
         return {
             "sample_id": sample.sample_id,
             "exam_id": sample.exam_id,
