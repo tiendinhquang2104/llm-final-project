@@ -25,6 +25,37 @@ _DIRECTION_V2 = re.compile(
 )
 
 
+def validate_code_claims(code: str, claims: list[dict], *, statement: str = "") -> list[dict]:
+    """Flag only narrow, statically checkable contradictions; all other claims stay unverified."""
+    results = []
+    for claim in claims:
+        text = str(claim.get("claim", ""))
+        evidence = str(claim.get("evidence", ""))
+        status, reason = "unverified", "No deterministic source check applies."
+        identifiers = set(re.findall(r"\b[A-Za-z_]\w*\b", text))
+        if re.search(r"uninitiali[sz]ed|chưa\s+(?:được\s+)?khởi\s+tạo|chua\s+(?:duoc\s+)?khoi\s+tao", text, re.I):
+            initialized = next((name for name in identifiers if re.search(
+                rf"\b(?:int|long|short|char|float|double|bool|auto)\s+(?:[A-Za-z_]\w*\s+)*{re.escape(name)}\s*=", code
+            )), None)
+            if initialized:
+                status, reason = "contradicted", "The named scalar has an explicit initializer in its declaration."
+        if re.search(r"pointer\s+index(?:ing)?\s+is\s+illegal|không\s+(?:thể|được)\s+(?:truy\s+cập|dùng).{0,30}(?:chỉ\s+số|\[\])|khong\s+(?:the|duoc).{0,30}(?:chi so|\[\])", text, re.I):
+            if re.search(r"\*\s*[A-Za-z_]\w*\s*(?:[,;=\[])", code) and re.search(r"\b[A-Za-z_]\w*\s*\[[^]]+\]", code):
+                status, reason = "contradicted", "Pointer subscripting is valid C++; other bounds/ownership issues need separate evidence."
+        if re.search(r"header.{0,60}(?:skip|bỏ qua|bo qua).{0,40}(?:first|đầu|dau).{0,30}(?:data|dữ liệu|du lieu)", text, re.I):
+            if re.search(r"seekg\s*\(\s*0[^;]*\);[\s\S]{0,120}getline\s*\([^;]*header[^;]*\);[\s\S]{0,100}(?:while|for)\s*\([^)]*getline", code, re.I):
+                status, reason = "contradicted", "The stream is rewound, the header is consumed, then data iteration begins."
+        if re.search(r"(?:chia|divide)\s*(?:cho|by)?\s*10.{0,50}(?:sai|wrong|error)", text, re.I):
+            if re.search(r"Armstrong", statement, re.I) and re.search(r"(?:/=\s*10|/\s*=\s*10)", code):
+                status, reason = "contradicted", "Dividing a digit-copy by ten is the standard decimal digit traversal here."
+        if re.search(r"\b(?:d|n)\s*=\s*0\b.{0,60}(?:invalid|failure|lỗi|sai)", text, re.I):
+            lower = re.search(r"(?:1\s*<=\s*n|n\s*>=\s*1|n\s*>\s*0)", statement)
+            if lower:
+                status, reason = "unsupported_by_constraints", "Zero is outside the stated input domain; a zero counter initializer is not itself an error."
+        results.append({"claim": text, "evidence": evidence, "status": status, "reason": reason})
+    return results
+
+
 def quality_review_flags(record, feedback: str, *, fallback_used: bool = False, version=1) -> dict:
     """Return review candidates only; never assign semantic correctness or a quality score."""
     text = feedback or ""
@@ -63,6 +94,15 @@ def quality_review_flags(record, feedback: str, *, fallback_used: bool = False, 
             flags.append("LEVEL2_DIAGNOSIS_SPECIFICITY_REVIEW_CANDIDATE")
         if record.target_feedback_level == "Level 3 - Gợi ý sửa" and not (_DIRECTION_V2 if version == 2 else _LEVEL3_ACTION).search(text):
             flags.append("LEVEL3_ACTIONABILITY_REVIEW_CANDIDATE")
+        if record.target_feedback_level == "Level 3 - Gợi ý sửa":
+            if not re.search(r"\b(?:lỗi|sai|thiếu|chưa|không|đang|vì|do|nguyên nhân|hàm|biến|vòng lặp|điều kiện|phép tính|compiler|undeclared|syntax)\b", text, re.I):
+                flags.append("LEVEL3_DIAGNOSIS_REVIEW_CANDIDATE")
+            if not re.search(
+                r"\b(?:hãy|nên|cần|thử)\s+(?:(?:em|bạn)\s+)?(?:dùng|sử dụng|thay|đổi|sửa|cập nhật|khởi tạo|đảm bảo|bổ sung)\b"
+                r"|\b(?:kiểm tra|đối chiếu|rà soát)\b.{0,50}\b(?:biến|vòng lặp|điều kiện|phép tính|phép cộng|hàm|đầu vào|kết quả|lệnh)\b",
+                text, re.I,
+            ):
+                flags.append("LEVEL3_DIRECTION_REVIEW_CANDIDATE")
         if record.target_feedback_level == "Level 4 - Lời giải mẫu" and record.gold_taxonomy and not re.search(
             r"```|\b(?:return|cout|cin|int|bool|long)\b|\b(?:sửa|điều chỉnh|thay|dùng|sử dụng|kiểm tra)\b", text, re.I
         ):

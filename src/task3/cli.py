@@ -9,6 +9,7 @@ from pathlib import Path
 
 from src.task3.dataset import load_prepared, prepare, read_json, write_json
 from src.task3.diagnosis import (
+    attach_compiler_evidence,
     audit_taxonomy_prompts,
     diagnose_taxonomies,
     load_taxonomy_diagnosis_audit,
@@ -151,6 +152,7 @@ def run_main(argv=None):
         if any(records_by_id[sid].target_feedback_level != level for sid, level in requested_levels.items()):
             raise ValueError("prepared public Level does not match requested-level file")
         records = [records_by_id[sid] for sid in requested_levels]
+    records = attach_compiler_evidence(records, config)
     if args.sample_ids:
         records = select_sample_records(records, args.sample_ids)
     if not records:

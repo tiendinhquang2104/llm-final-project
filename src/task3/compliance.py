@@ -86,6 +86,12 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
             violations.append("level1_identifier_disclosure")
         if re.search(r"\b(?:sao chep|dao van|copy(?:paste)?|plagiar\w*)\b", normalized):
             violations.append("level1_copying_accusation")
+    if lvl == 1 and re.search(
+        r"\b(?:hàm|function)\s+[A-Za-z_]\w*|\b(?:vòng\s+lặp|for\s+loop|while\s+loop)\b"
+        r"|\b(?:tính\s+lũy\s+thừa|phép\s+tính|công\s+thức)\b",
+        text, re.I,
+    ):
+        violations.append("level1_specific_computation")
     guidance_text = normalized
     if version == 3 and lvl == 1:
         # Learning encouragement is not a code repair command. Preserve v1/v2.

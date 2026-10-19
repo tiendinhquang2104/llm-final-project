@@ -205,8 +205,11 @@ def test_diagnosis_parse_failure_never_becomes_empty_taxonomy():
         def generate(self, messages, config):
             return Generation("not JSON", 10, 0.1)
 
-    with pytest.raises(ValueError, match="diagnosis failed"):
-        diagnose_taxonomies([record("TEST-INVALID")], Backend(), {"context_limit": 10000})
+    predicted, audit = diagnose_taxonomies([record("TEST-INVALID")], Backend(), {"context_limit": 10000})
+    assert predicted["TEST-INVALID"] == []
+    assert audit["TEST-INVALID"]["status"] == "diagnosis_unavailable"
+    assert audit["TEST-INVALID"]["diagnosis"]["status"] == "uncertain"
+    assert "no clean-code conclusion" in audit["TEST-INVALID"]["diagnosis"]["evidence_limitations"][0]
 
 
 def test_parse_failure_keeps_a_private_raw_attempt_journal(tmp_path):
@@ -217,12 +220,12 @@ def test_parse_failure_keeps_a_private_raw_attempt_journal(tmp_path):
             return Generation("not JSON", 10, 0.1)
 
     journal = tmp_path / "diagnosis.attempts.jsonl"
-    with pytest.raises(ValueError, match="diagnosis failed"):
-        diagnose_taxonomies([record("TEST-INVALID-JOURNAL")], Backend(), {"context_limit": 10000}, attempt_journal_path=journal)
+    _, audit = diagnose_taxonomies([record("TEST-INVALID-JOURNAL")], Backend(), {"context_limit": 10000}, attempt_journal_path=journal)
 
     attempts = [json.loads(line) for line in journal.read_text(encoding="utf-8").splitlines()]
     assert [attempt["status"] for attempt in attempts] == ["format_retry", "parse_failed"]
     assert all(attempt["raw_text"] == "not JSON" for attempt in attempts)
+    assert audit["TEST-INVALID-JOURNAL"]["status"] == "diagnosis_unavailable"
 
 
 def test_diagnosis_retries_format_once_and_keeps_raw_and_final_attempts():
@@ -243,6 +246,39 @@ def test_diagnosis_retries_format_once_and_keeps_raw_and_final_attempts():
     assert backend.calls == 2
     assert [attempt["status"] for attempt in item["attempts"]] == ["format_retry", "validated"]
     assert item["attempts"][0]["raw_text"] == "not JSON"
+
+
+def test_diagnosis_retries_one_nonexact_quote_without_weakening_evidence():
+    class Backend:
+        tokenizer = MockTokenizer()
+        calls = 0
+
+        def generate(self, messages, config):
+            self.calls += 1
+            payload = json.loads(valid_diagnosis(quote='invented source' if self.calls == 1 else 'return 17;'))
+            return Generation(json.dumps(payload), 30, .1)
+
+    backend = Backend()
+    predicted, audit = diagnose_taxonomies([record('TEST-QUOTE-RETRY')], backend, {'context_limit': 10000})
+    assert predicted['TEST-QUOTE-RETRY'] == ['Lỗi logic']
+    assert backend.calls == 2
+    assert [row['status'] for row in audit['TEST-QUOTE-RETRY']['attempts']] == ['format_retry', 'validated']
+
+
+def test_exhausted_quote_format_retry_is_explicitly_unavailable_not_clean(tmp_path):
+    class Backend:
+        tokenizer = MockTokenizer()
+
+        def generate(self, messages, config):
+            return Generation(valid_diagnosis(quote='invented source'), 30, .1)
+
+    row = record('TEST-QUOTE-UNAVAILABLE')
+    _, audit = diagnose_taxonomies([row], Backend(), {'context_limit': 10000})
+    item = audit[row.sample_id]
+    assert item['status'] == 'diagnosis_unavailable'
+    assert item['diagnosis']['status'] == 'uncertain'
+    assert item['taxonomy_error'] == []
+    assert 'no clean-code conclusion' in item['diagnosis']['evidence_limitations'][0]
 
 
 def test_string_null_problem_id_gets_only_a_format_retry():
@@ -382,3 +418,84 @@ def test_self_diagnosis_taxonomy_and_feedback_context_stay_consistent():
     assert traces[0]["taxonomy_source"] == "self-diagnosis"
     assert traces[0]["taxonomy_error"] == ["Lỗi logic"]
     assert "UNVERIFIED_TAXONOMY_DIAGNOSIS_JSON" in json.dumps(feedback_backend.messages, ensure_ascii=False)
+
+
+def test_runtime_compiler_success_does_not_authorize_compile_error_label():
+    row = record('TEST-COMPILED', compile_log='return 17; syntax-only check succeeded', provenance={'_task3_compile_check': {'status': 'compiled'}})
+    payload = json.loads(valid_diagnosis(label='Lỗi biên dịch', quote='return 17;'))
+    payload['findings'][0]['source_field'] = 'compile_log'
+    payload['findings'][0]['source_quote'] = 'return 17;'
+    with pytest.raises(ValueError, match='compiler evidence'):
+        parse_taxonomy_diagnosis(json.dumps(payload), row)
+
+
+def test_unsupported_compile_and_prerequisite_claims_are_both_filtered_and_logged(tmp_path):
+    class Backend:
+        tokenizer = MockTokenizer()
+
+        def generate(self, messages, config):
+            payload = json.loads(valid_diagnosis(label='Lỗi biên dịch', quote='compiler diagnostic'))
+            payload['findings'][0]['source_field'] = 'compile_log'
+            payload['prerequisite_review'] = [{
+                'problem_id': 'P1', 'depends_on': [], 'status': 'met', 'basis': ''
+            }]
+            return Generation(json.dumps(payload, ensure_ascii=False), 40, 0.1)
+
+    row = record(
+        'TEST-COMPILE-PREREQ', compile_log='compiler diagnostic: not run',
+        provenance={'_task3_compile_check': {'status': 'unavailable'}}, problems=[{'pid': 'P1'}],
+    )
+    journal = tmp_path / 'attempts.jsonl'
+    predicted, audit = diagnose_taxonomies(
+        [row], Backend(), {'context_limit': 10000}, attempt_journal_path=journal
+    )
+    assert predicted[row.sample_id] == []
+    assert audit[row.sample_id]['diagnosis']['status'] == 'uncertain'
+    assert audit[row.sample_id]['evidence_filter']['prerequisite_reviews_removed']
+    attempts = [json.loads(line) for line in journal.read_text().splitlines()]
+    assert attempts[0]['status'] == 'evidence_filtered'
+    assert attempts[0]['raw_text']
+
+
+def test_compiler_unavailable_is_prompted_as_unknown_not_success():
+    from src.task3.diagnosis import _diagnostic_data
+    row = record('TEST-COMPILER-UNKNOWN', provenance={'_task3_compile_check': {'status': 'unavailable'}})
+    data = _diagnostic_data(row, 8000, 8000)
+    assert data['compiler_check_status'] == 'unavailable'
+    assert 'unknown' in data['compile_log_status']
+
+
+def test_narrow_code_contradiction_filter_catches_initializer_pointer_and_header_claims():
+    from src.task3.diagnosis import _filter_source_contradictions
+    row = record(
+        'TEST-CODE-CONTRADICTIONS',
+        code='int d=0; long long p=1; int* ptr = values; ptr[i];\nfin.clear(); fin.seekg(0, ios::beg); getline(fin, header); while(getline(fin,line)) {}',
+    )
+    payload = json.loads(valid_diagnosis())
+    payload['findings'][0]['observed_fact'] = 'p is uninitialized and pointer indexing is illegal'
+    payload['findings'][0]['possible_cause'] = 'Re-reading the header skips the first data row.'
+    filtered, rejected = _filter_source_contradictions(payload, row)
+    assert filtered['taxonomy_error'] == []
+    assert filtered['status'] == 'uncertain'
+    assert rejected
+
+
+def test_zero_is_not_an_input_edge_case_when_statement_requires_positive_n():
+    from src.task3.diagnosis import _filter_source_contradictions
+    row = record('TEST-D-ZERO', code='int d=0;', statement='TEST-ONLY: 1 <= n <= 10^9')
+    payload = json.loads(valid_diagnosis(quote='int d=0;'))
+    payload['findings'][0]['observed_fact'] = 'd=0 is invalid because zero can be input.'
+    payload['findings'][0]['possible_cause'] = 'The zero value prevents the program from working.'
+    filtered, rejected = _filter_source_contradictions(payload, row)
+    assert filtered['taxonomy_error'] == []
+    assert filtered['status'] == 'uncertain'
+    assert rejected[0]['review']['status'] == 'unsupported_by_constraints'
+
+
+def test_empty_taxonomy_cannot_claim_confirmed_clean_submission():
+    payload = json.loads(valid_diagnosis())
+    payload['taxonomy_error'] = []
+    payload['findings'] = []
+    payload['status'] = 'no_supported_error'
+    with pytest.raises(ValueError, match='uncertain'):
+        parse_taxonomy_diagnosis(json.dumps(payload), record())

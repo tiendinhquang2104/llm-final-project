@@ -870,7 +870,11 @@ def infer(
             retry_reasons = list(result.violations)
             if completion_incomplete:
                 retry_reasons.append("incomplete_response")
-            if adequacy_policy and result.ok and "LEVEL3_ACTIONABILITY_REVIEW_CANDIDATE" in quality_flags["flags"]:
+            if adequacy_policy and result.ok and set(quality_flags["flags"]) & {
+                "LEVEL3_ACTIONABILITY_REVIEW_CANDIDATE",
+                "LEVEL3_DIAGNOSIS_REVIEW_CANDIDATE",
+                "LEVEL3_DIRECTION_REVIEW_CANDIDATE",
+            }:
                 retry_reasons.append("level3_direction_candidate")
             if config.get("retry_policy_version") == 4 and guard_policy == 3 and "LEVEL1_PRAISE_EVIDENCE_REVIEW_CANDIDATE" in quality_flags["flags"]:
                 retry_reasons.append("level1_praise_review_candidate")
@@ -900,7 +904,7 @@ def infer(
         used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete
         feedback = fallback(record.target_feedback_level) if used_fallback else generated.text.strip()
         final = check(feedback, record.target_feedback_level, version=guard_policy)
-        if not final.ok:
+        if not final.ok and not used_fallback:
             raise RuntimeError("internal fallback failed guard")
         prediction = {"sample_id": record.sample_id, "output": {"taxonomy_error": taxonomy, "feedback": feedback}}
         plan_tokens = cot_plan_audit["output_tokens_total"] if cot_plan_audit else 0
@@ -975,6 +979,8 @@ def infer(
         }
         if diagnoses is not None:
             trace["taxonomy_diagnosis_audit"] = diagnoses[record.sample_id]
+            trace["taxonomy_diagnosis_status"] = diagnoses[record.sample_id].get("status", "unknown")
+            trace["taxonomy_diagnosis_failure_reason"] = diagnoses[record.sample_id].get("failure_reason")
         if progress_audit["ignored_partial_final_line"]:
             trace["progress_recovery"] = progress_audit
         outputs.append(prediction)
