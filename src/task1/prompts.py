@@ -23,7 +23,7 @@ SYSTEM_PLAIN = (
     'Chỉ trả về một object JSON dạng {"compilable": số, "io_format": số, "logic": số, '
     '"edge_case": số, "complexity": số, "code_quality": số}; cho phép hai chữ số thập phân. '
     "Với đề nhiều câu, đánh giá sáu chiều cho từng câu; điểm mỗi chiều của bài là trung bình các câu với trọng số bằng nhau. "
-    "Không so sánh bài với bài khác để phát hiện sao chép."
+    "Không áp điều kiện P1 hay so sánh bài với bài khác để phát hiện sao chép."
 )
 
 SYSTEM_STRUCTURED = (
@@ -32,7 +32,7 @@ SYSTEM_STRUCTURED = (
     "rồi trả về DUY NHẤT một object JSON hợp lệ, không có văn bản nào khác.\n\n"
     "Với đề nhiều câu, đánh giá sáu chiều cho từng câu; điểm mỗi chiều của bài là trung bình các câu với trọng số bằng nhau. "
     "không dùng điểm P1–P4 hoặc max_score trong đề làm trọng số. "
-    "Không so sánh bài với bài khác để phát hiện sao chép.\n\n"
+    "Không áp điều kiện P1 hay so sánh bài với bài khác để phát hiện sao chép.\n\n"
     + STATUS_GUIDE
 )
 
@@ -137,10 +137,7 @@ def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict,
                    csv_header: str = "", label_space: dict | None = None) -> list[dict]:
     template = cfg.get("template", "structured")
     policy_in_prompt = cfg.get("policy_in_prompt", False)
-    system = SYSTEM_PLAIN if template == "plain" else SYSTEM_STRUCTURED
-    if not policy_in_prompt:
-        system += "\nKhông áp điều kiện P1 lên các câu khác."
-    system += "\n" + rubric_guide(label_space)
+    system = (SYSTEM_PLAIN if template == "plain" else SYSTEM_STRUCTURED) + "\n" + rubric_guide(label_space)
     user = "\n".join(
         x for x in [
             exam_block(exam, policy_in_prompt, csv_header),
