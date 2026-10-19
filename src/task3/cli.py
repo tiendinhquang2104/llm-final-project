@@ -89,9 +89,12 @@ def run_main(argv=None):
     p.add_argument("--resume-progress", action="store_true")
     p.add_argument("--progress-file")
     p.add_argument("--audit-tokenizer", action="store_true")
+    p.add_argument("--context-limit", type=int, help="override context limit in tokens")
     p.add_argument("--seed", type=int)
     args = p.parse_args(argv)
     config = load_config(args.config)
+    if args.context_limit:
+        config["context_limit"] = args.context_limit
     if args.adapter:
         config["adapter"] = args.adapter
     if args.seed is not None:

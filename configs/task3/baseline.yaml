@@ -2,7 +2,7 @@ model_id: Qwen/Qwen2.5-Coder-7B-Instruct
 revision: c03e6d358207e414f1eca0bb1891e29f1db0e242
 seed: 42
 data_dir: data/processed/task3
-context_limit: 4096
+context_limit: 8192
 max_new_tokens: 512
 do_sample: false
 few_shot_k: 0
