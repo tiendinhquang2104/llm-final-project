@@ -64,15 +64,24 @@ python scripts/run_task3.py --config configs/task3/baseline.yaml --split synthet
 python scripts/run_task3.py --config configs/task3/baseline.yaml --split real-val --taxonomy-source task2-json --taxonomy-json outputs/task2/real-val.json --output outputs/task3/zero.predicted.json
 ```
 
-`--taxonomy-source gold` is oracle mode and is prohibited for public records. `task2-json` is the separate predicted-label mode. Accepted taxonomy files are a map `{"TEST-ID": []}`, an official array `[{"sample_id":"TEST-ID","output":{"taxonomy_error":[]}}]`, or the team's internal array/map with `labels` and successful `parse_ok`. Invalid/duplicate labels, duplicate IDs, missing/extra IDs and `parse_ok:false` fail. An explicitly supplied empty list is retained; missing values never become `[]`. Self-diagnosis is not enabled: use Task 2 predictions for public inference.
+`--taxonomy-source gold` is oracle mode and is prohibited for public records. `task2-json` is the Task 2 predicted-label mode. Accepted taxonomy files are a map `{"TEST-ID": []}`, an official array `[{"sample_id":"TEST-ID","output":{"taxonomy_error":[]}}]`, or the team's internal array/map with `labels` and successful `parse_ok`. Invalid/duplicate labels, duplicate IDs, missing/extra IDs and `parse_ok:false` fail. An explicitly supplied empty list is retained; missing values never become `[]`.
+
+If a verified Task 2 prediction export is unavailable, `self-diagnosis` provides a separate local Qwen baseline. It excludes gold labels, instructor feedback and requested Level from the taxonomy prompt; every emitted label must be tied to a source quote, a supplied problem ID when available, a confidence and stated evidence limits. Invalid JSON, unsupported labels, invented quotes or taxonomy/finding disagreement stop the run. The same validated diagnosis summary can be reused for an oracle comparison, where only the taxonomy input changes:
+
+```bash
+python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split real-val --taxonomy-source self-diagnosis --output outputs/task3/self-diagnosis.real-val.json
+python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split real-val --taxonomy-source gold --diagnosis-audit outputs/task3/self-diagnosis.real-val.taxonomy-diagnosis.json --output outputs/task3/oracle.same-diagnosis.real-val.json
+```
+
+Private diagnosis attempts and prompts are stored beside the output under ignored `outputs/`. `self_diagnosis_few_shot.yaml` is the same-Level, train-only K=1 ablation. A saved diagnosis audit separates taxonomy-model provenance from the feedback run; do not tune these baselines with public output.
 
 Every item in an array-form Task 2 export is checked for a valid, unique ID before projecting the selected IDs; extra prediction bodies are not interpreted, and their count/hash are recorded. Legacy label-only exports without `parse_ok` provenance are rejected by default. Use `--allow-unverified-task2-export` only when the source is a known legacy Task 2 writer; the run manifest explicitly marks provenance as unknown. This opt-in does not waive taxonomy validation or ID coverage checks.
 
 ```bash
 # Fails before model loading if predictions are absent/invalid
-python scripts/run_task3.py --config configs/task3/baseline.yaml --split public --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.json --dry-run
+python scripts/run_task3.py --config configs/task3/baseline.yaml --split public --requested-levels data/raw/public_test_release/task3_requested_levels.json --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.json --dry-run
 # Explicit real public generation: remove --dry-run only after supplying actual Task2 predictions
-python scripts/run_task3.py --config configs/task3/baseline.yaml --split public --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.json
+python scripts/run_task3.py --config configs/task3/baseline.yaml --split public --requested-levels data/raw/public_test_release/task3_requested_levels.json --taxonomy-source task2-json --taxonomy-json outputs/task2/public.predictions.json --output outputs/task3/predictions.json
 ```
 
 Dry-run still validates taxonomy coverage, then uses a TEST-ONLY generic mock backend. A requested `predictions.json` is saved as `predictions.mock.json` during dry-run. Never submit mock predictions. The strict local validator checks exact ordered IDs, unique IDs, exact output keys, valid labels and nonempty feedback. Example schema, using artificial data only:
@@ -81,7 +90,7 @@ Dry-run still validates taxonomy coverage, then uses a TEST-ONLY generic mock ba
 [{"sample_id":"TEST-ONLY-001","output":{"taxonomy_error":[],"feedback":"Em tự kiểm tra lại bài làm nhé."}}]
 ```
 
-When the public release includes `task3_requested_levels.json`, preparation merges its ID/Level pairs with `task3_feedback.json`, requires exact public ID coverage, and rejects any Level disagreement. Public records still have no taxonomy or feedback target. Validate a prediction bundle offline against that file before use:
+Public preparation requires `task3_requested_levels.json`, merges its ID/Level pairs with `task3_feedback.json`, and rejects missing, duplicate or mismatched IDs/Levels. Public inference also requires the file and orders output to match it. Public records still have no taxonomy or feedback target. Validate a prediction bundle offline against the same file before use:
 
 ```bash
 python scripts/validate_task3_submission.py \

@@ -8,6 +8,11 @@ import json
 from pathlib import Path
 
 from src.task3.dataset import load_prepared, prepare, read_json, write_json
+from src.task3.diagnosis import (
+    audit_taxonomy_prompts,
+    diagnose_taxonomies,
+    load_taxonomy_diagnosis_audit,
+)
 from src.task3.evaluator import evaluate, write_benchmark, write_review_csv
 from src.task3.inference import HFBackend, MockBackend, MockTokenizer, load_tokenizer, tokenizer_metadata
 from src.task3.pipeline import (
@@ -19,6 +24,7 @@ from src.task3.pipeline import (
     load_taxonomy_predictions,
 )
 from src.task3.runtime import runtime_manifest
+from src.task3.submission import load_requested_levels
 from src.task3.strategy import PROMPT_STRATEGIES, resolve_strategy_config
 from src.utils.config import load_config
 
@@ -87,8 +93,10 @@ def run_main(argv=None):
     )
     p.add_argument("--config", default="configs/task3/baseline.yaml")
     p.add_argument("--split", choices=["real-val", "synthetic-heldout", "public", "synthetic-train"], default="real-val")
-    p.add_argument("--taxonomy-source", choices=["gold", "task2-json"], default="gold")
+    p.add_argument("--taxonomy-source", choices=["gold", "task2-json", "self-diagnosis"], default="gold")
     p.add_argument("--taxonomy-json")
+    p.add_argument("--requested-levels", help="required public ID/Level input used to order and validate inference")
+    p.add_argument("--diagnosis-audit", help="validated local diagnosis audit to share across paired experiments")
     p.add_argument(
         "--allow-unverified-task2-export",
         action="store_true",
@@ -117,13 +125,32 @@ def run_main(argv=None):
         config["adapter"] = args.adapter
     if args.seed is not None:
         config["seed"] = args.seed
-    if args.split == "public" and args.taxonomy_source != "task2-json":
-        p.error("public mode requires --taxonomy-source task2-json and --taxonomy-json; gold is unavailable")
+    if args.split == "public" and args.taxonomy_source == "gold":
+        p.error("public mode requires a predicted taxonomy source; gold is unavailable")
     if args.taxonomy_source == "task2-json" and not args.taxonomy_json:
         p.error("--taxonomy-json is required; missing predictions cannot default to []")
+    if args.split == "public" and not args.requested_levels:
+        p.error("--requested-levels is required for public mode; public IDs/Levels are not inferred from feedback metadata")
+    if args.requested_levels and args.split != "public":
+        p.error("--requested-levels is only valid for the public split")
+    if args.split == "public" and args.sample_ids:
+        p.error("public inference must cover the complete requested-level ID set")
+    if args.taxonomy_source == "self-diagnosis" and args.taxonomy_json:
+        p.error("--taxonomy-json is only valid with --taxonomy-source task2-json")
     root = config.get("data_dir", "data/processed/task3")
     manifest_hash = verify_prepared(root)
     records = load_prepared(root, args.split)
+    requested_levels = None
+    requested_levels_sha256 = None
+    if args.split == "public":
+        requested_levels = load_requested_levels(args.requested_levels)
+        requested_levels_sha256 = hashlib.sha256(Path(args.requested_levels).read_bytes()).hexdigest()
+        records_by_id = {record.sample_id: record for record in records}
+        if len(records_by_id) != len(records) or set(records_by_id) != set(requested_levels):
+            raise ValueError("prepared public IDs do not exactly match requested-level IDs")
+        if any(records_by_id[sid].target_feedback_level != level for sid, level in requested_levels.items()):
+            raise ValueError("prepared public Level does not match requested-level file")
+        records = [records_by_id[sid] for sid in requested_levels]
     if args.sample_ids:
         records = select_sample_records(records, args.sample_ids)
     if not records:
@@ -152,7 +179,67 @@ def run_main(argv=None):
     if args.audit_tokenizer and args.dry_run:
         p.error("--audit-tokenizer requires the pinned real Qwen tokenizer; it cannot use --dry-run")
     tokenizer = MockTokenizer() if args.dry_run else load_tokenizer(config)
-    prompt_audit = audit_prompts(records, tokenizer, config, args.taxonomy_source, predicted, demos)
+    diagnoses = None
+    backend = None
+    diagnosis_audit = None
+    diagnosis_run_path = None
+    if args.diagnosis_audit:
+        diagnosis_run_path = Path(args.diagnosis_audit).with_suffix(".run.json")
+        diagnosis_predictions, diagnosis_audit = load_taxonomy_diagnosis_audit(args.diagnosis_audit, records)
+        if args.taxonomy_source == "self-diagnosis":
+            predicted = diagnosis_predictions
+        if args.taxonomy_source == "self-diagnosis":
+            taxonomy_audit = {
+                "provenance_status": "loaded_local_self_diagnosis",
+                "required_id_count": len(records),
+                "validated_id_count": len(predicted),
+                "taxonomy_diagnosis_sha256": hashlib.sha256(
+                    json.dumps(diagnosis_audit, sort_keys=True, ensure_ascii=False).encode()
+                ).hexdigest(),
+            }
+    elif args.taxonomy_source == "self-diagnosis":
+        diagnosis_prompt_audit = audit_taxonomy_prompts(records, tokenizer, config)
+        diagnosis_audit_path = output.with_suffix(".taxonomy-tokenizer-audit.json")
+        diagnosis_prompt_audit["tokenizer_metadata"] = tokenizer_metadata(tokenizer)
+        write_json(diagnosis_audit_path, diagnosis_prompt_audit)
+        if diagnosis_prompt_audit["blocked_count"]:
+            raise ValueError(
+                f"taxonomy tokenizer preflight blocked {diagnosis_prompt_audit['blocked_count']} samples; see ID-only report {diagnosis_audit_path}"
+            )
+        if args.audit_tokenizer:
+            print(json.dumps({"status": diagnosis_prompt_audit["status"], "stage": "taxonomy_diagnosis", "records": len(records), "audit": str(diagnosis_audit_path)}, ensure_ascii=False))
+            return
+        backend = MockBackend() if args.dry_run else HFBackend(config, tokenizer)
+        predicted, diagnosis_audit = diagnose_taxonomies(
+            records,
+            backend,
+            config,
+            attempt_journal_path=output.with_suffix(".taxonomy-diagnosis.attempts.jsonl"),
+        )
+        write_json(output.with_suffix(".taxonomy-diagnosis.json"), diagnosis_audit)
+        diagnosis_run_path = output.with_suffix(".taxonomy-diagnosis.run.json")
+        diagnosis_provenance = runtime_manifest(config, backend.tokenizer)
+        diagnosis_provenance.update(
+            stage="taxonomy_diagnosis",
+            status="TEST-ONLY MOCK" if args.dry_run else "GENERATED",
+            split=args.split,
+            data_manifest_sha256=manifest_hash,
+            selected_ordered_ids=[r.sample_id for r in records],
+            adapter_sha256=_adapter_hash(config),
+            diagnosis_audit_sha256=hashlib.sha256(
+                output.with_suffix(".taxonomy-diagnosis.json").read_bytes()
+            ).hexdigest(),
+        )
+        write_json(diagnosis_run_path, diagnosis_provenance)
+        taxonomy_audit = {
+            "provenance_status": "test_only_mock" if args.dry_run else "local_self_diagnosis",
+            "required_id_count": len(records),
+            "validated_id_count": len(predicted),
+            "taxonomy_diagnosis_sha256": hashlib.sha256(
+                json.dumps(diagnosis_audit, sort_keys=True, ensure_ascii=False).encode()
+            ).hexdigest(),
+        }
+    prompt_audit = audit_prompts(records, tokenizer, config, args.taxonomy_source, predicted, demos, diagnoses=diagnosis_audit)
     prompt_audit["tokenizer_metadata"] = tokenizer_metadata(tokenizer)
     audit_path = output.with_suffix(".tokenizer-audit.json")
     write_json(audit_path, prompt_audit)
@@ -173,7 +260,8 @@ def run_main(argv=None):
         raise ValueError(
             f"tokenizer preflight blocked {prompt_audit['blocked_count']} samples; see ID-only report {audit_path}"
         )
-    backend = MockBackend() if args.dry_run else HFBackend(config, tokenizer)
+    if backend is None:
+        backend = MockBackend() if args.dry_run else HFBackend(config, tokenizer)
     progress_path = Path(args.progress_file) if args.progress_file else output.with_suffix(".progress.jsonl")
     predictions, traces = infer(
         records,
@@ -186,6 +274,7 @@ def run_main(argv=None):
         resume=args.resume_progress,
         cache_context=manifest_hash,
         attempt_journal_path=progress_path.with_suffix(".attempts.jsonl"),
+        diagnoses=diagnosis_audit,
     )
     export_predictions(output, predictions, records, mock=args.dry_run)
     metrics = evaluate(records, predictions, traces, args.taxonomy_source)
@@ -200,13 +289,26 @@ def run_main(argv=None):
         taxonomy_predictions_sha256=hashlib.sha256(Path(args.taxonomy_json).read_bytes()).hexdigest()
         if args.taxonomy_json
         else None,
+        taxonomy_diagnosis_sha256=(
+            hashlib.sha256(json.dumps(diagnosis_audit, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+            if diagnosis_audit is not None else None
+        ),
         taxonomy_projection=taxonomy_audit,
         tokenizer_preflight=prompt_audit["status"],
         tokenizer_preflight_sha256=hashlib.sha256(audit_path.read_bytes()).hexdigest(),
         progress_file=str(progress_path),
         adapter_sha256=_adapter_hash(config),
+        feedback_model={"model_id": config.get("model_id"), "revision": config.get("revision"), "adapter_sha256": _adapter_hash(config)},
+        taxonomy_model=(
+            {"kind": "self-diagnosis", "run_manifest": str(diagnosis_run_path) if diagnosis_run_path else None,
+             "model_id": (read_json(diagnosis_run_path).get("model_id") if diagnosis_run_path and diagnosis_run_path.exists() else None),
+             "revision": (read_json(diagnosis_run_path).get("revision") if diagnosis_run_path and diagnosis_run_path.exists() else None),
+             "adapter_sha256": (read_json(diagnosis_run_path).get("adapter_sha256") if diagnosis_run_path and diagnosis_run_path.exists() else None)}
+            if args.taxonomy_source == "self-diagnosis" else {"kind": args.taxonomy_source}
+        ),
         official_validator="not supplied; strict local schema validation only",
         selected_ordered_ids=[r.sample_id for r in records],
+        requested_levels_sha256=requested_levels_sha256,
         pilot_sample_ids_sha256=hashlib.sha256(Path(args.sample_ids).read_bytes()).hexdigest() if args.sample_ids else None,
     )
     write_json(output.with_suffix(".run.json"), provenance)

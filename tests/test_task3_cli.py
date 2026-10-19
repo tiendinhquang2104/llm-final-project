@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from src.synth.feedback import FEEDBACK_LEVELS
 from src.task3.cli import run_main, train_main
 from src.task3.dataset import fixed_splits, read_json, write_json
 from src.task3.schema import MODEL_ID
@@ -82,8 +83,20 @@ def test_public_missing_taxonomy_fails_before_model_or_data(capsys):
     assert "--taxonomy-json is required" in capsys.readouterr().err
 
 
+def test_public_requires_requested_level_file_before_data_loading(capsys):
+    with pytest.raises(SystemExit) as exc:
+        run_main(["--split", "public", "--taxonomy-source", "self-diagnosis", "--dry-run"])
+    assert exc.value.code == 2
+    assert "--requested-levels is required" in capsys.readouterr().err
+
+
 def test_public_cli_mock_export_shape_and_separate_filename(tmp_path, monkeypatch, capsys):
     data, config = fixture_prepared(tmp_path)
+    requested = tmp_path / "requested-levels.json"
+    write_json(requested, {
+        "TEST-ONLY-PUBLIC-2": FEEDBACK_LEVELS[1],
+        "TEST-ONLY-PUBLIC-1": FEEDBACK_LEVELS[1],
+    })
     taxonomy = tmp_path / "TEST-ONLY.taxonomy.mock.json"
     write_json(taxonomy, {"TEST-ONLY-PUBLIC-1": [], "TEST-ONLY-PUBLIC-2": ["Lỗi logic"]})
 
@@ -100,6 +113,8 @@ def test_public_cli_mock_export_shape_and_separate_filename(tmp_path, monkeypatc
             "public",
             "--taxonomy-source",
             "task2-json",
+            "--requested-levels",
+            str(requested),
             "--taxonomy-json",
             str(taxonomy),
             "--allow-unverified-task2-export",

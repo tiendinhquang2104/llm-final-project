@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import time
 from dataclasses import dataclass
 from typing import Protocol
@@ -46,6 +47,18 @@ class MockBackend:
     tokenizer = MockTokenizer()
 
     def generate(self, messages, config):
+        if messages and "Bạn phân loại lỗi C++" in messages[0].get("content", ""):
+            text = json.dumps(
+                {
+                    "status": "uncertain",
+                    "taxonomy_error": [],
+                    "findings": [],
+                    "prerequisite_review": [],
+                    "evidence_limitations": ["TEST-ONLY mock diagnosis; no correctness claim."],
+                },
+                ensure_ascii=False,
+            )
+            return Generation(text, len(self.tokenizer.encode(text)), 0.0, "test_mock", True)
         text = fallback(1)
         return Generation(text, len(self.tokenizer.encode(text)), 0.0)
 

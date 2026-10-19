@@ -89,16 +89,17 @@ def load_task3(root, source, requested_levels_path=None):
     requested_levels = None
     if source == "public":
         requested_path = Path(requested_levels_path) if requested_levels_path else root / "task3_requested_levels.json"
-        if requested_path.is_file():
-            # Imported lazily to avoid coupling the dataset module to submission validation at import time.
-            from src.task3.submission import load_requested_levels
+        if not requested_path.is_file():
+            raise ValueError("public release requires a separate task3_requested_levels.json file")
+        # Imported lazily to avoid coupling the dataset module to submission validation at import time.
+        from src.task3.submission import load_requested_levels
 
-            requested_levels = load_requested_levels(requested_path)
-            sample_ids = [sample.get("sample_id") for sample in samples]
-            if any(not isinstance(sid, str) or not sid for sid in sample_ids):
-                raise ValueError("public samples contain an invalid sample_id")
-            if len(set(sample_ids)) != len(sample_ids) or set(sample_ids) != set(requested_levels):
-                raise ValueError("public sample IDs do not match requested-level IDs")
+        requested_levels = load_requested_levels(requested_path)
+        sample_ids = [sample.get("sample_id") for sample in samples]
+        if any(not isinstance(sid, str) or not sid for sid in sample_ids):
+            raise ValueError("public samples contain an invalid sample_id")
+        if len(set(sample_ids)) != len(sample_ids) or set(sample_ids) != set(requested_levels):
+            raise ValueError("public sample IDs do not match requested-level IDs")
     seen, records = set(), []
     for s in samples:
         sid = s["sample_id"]

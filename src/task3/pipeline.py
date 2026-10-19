@@ -14,6 +14,7 @@ from pathlib import Path
 from src.synth.compliance import level_of
 from src.task3.compliance import check, fallback
 from src.task3.dataset import read_json, write_json
+from src.task3.diagnosis import parse_taxonomy_diagnosis, untrusted_diagnosis_message
 from src.task3.generation_audit import inspect_generation
 from src.task3.inference import tokenizer_metadata
 from src.task3.prompts import RETRY_HINT, ContextTooLong, budget_prompt, exemplar_feedback, retry_hint, select_exemplars
@@ -108,17 +109,19 @@ def taxonomy_for(record, source, predicted=None):
                 f"{record.sample_id}: oracle mode requires supplied gold taxonomy; public gold is unavailable"
             )
         return validate_taxonomy(record.gold_taxonomy)
-    if source != "task2-json" or predicted is None or record.sample_id not in predicted:
-        raise ValueError(f"{record.sample_id}: missing Task2 taxonomy predictions; no empty-label fallback")
+    if source not in {"task2-json", "self-diagnosis"} or predicted is None or record.sample_id not in predicted:
+        raise ValueError(f"{record.sample_id}: missing predicted taxonomy; no empty-label fallback")
     return validate_taxonomy(predicted[record.sample_id])
 
 
-def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=None, demo_pool=()):
+def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=None, demo_pool=(), diagnoses=None):
     """Measure selected prompts and both CoT stages before inference."""
     strategy = validate_strategy(
         config.get("prompt_strategy", "few_shot" if config.get("few_shot_k", 0) else "zero_shot")
     )
     structured = strategy in {"structured_cot", "few_shot_structured_cot"}
+    if taxonomy_source == "self-diagnosis" and diagnoses is None:
+        raise ValueError("self-diagnosis requires validated diagnosis details")
     quality_version = config.get("cot_quality_version", 1)
     if isinstance(quality_version, bool) or quality_version not in {1, 2, 3, 4}:
         raise ValueError("cot_quality_version must be 1, 2, 3 or 4")
@@ -134,6 +137,7 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
     for record in records:
         try:
             taxonomy = taxonomy_for(record, taxonomy_source, predicted)
+            diagnostic_context = [untrusted_diagnosis_message(diagnoses[record.sample_id]["diagnosis"])] if diagnoses else []
             demos = select_exemplars(
                 demo_pool,
                 record,
@@ -177,7 +181,7 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
                 config.get("context_limit", 4096),
                 config.get("max_new_tokens", 512),
                 demos,
-                additional_messages=additional_messages,
+                additional_messages=[*additional_messages, *diagnostic_context],
                 system_addendum=system_addendum,
                 prompt_policy_version=level_policy,
             )
@@ -195,7 +199,7 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
                     config.get("max_new_tokens", 512),
                     demos,
                     strict_hint=retry_hint(["incomplete_response", "level3_direction_candidate", "specific_diagnosis"], level_of(record.target_feedback_level), config["retry_policy_version"]) if config.get("retry_policy_version") in (3, 4) else RETRY_HINT,
-                    additional_messages=additional_messages,
+                    additional_messages=[*additional_messages, *diagnostic_context],
                     system_addendum=system_addendum,
                     prompt_policy_version=level_policy,
                 )
@@ -569,6 +573,7 @@ def infer(
     resume=False,
     cache_context=None,
     attempt_journal_path=None,
+    diagnoses=None,
 ):
     outputs, traces = [], []
     guard_policy = config.get("guard_policy_version", 1)
@@ -586,6 +591,18 @@ def infer(
         config.get("prompt_strategy", "few_shot" if config.get("few_shot_k", 0) else "zero_shot")
     )
     structured = strategy in {"structured_cot", "few_shot_structured_cot"}
+    if taxonomy_source == "self-diagnosis" and diagnoses is None:
+        raise ValueError("self-diagnosis requires validated diagnosis details")
+    if diagnoses is not None:
+        if set(diagnoses) != {record.sample_id for record in records}:
+            raise ValueError("taxonomy diagnosis details must exactly cover inference IDs")
+        for record in records:
+            detail = diagnoses[record.sample_id]
+            if not isinstance(detail, dict) or not isinstance(detail.get("diagnosis"), dict):
+                raise ValueError(f"{record.sample_id}: missing validated self-diagnosis details")
+            parsed = parse_taxonomy_diagnosis(json.dumps(detail["diagnosis"], ensure_ascii=False), record)
+            if taxonomy_source == "self-diagnosis" and parsed["taxonomy_error"] != taxonomy_for(record, taxonomy_source, predicted):
+                raise ValueError(f"{record.sample_id}: diagnosis and predicted taxonomy disagree")
     quality_version = config.get("cot_quality_version", 1)
     if isinstance(quality_version, bool) or quality_version not in {1, 2, 3, 4}:
         raise ValueError("cot_quality_version must be 1, 2, 3 or 4")
@@ -620,6 +637,7 @@ def infer(
     prepared = {}
     for record in records:
         taxonomy = taxonomy_for(record, taxonomy_source, predicted)
+        diagnostic_context = [untrusted_diagnosis_message(diagnoses[record.sample_id]["diagnosis"])] if diagnoses else []
         demos = select_exemplars(
             demo_pool,
             record,
@@ -647,6 +665,7 @@ def infer(
         else:
             additional_messages = []
             system_addendum = ""
+        additional_messages.extend(diagnostic_context)
         prompt = budget_prompt(
             record,
             taxonomy,
@@ -904,6 +923,7 @@ def infer(
         trace = {
             "sample_id": record.sample_id,
             "taxonomy_source": taxonomy_source,
+            "taxonomy_error": taxonomy,
             "level": result.level if result is not None else level_of(record.target_feedback_level),
             "prompt_strategy": strategy,
             "attempts": attempts,
@@ -953,6 +973,8 @@ def infer(
             "fallback_text_policy_version": 1,
             "log_budget": prompt.log_budget,
         }
+        if diagnoses is not None:
+            trace["taxonomy_diagnosis_audit"] = diagnoses[record.sample_id]
         if progress_audit["ignored_partial_final_line"]:
             trace["progress_recovery"] = progress_audit
         outputs.append(prediction)

@@ -82,6 +82,11 @@ def make_root(path, source, samples=None):
         path / "task3_feedback.json",
         {"n_samples": len(samples), "output_fields": ["taxonomy_error", "feedback"], "samples": samples},
     )
+    if source == "public" and not (path / "task3_requested_levels.json").exists():
+        write_json(
+            path / "task3_requested_levels.json",
+            {sample["sample_id"]: sample["input"]["target_feedback_level"] for sample in samples},
+        )
     return path
 
 
@@ -119,6 +124,14 @@ def test_public_requested_level_mismatch_fails_closed(tmp_path):
     )
 
     with pytest.raises(ValueError, match="requested Level"):
+        load_task3(root, "public")
+
+
+def test_public_release_without_separate_requested_levels_fails_closed(tmp_path):
+    root = make_root(tmp_path / "public", "public")
+    (root / "task3_requested_levels.json").unlink()
+
+    with pytest.raises(ValueError, match="task3_requested_levels.json"):
         load_task3(root, "public")
 
 
@@ -302,6 +315,11 @@ def test_prepare_end_to_end_public_has_no_completion_and_strict_filter_reported(
                 s["sample_id"] = f"{source}-{i}"
         if source == "synthetic":
             d["samples"][0]["output"]["feedback"] = "```cpp\nreturn 0;\n```"
+        if source == "public":
+            write_json(
+                root / "task3_requested_levels.json",
+                {s["sample_id"]: s["input"]["target_feedback_level"] for s in d["samples"]},
+            )
         write_json(root / "task3_feedback.json", d)
         roots[source] = root
     repo = tmp_path / "repo"
