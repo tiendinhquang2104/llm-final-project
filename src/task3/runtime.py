@@ -10,7 +10,7 @@ from importlib import metadata
 from pathlib import Path
 
 
-def runtime_manifest(config, tokenizer=None):
+def runtime_manifest(config, tokenizer=None, *, backend=None):
     packages = {}
     for package in (
         "torch",
@@ -54,6 +54,10 @@ def runtime_manifest(config, tokenizer=None):
         },
         "config": config,
         **device,
+    }
+    result["inference_precision"] = {
+        "requested_precision": "nf4" if config.get("load_in_4bit", True) else "bf16",
+        **(backend.runtime_metadata() if backend is not None and hasattr(backend, "runtime_metadata") else {"actual_precision": "not_measured"}),
     }
     if tokenizer is not None:
         from src.task3.inference import tokenizer_metadata

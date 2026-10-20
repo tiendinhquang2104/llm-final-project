@@ -220,7 +220,7 @@ def run_main(argv=None):
         )
         write_json(output.with_suffix(".taxonomy-diagnosis.json"), diagnosis_audit)
         diagnosis_run_path = output.with_suffix(".taxonomy-diagnosis.run.json")
-        diagnosis_provenance = runtime_manifest(config, backend.tokenizer)
+        diagnosis_provenance = runtime_manifest(config, backend.tokenizer, backend=backend)
         diagnosis_provenance.update(
             stage="taxonomy_diagnosis",
             status="TEST-ONLY MOCK" if args.dry_run else "GENERATED",
@@ -282,7 +282,7 @@ def run_main(argv=None):
     metrics = evaluate(records, predictions, traces, args.taxonomy_source)
     metrics["test_only_mock"] = args.dry_run
     metrics["taxonomy_projection"] = taxonomy_audit
-    provenance = runtime_manifest(config, backend.tokenizer)
+    provenance = runtime_manifest(config, backend.tokenizer, backend=backend)
     provenance.update(
         status="TEST-ONLY MOCK" if args.dry_run else "GENERATED",
         split=args.split,

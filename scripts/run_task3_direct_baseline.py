@@ -100,7 +100,7 @@ def main(argv=None):
         predictions, traces = run_direct_baseline(records, backend, config, attempts_path=attempt_path)
     except DirectBaselineError as exc:
         attempt_rows = [json.loads(line) for line in attempt_path.read_text(encoding="utf-8").splitlines() if line]
-        metadata = runtime_manifest(config, backend.tokenizer)
+        metadata = runtime_manifest(config, backend.tokenizer, backend=backend)
         metadata.update({
             "experiment_id": "TASK3-DIRECT-ZERO-SHOT-ONE-TURN",
             "branch": "direct_self_prediction_and_feedback",
@@ -127,7 +127,7 @@ def main(argv=None):
     temporary.unlink(missing_ok=True)
     write_json(output_path, predictions)
     write_json(output_path.with_suffix(".traces.json"), traces)
-    metadata = runtime_manifest(config, backend.tokenizer)
+    metadata = runtime_manifest(config, backend.tokenizer, backend=backend)
     metadata.update({
         "experiment_id": "TASK3-DIRECT-ZERO-SHOT-ONE-TURN",
         "branch": "direct_self_prediction_and_feedback",

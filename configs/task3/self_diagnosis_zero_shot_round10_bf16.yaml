@@ -1,0 +1,2 @@
+extends: self_diagnosis_zero_shot_round10.yaml
+load_in_4bit: false
