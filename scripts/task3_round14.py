@@ -112,6 +112,8 @@ def main():
     write_json(out/'audit-summary.json',[{'sample_id':r.sample_id,'requested_level':int(r.target_feedback_level[6]),
         'compiler_status':r.provenance['_task3_compile_check']['status'],
         'taxonomy_error':trace_by_id[r.sample_id]['assessment']['taxonomy_error'],
+        'model_taxonomy_error':trace_by_id[r.sample_id]['assessment'].get('model_taxonomy_error'),
+        'compiler_reconciliation':trace_by_id[r.sample_id]['assessment'].get('compiler_reconciliation',False),
         'epistemic_status':trace_by_id[r.sample_id]['assessment']['epistemic_status'],
         'uncertain':trace_by_id[r.sample_id]['assessment']['uncertain'],
         'classification_fallback':trace_by_id[r.sample_id]['classification_fallback'],

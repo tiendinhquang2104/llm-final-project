@@ -123,6 +123,24 @@ def parse_assessment(text,record,*,direct=False):
     out={'taxonomy_error':labels,'rationales':reasons,'assessment':v['assessment'],
          'uncertain':bool(v.get('uncertain',True)) or bool(rejected),'rejected_rationales':rejected,
          'epistemic_status':'model_predicted_errors_unverified' if labels else 'model_predicted_clean_unverified'}
+    out['model_taxonomy_error']=list(labels)
+    out['compiler_reconciliation']=False
+    if _compiler(record)['status']=='compile_error':
+        from src.task3.discovery import DiscoveryInput,discover
+        evidence=record.provenance['_task3_compile_check']
+        item=DiscoveryInput(record.code,record.statement,tuple({k:p[k] for k in ('pid','prototype') if k in p} for p in record.problems),evidence['status'],evidence.get('diagnostic',''))
+        verified=[f for f in discover(item)['findings'] if f['taxonomy_group']=='Lỗi biên dịch']
+        out['verified_compiler_findings']=verified
+        if verified and 'Lỗi biên dịch' not in out['taxonomy_error']:
+            out['taxonomy_error']=[g for g in LABEL_SPACE if g in labels or g=='Lỗi biên dịch']
+            f=verified[0]
+            out['rationales'].append({'taxonomy_group':'Lỗi biên dịch','source_quote':f['source_span']['quote'],
+                'reason':f['observed_fact']+' '+f['cause'],'confidence':'direct_compiler',
+                'factual_support':'verified_compiler_error_location_only'})
+            out['compiler_reconciliation']=True;out['uncertain']=True
+            out['model_assessment']=out['assessment']
+            out['assessment']+=' Compiler mới có error được kiểm chứng độc lập; nhận định model thiếu nhãn này. Các nhóm khác vẫn chưa được xác minh đầy đủ.'
+            out['epistemic_status']='hybrid_prediction_with_verified_compiler_error'
     if direct:
         if not isinstance(v['feedback'],str) or not v['feedback'].strip():raise ValueError('feedback string required')
         out['feedback']=v['feedback'].strip()
@@ -141,6 +159,7 @@ def feedback_errors(record,labels,text):
     for group in LABEL_SPACE:
         if group.casefold() in text.casefold() and group not in labels:errors.append('taxonomy_feedback_mismatch:'+group)
     if _compiler(record)['status']=='compiled' and re.search(r'(?i)không biên dịch|lỗi biên dịch|compiler (?:báo|error)',text):errors.append('unsupported_compile_claim')
+    if _compiler(record)['status']=='compile_error' and re.search(r'(?i)biên dịch thành công|không có lỗi biên dịch',text):errors.append('compiler_status_contradiction')
     if level==2 and re.search(r'(?i)(?:^|[.!?;,:]\s*|\n)\s*(?:hãy|nên|cần|bổ sung|sử dụng|dùng|đặt|thay|đổi|sửa|loại bỏ|khai báo|khởi tạo|gán|cập nhật)\b|hướng sửa|cách sửa|gợi ý sửa',text):errors.append('level2_imperative_repair')
     if not labels and level>1:
         for sentence in re.split(r'(?<=[.!?])\s+|\n',text):
@@ -164,8 +183,14 @@ def feedback_errors(record,labels,text):
         directed=bool(re.search(r'(?i)\b(?:bằng|thành|trước|sau|mỗi|giảm|tăng)\b|=',action))
         from src.task3.adequacy import assess_repair_action
         bounded=assess_repair_action(record,text)['kind']=='specific'
-        if not (bounded or (anchored and operation and relation and directed and (explicit_value or len(named)>=2))):errors.append('level3_action_not_source_bound')
-    if level==4 and labels and not re.search(r'```(?:cpp|c\+\+)?\s*[\s\S]*?```',text):errors.append('missing_level4_solution')
+        inserted_return=re.search(r'(?i)\b(?:thêm|bổ sung|đặt)\b.{0,60}\breturn\s+([A-Za-z_]\w*)\s*;',action)
+        return_specific=bool(inserted_return and inserted_return[1] in identifiers)
+        if not (bounded or return_specific or (anchored and operation and relation and directed and (explicit_value or len(named)>=2))):errors.append('level3_action_not_source_bound')
+    if level==4 and labels:
+        fenced=bool(re.search(r'```(?:cpp|c\+\+)?\s*[\s\S]*?```',text))
+        unfenced=bool(re.search(r'\b(?:if|for|while)\s*\([^)]{1,200}\)\s*\{[^{}]{1,3000}\}',text) and re.search(r'\b(?:cout|return|cin|printf)\b',text))
+        function=bool(re.search(r'\b(?:int|void|bool|long(?: long)?)\s+\w+\s*\([^)]*\)\s*\{',text))
+        if not (fenced or unfenced or function):errors.append('missing_level4_solution')
     return list(dict.fromkeys(errors))
 
 

@@ -119,7 +119,7 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
                 final=finish_feedback(record,feedback_assessment,assessment.get('feedback',''))
             else:
                 final=verified_projection(record,feedback_assessment)
-                if final is None and config['method']=='direct' and oracle_labels is None and assessment.get('feedback'):
+                if final is None and config['method']=='direct' and oracle_labels is None and assessment.get('feedback') and not assessment.get('compiler_reconciliation'):
                     try:final=finish_feedback(record,feedback_assessment,assessment['feedback'])
                     except ValueError as exc:trace['direct_feedback_rejection']=str(exc)
                 if final is None:final=request('feedback',feedback_assessment)

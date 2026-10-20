@@ -165,3 +165,28 @@ def test_empty_taxonomy_cannot_request_a_concrete_repair_even_without_error_keyw
     from src.task3.round14 import feedback_errors
     assert 'empty_taxonomy_repair' in feedback_errors(sample(3),[],
         'Ở hàm main, thay x thành 0 để phù hợp yêu cầu đề.')
+
+
+def test_verified_compiler_finding_cannot_be_lost_in_a_model_clean_decision():
+    from src.task3.round14 import parse_assessment,sanitize
+    r=replace(sample(),code='int main(){return absent;}')
+    r=sanitize(r,{'status':'compile_error','diagnostic':'<stdin>:1:19: error: absent was not declared'})
+    v=value(labels=[])
+    out=parse_assessment(json.dumps(v),r,direct=True)
+    assert out['model_taxonomy_error']==[]
+    assert out['taxonomy_error']==['Lỗi biên dịch']
+    assert out['compiler_reconciliation'] and out['uncertain']
+    assert out['rationales'][0]['factual_support']=='verified_compiler_error_location_only'
+
+
+def test_single_return_statement_is_a_specific_action_not_generic_advice():
+    from src.task3.round14 import feedback_errors
+    r=replace(sample(3),code='int count(int n){int total=0;while(n){total++;n/=10;}}')
+    text='Hàm count thiếu giá trị trả về. Hướng sửa: Thêm câu lệnh return total; ở cuối hàm.'
+    assert 'level3_action_not_source_bound' not in feedback_errors(r,['Lỗi hàm'],text)
+
+
+def test_level4_code_artifact_does_not_require_markdown_fences():
+    from src.task3.round14 import feedback_errors
+    text='Hàm main cần trả token theo đề. Phần sửa:\nif(x==1){std::cout<<"True";}else{std::cout<<"False";}'
+    assert 'missing_level4_solution' not in feedback_errors(sample(4),['Lỗi nhập/xuất'],text)
