@@ -11,7 +11,7 @@ Design: new opt-in direct prompt asks exactly taxonomy_error+Vietnamese feedback
 - [x] TDD prompt/fullsource budgeting, schema/rawcapture/disclosure boundaries and retry/resume. Implement independent opt-in CLI/config; no default/oldartifact edits.
 - [x] Run zero/few/R14control on same newdevelopment IDs/Levels/model/shareddecoding. Save allraws, review perrecord model vs postprocess errors, usefulL2location/cause and usefulL3action. Reportlabels/claims separatelyfromschema/fallback. No publicsemanticinspection forselection.
 - [x] Choose prompt on development and commit/hashfreeze. FullTask3suite includingC++sandbox; historicalfullrepomissingTask1dependencies remains a reportedlimit.
-- [ ] Run selected frozenprompt on public328 to newoutputdir. ValidateofficialID/Level/schema, capture raw/audit/fallback and usefulfeedback assessment scope. PreserveRound14bytes, no public-derivedpromptrevision.
-- [ ] Commitreport/config/code/tests, giveartifactSHA/path and honestqualitylimits; verifycleanstatus, no rawstaged/push/submission.
+- [x] Run selected frozenprompt on public328 to newoutputdir. ValidateofficialID/Level/schema, capture raw/audit/fallback and usefulfeedback assessment scope. PreserveRound14bytes, no public-derivedpromptrevision.
+- [x] Commitreport/config/code/tests, giveartifactSHA/path and honestqualitylimits; verifycleanstatus, no rawstaged/push/submission.
 
 Implementation ownership: root prompt/controller/CLI/config/report; independent trainpartition and narrow disclosure modules/tests can be delegated under dispatching-parallel-agents skill. Independent source-based development review after outputs; publicquality review (if performed) only after freeze, never changesprompt.
