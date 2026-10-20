@@ -1,0 +1,365 @@
+{
+  "initial_head": "de89ce43cca36fa346a49d1fbea3c5fa4f124133",
+  "branch": "feat/task3-quality-round5",
+  "protected_file_count": 154,
+  "protected_files_unchanged": true,
+  "public_sha256": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+  "new_flow_freeze": {
+    "implementation": {
+      "src/task3/two_stage.py": "e31e7035c467c932111746c469723c7cdf1585900c846d6b20aa5fdaa658a4b4",
+      "scripts/task3_round18_flow.py": "1938270903b1d91d37406fc393e59a664391b89295c0a66960763b4bfca17263",
+      "configs/task3/r18_two_stage.yaml": "afe6fc6e8cf175cec990f78c9518eab299e8440ebdb1c0775310ef2de34d2d6d"
+    },
+    "config": {
+      "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "seed": 42,
+      "data_dir": "data/processed/task3",
+      "context_limit": 16384,
+      "max_new_tokens": 1024,
+      "level4_max_tokens": 1536,
+      "max_attempts": 1,
+      "generation_max_time_s": 45,
+      "do_sample": false,
+      "few_shot_k": 0,
+      "load_in_4bit": true,
+      "cpp_compiler": "/usr/bin/g++",
+      "compiler_timeout_s": 3,
+      "prompt_policy": "r18-level-independent-diagnosis-v1",
+      "example_bank": "outputs/task3/round15/train-examples.json",
+      "completion_policy": "diagnostic_taxonomy_immutable_no_content_retry_no_clean_fallback",
+      "prompt_variant": "zero_shot"
+    },
+    "A_results_sha256": "19ae979516c795866deb7d5a3ba122f6f8f84e95e239820d8f424a30ada449ab"
+  },
+  "training": {
+    "config": {
+      "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "seed": 42,
+      "load_in_4bit": true,
+      "max_seq_length": 8192,
+      "lora_r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj"
+      ],
+      "learning_rate": 0.0001,
+      "epochs": 1,
+      "per_device_train_batch_size": 1,
+      "gradient_accumulation_steps": 4,
+      "lr_scheduler_type": "cosine",
+      "warmup_ratio": 0.03,
+      "checkpoint_policy": "final_epoch_only_no_selection",
+      "output_dir": "checkpoints/task3/r18-pilot"
+    },
+    "config_sha256": "48daaa5d85467f1e5642a46401bd3f1c3efb8895cdcf927b751a8474382cb162",
+    "target_sha256": "4d480f76c677dfdf56e3b10ceb59ef0ffc2dd6134391c5ed13b85ed748b03403",
+    "data_manifest_sha256": "ec62e404eb83e52a6d206c1fefd4ff49ee2279fed5eac7c3a7b84b067856ae49",
+    "evaluation_freeze_sha256": "4388a9fa7be648af56ff20948c729d7b49d0fb93db378577bfa5549683dbb1a5",
+    "token_audit": {
+      "examples": 80,
+      "max_tokens": 3311,
+      "supervised_tokens": 5558,
+      "truncated": false,
+      "prompt_masked": true
+    },
+    "checkpoint_policy": "one epoch, final adapter only; no checkpoint or prompt/hparam selection from evaluation",
+    "status": "complete",
+    "script_sha256": "0c0f1a65f6975d2fe6f6db26653868da03258435db0958a900bf28bb836ab549",
+    "optimizer_steps": 20,
+    "metrics": {
+      "train_runtime": 34.851,
+      "train_samples_per_second": 2.295,
+      "train_steps_per_second": 0.574,
+      "total_flos": 3506371941832704.0,
+      "train_loss": 1.3380670726299286,
+      "epoch": 1.0
+    },
+    "history": [
+      {
+        "loss": 1.6036,
+        "grad_norm": 0.894415020942688,
+        "learning_rate": 0.0,
+        "epoch": 0.05,
+        "step": 1
+      },
+      {
+        "loss": 2.521,
+        "grad_norm": 1.06172513961792,
+        "learning_rate": 0.0001,
+        "epoch": 0.1,
+        "step": 2
+      },
+      {
+        "loss": 0.9862,
+        "grad_norm": 0.6271837949752808,
+        "learning_rate": 9.931806517013612e-05,
+        "epoch": 0.15,
+        "step": 3
+      },
+      {
+        "loss": 1.653,
+        "grad_norm": 0.6895520687103271,
+        "learning_rate": 9.729086208503174e-05,
+        "epoch": 0.2,
+        "step": 4
+      },
+      {
+        "loss": 1.551,
+        "grad_norm": 0.8499923944473267,
+        "learning_rate": 9.397368756032445e-05,
+        "epoch": 0.25,
+        "step": 5
+      },
+      {
+        "loss": 2.3039,
+        "grad_norm": 1.535860300064087,
+        "learning_rate": 8.945702546981969e-05,
+        "epoch": 0.3,
+        "step": 6
+      },
+      {
+        "loss": 1.5087,
+        "grad_norm": 1.6963369846343994,
+        "learning_rate": 8.386407858128706e-05,
+        "epoch": 0.35,
+        "step": 7
+      },
+      {
+        "loss": 1.0727,
+        "grad_norm": 1.1540056467056274,
+        "learning_rate": 7.734740790612136e-05,
+        "epoch": 0.4,
+        "step": 8
+      },
+      {
+        "loss": 1.5993,
+        "grad_norm": 0.8596322536468506,
+        "learning_rate": 7.008477123264848e-05,
+        "epoch": 0.45,
+        "step": 9
+      },
+      {
+        "loss": 1.393,
+        "grad_norm": 1.184671401977539,
+        "learning_rate": 6.227427435703997e-05,
+        "epoch": 0.5,
+        "step": 10
+      },
+      {
+        "loss": 1.3629,
+        "grad_norm": 0.900171160697937,
+        "learning_rate": 5.4128967273616625e-05,
+        "epoch": 0.55,
+        "step": 11
+      },
+      {
+        "loss": 0.8105,
+        "grad_norm": 0.980930745601654,
+        "learning_rate": 4.5871032726383386e-05,
+        "epoch": 0.6,
+        "step": 12
+      },
+      {
+        "loss": 1.282,
+        "grad_norm": 1.8033276796340942,
+        "learning_rate": 3.772572564296005e-05,
+        "epoch": 0.65,
+        "step": 13
+      },
+      {
+        "loss": 1.1973,
+        "grad_norm": 0.9124473333358765,
+        "learning_rate": 2.991522876735154e-05,
+        "epoch": 0.7,
+        "step": 14
+      },
+      {
+        "loss": 0.6662,
+        "grad_norm": 1.4076555967330933,
+        "learning_rate": 2.2652592093878666e-05,
+        "epoch": 0.75,
+        "step": 15
+      },
+      {
+        "loss": 1.04,
+        "grad_norm": 1.0442970991134644,
+        "learning_rate": 1.6135921418712956e-05,
+        "epoch": 0.8,
+        "step": 16
+      },
+      {
+        "loss": 1.1511,
+        "grad_norm": 1.1299835443496704,
+        "learning_rate": 1.0542974530180327e-05,
+        "epoch": 0.85,
+        "step": 17
+      },
+      {
+        "loss": 1.1805,
+        "grad_norm": 1.3660180568695068,
+        "learning_rate": 6.026312439675552e-06,
+        "epoch": 0.9,
+        "step": 18
+      },
+      {
+        "loss": 0.9606,
+        "grad_norm": 1.075532078742981,
+        "learning_rate": 2.7091379149682685e-06,
+        "epoch": 0.95,
+        "step": 19
+      },
+      {
+        "loss": 0.9179,
+        "grad_norm": 1.0866767168045044,
+        "learning_rate": 6.819348298638839e-07,
+        "epoch": 1.0,
+        "step": 20
+      },
+      {
+        "train_runtime": 34.851,
+        "train_samples_per_second": 2.295,
+        "train_steps_per_second": 0.574,
+        "total_flos": 3506371941832704.0,
+        "train_loss": 1.3380670726299286,
+        "epoch": 1.0,
+        "step": 20
+      }
+    ],
+    "gradient_finite_nonzero": true,
+    "lora_update_nonzero": true,
+    "checkpoint_sha256": {
+      "tokenizer_config.json": "60bf17d6543b028dbd97ac7f4847418c96502006b80b4b1c57427c241c818224",
+      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+      "tokenizer.json": "9c5ae00e602b8860cbd784ba82a8aa14e8feecec692e7076590d014d7b7fdafa",
+      "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+      "training_args.bin": "adbb8daf73aa316edd7a0b8c14d013d5a1da89ab839a4fc18bd424b299981a9a",
+      "adapter_config.json": "394d3ad6e290c7e75ef3e1ba1326570059a6d285db6179e582a9c64e4d93ee76",
+      "adapter_model.safetensors": "d3b45d96331f54c62722f697ae8b45048bc87d5d795c059f9f683233ec94af79",
+      "added_tokens.json": "58b54bbe36fc752f79a24a271ef66a0a0830054b4dfad94bde757d851968060b",
+      "chat_template.jinja": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
+      "README.md": "2e326a70ff8cf6b8cc64186dbe97e6d7504d66291fd2e7de4c4578602e95657c",
+      "special_tokens_map.json": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd"
+    },
+    "adapter_tensor_sha256": "d3b45d96331f54c62722f697ae8b45048bc87d5d795c059f9f683233ec94af79",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "free_vram_start": 33122746368,
+    "total_vram": 33671348224,
+    "peak_allocated": 17027814912,
+    "peak_reserved": 26262634496,
+    "wall_s": 41.013382107019424
+  },
+  "runtime": {
+    "A": {
+      "actual_precision": "nf4",
+      "parameter_storage_elements_by_dtype": {
+        "torch.float16": 1090328064,
+        "torch.uint8": 3262644224
+      },
+      "parameter_storage_elements_by_device": {
+        "cuda:0": 4352972288
+      },
+      "hf_device_map": {
+        "": "0"
+      },
+      "is_loaded_in_4bit": true,
+      "quantized_compute_dtypes": [
+        "torch.bfloat16"
+      ],
+      "resolved_model_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "load_latency_s": 5.64653068035841,
+      "peak_gpu_memory_allocated_bytes": 7071596544,
+      "peak_gpu_memory_reserved_bytes": 7212105728,
+      "current_gpu_memory_allocated_bytes": 5566237184,
+      "free_gpu_memory_bytes": 25795297280,
+      "total_gpu_memory_bytes": 33671348224
+    },
+    "B": {
+      "actual_precision": "nf4",
+      "parameter_storage_elements_by_dtype": {
+        "torch.float16": 1090328064,
+        "torch.uint8": 3262644224
+      },
+      "parameter_storage_elements_by_device": {
+        "cuda:0": 4352972288
+      },
+      "hf_device_map": {
+        "": "0"
+      },
+      "is_loaded_in_4bit": true,
+      "quantized_compute_dtypes": [
+        "torch.bfloat16"
+      ],
+      "resolved_model_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "load_latency_s": 5.660677373409271,
+      "peak_gpu_memory_allocated_bytes": 7071596544,
+      "peak_gpu_memory_reserved_bytes": 7212105728,
+      "current_gpu_memory_allocated_bytes": 5566237184,
+      "free_gpu_memory_bytes": 25795297280,
+      "total_gpu_memory_bytes": 33671348224
+    },
+    "C": {
+      "actual_precision": "nf4",
+      "parameter_storage_elements_by_dtype": {
+        "torch.float16": 1090328064,
+        "torch.uint8": 3262644224
+      },
+      "parameter_storage_elements_by_device": {
+        "cuda:0": 4352972288
+      },
+      "hf_device_map": {
+        "": "0"
+      },
+      "is_loaded_in_4bit": true,
+      "quantized_compute_dtypes": [
+        "torch.bfloat16"
+      ],
+      "resolved_model_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "adapter_tensor_sha256": "d3b45d96331f54c62722f697ae8b45048bc87d5d795c059f9f683233ec94af79",
+      "adapter_loader_sha256": "6bf9f3261393a9d03a0ed8ef3d6da0e070b3b923c086e54804be2687ebd39ccd",
+      "load_latency_s": 4.891100836917758,
+      "peak_gpu_memory_allocated_bytes": 7071596544,
+      "peak_gpu_memory_reserved_bytes": 7289700352,
+      "current_gpu_memory_allocated_bytes": 5729647104,
+      "free_gpu_memory_bytes": 25717702656,
+      "total_gpu_memory_bytes": 33671348224
+    }
+  },
+  "versions": {
+    "torch": "2.8.0",
+    "transformers": "4.57.1",
+    "peft": "0.17.1",
+    "bitsandbytes": "0.48.1",
+    "accelerate": "1.11.0"
+  },
+  "commands_executed": [
+    ".venv-task3/bin/python scripts/task3_round18.py prepare",
+    ".venv-task3/bin/python scripts/task3_round18.py A",
+    ".venv-task3/bin/python scripts/task3_round18_flow.py B",
+    ".venv-task3/bin/python scripts/task3_round18_targets.py",
+    ".venv-task3/bin/python scripts/task3_round18_train.py",
+    ".venv-task3/bin/python scripts/task3_round18_adapter.py",
+    ".venv-task3/bin/python scripts/task3_round18_report.py",
+    ".venv-task3/bin/python -m pytest tests/test_task3_*.py -q"
+  ],
+  "operational_incidents": [
+    "Initial A harness used noncanonical Level2 display name; schema rejected before model loaded; corrected before A generation.",
+    "Initial training preflight missing datasets dependency; no model or optimizer ran. Replaced Dataset wrapper with list rows, unchanged target/config.",
+    "Original HFBackend adapter precision audit confuses PEFT Linear4bit wrapper with bitsandbytes base layer, failing before any C generation. Separate loader validates actual bnb layers; R15 backend untouched.",
+    "Post-training historical audit found2 train IDs from R15/R16/R17 evaluation. Pilot invalidated, no second training. Historical isolation gate added after run; exact executed pre-hardening script archived privately and SHA-verified."
+  ],
+  "candidate_frozen": false,
+  "next_submission_created": false,
+  "public_inference_ran": false,
+  "pushed": false,
+  "pilot_count_with_optimizer_steps": 1,
+  "current_training_command": "Intentionally rejects this frozen target set due to newly added historical isolation gate. Do not treat an exact replay of invalid pilot as a valid training recommendation."
+}

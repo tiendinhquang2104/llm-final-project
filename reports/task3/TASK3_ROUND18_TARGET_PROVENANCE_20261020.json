@@ -1,0 +1,690 @@
+{
+  "target_file_sha256": "4d480f76c677dfdf56e3b10ceb59ef0ffc2dd6134391c5ed13b85ed748b03403",
+  "zip_sha256": "6bda70c29254a3bce91933b65f4a311d73a052e72d181c97e977152e14602f9b",
+  "records": 20,
+  "examples": 80,
+  "source_counts": {
+    "real": 2,
+    "synthetic": 18
+  },
+  "provenance": [
+    {
+      "sample_id": "SYN-COUNT-0000",
+      "family": "SYN-COUNT",
+      "group": "SYN-COUNT-0000",
+      "source_sha256": "40b05f4d6c286b6a3acf5e72d02c81c0b1decd6bc73170ec313fab61666c7a7a",
+      "code_identity": "a9c9fde761b7f8be2d7d3021a162286668ce6551dbbf6a9f18eb2d5ec587dfba",
+      "renamed_identity": "b824bc3f75fe883d6f0e017a714d952759818d26ed4141bfa98124be24c6fa06",
+      "annotation_v2": [],
+      "labels_source_review": [],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [],
+      "basis": "Với file hợp lệ không rỗng và dữ liệu vừa int: đọc từng cặp vào vector, sao chép vào mảng động, n bằng số bản ghi, prob2 trả n, prob3 giữ min b, prob4 in n. File rỗng không có min nên cần quy ước từ đề; không chứng nhận miền ngoài giả thiết này.",
+      "target_sha256": [
+        "38389fb7419c404bfe8b32f0a5be62bb580eba418d1066c176103e711bed12bc",
+        "2b48f89c0521fde9af7ff384f522e140b84c2ab7431d121aea65e8504afe3b9d",
+        "046d078e96f6f1a27edad7097337739e6512f244d2e888681ca4b66c1192a928",
+        "dd68e94357cf6e5be7833adafe99a11d404148bb2d079905be60c9663d1c3e5f"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-COUNTEVEN-0001",
+      "family": "SYN-COUNTEVEN",
+      "group": "SYN-COUNTEVEN-0001",
+      "source_sha256": "86d1b6763674bdc2c0db5b0f45675948c879f201eba2afb45eb2ec7584910475",
+      "code_identity": "48558f589fd16bdb0e71f6ce11eb71b327ad9e69e3d014730b0058e94d1848a0",
+      "renamed_identity": "bed11d68f8b825c24757d643a425856eabbdcc555a42931430aac9335bc63284",
+      "annotation_v2": [],
+      "labels_source_review": [],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [],
+      "basis": "Với file hợp lệ không rỗng, vừa int: đọc đúng từng cặp, cấp phát theo số đọc, đếm từng a chia hết2 kể cả âm, giữ min b, in prob2. Đề chưa quy định min của file rỗng; kết luận sạch chỉ trong miền có min.",
+      "target_sha256": [
+        "daf4592f8406e0989668de441a2686065f4c9fb03eeface0d2b44ad830d73b1d",
+        "95414895a04de110cbc1fb14563b5d8fa23800d50e4cbbf0a2fd169225640fe9",
+        "b8897a297033fcc069ada94498ec1acbacd78a6c870fff39839a1d85c7543ef4",
+        "a82c3cd434e77690490a0b87767df48ed0ef6bc867e943aaaa67065636fb574e"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-GEN-0001",
+      "family": "SYN-GEN",
+      "group": "SYN-GEN-0001",
+      "source_sha256": "467100862c5fbd6f8bcb0c666086c5a16923c6ea6d6ccfd42a64e2b181442864",
+      "code_identity": "6a4ef6e6e8593505ee3826cf7b19063eeec8ba1d5b34722c72786c49ef9eaff1",
+      "renamed_identity": "5775b2addcb65c226bcca4818d76350082b40e7862e61d0aaf3e1e131a0c9fe4",
+      "annotation_v2": [],
+      "labels_source_review": [],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [],
+      "basis": "Với file hợp lệ không rỗng, tổng a vừa int: đọc vào vector rồi mảng động, n đúng số bản ghi, cộng tất cả a, giữ max a và in tổng. Không khẳng định xử lý file rỗng/overflow ngoài miền này.",
+      "target_sha256": [
+        "7d95f5e8705cfd2b16e4cd49aa7ef6d742d6c967c9c38f59ec499e4c97bdd129",
+        "d5406891b58c9a0d4c3fa2b9814f24a476dcfd789d554b657b905c3d21d637d7",
+        "e5c0f72ff248871fc82852a7c1c7f42fff480d161284e7286035c63fd2c6bdca",
+        "df25fc2684b2cffac133708f21126afc05c10e2c1127ab02edc6325d35233386"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-UPPER-0003",
+      "family": "SYN-UPPER",
+      "group": "SYN-UPPER-0003",
+      "source_sha256": "5517820bbf5232f5ec92673735a582ab81a027c8aa5cc536b85fa1ba7caecb01",
+      "code_identity": "cb17af565e37d046ca45b1cf0ebc3dd41bb3f3508ccd0054f4c2692848dbc856",
+      "renamed_identity": "a7664a8b319319957528ddc5f089cf2a1eafe59f7805ea0be29650c0a31caab6",
+      "annotation_v2": [
+        "Lỗi style"
+      ],
+      "labels_source_review": [],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [],
+      "basis": "Trong miền chuỗi ASCII không khoảng trắng, mỗi ký tự thường được đổi sang hoa, ký tự khác giữ nguyên, in chuỗi kết quả. TODO/comment không phải lỗi theo đề.",
+      "target_sha256": [
+        "cc7147be4073dfc0d19721fcd9685457eb56e1dd8cfae4e7702230044608943d",
+        "f22bacfb0b47be40d6a875af9bc89f5d094ef76339510309f427e591ed56a2bb",
+        "c6522abb79ae1b60f1a22309d7688aeed59c2ac9bdc136421f2bf0e263359940",
+        "804586b8c454a9512296aa762836bf55d8d213b07d233d2d97f13ad7df499a98"
+      ],
+      "gold_disagreement": true
+    },
+    {
+      "sample_id": "SYN-COUNT-0007",
+      "family": "SYN-COUNT",
+      "group": "SYN-COUNT-0007",
+      "source_sha256": "36f5dadc155d1f6ed1815b0ab7ca3d3bdfd2645360663efe22623d6082bcb7ff",
+      "code_identity": "f200e9fdc0c5b6cbd721f761da576ad7d7704ea3e5fe5a65a317bd22410321c6",
+      "renamed_identity": "80a791ec10682b6a6462f1f00086cebad6004d1fbe9e92c9c5eb6a358b4c02db",
+      "annotation_v2": [
+        "Lỗi vòng lặp",
+        "Lỗi logic"
+      ],
+      "labels_source_review": [
+        "Lỗi vòng lặp"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi vòng lặp",
+          "quote": "for (int i = 1; i < n; )",
+          "location": "prob3",
+          "evidence": "Với n=2, i giữ nguyên bằng1 nên vòng lặp không kết thúc.",
+          "repair": "Tăng chỉ số duyệt sau mỗi lượt để tiến tới điều kiện dừng."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "ed06257986eb87d67f7139d7d34c8e186113cf5274fc4364e60aeb930aed8f4c",
+        "a4376aa43493ac7fd228bb4df95ed21a0cc89159c88c12676f753a77448a27c9",
+        "3df4de9c0b8cecb83d804abfcaa3571a5eee8a958ebcc34a20a4f0e0ae144a1c",
+        "dcf6c04770202dc61be77a1b42e1869970104863bdfb94eeca529fbf8244ae81"
+      ],
+      "gold_disagreement": true
+    },
+    {
+      "sample_id": "SYN-COUNTEVEN-0003",
+      "family": "SYN-COUNTEVEN",
+      "group": "SYN-COUNTEVEN-0003",
+      "source_sha256": "49b7ff522bb23842b4191370c4f901d456cbf90345d104a8e6a98c4c13a109bc",
+      "code_identity": "b450c205a6e4474650e83e9c3166914fdecb8fd763e2e25aede145d89c8698fa",
+      "renamed_identity": "b6130d7397c2bfb916f6caeb1c9252239fe7739054a5832832fb19039f91153c",
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "labels_source_review": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi mảng/chuỗi",
+          "quote": "tong = arr[i + 1].b;",
+          "location": "prob3",
+          "evidence": "Khi phần tử hiện tại nhỏ hơn tong, mã lại lưu phần tử kế tiếp. Dãy b=[5,1,3] trả3 thay1.",
+          "repair": "Cập nhật giá trị nhỏ nhất bằng chính phần tử vừa được so sánh; giữ chỉ số trong miền dữ liệu."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "3e724e96bf94fc624291a58419b3e55d5ee15795811c6f20dd33c9aa2895f29f",
+        "c796345d2cc5a11e0d560a5acf6a64c3edffb33e86be53da8fe361e904f1a8c6",
+        "a37d2591f6efa20d83f9799a8a3013d7bc7ee1a0851d25a6ca57bd36fc4d8f53",
+        "b3a7256a003d3e58795e923524ce4b5302cdbd75c305bc2349661ce988e0320d"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-GEN-0003",
+      "family": "SYN-GEN",
+      "group": "SYN-GEN-0003",
+      "source_sha256": "38b6353cb84355677c333e28661987afb1bdd36b48084b5618fa5d193412b3ce",
+      "code_identity": "44ce2a0bc43ebc646bb69153f7a647093c920e9fa69f5215c63db89918da17ac",
+      "renamed_identity": "9b83b13ca5afee40f70d8f85c05bb01b44f77d4c9cc506fecf208317b6e6d18d",
+      "annotation_v2": [
+        "Lỗi vòng lặp"
+      ],
+      "labels_source_review": [
+        "Lỗi vòng lặp"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi vòng lặp",
+          "quote": "i < n - 1",
+          "location": "prob3",
+          "evidence": "Vòng lặp bỏ qua phần tử cuối. Với a=[1,9], hàm trả1 thay9.",
+          "repair": "Cho vòng duyệt bao phủ cả phần tử cuối trong miền0..n-1."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "b62fab6a5ab37f9f9266a7e479e6edf82b64ff4aa9d6a5ceeda3373d55fedae2",
+        "db413e69aea712f91981311a5018cfcb5da0f77802020e1b60e67018e40e9c12",
+        "5b87632ce6acd7541ac9725cb7d9b00a5d0f15f91a9743952af7139a9455fe81",
+        "3df69d95a72a8921d415b14e64cf78c8575dea31f97b408c2cba6310e5b9605f"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-GEN-0016",
+      "family": "SYN-GEN",
+      "group": "SYN-GEN-0016",
+      "source_sha256": "0cc79fdf5089db9f13e9f45b7942cc3270eff9ab3699144b2bc92cd80c92c1da",
+      "code_identity": "44c1169f2b89b2b6978775b87a06f259f94476673b60f5cbb1097eaba2833d45",
+      "renamed_identity": "667bb445c256f22a4f7927bfcb8b30cfd8090f5868de17df0cd5b67350643041",
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "labels_source_review": [
+        "Lỗi hàm",
+        "Lỗi vòng lặp"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi hàm",
+          "quote": "return 0;",
+          "location": "prob3",
+          "evidence": "Hàm chưa tính max a mà luôn trả0; một bản ghi a=7 phải trả7.",
+          "repair": "Triển khai tìm max a từ các bản ghi thực tế."
+        },
+        {
+          "label": "Lỗi vòng lặp",
+          "quote": "prob2(arr, n - 1)",
+          "location": "prob4",
+          "evidence": "Truyền n-1 khiến phép tính tổng bỏ bản ghi cuối; một bản ghi a=7 bị in0.",
+          "repair": "Truyền đủ số bản ghi cần xử lý vào hàm tính tổng."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "bcc7f39c3d816cb8a4de39f247a79f7ca33fb4e43446a0fa0ded5b7b29bb9b33",
+        "b9dfe42a5bc416d2f6aeb073665554e7f7d31162ab007350f4c1c18fe9a7c7d7",
+        "ed14dbf469e22cd221812cb6894fecf4cd003a66e4fe1f295720ee68845582c8",
+        "2c8d81b6a0e7c89d8286b0711959f95b1895f3ef77b9cf1f7acbea42f85d594e"
+      ],
+      "gold_disagreement": true
+    },
+    {
+      "sample_id": "SYN-RANGE-0014",
+      "family": "SYN-RANGE",
+      "group": "SYN-RANGE-0014",
+      "source_sha256": "692bf0b0fe1076da68877af4b473786e03d7b741af786cb45d9f141845524762",
+      "code_identity": "2c8e728b86ceeb9bcf9248938a7308cff862a3e3f4b0402c0e39ef8534788436",
+      "renamed_identity": "5719ecf7044fc16cb1161907032732da45b0608b7e916ab4afde90137bb19c79",
+      "annotation_v2": [
+        "Lỗi hard-code"
+      ],
+      "labels_source_review": [
+        "Lỗi hard-code"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi hard-code",
+          "quote": "ifstream f(\"data.csv\");",
+          "location": "prob1",
+          "evidence": "Hàm bỏ qua filename và luôn đọc data.csv; truyền rng.csv không được sử dụng.",
+          "repair": "Mở tệp theo tham số filename, đồng thời kiểm tra trạng thái đọc."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "03e1e35f1794a6ea56fc6598938792ce18327e979bf59641e762e0cde4a424ab",
+        "8e88f99ffea333aa7ca8821f85c5f18bb4681495381f77ebfd1be5a5750dd399",
+        "9ccd00f4c3db5682bf4d87d23ce1bbc4e509cc6462895fbbc78f0341d4e79aac",
+        "6d7b8d7554b7079af96b4f00f8bc3ff3205bb541824c1b37311d92b4796b7d6b"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-SUMB-0007",
+      "family": "SYN-SUMB",
+      "group": "SYN-SUMB-0007",
+      "source_sha256": "67e521bbbb59f97613c97f0562b5a22620362197162769bded7cd167c388478a",
+      "code_identity": "3e274b98749ebfc4f47c16c96406d8ed90a194340f06086430975103e74311c0",
+      "renamed_identity": "bdf13b18898679b28f1ed62a061522a3aae7f45f95bb2ad67fdf84b3d7669ef6",
+      "annotation_v2": [
+        "Lỗi edge case",
+        "Lỗi logic"
+      ],
+      "labels_source_review": [
+        "Lỗi edge case",
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi edge case",
+          "quote": "if (n == 1) return 0;",
+          "location": "prob2",
+          "evidence": "Một bản ghi b=5 có tổng5 nhưng nhánh riêng trả0.",
+          "repair": "Để trường hợp một phần tử được tính như quy tắc tổng chung."
+        },
+        {
+          "label": "Lỗi logic",
+          "quote": "kq3 = 0;",
+          "location": "prob3",
+          "evidence": "Khởi tạo0 và bắt đầu i=1 bỏ bản ghi đầu, sai cả dãy a âm. Một bản ghi a=-2 trả0 thay-2.",
+          "repair": "Khởi tạo max từ phần tử đầu và duyệt các phần tử còn lại."
+        },
+        {
+          "label": "Lỗi nhập/xuất",
+          "quote": "if (arr[i].b > 0) t += arr[i].b;",
+          "location": "prob4",
+          "evidence": "Chỉ cộng b dương nên không in tổng tất cả b; một bản ghi b=-3 in0 thay-3.",
+          "repair": "In tổng b của toàn bộ bản ghi, kể cả số âm."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "cfc501da99a224a646e44a9b778e9d3d3749fa436b62232b5cf53b5db348164f",
+        "a52f2ae48d912a3fab8645b0482907e7ef425d8b543fb132597f336d2e1ebc33",
+        "4a6c0533677f6195e24e1196a6e9393a5497aa6ae5b30bbbd0d8a2113e2c2628",
+        "674eed830453cd5e1465d2b3422f76464b48da541a4e0db50596f2f21b3d1846"
+      ],
+      "gold_disagreement": true
+    },
+    {
+      "sample_id": "SYN-SUMPAIR-0003",
+      "family": "SYN-SUMPAIR",
+      "group": "SYN-SUMPAIR-0003",
+      "source_sha256": "66f5766d46181fc99dee7b0247f49b2977e28e0f22afb2c032fe5a499ffc6846",
+      "code_identity": "04c670fdb013a7f141da7de2aab6d7e501ab2d312376bdc09b50d32dc472705f",
+      "renamed_identity": "94ed41f469cf0f278bc8313ebcf386a4b134cfc5a42c80ad2d706dfd2343a65f",
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "labels_source_review": [
+        "Lỗi logic"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi logic",
+          "quote": "kq3 = 0;",
+          "location": "prob3",
+          "evidence": "Khởi tạo0 và duyệt từ i=1 bỏ a[0]. Một bản ghi a=5 phải trả5 nhưng trả0; dãy âm cũng sai.",
+          "repair": "Khởi tạo max bằng a đầu tiên rồi duyệt phần còn lại."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "44f2729982a04249593b40c683dfcf9ecc43c64b1769c292c4ae516434b59ca5",
+        "567059c06c193186d376454239f30f1d24ca54509edd8447844447f3ec52cef3",
+        "8f658e885aa27820d6d58bce32097039f2268ec5bf38c3ee76b15e6d2d8f8c3a",
+        "6f56feb6afbfb4bceca7bf312eaf168613311c652b09dff96da1706a7c4c5857"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-UPPER-0006",
+      "family": "SYN-UPPER",
+      "group": "SYN-UPPER-0006",
+      "source_sha256": "c45d8b2263969be4632836fdb9cba9b93c14774398a6c63b3e27557e4ac80c7d",
+      "code_identity": "209bf7459d5e55791d767daa32365afcc9576f6165fd2c029024d5b0a8b09373",
+      "renamed_identity": "744f7639d02c5c9b6cf4f1e949185833f3c407d5b9ffa08b567ceb89d0ee0c35",
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "labels_source_review": [
+        "Lỗi hàm"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi hàm",
+          "quote": "int main() {\n    return 0;",
+          "location": "main",
+          "evidence": "Hàm chuyển chữ hoa không được gọi; main kết thúc ngay, nên input a không nhận output A.",
+          "repair": "Đọc chuỗi, gọi hàm chuyển đổi và in giá trị trả về."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "eb281101cf8d52b54f95f00a63ab53dae3e7f674d35d535cd1df6396e2575729",
+        "8e3346dcfdff3914c662da7cc6f65258470c59a3fdcd4a6b12532bd85791f348",
+        "82f708e6965e5cf89d46d9ba930da34b517fc8ea7e4759810fa40faaa813cfe1",
+        "a3cc81ccd8282965435913ad24f97d34b34f8ba8895c27789b6a4767cd0d05c7"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-UPPER-0007",
+      "family": "SYN-UPPER",
+      "group": "SYN-UPPER-0007",
+      "source_sha256": "5b3369383c41717136dce74703e47e055704425dbc828dc92b12a0fc4f68ee6e",
+      "code_identity": "014be9faec81c0c098c75f94c965900fd682f7b525709f607d761d803a700b46",
+      "renamed_identity": "99d9a936e3560087a5f12bd1ffb42dc7ca8c0ad4a0cc8c926f8e949c4bb29709",
+      "annotation_v2": [
+        "Lỗi biên dịch"
+      ],
+      "labels_source_review": [
+        "Lỗi biên dịch"
+      ],
+      "compiler_status": "compile_error",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi biên dịch",
+          "quote": "char s[1005]",
+          "location": "main",
+          "evidence": "Thiếu dấu chấm phẩy kết thúc khai báo mảng; compiler báo lỗi trước cin.",
+          "repair": "Kết thúc khai báo mảng bằng dấu chấm phẩy."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compile_error. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "f8b9fb286e4b48fad950b7adad2085e945ba71263f60c014e3aab39dea39feeb",
+        "d9a351b0a666bd82be295b98fa4737a75bf5c21e243cb404b564a545237fb6f1",
+        "19ca9286ee42042f2120ee4295ffb194fa2a798717a8b7d2e742c97943e15fc8",
+        "10bcf4ee3dece36272800f141a7ef95844ba2e1c28351cad3f1f4cf5bacb2864"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-COUNTVOWEL-0004",
+      "family": "SYN-COUNTVOWEL",
+      "group": "SYN-COUNTVOWEL-0004",
+      "source_sha256": "3103a777ed8f99f3ee89721575c9c89f18842a5798899b5ac71747a4642a59bc",
+      "code_identity": "84efb1dad709b7eed530ae1f428fef49d7b3d9e9f49bded89fad6f937d379510",
+      "renamed_identity": "fe26f88f63ebfe09255b2f8069022433fd061f51d1d7716a44985a5a2822065e",
+      "annotation_v2": [
+        "Lỗi vòng lặp"
+      ],
+      "labels_source_review": [
+        "Lỗi vòng lặp"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi vòng lặp",
+          "quote": "int i = 1",
+          "location": "countVowel",
+          "evidence": "Bắt đầu từ1 bỏ ký tự đầu. Input a cho0 thay1.",
+          "repair": "Duyệt từ ký tự đầu đến trước độ dài chuỗi."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "df4aeb9d39fe79a47cf6f328c415793848afd4337ea3587a8d34ead4adbfd387",
+        "76aa53c92d2293701620427279520e7dafa2c8b082d1f7777c6871071058028f",
+        "997f1b079cf64fc6551ebcbe2dc6707c6d3e95525dee92d10889b5686dd3532d",
+        "3b71952df9e866cb562e09f2eba94f411645ce6b15ab39eb8297720202eafe60"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-COUNTVOWEL-0012",
+      "family": "SYN-COUNTVOWEL",
+      "group": "SYN-COUNTVOWEL-0012",
+      "source_sha256": "dbefb03228c6ca1b18388412fb0ace5123c12ed74faa6060797d78cc1c4368d0",
+      "code_identity": "f34ee7589a536fee597092950f22475ada5f18bfcf2f108e1061abb34fba79fa",
+      "renamed_identity": "a58dc0f733a94e633f42580b614de52956fe4ad7fe2c645eff154ccb4d2c1253",
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "labels_source_review": [
+        "Lỗi logic"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi logic",
+          "quote": "demNguyenAm = demNguyenAm - 1;",
+          "location": "main",
+          "evidence": "Bộ đếm giảm khi gặp nguyên âm; input a trả-1 thay1.",
+          "repair": "Tăng bộ đếm cho mỗi nguyên âm gặp được."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "805103bd22bf81411ca07df98eee31694f1f774c5f3dfe6ca08f00321cdd13b9",
+        "239368c76185ef277274822a7d7ae26fb92d2c2e03199d87bd3802846c91866a",
+        "635bb869c004cbfdcb1d91182e167011c40e17f083dbfe8b198631a947033c23",
+        "7dfdaaf947e987a45e9b839df228a34b7d5abe0a2caa5392460c9e37b0ee9821"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "SYN-MAXARR-0005",
+      "family": "SYN-MAXARR",
+      "group": "SYN-MAXARR-0005",
+      "source_sha256": "3dc48b87d0974aec82caa51889386599b52b1f9e8aac09565b363ed4038a7cd6",
+      "code_identity": "933b0c2dcbc508d2ff7f7806ba9fc1d5d7932459ebd0f214c2f343b5905fedf1",
+      "renamed_identity": "58a34b6c06bbd0eb8005df707f8ffb02f7e5de8c5f9f4e31b5cdf5f2369fc67b",
+      "annotation_v2": [
+        "Lỗi vòng lặp"
+      ],
+      "labels_source_review": [
+        "Lỗi vòng lặp",
+        "Lỗi nhập/xuất"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi vòng lặp",
+          "quote": "i < n - 1",
+          "location": "main",
+          "evidence": "Chỉ đọc n-1 giá trị, bỏ phần tử cuối: n=2,dãy1 9 in1 thay9.",
+          "repair": "Bao phủ đủ n giá trị, tính cả giá trị đầu đã đọc."
+        },
+        {
+          "label": "Lỗi nhập/xuất",
+          "quote": "cout << \"Nhap n: \";",
+          "location": "main",
+          "evidence": "In thêm lời nhắc trước số kết quả, không đúng định dạng chỉ in giá trị lớn nhất.",
+          "repair": "Bỏ lời nhắc khỏi output nộp bài."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "69ab68616fec97cb20e80005dc6954d8d196b532952a98ab2c9674693696e930",
+        "fc2bf4139a94c5ad0ffd284ac0224c21af0e993ea23009308e3a57a44781e9d8",
+        "822c6643dc8afc058d311d9552a8c7f3e54ea576efc955cca792a19ddb9ec81b",
+        "6102436f8745b68ef9aac73e6c3a8dc97e40cfc6b486c46bb04eac684c45799f"
+      ],
+      "gold_disagreement": true
+    },
+    {
+      "sample_id": "SYN-PALIN-0005",
+      "family": "SYN-PALIN",
+      "group": "SYN-PALIN-0005",
+      "source_sha256": "14807e6fa7e6fba971249e8ecae8ad64e2b1a3dafa390ebcf4ef081c3d95ace4",
+      "code_identity": "0ff31d5f6d4b9665cc0e62f7ab330b5232d819db8374f460b461f76411e1631b",
+      "renamed_identity": "4e3a30d4883aaca079265c5e3b3cb2f624f223aef244672c7c844c0d28bc18f0",
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi",
+        "Lỗi style"
+      ],
+      "labels_source_review": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi mảng/chuỗi",
+          "quote": "s[i + 1] != s[n - 1 - i]",
+          "location": "main",
+          "evidence": "So sánh lệch cặp đối xứng: input12 so sánh ký tự thứ hai với chính nó rồi inTrue, phảiFalse.",
+          "repair": "So sánh ký tự tại vị trí i với vị trí đối xứng n-1-i."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "4a62893dd35a7084de065135c6439378bce1d270fdaadba88f51adb4dea1b342",
+        "de099a042a7e8a44d1bbda647dd1d994801a176d69c94c27f0a39d7916a62c67",
+        "c03369f70ed9b2aafcf14db592f3801dfbbdc73582b7106ea44a94b4d7d74dc4",
+        "5db64469630be930ac8a75ab6c003c7569e090cb9a1b7a8662be8a9f17875af0"
+      ],
+      "gold_disagreement": true
+    },
+    {
+      "sample_id": "SYN-PALIN-0022",
+      "family": "SYN-PALIN",
+      "group": "SYN-PALIN-0022",
+      "source_sha256": "f8026b131bf322c00ab4451b216a54336e1cc40166ad6ff190ffe404a54c81f7",
+      "code_identity": "1a1eb72de8fe83ea56ff2d650f926ffa73901fc62d9d9569ffcd36ed35953264",
+      "renamed_identity": "d2039330ccec47e65d4bd12d76e7e3cc73459bbed686c531bdbe8d93ee28a8d6",
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "labels_source_review": [
+        "Lỗi thuật toán"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi thuật toán",
+          "quote": "rev = rev * 10 - n % 10;",
+          "location": "doiXung",
+          "evidence": "Dựng số đảo bằng phép trừ nên số đảo âm. Input11 choFalse dù phảiTrue.",
+          "repair": "Dựng số đảo bằng cách thêm chữ số vừa tách vào sau phần đã dựng, lưu ý giới hạn kiểu số."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "0fdb5b7568cede5cbd0feb6c963a620804a22f821dcb995f5bb7d54adb127dbb",
+        "232f64b3b948f1e25a912f361e1c79701e2c918142bd3f66a2026f84c114bc1f",
+        "51c7a665dafe82939436cf2edd44f75b604cb377ddd1ae7c2886780552a37dc7",
+        "15e12731ca3fb7877242fe118c2ec5625ae8b2f01cfe347f8aa179e75b38cba0"
+      ],
+      "gold_disagreement": false
+    },
+    {
+      "sample_id": "EX01-S101",
+      "family": "EX01",
+      "group": "72b558079983bf75fd3bdf7e5a36f08662a552d852cf68686f9e71ee0869f2d7",
+      "source_sha256": "e66ff20525bb9236e194cc863f2e407278b951ee4b3a69c1c61112ddaae1d6f7",
+      "code_identity": "0264d7b04f89b8ca9f72fb29e5ad27ea5cb693118e31ada20098bf5081fe01ee",
+      "renamed_identity": "888e3f7c1f30b8a0ad93578d2cc9d5a5b38662ba4904ba1ce6c420ae5a101ac2",
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "labels_source_review": [
+        "Lỗi logic",
+        "Lỗi hàm",
+        "Lỗi nhập/xuất"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi logic",
+          "quote": "delete deleted;",
+          "location": "prob4",
+          "evidence": "Khi xóa node, head hoặc liên kết next của node trước không được đổi. Xóa node đầu làm head trỏ vùng nhớ đã giải phóng.",
+          "repair": "Cập nhật head khi xóa đầu; với node khác cập nhật next của node trước rồi mới giải phóng."
+        },
+        {
+          "label": "Lỗi hàm",
+          "quote": "Node* prob2(General* generals, int n)",
+          "location": "toàn bộ source",
+          "evidence": "Có prob1,prob2,prob4 nhưng thiếu định nghĩa prob3 theo yêu cầu tìm tướng nhiều tuổi nhất.",
+          "repair": "Bổ sung hàm prob3 duyệt danh sách, tính tuổi theo era và giữ phần tử đầu khi hòa."
+        },
+        {
+          "label": "Lỗi nhập/xuất",
+          "quote": "return x;",
+          "location": "prob1",
+          "evidence": "Hàm tăng i sau mỗi bản ghi nhưng không gán lại tham số n; số bản ghi trả cho bên gọi không phản ánh số dòng thực đọc.",
+          "repair": "Đếm dữ liệu đọc thành công và cập nhật tham số n theo số bản ghi đó."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "12510945d6367569cc10bd1e7791ddb02bb2c6e6fd281274ecea4a184c1e3abe",
+        "aef769c709a8c70985be2148e24eb666c07e73dcb0c5fddc275076485779156e",
+        "afea3b908f4cb49f1ff12c68b053a6b798630790d761321abc89e8d1e795b55a",
+        "05614bfd02e7f4fa9d702e791ab76441ad1fed3e55095d39efdec7e285744577"
+      ],
+      "gold_disagreement": true
+    },
+    {
+      "sample_id": "EX01-S102",
+      "family": "EX01",
+      "group": "c643cec40d9f65b97bd53e71178ed500b4422017277f27617958843bf7cceeb6",
+      "source_sha256": "c380c3d390eac5e8f35281895264f74210193bd89ebb881a96cf65bd837ef7c8",
+      "code_identity": "3c3a2840c9b50f8c89f49e4691996ed4b70e9036c7c38c9488ca46124c9e1a9a",
+      "renamed_identity": "36b2a417b4f5a1ee5a78419000297f52dd843184e10e974f1768079785677be6",
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "labels_source_review": [
+        "Lỗi logic"
+      ],
+      "compiler_status": "compiled",
+      "review": "assistant reviewed, not human verified",
+      "findings": [
+        {
+          "label": "Lỗi logic",
+          "quote": "return new Node{g, nullptr};",
+          "location": "addTail",
+          "evidence": "Nhánh danh sách rỗng chỉ trả node mới mà không gán pHead; prob2 bỏ qua giá trị trả về nên head vẫn null.",
+          "repair": "Gán node mới cho pHead khi danh sách ban đầu rỗng."
+        },
+        {
+          "label": "Lỗi logic",
+          "quote": "pPrev -> next = pCurr -> next;",
+          "location": "prob4",
+          "evidence": "Khi node đầu có nationality cần xóa, pPrev vẫn null nhưng bị dereference.",
+          "repair": "Xử lý riêng cập nhật head khi xóa đầu và chỉ truy cập pPrev khi nó tồn tại."
+        }
+      ],
+      "basis": "Chẩn đoán từ source/đề; compiler compiled. Các giới hạn dung lượng/miền chưa rõ không tự thành lỗi đã xác nhận.",
+      "target_sha256": [
+        "7747b273f4968293596be1a907d5a32184f85196fb3d89005f8ed342f97a0a12",
+        "f90ef624e25dee48f04a898245370be4503b3faecd158fdc00231d3492083db2",
+        "29a1d3eb5aa8fef5c7d533f6bf95337e6f6139c3d205b15ab04b61007b0cfa83",
+        "44e3a70c35455612af273539965c238a3cb499455c86fc2da14cfff0d566a8a8"
+      ],
+      "gold_disagreement": true
+    }
+  ],
+  "evaluation_freeze_sha256": "4388a9fa7be648af56ff20948c729d7b49d0fb93db378577bfa5549683dbb1a5",
+  "split_policy": "all counterfactual/evaluation families excluded from train; exact/token/identifier-renamed identity, original and group excluded against both sets plus six real-val and old synthetic-heldout; each train code once before task/Level expansion",
+  "validation_policy": "fixed16 evaluation only, no during-train selection; exactly final one-epoch adapter",
+  "annotation_policy": "gold v2 unchanged and compared only; teacher feedback not copied; style-only vs scoped clean and missing implementation disagreements explicit",
+  "disputed_excluded": "whitespace-only correctness, invented style obligations, unspecified capacity/empty-file/overflow guarantees are not trained as unconditional claims; scoped clean basis states restrictions; no public data read for target selection",
+  "teacher_style_reference": "short Vietnamese locality/cause/direction; official label_space content rules take priority; no teacher text in inference"
+}

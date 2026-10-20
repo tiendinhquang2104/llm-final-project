@@ -1,0 +1,42 @@
+{
+  "pilot_eligibility": "INVALID_HISTORICAL_EVALUATION_LEAKAGE",
+  "historical_overlap": [
+    {
+      "train_id": "SYN-COUNTEVEN-0001",
+      "historical_id": "SYN-COUNTEVEN-0001",
+      "matched_on": [
+        "sample_id",
+        "code_identity",
+        "renamed_identity"
+      ]
+    },
+    {
+      "train_id": "SYN-SUMPAIR-0003",
+      "historical_id": "SYN-SUMPAIR-0003",
+      "matched_on": [
+        "sample_id",
+        "code_identity",
+        "renamed_identity"
+      ]
+    },
+    {
+      "train_id": "SYN-SUMPAIR-0003",
+      "historical_id": "SYN-SUMPAIR-0003",
+      "matched_on": [
+        "sample_id",
+        "code_identity",
+        "renamed_identity"
+      ]
+    }
+  ],
+  "unique_leaked_train_ids": [
+    "SYN-COUNTEVEN-0001",
+    "SYN-SUMPAIR-0003"
+  ],
+  "current_paired_evaluation_overlap": [],
+  "new_heldout65_renamed_overlap": [],
+  "found_after_training": true,
+  "training_not_repeated": true,
+  "adapter_eligible_for_candidate": false,
+  "correction": "Added pre-target-write and pre-training metadata gates; frozen80 targets/adapter retained as historical exploratory artifact, no relabeling or retraining. Training-result script hash binds the pre-hardening implementation."
+}

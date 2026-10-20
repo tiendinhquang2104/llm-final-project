@@ -1,0 +1,804 @@
+{
+  "zip_sha256": "6bda70c29254a3bce91933b65f4a311d73a052e72d181c97e977152e14602f9b",
+  "initial_head": "de89ce43cca36fa346a49d1fbea3c5fa4f124133",
+  "branch": "feat/task3-quality-round5",
+  "selection_rule": "source reviewed fixed IDs; two per diagnostic family; separate evaluation families; old fixed train membership plus new appended train IDs checked against heldout/real-val identities; no public selection",
+  "sets": {
+    "counterfactual": [
+      {
+        "sample_id": "SYN-ARM-0007",
+        "family": "SYN-ARM",
+        "group": "34bcdb3a9ffabb4f1c337f7820098f976453f18f5e7d94ab5e5319c5d5f1af42",
+        "source_sha256": "7765dd1ffdbf6b3146059022a16d8aa9ceaf01d83771368209830a64e2127412",
+        "code_identity": "dcb37e34ec61dafa4a1a43d5174c35fe99afd0a43d24e6a7eb275f9ecc907d4d",
+        "renamed_identity": "cb4fc99ce1a16ad1c1034d2c5c1bd7df4f99ac81ec8652491093f907c480082a",
+        "annotation_v2": [
+          "Lỗi thuật toán",
+          "Lỗi style"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Digit counter decrements; n=153 gives negative exponent, sum=3 instead of153; False instead ofTrue. Style annotation not objective requirement."
+      },
+      {
+        "sample_id": "SYN-ARM-0022",
+        "family": "SYN-ARM",
+        "group": "a4e42cf6efbafe13c00321b8ff592e90ed65b56c2d9de6e31ee256c94e9fc0e9",
+        "source_sha256": "65b769ac65f7716089d52f25df320f51336268edae121cd63337f417104709af",
+        "code_identity": "807004b64a93b70938bc5c728c99f4535f15bb7251a25baf89ca18f95f3916ed",
+        "renamed_identity": "675c0793679b0b5f8bd6cde9c5ecdd9e29844320f69938bf78518f5e12aaac90",
+        "annotation_v2": [
+          "Lỗi biên dịch"
+        ],
+        "labels": [
+          "Lỗi biên dịch"
+        ],
+        "compile_error": true,
+        "evidence": "Missing semicolon after digit counter initialization; syntax diagnostic."
+      },
+      {
+        "sample_id": "SYN-DIGITSUM-0015",
+        "family": "SYN-DIGITSUM",
+        "group": "25dbe9382607f0d9d0842e49b41e456972a1b694f01a092156ff1937ce5ec994",
+        "source_sha256": "d4b03a802d3c0c4d6eaa0800270e59262c2323a9a253c68987cd45d4554132b4",
+        "code_identity": "efa18263cae0d76e9cd726b11234d6b6c1b73f3a7f37f7555201c03fdcd54ff9",
+        "renamed_identity": "1e519a68566d5f6631a0b15b4a40ac94aa2037f25b741d36600726a105a8bc32",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Adds quotient n/10 instead of extracted digit:12 computes1 instead of3."
+      },
+      {
+        "sample_id": "SYN-DIGITSUM-0012",
+        "family": "SYN-DIGITSUM",
+        "group": "f7e43e5f2685c2dfe56277654952758b76fe84215c460cefd2d4b893ece3c264",
+        "source_sha256": "64b28048927262b4e22f9b9909e842ad4ac1e31d3824c0f8e300e6d4bcd78477",
+        "code_identity": "96c05b290499c07cc193d028498990c7adb8fa4b0f102a5e23cc0ce4725130b3",
+        "renamed_identity": "462e2dd2fbd6159913e4b17f6d4373cbd57beadcbe1151be32b184412d6f1526",
+        "annotation_v2": [
+          "Lỗi biên dịch"
+        ],
+        "labels": [
+          "Lỗi biên dịch"
+        ],
+        "compile_error": true,
+        "evidence": "Missing semicolon after string declaration; syntax diagnostic."
+      },
+      {
+        "sample_id": "SYN-DISTINCT-0004",
+        "family": "SYN-DISTINCT",
+        "group": "e5d33a845e945e14b5ed7f1451480e2ed8919bf74e7a4bbccbae625d899a2150",
+        "source_sha256": "1df9548e0f07177c15f4de9329f0cde61d5d773fced572f768ca108dab0811c8",
+        "code_identity": "cce27ed8bf014e5447e73fe783ba159e88237dc7901d40bffb9ab474475352da",
+        "renamed_identity": "e263eeab8436f25b90e3259c1a6234bcacca19d139cc9ac009708c32b9d54722",
+        "annotation_v2": [
+          "Lỗi edge case"
+        ],
+        "labels": [
+          "Lỗi edge case"
+        ],
+        "evidence": "Singleton branch returns0; n=1,a=[7] requires1. Capacity100 is an additional conditional domain limitation."
+      },
+      {
+        "sample_id": "SYN-DISTINCT-0012",
+        "family": "SYN-DISTINCT",
+        "group": "76a605631fe91f5796d3a21dbcda33a9d620f9cfc326aa0804b55a1625d1f8cc",
+        "source_sha256": "f98624563c2754ba41e35a0a05fe2930eb17b920c4c9b73b13c48ca9913508f1",
+        "code_identity": "8db626d87fb8de037c5edb18701fb79479b91dfe56ec2a5192887535a745e93b",
+        "renamed_identity": "d6973a3f8f0215546286a276e79e04079824a5d19728f27f33791beff02b459f",
+        "annotation_v2": [
+          "Lỗi logic"
+        ],
+        "labels": [
+          "Lỗi logic"
+        ],
+        "evidence": "Unique counter decrements: [7] yields-1 instead of1. Capacity100 conditional limitation."
+      },
+      {
+        "sample_id": "SYN-PRIME-0004",
+        "family": "SYN-PRIME",
+        "group": "f5fb47661cda7a1111204ef40803083cf67bd8b27580d4f4ef379067c537cf6a",
+        "source_sha256": "a9fa15d9a176c9cd76cee7172cc6c5dbe6436fb94d04cc2e74f146be30d04dc4",
+        "code_identity": "0995b33d55dc734582e5fd8d5a250da256645661deaa6bce87b73126394caa57",
+        "renamed_identity": "0b4f746026f89f2e3f9b04307ff4e3a012c4bd841ed9e25cb3006fd6f84da7ec",
+        "annotation_v2": [
+          "Lỗi edge case",
+          "Lỗi logic"
+        ],
+        "labels": [
+          "Lỗi edge case",
+          "Lỗi logic"
+        ],
+        "evidence": "n=2 rejected; strict square-root bound accepts4. Both counterexamples follow active code."
+      },
+      {
+        "sample_id": "SYN-PRIME-0007",
+        "family": "SYN-PRIME",
+        "group": "b762ccf670f9b86cf4e649fb297ce3909e587a276a5436969eaf34270623b7ef",
+        "source_sha256": "4e459d3559571453b6af9e075e4d9b995f33be27b1258f14e62f2c7d5bde680a",
+        "code_identity": "6a5b0a0648c6d59944a90ee9d5a8bd8978ef9f03ddcbab0425b2794a687d95ef",
+        "renamed_identity": "6c7360e9b5834233df79ecf8c08580721f86ace893c6315ea37bb80c27050982",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [],
+        "evidence": "Scoped clean for representable int inputs: reject<2, special2, even rejection, odd divisors through sqrt; long long divisor prevents int square overflow. TODO/style alone not source defect."
+      },
+      {
+        "sample_id": "SYN-GCDARR-0003",
+        "family": "SYN-GCDARR",
+        "group": "0d153ad87a331b2eefe211ea71fe164f2b64b691cd2169e9dc36ef1ba8a774de",
+        "source_sha256": "70a68314fb64a5cfc3aa9120627f478a94c73f3bb89839a947d47099b8a1ab8b",
+        "code_identity": "d2ddabd6d04a8d5714bea664dd916c7f571c1d92ab94012b32dd92c73aa3a971",
+        "renamed_identity": "6ec79e08c476cd7972e2d0254861fde3ad02e8a0c1cb1c1a536100858c29924b",
+        "annotation_v2": [
+          "Lỗi mảng/chuỗi"
+        ],
+        "labels": [
+          "Lỗi mảng/chuỗi"
+        ],
+        "evidence": "Both loops include index n, request n+1 numbers and use uninitialized element on valid input; at n=1000 goes out of capacity."
+      },
+      {
+        "sample_id": "SYN-GCDARR-0007",
+        "family": "SYN-GCDARR",
+        "group": "4119bc971e192a3bafdc1daae9c08158d86f940b1c207ac95736cb428e891aaa",
+        "source_sha256": "cada26ac620b565081001a38b0aac78dbc84de0996cb4674b5213a34048872ee",
+        "code_identity": "30d0d982edff567a9816f7b726a9629cff327a9cea4d7e7a88986c21bdc7ac1b",
+        "renamed_identity": "54c4a0d92dd0855dc3f5a34a2a9d04bb968951c86a1aece0908b7fad4c7cf648",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Euclidean update uses quotient: [6,4] gives1 instead of2; n<=100 counterexample avoids capacity issue."
+      },
+      {
+        "sample_id": "SYN-POWER-0003",
+        "family": "SYN-POWER",
+        "group": "6336d7b760cbbaf2d5cb1924e7b270bd147b32b780f71903493189edde5038e4",
+        "source_sha256": "b98ec5a069853632490f4acab66ccfbe6437275146eb9f0d25b665eb5f6f32cb",
+        "code_identity": "8aa7bbdf502e8118a8c57f9bebbe5953dd7bad1a5bf56566f001dfbd30687189",
+        "renamed_identity": "85750c52933f599825ca6226c416e803803cfd4997b7e6fa588ced13a6566053",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [],
+        "evidence": "Scoped clean when a,b fit input int and a^b fits signed64; product invariant with b iterations, b=0 returns1. Wider a allowed by unspecified input domain is limitation, not unconditional clean proof; style tag unsupported by requirement."
+      },
+      {
+        "sample_id": "SYN-POWER-0006",
+        "family": "SYN-POWER",
+        "group": "6c77e0aea1d83c8fa9e473f63a11e8e0c743f2f058944ed1ec84a9de23a6e10c",
+        "source_sha256": "befbbc3e95bfb8a4579f2599f31ca52f400ffea69aee54aab3d60aadaf227c5b",
+        "code_identity": "fc3ff626ec2c6f34f178261f79413b0f9e8bd79c980613ee7020ab7dcfc16f3f",
+        "renamed_identity": "428f7814736737994a56146c7cf12e6d01949e70ded06d2e0605a24fa7a57b79",
+        "annotation_v2": [
+          "Lỗi vòng lặp",
+          "Lỗi logic"
+        ],
+        "labels": [
+          "Lỗi vòng lặp",
+          "Lỗi logic"
+        ],
+        "evidence": "Positive exponent loop never increments iteration counter; input1,1 never terminates and avoids overflow."
+      },
+      {
+        "sample_id": "SYN-COUNTUPPER-0003",
+        "family": "SYN-COUNTUPPER",
+        "group": "c93d4f8e2ad41e34bc8702961c9823f3b557e511eee849115e14a4b08f561e99",
+        "source_sha256": "56655c9bc12a9daa1b8b3cc08d3097e6b7ce192954b0842bf00706f9ab9ed6dc",
+        "code_identity": "2c836a493163c2f5b3741748562ed487670fdee08330d876e6f30c8ded2e0912",
+        "renamed_identity": "e249e83e51a74af2904301e1b0371e1b65251ae5ff372926dfa98c31a6ba6715",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [],
+        "evidence": "ASCII string domain: prefix count of A..Z with bound i<size; no output prefix. Style-only v2 disputed."
+      },
+      {
+        "sample_id": "SYN-COUNTUPPER-0009",
+        "family": "SYN-COUNTUPPER",
+        "group": "e7d40776ecbaf267a4d8265820d0ddd9adf27c670e34038e55fc07550e4b81a0",
+        "source_sha256": "caffc2538f2e95fa7ffcd3808c3b8b2437e5e8c09d4f39020969c830a6474445",
+        "code_identity": "53609d8192bb273879ab03404252d029f1fb1f4c36358a2ee471d1a9ae8fbc35",
+        "renamed_identity": "ce0e4c3347845c119f80a19252a09b0a195995ddfe6a526186b40ed01d33ca0d",
+        "annotation_v2": [
+          "Lỗi logic"
+        ],
+        "labels": [
+          "Lỗi logic"
+        ],
+        "evidence": "Strict lower ASCII bound excludes A: input A yields0 instead of1. Terminator at strlen is valid and fails predicate; do not invent terminator out-of-bounds. Unbounded input vs fixed1005 conditional issue."
+      },
+      {
+        "sample_id": "SYN-REVSTR-0004",
+        "family": "SYN-REVSTR",
+        "group": "655b46948e59a208db240263ec1d12961ef6212a9ef6ad9ab33714b031c62be3",
+        "source_sha256": "cd92475c32f784aeda9232880d53d46da83116a018a46790c44808c4ad85d04d",
+        "code_identity": "19bca413ee785f3c51659970243e1ad6857530ef8c6e3bc22e7335b3ab49c2db",
+        "renamed_identity": "affd63face2660ad0f199c7232666256485356c5f3e2d42ac41c894b1c337315",
+        "annotation_v2": [
+          "Lỗi logic"
+        ],
+        "labels": [
+          "Lỗi logic"
+        ],
+        "evidence": "Inclusive half bound double swaps even middle pair: ab returns ab instead ofba."
+      },
+      {
+        "sample_id": "SYN-REVSTR-0010",
+        "family": "SYN-REVSTR",
+        "group": "c9058675b30ba96393714dc556002063703940f817b8eefb47703404506bf854",
+        "source_sha256": "89dadb173b7042c7ef079172e7de6d671bf52f7a7b818ce4a725c4cd9ad3d00b",
+        "code_identity": "02f8b19290564fd20bf8e6782a85e5073ae13c95a5234f6cd7b2f7face4f23d1",
+        "renamed_identity": "86dc8e5a24d5a53629180ef3b2722fb715841e28beb189e8e8a6e42fdd10e67a",
+        "annotation_v2": [
+          "Lỗi biên dịch"
+        ],
+        "labels": [
+          "Lỗi biên dịch"
+        ],
+        "compile_error": true,
+        "evidence": "Missing semicolon between string declaration and cin."
+      },
+      {
+        "sample_id": "SYN-BASE2-0004",
+        "family": "SYN-BASE2",
+        "group": "2437bbac0e2c9cd7a205e5c45687c944cfee717fc9f3bfc998ce6c3826ba37c0",
+        "source_sha256": "b37a5e03fbebc3a889692ed6611f2516ab59ffb9e9b94efd482f46470c527dbe",
+        "code_identity": "1f7656d33ec722387c4812ffcb643ac6c57ab6f7e012380a74407626f5e619cd",
+        "renamed_identity": "b01666c9d938eeb6301d47366eb30c4b2b9c5be9852588005730ce25dab812de",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [],
+        "evidence": "Scoped clean for nonnegative int input: zero branch0, prepend remainders; TODO alone not defect. Wider unspecified domain remains limitation."
+      },
+      {
+        "sample_id": "SYN-BASE2-0008",
+        "family": "SYN-BASE2",
+        "group": "50c1f72898d0b825d6c65faef4f99e05905b50c3ed94994a0988cc3391cfe923",
+        "source_sha256": "e578b847a2eee6f74ed057df7a1f7cb6ba3029dd396604485a63a6753f619d6c",
+        "code_identity": "adf28e8995456f81a21ec8ef2cf6af8bfd5f9e67c08003c4b4a0f071698c698b",
+        "renamed_identity": "8654acea5741ce756ad9adddcfc1b97ffa65750534265ae693afa079e8100010",
+        "annotation_v2": [
+          "Lỗi hard-code"
+        ],
+        "labels": [
+          "Lỗi hard-code",
+          "Lỗi nhập/xuất"
+        ],
+        "evidence": "Special-cases5, consumes first input, then reads a second number into uninitialized n on other input; one-number input2 fails normal input path."
+      },
+      {
+        "sample_id": "SYN-SUMEVEN-0003",
+        "family": "SYN-SUMEVEN",
+        "group": "e3c22fe750b94369cac6f27cb24d35590566af09b9d2c5957e8cd8813240af69",
+        "source_sha256": "7e67973c8a4e739a5f1c7214b73c411fe8c8b98221afb763747090f99a31bfe9",
+        "code_identity": "bf33b4e5f62372b840dba060ea6ac76bf6a92b92b0889299832cd29132b75957",
+        "renamed_identity": "c5eef97184019ab71020ba25057f4d079d96bdd587e8addd913e4ad7234e7066",
+        "annotation_v2": [
+          "Lỗi nhập/xuất"
+        ],
+        "labels": [
+          "Lỗi nhập/xuất"
+        ],
+        "evidence": "Extra prompt text before reading n violates required numeric output. Whitespace alone separately checker-dependent. Capacity1000 conditional."
+      },
+      {
+        "sample_id": "SYN-SUMEVEN-0004",
+        "family": "SYN-SUMEVEN",
+        "group": "cb7348585286667db3293daa2c48b8813d2887295654271a76982923b25f8765",
+        "source_sha256": "d524a79d7cf68ab4d783ea37ceb53f62b5e03b3151330d5f8f517d0d5db30bfe",
+        "code_identity": "4d609a82ff198a56e0229ae951b23fcade37179252f89f663d278d9d8231409e",
+        "renamed_identity": "aa87397e20f7007919169a22685af6a6ca9d7b34d62cf210eb92b74148b91288",
+        "annotation_v2": [
+          "Lỗi edge case"
+        ],
+        "labels": [
+          "Lỗi edge case"
+        ],
+        "evidence": "Singleton even input n=1,[2] returns0 instead of2; capacity1000 conditional."
+      }
+    ],
+    "evaluation": [
+      {
+        "sample_id": "SYN-FACT-0009",
+        "family": "SYN-FACT",
+        "group": "4788b06ae51b4e0ab6b58c5506ebc5b408f23f0ee60ff204e5c38ed05a2b8e8d",
+        "source_sha256": "c60c2ebb29e9ce706b31d804ec413b434a0b6cd71e5e769127632825bfeb7a13",
+        "code_identity": "4788b06ae51b4e0ab6b58c5506ebc5b408f23f0ee60ff204e5c38ed05a2b8e8d",
+        "renamed_identity": "cccac1c6a064e58524571fe000ef9eb2e815d8ceb392d6965c5be9c5b7519f87",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Stirling approximation is not exact factorial: n=3 rounds to6 but n=4 rounds to23 instead of24.",
+        "repair": "Multiply integers from2 to n, initialize1; signed64 holds20!."
+      },
+      {
+        "sample_id": "SYN-FACT-0003",
+        "family": "SYN-FACT",
+        "group": "537a713c5ffe3560269257e28016d407fa6a6a9794c0b0903322034071a16b64",
+        "source_sha256": "dfd69e4a39c4123759db1b4e9385a497956c64f2fdf2c5ab29b831e1f1f2ebcf",
+        "code_identity": "de677dcb0fa671a806777baf57995e37c7db5625953f249ec5b0da80d9788e33",
+        "renamed_identity": "639f447703ff1215654b80e9bae6eb7358942b63a996efd3764240d590993bf1",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [],
+        "evidence": "Exact product2..n initialized1, n=0/1 returns1,20! fits signed64; comments/TODO not defect."
+      },
+      {
+        "sample_id": "SYN-PERFECT-0024",
+        "family": "SYN-PERFECT",
+        "group": "7491d91ab3d09ab79da6beefd3f0bd41eb9941784ea2286ae8556b97319a6c89",
+        "source_sha256": "80a318a0a0a62c9c6c2980ffdccba73ff943d40af34d3a077333863d9fb56894",
+        "code_identity": "7491d91ab3d09ab79da6beefd3f0bd41eb9941784ea2286ae8556b97319a6c89",
+        "renamed_identity": "3886780e2d0f6f99e669bdc0f9532a7419d1150b97b1201b8570feefcac59b7d",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Only adds divisors<=sqrt, omits partner divisors:6 gives3 instead of6, henceFalse instead ofTrue.",
+        "repair": "Add complementary proper divisor for each factor, avoid double-counting square roots and n."
+      },
+      {
+        "sample_id": "SYN-PERFECT-0005",
+        "family": "SYN-PERFECT",
+        "group": "bf57becae97f8ec15f6f72c68d89ed59f07a20fa62d7b3323cb5930e228a047d",
+        "source_sha256": "174c2a1399e77bef0e4749d1ec19056a24de2044325dbba0d7b834822414ecb7",
+        "code_identity": "c27b21737b4f062ce0b92114de816cae247df08f7569c8f9195144abd7b36947",
+        "renamed_identity": "f12a64b3ad0b294c7561b49240189c1a3eead13af61428399861c1f9bea0d19d",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [],
+        "evidence": "Loops1..n-1 sums all proper divisors; rejects1. At n<=1e8 sum fits int; O(n) may be slow, time limit unspecified; do not declare TLE as measured."
+      },
+      {
+        "sample_id": "SYN-SECONDMAX-0010",
+        "family": "SYN-SECONDMAX",
+        "group": "5039dcb9400e63f56de09c866a2aa88899cf2c7d9f89f6067a19e91d98833c13",
+        "source_sha256": "09096925457cfc5c214453d36d6c4f17a7e92620b0d061ea392ed1bea482657e",
+        "code_identity": "5039dcb9400e63f56de09c866a2aa88899cf2c7d9f89f6067a19e91d98833c13",
+        "renamed_identity": "6c17bd1838da1fd34b24613f1c5d90eb60357e960629ed6a086db55e5937c156",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "[1,5,10] prints9 instead of5; maximum minus1 need not appear in input.",
+        "repair": "Track largest and second largest from actual distinct elements."
+      },
+      {
+        "sample_id": "SYN-SECONDMAX-0003",
+        "family": "SYN-SECONDMAX",
+        "group": "e4f8b8e9e7d071e0ef05b8aebfdc172a51a63a1cb3cf1c71d23ef7acc33551cc",
+        "source_sha256": "b8599e1021de1150ed12c03e92678008e677c0f450868e635c6578f7e0b18547",
+        "code_identity": "4552e5c9e243b050871bca891c3dd1fbab39eb4cf742472c996f96e6c5cd36fb",
+        "renamed_identity": "7efb4407b795f6f6cb9fbd9d3feb44b482299f58e7f027a449eb45289a8eb6ec",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [],
+        "evidence": "Scoped clean for2<=n<=1000 distinct ints; initializes two extrema and preserves invariant. n<2 and capacity domain unspecified, report conditional limitations."
+      },
+      {
+        "sample_id": "SYN-FIB-0016",
+        "family": "SYN-FIB",
+        "group": "dd3c05b6a6695c8dbbac1a22e33cb1f8d3f03c741e604550c97e2d9650c4fef5",
+        "source_sha256": "d7b453a86f33139ecd7c08b3f95d0b2b314884d2a48595a63d753affea52e1b7",
+        "code_identity": "dd3c05b6a6695c8dbbac1a22e33cb1f8d3f03c741e604550c97e2d9650c4fef5",
+        "renamed_identity": "79f58d4da1791d6ce7872ae51330c726ec1aa4597da693b4147d1eb3d3ab76a0",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Double Binet loses exact integer precision: n=71 approximately308061521170130 vs exact308061521170129 (signed64 fits). Platform rounding counterexample must be checked.",
+        "repair": "Use integer recurrence with two previous terms in range fitting signed64."
+      },
+      {
+        "sample_id": "SYN-FIB-0015",
+        "family": "SYN-FIB",
+        "group": "fc4685fc5e7f92d27b67f1cd6c8b4f5eeecef940f8fe7d3359465e96361d7d4d",
+        "source_sha256": "09c9a715291a625a0d5b575f3cdaf3686381716445a837b33eab52cf4eff5326",
+        "code_identity": "855271db201183663cae8356416647e26212523184f99d8f7a69a075d34759f5",
+        "renamed_identity": "108ad5affa61a35e5b496f5669ea7474136b9aaf7e4c90eb59e26e0605b5fafe",
+        "annotation_v2": [
+          "Lỗi biên dịch"
+        ],
+        "labels": [
+          "Lỗi biên dịch"
+        ],
+        "compile_error": true,
+        "evidence": "Missing semicolon after pair of previous-term declarations.",
+        "repair": "Terminate declaration before for loop."
+      },
+      {
+        "sample_id": "SYN-COUNTGT-0023",
+        "family": "SYN-COUNTGT",
+        "group": "feeebd7382ca62c1f0567036d054d451dc3f601c97189f3b0beaab62ac0b930c",
+        "source_sha256": "2c256805890ac306a57ea477485562bdf526a4b03ea1669b8412557f63b2ec07",
+        "code_identity": "feeebd7382ca62c1f0567036d054d451dc3f601c97189f3b0beaab62ac0b930c",
+        "renamed_identity": "f7eb261e56072b8e7c1c266efb3b8f0b32166802dfb1d75115209c0552c1d710",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Rows(3,1),(0,1): totals3>2 returns2; only first row satisfiesa>b, expected1. Fixed capacity100 also conditional input limit.",
+        "repair": "Count each row satisfying comparison separately."
+      },
+      {
+        "sample_id": "SYN-COUNTGT-0022",
+        "family": "SYN-COUNTGT",
+        "group": "f1fefcf4b57414fedb4c4734ae3e62d24e7db679d5bc084d9cb19a1a004987a1",
+        "source_sha256": "c11f5c216602f30710526e757712802e9a85eaa80803930629e82f8bbe5809fd",
+        "code_identity": "dd28e6af3e4cdc8ea3dbf49cb6b9ba6b1397d862f64a089f8e98a23e11ee73d0",
+        "renamed_identity": "4b5408ba29c76fd19d59a726a2b913d47885d1281852a6ef3f6570d8d974ca06",
+        "annotation_v2": [
+          "Lỗi biên dịch"
+        ],
+        "labels": [
+          "Lỗi biên dịch"
+        ],
+        "compile_error": true,
+        "evidence": "Missing semicolon after dynamic allocation; no main is permitted by function prototype task.",
+        "repair": "Terminate allocation declaration."
+      },
+      {
+        "sample_id": "SYN-MAXDIFF-0013",
+        "family": "SYN-MAXDIFF",
+        "group": "6610fa5214a49659890a9feb60df688778950d57ddea80c9c1241cdc5d4c1dd7",
+        "source_sha256": "9328f7f342f3ab26b64dff9dac49234fec1545bcce2886ffb17d50e55cd8eeb3",
+        "code_identity": "6610fa5214a49659890a9feb60df688778950d57ddea80c9c1241cdc5d4c1dd7",
+        "renamed_identity": "8745e529bebcf27d2a7f0ea8d2328a8aef254eed26b11ebd9390f188917409ff",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Rows(10,9),(2,1) have max difference1; independently chosen maxA-minB gives9. Capacity100 and empty file are conditional limitations.",
+        "repair": "Compute a-b per row and maximize those differences."
+      },
+      {
+        "sample_id": "SYN-MAXDIFF-0000",
+        "family": "SYN-MAXDIFF",
+        "group": "fa474242fc985c10f19c689872af77159af78c750bb64fafc13dd95cd721a11d",
+        "source_sha256": "7351cf6afee25c65ea6bb305353dc3bbcd7f8fbc80df9ba4a88056a39a3b3c92",
+        "code_identity": "00df2b83b2936b7f902675c4b5864b643e932407a383da8eb093b66ddfbcafac",
+        "renamed_identity": "7699eb0f13e9f5a097e5e4dd6de3ed2243000941d58a9db0c048cbc33b9708c4",
+        "annotation_v2": [],
+        "labels": [],
+        "evidence": "Scoped clean nonempty file with differences/sum fitting int: counts rows then exact allocation, sums differences, max of row differences, printsP2. Empty-file policy unspecified; conditional issue not invented compile error."
+      },
+      {
+        "sample_id": "SYN-MINA-0019",
+        "family": "SYN-MINA",
+        "group": "9f3e2a5343b52cb8a368aa2cbabe28ff6f9755a695a0be3c5cd4e32c451dae78",
+        "source_sha256": "a39aa728fae175910008b354744ef23068ee9bbf57b1682eb22363443dc1c4a8",
+        "code_identity": "9f3e2a5343b52cb8a368aa2cbabe28ff6f9755a695a0be3c5cd4e32c451dae78",
+        "renamed_identity": "1d5e60065a61876119a06efc65448c0f101a250457f8a14afe7131b4df530c6f",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "One left-to-right bubble pass on a=[3,2,1] leaves[2,1,3], returns2 instead of1. Capacity100 conditional.",
+        "repair": "Scan and update running minimum instead of incomplete sorting."
+      },
+      {
+        "sample_id": "SYN-MINA-0017",
+        "family": "SYN-MINA",
+        "group": "f0d1e54ba2fffebf02a94e42ca5c15ad1918306ed32e4404d2db992951195f61",
+        "source_sha256": "d14751d8fbb2d73d900b74b91e5a0ff1add530e3a38e14325e3d9fd5416bdb92",
+        "code_identity": "afff6d3bb02717f8cb61fd8b7b689b73cb617ccc33ae58d7a57e0e881f5eb63a",
+        "renamed_identity": "9bb31e6f420d085bb0fac511a56cb43f4fb72de5bc4928c7b87c986ed22e0c76",
+        "annotation_v2": [
+          "Lỗi biên dịch"
+        ],
+        "labels": [
+          "Lỗi biên dịch"
+        ],
+        "compile_error": true,
+        "evidence": "Missing semicolon after vector declaration.",
+        "repair": "Terminate vector declaration."
+      },
+      {
+        "sample_id": "SYN-PROD-0026",
+        "family": "SYN-PROD",
+        "group": "d6efea1194910a5c95e336ce83303bb6c32cd91a748e4d37aaeb211e309e09c1",
+        "source_sha256": "9a9891c5495e4a650068a35faa770d4bb584b903729663383d9f362b91e31967",
+        "code_identity": "d6efea1194910a5c95e336ce83303bb6c32cd91a748e4d37aaeb211e309e09c1",
+        "renamed_identity": "79ce3578c944ae9e942b958becd81aae3592ef554c38ffd34edc3c61de41a3bc",
+        "annotation_v2": [
+          "Lỗi thuật toán"
+        ],
+        "labels": [
+          "Lỗi thuật toán"
+        ],
+        "evidence": "Rows(10,1),(1,10): both products10, independent maxima product100 not present. Capacity100/empty domain conditional.",
+        "repair": "Maximize actual row products."
+      },
+      {
+        "sample_id": "SYN-PROD-0013",
+        "family": "SYN-PROD",
+        "group": "6d20df3a583d61289dee48d62f4224a870aafaf34bf5719147e9fe6a32b544f4",
+        "source_sha256": "90783a6e3e0588448e8cfb5788b0e222dc2d87d94b89bfd8e6029e0301f53250",
+        "code_identity": "7eae7642a71e56ac9c9bdbf530d22674403beee245317fb2bd5e09e07728a694",
+        "renamed_identity": "93884d022d1f4ed54d388d2632884040eaf8450a7f9b0489aba1dec534a4208f",
+        "annotation_v2": [
+          "Lỗi style"
+        ],
+        "labels": [
+          "Lỗi hàm",
+          "Lỗi nhập/xuất"
+        ],
+        "evidence": "P2 returns0 regardless of records; P4 empty. One row(2,3) requires sum6 and printed6. v2 style-only contradicted by source.",
+        "repair": "Implement accumulation of row products inP2 and call/output it inP4."
+      }
+    ]
+  },
+  "private_hashes": {
+    "counterfactual": "61ef1654d8a7a4c32ce21902db5ebdb094343d5103b99b9b5e8fc0d5464d5358",
+    "evaluation": "3a8b5a2edb09d7b21020f849aa296c81c022aadb7dfa5c38e0fcafa60a5ee15c"
+  },
+  "control_config": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "seed": 42,
+    "data_dir": "data/processed/task3",
+    "context_limit": 16384,
+    "max_new_tokens": 1024,
+    "level4_max_tokens": 1536,
+    "max_attempts": 3,
+    "generation_max_time_s": 45,
+    "do_sample": false,
+    "few_shot_k": 0,
+    "load_in_4bit": true,
+    "cpp_compiler": "/usr/bin/g++",
+    "compiler_timeout_s": 3,
+    "prompt_policy": "round15-short-direct-v1",
+    "example_bank": "outputs/task3/round15/train-examples.json",
+    "completion_policy": "preserve_qwen_content_with_schema_and_explicit_l1_l2_only",
+    "prompt_variant": "zero_shot"
+  },
+  "control_implementation": {
+    "src/task3/round15.py": "9f367db21ee0bffba82a56950734e830606b52fafa32b70f4f8312e6492c3f9c",
+    "src/task3/round15_runner.py": "d59530f8fff1feffe26e62cb89d47fa240de4a6442c94c5cf9df3546429c5807",
+    "src/task3/round15_disclosure.py": "3b8a7009c491e4def66ee63f849c15580842b88fcdc74315324e81798496e941",
+    "src/task3/inference.py": "84c4b0166dfcadc1d79aba365ed9dba84058e55954c459f6f4eb3724c452eea2"
+  },
+  "protected_files": {
+    "outputs/task3/round15/train-examples.draft.json": "fe776cedec99cf669b482ed925579d8c449ab917ac94a1880ec2f5600fda7b03",
+    "outputs/task3/round15/postprocess-replay.log": "3f965ec0e19041b4336f5b355014f3701c1661f5db3e93692ed58a2f0edc53e8",
+    "outputs/task3/round15/tests-round15-green.log": "b274cc9cf0ee332332cb4121525a2cc7b1a6fd4c5ee2da09a4e4b35585291ce0",
+    "outputs/task3/round15/tests-generic-noun-red.log": "11fb2ba82dab7d499c4c3770d4412acb8b4dbc0bc729f255f8cccad3ecde63ba",
+    "outputs/task3/round15/tests-bank-red.log": "cdce4905d16210db00fdf99aea5cd8f06cc986081dcf73c3c3c686681a3a9546",
+    "outputs/task3/round15/example-syntax-evidence.json": "ff39595a7307b674961172127759844c386d7de8c83864352fc9fa16521a5052",
+    "outputs/task3/round15/train-tokenizer-preflight.json": "38fb85b5c5a5a24fc958b2f6b5cc23d6c6b3c08b0c0f5536e3a40034249ce605",
+    "outputs/task3/round15/tests-round15-pre-model.log": "32c2ced21746266c3aac1b372347d81f43ccb2e95a1096b0429a947d3629a7ab",
+    "outputs/task3/round15/public-candidate-zero.log": "20785f1a75c2731e69ca65d762163a6b082acf609f8b2cf7b78b9541d0141062",
+    "outputs/task3/round15/tests-runtime-resume-red.log": "e5083008be3881fb90b578cd3d1e8206dd209685b57c5777b72fb9fc4bd610fc",
+    "outputs/task3/round15/tests-review-all-green.log": "ca609c48f1d984f51287fe812cb694011c85b0bd33eb730bc05b5eaecc2261c3",
+    "outputs/task3/round15/tests-resume-integrity-red.log": "86213de01b572d44c2d927618882de16643ec50c4e1d7bab7c4b33696f54473a",
+    "outputs/task3/round15/dev-round14-control.log": "df7317a420d0a3150305543d59845575743ebc94536ac48c97434e2a6ca35e4a",
+    "outputs/task3/round15/replay_postprocessing.py": "0b9711e38eaf6090b1f0e3e454e2f7172ecca939e4d3760d64f62639a806d17f",
+    "outputs/task3/round15/tests-prompt-mid.log": "64c9d7a89fe33a839f033bcde64f85eb4069d31ccad353192f8513011de9b4f0",
+    "outputs/task3/round15/development-selection.json": "0e229f0f80728cb06fd326418f02d4716a976dee5b9dce60eae62cbf8c27a26c",
+    "outputs/task3/round15/tests-task3-pre-model.log": "c8884c23e4fd383e7424dd7ac7a5b2485b4bc8c880185225ff9a0537fcb2fae6",
+    "outputs/task3/round15/tests-round15-current.log": "b15d7b8c071402aa4a3f91e688b748d06a9ea2d6ac23f87211b76074c61c76ca",
+    "outputs/task3/round15/tests-task3-pre-public.log": "9f285f236ea3dc73b87ab534caa13ca98fd377f799de9f25c421a0ea09eedfe6",
+    "outputs/task3/round15/tests-root-green.log": "b33632f1430ce0b5613db6927aa9428be40f9ba4c14734049ef9438acb7ebe3a",
+    "outputs/task3/round15/tests-repository-collection.log": "80b4a7795a547b651471f3ddab263e95d95ed01896569440a369a9e896b7e533",
+    "outputs/task3/round15/tests-baseline-capture-red.log": "b07cb9ae909cc93ff6cbe95ed1ad481b2ace9d96b3651bb819536d11af62a805",
+    "outputs/task3/round15/summarize_public.py": "667f6a4fb45407c0d79ea26f4d2be83879d95014fb668f0c30572262bfcd343f",
+    "outputs/task3/round15/tests-task3-final.log": "9f285f236ea3dc73b87ab534caa13ca98fd377f799de9f25c421a0ea09eedfe6",
+    "outputs/task3/round15/tests-generic-noun-green.log": "7bbbca46fa123f0742382cef1a626c259b37e6ed30a4bd55c75f89b40b5af5e5",
+    "outputs/task3/round15/tests-prompt-red.log": "6c75ce1c60e9281c5c5311f4aa8883245088129574029c528b9a103b931454a5",
+    "outputs/task3/round15/dev-few.log": "ae6088979b3daaa64779699ac75c4a09251a3f4a2bc00d3f8bd16157b056d60e",
+    "outputs/task3/round15/tests-task3-reviewed-pre-model.log": "b1e8c7e6e4b7465dda174e0f7bb077b6d2d572d250076b1d785e0c379910adaa",
+    "outputs/task3/round15/public-usefulness-audit-plan.json": "8e84a829c0aa6794423283461191328a86394d550fbd22d97c3b44f850bc74c4",
+    "outputs/task3/round15/dev-zero.log": "a249ea553511ca27da829ffc2303555746aa4b031eb9809f542e2a85c5687d31",
+    "outputs/task3/round15/tests-runner-red.log": "9d564687238165b32e908dc3279cb54567b800f82db845bab3a0b0793a001aa9",
+    "outputs/task3/round15/example-source-shortlist.json": "506fce25c6ab91f1cf640a7381dc3381de39b4d32846a24337d0464ad536b31d",
+    "outputs/task3/round15/train-partition-history-audit.json": "3c6f6d2df87c37b972aaf595da7f09956dfcb9f6719c8c8627d7c4f1a14134cf",
+    "outputs/task3/round15/selected-prompt-freeze.json": "031c546bb5a83236725a158176585183c78799f7a8c4adc502d197cb3c858795",
+    "outputs/task3/round15/tests-review-all-red.log": "10a573b1daff63c1986d7c78f1cebccaa1e4cc653abc23824521d9319bdca1cd",
+    "outputs/task3/round15/train-examples.json": "731cc2b4caa43e4db83011a2bb73fb8919deb7138665e48964457e9962ee7938",
+    "outputs/task3/round15/same-text-guard-counterfactual.json": "28758ccdc825f65d6222d6f5b6ad73bc13240445d3ab2e1535708c4888832d22",
+    "outputs/task3/round15/example-candidate-selection.json": "bdc8b82ed50bbb9756f596b086322cccb45ce05be40df888021b5e7cdf488eea",
+    "outputs/task3/round15/postprocess-replay-summary.json": "320537504d7f4bfa3ce3f6d2beb58a37fc5a905750fc43688d1b84c0e71705c1",
+    "outputs/task3/round15/development-probe-freeze.json": "197e5fdbaa7fc76269c8b5a1fffdbba96799dd28652d57a64e5f37630a444e8b",
+    "outputs/task3/round15/task3_requested_levels.official.json": "17b8d690f2d86a53a6908da7b95a966194671c9e06117d635da24b1edd70bfa5",
+    "outputs/task3/round15/train-examples-review-notes.json": "43574b128823c60470a43cf6db1e73a5f02d824ac333f67d58b19b2f46000788",
+    "outputs/task3/round15/dev-round14-control/predictions.json": "2f0775f0467579c78fc5edd8711c15d9006e1c27f280513bd125efcb244022a0",
+    "outputs/task3/round15/dev-round14-control/compiler-evidence.json": "f35c5fb9bd5577e3296c1981f3f92df3636d886f299585a018d0bf41758546bc",
+    "outputs/task3/round15/dev-round14-control/raw-first.predictions.json": "fd2cf51c7581837577c760cb6673da8613f1f9a7763261686e0f540d2e863d31",
+    "outputs/task3/round15/dev-round14-control/development-selection.json": "0e229f0f80728cb06fd326418f02d4716a976dee5b9dce60eae62cbf8c27a26c",
+    "outputs/task3/round15/dev-round14-control/completed.predictions.json": "2f0775f0467579c78fc5edd8711c15d9006e1c27f280513bd125efcb244022a0",
+    "outputs/task3/round15/dev-round14-control/metrics.json": "96f7df357d1e4ce10a09d446053380b5d609274181626e9e26cf21ff719d79cc",
+    "outputs/task3/round15/dev-round14-control/traces.json": "13ca0d85ad11056e00d7496694c7ad86fe9ef2a09fb4b43125eea9d690a7349b",
+    "outputs/task3/round15/dev-round14-control/legacy-pre-guard.jsonl": "340b4ea67da621f339f2f59c2a4d0ace8479c7afc04906ac99099078c296d393",
+    "outputs/task3/round15/dev-round14-control/run.json": "42e5366bde15c2635f41bd890e62328438ae96beae17a234d2c25f1b13e4e235",
+    "outputs/task3/round15/dev-round14-control/raw-and-final.audit.json": "21fbcdd38b2a62b8efba77d06e08599155f74838f208ba5d63ef63bdc4645626",
+    "outputs/task3/round15/dev-round14-control/attempts.jsonl": "f26a486b6b66fedf3f8cd4056a69c1d055d3eec872015400afc139ff94bd5e0e",
+    "outputs/task3/round15/dev-round14-control/tokenizer-budget.json": "78c363052d26e3b5db20e51678608c17f9b707e7ad60bf383fd0807506df5166",
+    "outputs/task3/round15/dev-round14-control/progress.json": "db9663ce432948fe861ae92dee0f47f06f0be089aedea963bae8769bf34e65e9",
+    "outputs/task3/round15/dev-zero/predictions.json": "9030e860c9d56da6212d3d439a57a7b8ae943a594f6a98d4e9b92dfa1da6262a",
+    "outputs/task3/round15/dev-zero/compiler-evidence.json": "9e744fee4ed475c5874e591f544e282e6db129c42f6f1c4dba1062d197521cef",
+    "outputs/task3/round15/dev-zero/raw-first.predictions.json": "973f9b8c11a9babb8664b52dbe0fe7f3ae041e64c801f8202517a7cdb49f297c",
+    "outputs/task3/round15/dev-zero/development-selection.json": "0e229f0f80728cb06fd326418f02d4716a976dee5b9dce60eae62cbf8c27a26c",
+    "outputs/task3/round15/dev-zero/completed.predictions.json": "9030e860c9d56da6212d3d439a57a7b8ae943a594f6a98d4e9b92dfa1da6262a",
+    "outputs/task3/round15/dev-zero/metrics.json": "5445dd08f54748bca7bc3562daa2af6f16637417ca393d9ae589810fede1a5f5",
+    "outputs/task3/round15/dev-zero/traces.json": "42f63f5ae7e37a753f718dc2579bec2ce4ca5d9e9bdabd09a29bdc8a3701395e",
+    "outputs/task3/round15/dev-zero/run.json": "8fd7f4658476b9fa21f46925eefce2bc565f8d93d3ef465439695bbfbe9de615",
+    "outputs/task3/round15/dev-zero/raw-and-final.audit.json": "6269eea88bf9a991a9c151313f23e4e28e14914bbc4f3d69bd8107e010455608",
+    "outputs/task3/round15/dev-zero/attempts.jsonl": "f489f5afc2e423c12a09b8d4abd90c730923ad5d281ff8c8638c5051892f750d",
+    "outputs/task3/round15/dev-zero/decisions.jsonl": "c92adfc431c28d95f41e81582900272ca62d7a11015930894776989a5808ab9f",
+    "outputs/task3/round15/dev-zero/tokenizer-budget.json": "78c363052d26e3b5db20e51678608c17f9b707e7ad60bf383fd0807506df5166",
+    "outputs/task3/round15/dev-zero/progress.json": "f364f39a7d6c6c5f1022555842ebb862f5ce4d904c7cb2ae30598ee7817e75f8",
+    "outputs/task3/round15/public-review/l3-independent-source-facts.json": "e1760c05a8729726f9f99f9b68835857d4722172c66816573336868b0a1f7a60",
+    "outputs/task3/round15/public-review/build-l1-l2-paired-review.py": "538a2cf9c7dab68cec25e3edc66d01ae680799b78d179262aad4ecd18ea12aed",
+    "outputs/task3/round15/public-review/l1-l2-selected-source-evidence.json": "8941d07d8ed6693ef10c961f0992fc46ba9e1f3389734e25da52674a75571b54",
+    "outputs/task3/round15/public-review/l3-summary.json": "677a9ba49b9a62e46749849a26564a50b8e2157729f2c3067aaba28431c3c171",
+    "outputs/task3/round15/public-review/l3-atomic-raw-final-old-review.json": "69fc8331c9b2ad221411b679b459aec1c174f91577ea65e26bc697c4914a7d67",
+    "outputs/task3/round15/public-review/l1-l2-new-vs-round14-review.json": "da2c94d67675312eb70bca118489e7146a84dace258b8a6ce0125fc1ba391e25",
+    "outputs/task3/round15/public-review/protocol-notes.json": "d8cbde21d90128d68e6aea2153bf646c6051084a21b761fbbf139b03a3257c49",
+    "outputs/task3/round15/public-review/evidence-index.json": "bf0e5cd36c6aa792f9268d7064d671036242e6ad10a23fdf2c05e3c4b6d6eaae",
+    "outputs/task3/round15/public-review/l1-l2-source-first-facts.json": "7d74d277e91c7a9feb256b4da0265b8ec23eb9227e4027e3fc1c1af456281a88",
+    "outputs/task3/round15/public-review/l1-l2-selected-compiler-evidence.json": "52bacf18e0bfc2c9e7b3683e8a08a83781066fb57c10418eca8a015c73d687c8",
+    "outputs/task3/round15/review/l3-l4-condition-tables.json": "6708f35b86d159f7858304bbd073be5481f04a3a473593ae4e430fc5ecab995a",
+    "outputs/task3/round15/review/l1-l2-source-expectations.json": "d84981f7ed09204b3d55ef47d95d62afb4dcc926ca8c2c38a0c9bf40d1cfba37",
+    "outputs/task3/round15/review/l1-l2-three-condition-review.json": "2744c3bfc66736912d8fea174a07a27f7339a7bdc0bd0d6d9f91906f0f305f18",
+    "outputs/task3/round15/review/l3-l4-independent-source-expectations.json": "8f63c361b50b9f26623c13b055c59182631e3282c124e2b4067d7c3b1310eae8",
+    "outputs/task3/round15/review/build-l1-l2-review.py": "adfa86316a4607bb6445e97ac27229711665e0df246657d307e836e16d975b2f",
+    "outputs/task3/round15/review/l3-l4-atomic-raw-final-review.json": "767ec7e2f5a0d4c993e26074e27fcbb2d8fd380536a919e496c3ac25ecf9b141",
+    "outputs/task3/round15/dev-zero-postfix-replay/predictions.json": "0618223fcb57a8bd5127e99707b7d2f88672787fc9caa104dfabe2a4c2b287e9",
+    "outputs/task3/round15/dev-zero-postfix-replay/completed.predictions.json": "0618223fcb57a8bd5127e99707b7d2f88672787fc9caa104dfabe2a4c2b287e9",
+    "outputs/task3/round15/dev-zero-postfix-replay/traces.json": "7691a23ae3d1a5c9ad9ab6ddaac5425607b79daf8f3adb311092775b508a1eff",
+    "outputs/task3/round15/dev-zero-postfix-replay/run.json": "76a415cbd9b096169847616f08e7827a91091a6e29ec05029a265b80070a541a",
+    "outputs/task3/round15/dev-zero-postfix-replay/raw-and-final.audit.json": "398cd999aaec51f36f11af726f5237c70f59619290f3df933c3ed7a91e82d492",
+    "outputs/task3/round15/dev-zero-postfix-replay/attempts.jsonl": "f2feebf27ccd72472d77f36eb74251c90533565e3ac4f5ab7478ab6063d37508",
+    "outputs/task3/round15/dev-zero-postfix-replay/decisions.jsonl": "fd7fedfb58c9d7784bd8c5e5809453c0022858ad32293945ed9246dfab1d25ff",
+    "outputs/task3/round15/dev-zero-postfix-replay/progress.json": "b6f4c904848394c9b3dc2623c2627e61bf598e77e23d0f66a86d78d9ca2126b2",
+    "outputs/task3/round15/dev-few/predictions.json": "87a92dfa153a7597c29629b4e875d40869b51b6a2bb73ce655c36c8e12c045a3",
+    "outputs/task3/round15/dev-few/compiler-evidence.json": "117093fca2ea8200b63d45a73c41f74ae5d1af74e22774ce235c12e567753603",
+    "outputs/task3/round15/dev-few/raw-first.predictions.json": "aedf71430156acf46e1976f7b7d803902cd2b3383d56d4af8c84d93cf9cc33be",
+    "outputs/task3/round15/dev-few/development-selection.json": "0e229f0f80728cb06fd326418f02d4716a976dee5b9dce60eae62cbf8c27a26c",
+    "outputs/task3/round15/dev-few/completed.predictions.json": "87a92dfa153a7597c29629b4e875d40869b51b6a2bb73ce655c36c8e12c045a3",
+    "outputs/task3/round15/dev-few/metrics.json": "8693603dd8016848f9d8ae924caffb4360c9b4f88f48e965540c80281bbffe88",
+    "outputs/task3/round15/dev-few/traces.json": "d96927a8a0f5f4105c82b8659b787db94578f56e212fc982409ec84d40402dd8",
+    "outputs/task3/round15/dev-few/run.json": "1e920469e2b2cc0b8462903da4691502ce7383db92b5a3320f5a193545575b9e",
+    "outputs/task3/round15/dev-few/raw-and-final.audit.json": "879a49152df7082525c12c7eb71abbafd6cbc3a12bdd7b9fa7c15426889e9d14",
+    "outputs/task3/round15/dev-few/attempts.jsonl": "252e0ca7b5bc2dc95cee5fdb6fbd053714655bc6a498ddbef50488acfc402c21",
+    "outputs/task3/round15/dev-few/decisions.jsonl": "3acf168daeaf8f535446fe235adce160bf0a69337d8c32fbe322423ff31a0f2d",
+    "outputs/task3/round15/dev-few/tokenizer-budget.json": "4ba6c02c4eae213d6c00302e4c3af54241c093947a7fdcbe56f7070c0d40c99a",
+    "outputs/task3/round15/dev-few/progress.json": "d52b1bac7bbddd58e29c21fa0d7106dac20b52bcadc2551b65e7e19a7a4c532f",
+    "outputs/task3/round15/public-candidate-zero/predictions.json": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+    "outputs/task3/round15/public-candidate-zero/compiler-evidence.json": "1e7a6e6304ee1b09cc6a887c68903f8a8c669f696c3fffb3907edd94258d3abe",
+    "outputs/task3/round15/public-candidate-zero/raw-first.predictions.json": "b22a0a370cc5e0313f1ed31809cb39bdc60d4f416cae0b341964e66b8731e96b",
+    "outputs/task3/round15/public-candidate-zero/validator-cli.log": "0fac64d88a34c896225b8a43cb1d01b22eac4d89df68310953600b08aca5822a",
+    "outputs/task3/round15/public-candidate-zero/public-aggregate.json": "1e4d84934ca645eac790313363cf8d14fe0c6f1fe83cd308d54fd7a2e000f0e3",
+    "outputs/task3/round15/public-candidate-zero/completed.predictions.json": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+    "outputs/task3/round15/public-candidate-zero/metrics.json": "30b58dce1b9c3db6182d357bdf6e70fc47e62d514477d74e5287350079b6bb42",
+    "outputs/task3/round15/public-candidate-zero/official-requested-levels.json": "7246a8cb36f52c113440d4b76874022f54d16d254058ea9945e853859dd4f85f",
+    "outputs/task3/round15/public-candidate-zero/traces.json": "ba6f4ef99fca8a8cb44404ffb78d9a9d0c77f769d3c029723bcbd05a7ce20280",
+    "outputs/task3/round15/public-candidate-zero/validation-report.json": "5cf68385362a6a0e25b092b763c90bc0168a19b2c04dd0f10002f77dfa03d3dc",
+    "outputs/task3/round15/public-candidate-zero/run.json": "ca4afeedf2f3115fcacef0a5dc7ac23601d2ad433522a9628def4cb34dd2705c",
+    "outputs/task3/round15/public-candidate-zero/raw-and-final.audit.json": "a663c597ce8fdd4de6f31ae937f36cb938e28a44663ce5fc868cc71fe3d98a39",
+    "outputs/task3/round15/public-candidate-zero/attempts.jsonl": "5fe9989bda25ca4643e9c379e0669d1d14f31a4f3085e069de83993ace38b5ad",
+    "outputs/task3/round15/public-candidate-zero/decisions.jsonl": "326db480317d5d2fe09797a488be220ce706536e896cc470f2b8e469380d4203",
+    "outputs/task3/round15/public-candidate-zero/tokenizer-budget.json": "9e3b72e4869b5e87542bf8f940a8c31f9ec65b28ca199c8892b4d92ebaa256d8",
+    "outputs/task3/round15/public-candidate-zero/progress.json": "8246908fef874815277aaa4b05eda307c430a1b01767727c938aa110d116ba62",
+    "outputs/task3/round15/dev-few-postfix-replay/predictions.json": "87a92dfa153a7597c29629b4e875d40869b51b6a2bb73ce655c36c8e12c045a3",
+    "outputs/task3/round15/dev-few-postfix-replay/completed.predictions.json": "87a92dfa153a7597c29629b4e875d40869b51b6a2bb73ce655c36c8e12c045a3",
+    "outputs/task3/round15/dev-few-postfix-replay/traces.json": "b58e6a0ab8bd1ceb5386e59d77788d6e2f7ac6961333e5ab443546781b0bc038",
+    "outputs/task3/round15/dev-few-postfix-replay/run.json": "9d8a6348b5fbac0d109a82675a0e0ef2328beb07f3c3f35772cab9a55bdac408",
+    "outputs/task3/round15/dev-few-postfix-replay/raw-and-final.audit.json": "9ebfd499e5439bcbc23799dbd61de6d974a2a6804abb946261468079f44809bd",
+    "outputs/task3/round15/dev-few-postfix-replay/attempts.jsonl": "e148a487ca44e2fe39aa86cadd7440d9c5d30cd3cede20c3546aaf5d0d418a7e",
+    "outputs/task3/round15/dev-few-postfix-replay/decisions.jsonl": "e948769ee3e0bf5bd17959e3db4381a8a884915c3bca83d57b0693e92e5d41c2",
+    "outputs/task3/round15/dev-few-postfix-replay/progress.json": "57015d604e53838303076c79a88d6676cc559ee3d5ec449f6a4d7390f1466a2a",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Final-1-S57.json": "6267c2c2c3e7aa19b5b959e140f05e93d05d437bca5528c8bf3d66514ba2b651",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-2-S20.json": "bd28b71f367689aba19215817dcf7df0001cc1e32eb75b7dd0756f0221e3ff2e",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-2-S54.json": "d2b020f259feaa0200231e6fc2429beb741bd37810bf63e9d7dadae7f0f9ca61",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-1-S19.json": "c21a0aacf29165ab665b9a1c231d2debacfed8b715e268dd476cda758c799d90",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Final-1-S45.json": "d74f2e9697f6d2a5e3bf50f90a7e650a85d8819495f47300548a90d49bc1340d",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-2-S65.json": "0fe79cd45f7c3630c8f5ac56df5a288adb49f2c9913cf3d521845fbb42d715ba",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-2-S17.json": "07235d8017acf3cc60618a9a84f179006c904ba03bf9e41d56675af1a275e5b8",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-1-S64.json": "379aa46ffaedd73b300afd2d63c6c5f1cca3c15f82938b45caaaaa9f2bd38d27",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-1-S21.json": "e2933b214ab5e381fb1ca6d4f90f7b206d368472cf6eb3575950b5dd28c023b5",
+    "outputs/task3/round15/public-review/l3-per-id/Class03-Midterm-2-S14.json": "a3e1ffb5594c3f2d17c693b1bddc73b03ac0c61109f4572b4d2bc6fb174a594e",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-PROD-0020-L2.json": "c802fb88f1e7e6ed20d75e73284ad07d2cadca23258393c199772ec545fd858e",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-DISTINCT-0016.json": "2f3b6f358df8e444155f85aa9114310104473506c236111b4cc64120eb10b670",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-SUMPAIR-0011.json": "f6ad63398503c18bcc2867eefb7d11344a97ec1a10a31f8fef783dff8c340eb5",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-BASE2-0005.json": "2e0fd6b52d9f562136c5f493d3f7c3b155bc2fe9e11b90d8e9a0c2d6ea3f8570",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-BASE2-0011.json": "8efd44daf8e33596d50dae2deef4098d5aad143ed841de52030f01bc9aed91bd",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-FIB-0004.json": "74ef07d6b00ed5a4ca5e3192518a7d42e78e22d8d9a0675940198cf5c5f0158f",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-SUMEVEN-0014.json": "21d9879d5a2657e631ac1cf578d6e455621d8ad1fe24c791783e1ff3a6430b8f",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-COUNTEVEN-0006-L3.json": "d697c578e041dac9bbedae0db34025a116a8056c921cc96b904e224d1a64c9cb",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-FIB-0002.json": "ca353217773ea2f5201f0ef175839ef7627df0b05e4555e5fd2268f331a6a6f9",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-PERFECT-0008.json": "b2343fc3d8c714605bbf662ff2eede841602809753a00e47065d20d503c74b30",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-SUMEVEN-0007.json": "869678a7513cac2afbf4c33a705b532894bb023c0954d9e2fcddddbc82ece35a",
+    "outputs/task3/round15/review/l3-l4-per-id/SYN-DISTINCT-0008-L3.json": "400e1ae039e6b7bea947039ee7487dabeee20e83f13df3d0421821a8ee59e00f",
+    "predictions.json": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+    "reports/task3/TASK3_R15_SUBMISSION_HANDOFF_20261020.json": "7a947254f2473b1d53a9002a9e00b90a4ed13e1e00469796fd4d7e0eda30e4fa",
+    "reports/task3/TASK3_R15_SUBMISSION_HANDOFF_20261020.md": "8d1f00119b9cf59e10bbb7a193b68a01b6d15231a520919ea3e471fb7c5e1bd2"
+  },
+  "counterfactual_levels": [
+    1,
+    2,
+    3
+  ],
+  "level4_ids": [
+    "SYN-ARM-0007",
+    "SYN-ARM-0022",
+    "SYN-DIGITSUM-0015",
+    "SYN-DIGITSUM-0012"
+  ],
+  "evaluation_levels": {
+    "SYN-FACT-0009": 1,
+    "SYN-FACT-0003": 2,
+    "SYN-PERFECT-0024": 3,
+    "SYN-PERFECT-0005": 4,
+    "SYN-SECONDMAX-0010": 1,
+    "SYN-SECONDMAX-0003": 2,
+    "SYN-FIB-0016": 3,
+    "SYN-FIB-0015": 4,
+    "SYN-COUNTGT-0023": 1,
+    "SYN-COUNTGT-0022": 2,
+    "SYN-MAXDIFF-0013": 3,
+    "SYN-MAXDIFF-0000": 4,
+    "SYN-MINA-0019": 1,
+    "SYN-MINA-0017": 2,
+    "SYN-PROD-0026": 3,
+    "SYN-PROD-0013": 4
+  },
+  "pilot_policy": {
+    "seed": 42,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "learning_rate": 0.0001,
+    "epochs": 1,
+    "gradient_accumulation_steps": 4,
+    "checkpoint": "final epoch only; no eval selection or sweep",
+    "training_family_exclusions": [
+      "SYN-ARM",
+      "SYN-BASE2",
+      "SYN-COUNTGT",
+      "SYN-COUNTUPPER",
+      "SYN-DIGITSUM",
+      "SYN-DISTINCT",
+      "SYN-FACT",
+      "SYN-FIB",
+      "SYN-GCDARR",
+      "SYN-MAXDIFF",
+      "SYN-MINA",
+      "SYN-PERFECT",
+      "SYN-POWER",
+      "SYN-PRIME",
+      "SYN-PROD",
+      "SYN-REVSTR",
+      "SYN-SECONDMAX",
+      "SYN-SUMEVEN"
+    ]
+  },
+  "exposure": "R16/R17 train development and six real-val/old heldout repeatedly observed; R13 corpus reviewed. This is a frozen paired development evaluation, NOT blind. New algorithm source appended in current ZIP; no family-generalization claim."
+}

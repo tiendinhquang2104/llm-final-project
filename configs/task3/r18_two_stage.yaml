@@ -1,0 +1,4 @@
+extends: r15_zero_shot.yaml
+prompt_policy: r18-level-independent-diagnosis-v1
+completion_policy: diagnostic_taxonomy_immutable_no_content_retry_no_clean_fallback
+max_attempts: 1
