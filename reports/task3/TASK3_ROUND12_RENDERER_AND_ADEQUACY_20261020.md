@@ -156,3 +156,14 @@ Renderer CLI từ chối ghi đè thư mục; dùng tên mới khi tái hiện. 
 **Tầng chưa giải quyết:** tự tìm finding, entailment của cause, known-clean vs unknown, mapping finding→taxonomy đầy đủ, diagnosis schema/truncation của A, false positive/mismatch B, và factual/language guard cho text sinh tự do. Opt-in v4 còn từ chối họ câu/repair chưa hỗ trợ; không thay default toàn hệ thống hoặc gọi nó đủ mạnh để dùng public.
 
 Trọng tâm tiếp theo là finding **không cần gold trên train-only/artificial fixtures**, giữ compiler error tách warning, yêu cầu observed fact/cause có entailment và binding repair trước khi đi vào renderer. Không tiếp tục tìm prompt trên sáu ca này. Chỉ đánh giá heldout một lần sau khi đóng băng **toàn bộ** cách tạo finding và render; Round 12 chưa thỏa điều kiện đóng băng A/B nên chưa chạy heldout. Không suy ra chất lượng tổng quát từ preservation của năm oracle findings.
+
+## 8. Xác minh khi tiếp tục trên branch hiện tại
+
+Tiếp tục từ `d175a4c` trên cùng branch, working tree ban đầu sạch; code/test Round 12 đã có trong `8cf15aa`, báo cáo trong `d175a4c`. Không viết lại implementation hoặc chạy tìm prompt mới.
+
+- Chạy lại **đầy đủ Task 3: 398 passed, 4 skipped, 6,52 giây**, gồm `test_task3_cpp_checks.py`; log `outputs/task3/renderer-round12/tests-task3-resume-verification.log`.
+- Tái hiện renderer oracle với cùng approved file/config: 6 bản ghi, không gọi model; `documents.json` bằng chính xác run chính thức trước đó. Validator: VALID 6/6. Artifacts mới ở `outputs/task3/renderer-round12/oracle-resume-verification/`, không ghi đè raw/source/prompt/attempts.
+- Replay lại 67 attempts khớp toàn bộ quyết định legacy; acceptance 42 → 47, gồm 8 reject → accept và 3 accept → reject. Fixture action vẫn có 0/8 false acceptance và 0/4 false rejection; đây là fixture phát triển, không estimate heldout. Giới hạn factual của text tự do ở mục 4 vẫn giữ nguyên.
+- Không chạy public/heldout, không sửa gold, không push. Oracle findings/raw và outputs mới vẫn ignored; chỉ bổ sung xác minh vào báo cáo đã commit.
+
+Renderer đủ ổn định làm đối chứng có điều kiện cho họ action đã hỗ trợ. Bước nghiên cứu kế tiếp chuyển sang tạo finding không cần gold trên train-only/artificial fixtures, với factual support và coverage đo riêng; chưa đóng băng A/B end-to-end và chưa đánh giá heldout.
