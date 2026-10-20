@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+"""Opt-in Round14 train-development comparison or frozen public candidate run."""
+from __future__ import annotations
+import argparse
+from collections import Counter
+from dataclasses import asdict
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+REPO=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(REPO))
+from src.utils.config import load_config
+from src.task3.dataset import write_json,load_task3
+from src.task3.compiler import check_cpp_syntax
+from src.task3.inference import HFBackend,load_tokenizer,tokenizer_metadata
+from src.task3.round14 import sanitize
+from src.task3.round14_runner import run_records,digest
+from src.task3.round14_eval import select_development,taxonomy_metrics,feedback_metrics
+from src.task3.public_contract import verify_public_contract
+from src.task3.submission import validate_submission
+
+IMPLEMENTATION=('src/task3/round14.py','src/task3/round14_runner.py','src/task3/round14_eval.py',
+                'src/task3/public_contract.py','src/task3/inference.py','src/task3/compiler.py',
+                'src/task3/discovery.py','src/task3/discovery_render.py','src/task3/renderer.py',
+                'scripts/task3_round14.py')
+
+
+def implementation_hashes():
+    return {p:hashlib.sha256((REPO/p).read_bytes()).hexdigest() for p in IMPLEMENTATION}
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--config',required=True)
+    parser.add_argument('--phase',choices=('development','public'),required=True)
+    parser.add_argument('--output-dir',required=True)
+    parser.add_argument('--per-level',type=int,default=6)
+    parser.add_argument('--freeze')
+    parser.add_argument('--oracle-from',help='development-only B traces to hold stage1 context fixed')
+    parser.add_argument('--public-root',default='data/raw/public_test_release')
+    args=parser.parse_args()
+    config=load_config(args.config);out=Path(args.output_dir).resolve()
+    if not out.is_relative_to(REPO/'outputs/task3'):parser.error('private outputs must be under ignored outputs/task3/')
+    if config.get('few_shot_k',0)!=0:parser.error('Round14 frozen K=0 method does not read public demonstrations')
+    out.mkdir(parents=True,exist_ok=True)
+    oracle_labels=assessment_cache=None;selection=None;contract=None
+    if args.phase=='public':
+        if args.oracle_from:parser.error('oracle taxonomy forbidden for public')
+        if not args.freeze:parser.error('public requires a pre-public development selection freeze')
+        freeze=json.loads(Path(args.freeze).read_text())
+        if freeze['config']!=config or freeze['implementation_sha256']!=implementation_hashes():
+            parser.error('frozen method/config implementation mismatch; do not tune on public')
+        if not freeze.get('development_evidence') or freeze.get('public_used_for_selection') is not False:
+            parser.error('train-only selection evidence required')
+        contract=verify_public_contract(args.public_root)
+        requested=contract['requested_levels']
+        levels_path=out/'official-requested-levels.json';write_json(levels_path,requested)
+        records=load_task3(args.public_root,'public',levels_path)
+        by_id={r.sample_id:r for r in records};records=[by_id[sid] for sid in requested]
+    else:
+        records,selection=select_development(config.get('data_dir','data/processed/task3'),per_level=args.per_level)
+        write_json(out/'development-selection.json',selection)
+        if args.oracle_from:
+            if config['method']!='two_stage':parser.error('paired oracle control requires B')
+            prior=json.loads(Path(args.oracle_from).read_text())
+            assessment_cache={r['sample_id']:r['assessment'] for r in prior}
+            if set(assessment_cache)!={r.sample_id for r in records}:parser.error('paired assessment IDs mismatch')
+            oracle_labels={r.sample_id:r.gold_taxonomy for r in records}
+    started=time.perf_counter();evidence_cache={};sanitized=[]
+    for r in records:
+        key=hashlib.sha256(r.code.encode()).hexdigest()
+        if key not in evidence_cache:
+            evidence_cache[key]=check_cpp_syntax(r.code,compiler=config.get('cpp_compiler'),standard='c++11',timeout_s=config.get('compiler_timeout_s',3))
+        sanitized.append(sanitize(r,evidence_cache[key]))
+    write_json(out/'compiler-evidence.json',{r.sample_id:r.provenance['_task3_compile_check'] for r in sanitized})
+    os.environ.setdefault('HF_HOME',str(REPO/'outputs/task3/hf-cache'))
+    os.environ.setdefault('HF_HUB_OFFLINE','1');os.environ.setdefault('TRANSFORMERS_OFFLINE','1')
+    tokenizer=load_tokenizer(config)
+    # Preflight both initial and maximal retry instructions before model loading.
+    from src.task3.round14 import fitted_messages
+    budgets=[]
+    for r in sanitized:
+        for stage in ('direct','classify','classifier_fallback','feedback'):
+            reserve=config.get('level4_max_tokens',1536) if int(r.target_feedback_level[6])==4 else max(config.get('direct_max_tokens',1024),config.get('classification_max_tokens',768),config.get('feedback_max_tokens',640))
+            try:
+                _,count=fitted_messages(r,stage,tokenizer,{**config,'max_new_tokens':reserve},assessment=None,retry='Schema/Level validation failed. '+('x'*650))
+                budgets.append({'sample_id':r.sample_id,'stage':stage,'tokens':count,'reserve':reserve,'fits':True})
+            except ValueError as exc:budgets.append({'sample_id':r.sample_id,'stage':stage,'fits':False,'error':str(exc)})
+    write_json(out/'tokenizer-budget.json',{'tokenizer':tokenizer_metadata(tokenizer),'records':budgets})
+    backend=HFBackend(config,tokenizer)
+    backend.model.generation_config.max_time=float(config.get('generation_max_time_s',45))
+    result=run_records(sanitized,backend,dict(config,implementation_sha256=implementation_hashes()),out,
+                       oracle_labels=oracle_labels,assessment_cache=assessment_cache)
+    completed_ids={p['sample_id'] for p in result['predictions']}
+    scored_records=[r for r in records if r.sample_id in completed_ids]
+    metrics={'feedback':feedback_metrics(scored_records,result['predictions'],result['traces']),
+             'completion':{'requested':len(records),'completed':len(result['predictions']),'unresolved_ids':list(result['errors'])}}
+    if args.phase=='development':metrics['taxonomy']=taxonomy_metrics(scored_records,result['predictions'])
+    write_json(out/'metrics.json',metrics)
+    manifest={'status':'complete_candidate_not_submitted' if not result['errors'] else 'incomplete_resumable',
+              'phase':args.phase,'method':config['method'],'condition':'oracle_taxonomy_development_diagnostic' if oracle_labels is not None else 'no_gold_inference',
+              'git_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+              'worktree_dirty':bool(subprocess.check_output(['git','status','--porcelain'],text=True).strip()),
+              'implementation_sha256':implementation_hashes(),'config':config,'config_sha256':digest(config),
+              'tokenizer':tokenizer_metadata(tokenizer),'runtime':backend.runtime_metadata(),
+              'wall_s':time.perf_counter()-started,'records':len(records),'completed':len(result['predictions']),
+              'resume_identity':result['identity'],'unresolved_ids':list(result['errors']),
+              'compiler_status':dict(Counter(e['status'] for e in evidence_cache.values())),
+              'compiler_unique_sources':len(evidence_cache),'standard':'c++11','student_programs_executed':False,
+              'selection':selection,'public_contract':contract,'freeze':args.freeze,
+              'generation_max_time_s':backend.model.generation_config.max_time,
+              'attempt_output_tokens':sum(a['output_tokens'] for t in result['traces'] for a in t['attempts']),
+              'attempt_latency_s':sum(a['latency_s'] for t in result['traces'] for a in t['attempts'])}
+    if not result['errors']:
+        requested={r.sample_id:r.target_feedback_level for r in records}
+        manifest['validation']=validate_submission(out/'predictions.json',requested)
+        manifest['predictions_sha256']=hashlib.sha256((out/'predictions.json').read_bytes()).hexdigest()
+    write_json(out/'run.json',manifest)
+    print(json.dumps({k:manifest[k] for k in ('status','records','completed','wall_s')},ensure_ascii=False))
+    return 0 if not result['errors'] else 2
+
+
+if __name__=='__main__':raise SystemExit(main())
