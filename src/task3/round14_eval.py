@@ -184,7 +184,8 @@ def feedback_metrics(records, predictions, traces):
     predictions, traces = _align(records, predictions), _align(records, traces)
     per_level = {str(i): {'count': 0, 'guard_pass_count': 0, 'cjk_count': 0,
                           'fallback_count': 0, 'classification_fallback_count': 0,
-                          'level1_projection_count': 0, 'action_only_heuristic_count': 0}
+                          'level1_projection_count': 0, 'action_only_heuristic_count': 0,
+                          'round14_policy_error_count': 0, 'insufficient_requested_level_count': 0}
                  for i in range(1, 5)}
     for r, p, trace in zip(records, predictions, traces):
         level = FEEDBACK_LEVELS.index(r.target_feedback_level) + 1
@@ -194,6 +195,8 @@ def feedback_metrics(records, predictions, traces):
         bucket['guard_pass_count'] += check(text, level, version=3).ok
         bucket['cjk_count'] += bool(re.search(r'[\u3400-\u9fff\uf900-\ufaff]', text))
         bucket['fallback_count'] += bool(trace.get('fallback_used', False))
+        bucket['round14_policy_error_count'] += bool(trace.get('feedback_level_errors',[]))
+        bucket['insufficient_requested_level_count'] += trace.get('usefulness')=='insufficient_for_requested_level'
         bucket['classification_fallback_count'] += bool(trace.get('classification_fallback', False))
         bucket['level1_projection_count'] += trace.get('feedback_origin') == 'level1_projection'
         action = bool(re.search(r'\b(?:hãy|nên|cần|thay|sửa|bổ sung|loại bỏ|kiểm tra)\b', text, re.I))
@@ -202,5 +205,6 @@ def feedback_metrics(records, predictions, traces):
     return {'count': len(records), 'per_level': per_level,
             'fallback_count': sum(v['fallback_count'] for v in per_level.values()),
             'factual_correctness': 'not_measured', 'guard_policy_version': 3,
+            'guard_metric_scope':'legacy disclosure screen; round14_policy_error_count additionally includes experimental action/coherence checks',
             'action_only_heuristic_definition': 'Vietnamese action cue without causal/defect cue; not factual or adequacy score',
             'level4_correctness': 'not_measured'}

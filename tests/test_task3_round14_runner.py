@@ -120,3 +120,12 @@ def test_interrupted_attempt_tail_is_preserved_before_resume_append(tmp_path):
     assert len(out['predictions'])==1 and journal_totals(journal)['attempts']==1
     backups=list(tmp_path.glob('attempts.jsonl.interrupted-*.raw'))
     assert len(backups)==1 and backups[0].read_bytes()==b'{"incomplete":'
+
+
+@pytest.mark.parametrize('separator',['\u2028','\u0085','\u2029'])
+def test_jsonl_uses_physical_lf_not_unicode_string_separators(tmp_path,separator):
+    from src.task3.round14_runner import run_records,journal_totals
+    v=value();v['assessment']='first'+separator+'second'
+    out=run_records([sample()],Scripted([json.dumps(v,ensure_ascii=False)]),config(),tmp_path)
+    assert len(out['predictions'])==1
+    assert journal_totals(tmp_path/'attempts.jsonl')['attempts']==1

@@ -251,3 +251,21 @@ Direct baseline controls `r11_direct_one_more.yaml` and `r11_direct_zero_more.ya
 `python scripts/task3_render_oracle.py --config configs/task3/r12_adequacy_diagnostic.yaml --findings outputs/task3/mechanism-round11/findings-approved-C2.json --split real-val --output-dir outputs/task3/renderer-round12/reproduce-oracle` performs deterministic development-only rendering, with no model call or student program execution. It validates approval/source/statement binding, preserves approved fact/cause/action wording, checks compiler error severity at the source span, and projects only content permitted at Levels 1–3. Inputs and structured documents remain private under ignored outputs. Gold labels copied for schema compatibility are not model predictions. Empty supplied findings never establish clean code.
 
 The optional `quality_review_policy_version: 4` recognizes a bounded family of positive, directed loop-bound relations to existing source values. It rejects generic declaration advice and unsupported direction/expression families; it is not a factual correctness checker. Legacy defaults and disclosure guards remain unchanged. See [the Round 12 report](../reports/task3/TASK3_ROUND12_RENDERER_AND_ADEQUACY_20261020.md) for fixture metrics, retained false acceptances, false-rejection limits, full Task 3 checks and the narrow compiler helper permission fix.
+
+### Round 14 joint taxonomy and feedback candidate
+
+The public release requires both taxonomy and Vietnamese feedback, although the sample training input includes taxonomy. Task 2 predictions are **optional**, not a dependency of the new Round14 CLI. The original CLIs/configs and R12/R13 diagnostic controls remain available with their historical restrictions.
+
+`configs/task3/r14_direct.yaml` is candidate A (one Qwen request for model taxonomy, private rationales and feedback). `r14_two_stage.yaml` is B (model taxonomy followed by feedback). Both use pinned Qwen NF4, fresh C++11 syntax-only evidence, no student execution and K=0. Gold/teacher text is removed from model inputs. The independent-prompt classifier fallback makes explicit decisions; parsing errors never manufacture `[]`. Empty labels remain an unverified model prediction. Exact quotes do not certify causes.
+
+The controller saves each completed ID and exact attempts under ignored outputs/task3; failed IDs remain unresolved and resumable. Resume identity binds all prompt inputs/config/implementation/tokenizer. Level1 uses a neutral projection; Level2 repair disclosure and CJK are blocked. Level3 action screens and Level4 code-presence checks are limited heuristics. A truthful epistemic feedback fallback is explicitly marked inadequate for diagnosis/action; it is never counted as useful feedback or verified clean code.
+
+```bash
+# Actual local model runs on the same train-derived development selection.
+.venv-task3/bin/python scripts/task3_round14.py --config configs/task3/r14_direct.yaml --phase development --output-dir outputs/task3/round14/new-dev-A
+.venv-task3/bin/python scripts/task3_round14.py --config configs/task3/r14_two_stage.yaml --phase development --output-dir outputs/task3/round14/new-dev-B
+# Public execution requires a prior train-only selection freeze matching code/config.
+# Follow the selected config and freeze recorded in the Round14 report; do not tune on public output.
+```
+
+The metadata verifier checks the supplied supplemental ZIP/member hashes, exact328 IDs, official Level counts115/163/50/0, label definitions and sample output **shape**. Public source is loaded only after the selection freeze passes. Final predictions are a candidate for review, not a leaderboard submission or quality certification. Historical QLoRA comparisons are documented in the final/follow-up reports; their adapters are absent in this Docker workspace and were not silently substituted.

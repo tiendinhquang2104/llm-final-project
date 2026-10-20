@@ -149,7 +149,8 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
 
 def journal_totals(path):
     rows=[];incomplete_tail=False
-    raw=Path(path).read_text().splitlines() if Path(path).exists() else []
+    raw=Path(path).read_text().split('\n') if Path(path).exists() else []
+    if raw and raw[-1]=='':raw.pop()
     for index,line in enumerate(raw):
         try:rows.append(json.loads(line))
         except json.JSONDecodeError:
