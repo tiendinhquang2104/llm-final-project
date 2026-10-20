@@ -44,3 +44,27 @@ def test_precision_check_rejects_cpu_parameters_instead_of_reporting_gpu_success
     model = torch.nn.Linear(2, 2, dtype=torch.bfloat16)
     with pytest.raises(RuntimeError, match='CUDA'):
         inspect_model_precision(model, load_in_4bit=False)
+
+
+def test_fail_closed_cli_retains_precision_manifest_without_exporting_predictions(tmp_path, monkeypatch):
+    import json
+    from src.task3.cli import run_main
+    from tests.test_task3_cli import fixture_prepared
+
+    _, config = fixture_prepared(tmp_path)
+    config.write_text(config.read_text() + '\nload_in_4bit: false\n')
+
+    def fail(*args, **kwargs):
+        raise RuntimeError('TEST-ONLY fail-closed')
+
+    monkeypatch.setattr('src.task3.cli.infer', fail)
+    with pytest.raises(RuntimeError, match='TEST-ONLY fail-closed'):
+        run_main(['--config', str(config), '--split', 'real-val', '--taxonomy-source', 'gold',
+                  '--dry-run', '--output', str(tmp_path / 'failed.json')])
+    assert not (tmp_path / 'failed.mock.json').exists()
+    manifest = json.loads((tmp_path / 'failed.mock.run.json').read_text())
+    assert manifest['status'] == 'failed_inference_no_predictions_exported'
+    assert manifest['prediction_exported'] is False
+    assert manifest['inference_precision']['requested_precision'] == 'bf16'
+    assert manifest['inference_precision']['actual_precision'] == 'not_measured'
+    assert manifest['selected_ordered_ids'] == ['TEST-ONLY-VAL']

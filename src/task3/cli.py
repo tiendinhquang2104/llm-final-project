@@ -265,19 +265,33 @@ def run_main(argv=None):
     if backend is None:
         backend = MockBackend() if args.dry_run else HFBackend(config, tokenizer)
     progress_path = Path(args.progress_file) if args.progress_file else output.with_suffix(".progress.jsonl")
-    predictions, traces = infer(
-        records,
-        backend,
-        config,
-        args.taxonomy_source,
-        predicted,
-        demos,
-        progress_path=progress_path,
-        resume=args.resume_progress,
-        cache_context=manifest_hash,
-        attempt_journal_path=progress_path.with_suffix(".attempts.jsonl"),
-        diagnoses=diagnosis_audit,
-    )
+    try:
+        predictions, traces = infer(
+            records,
+            backend,
+            config,
+            args.taxonomy_source,
+            predicted,
+            demos,
+            progress_path=progress_path,
+            resume=args.resume_progress,
+            cache_context=manifest_hash,
+            attempt_journal_path=progress_path.with_suffix(".attempts.jsonl"),
+            diagnoses=diagnosis_audit,
+        )
+    except (RuntimeError, ValueError):
+        failed = runtime_manifest(config, backend.tokenizer, backend=backend)
+        failed.update(
+            status="failed_inference_no_predictions_exported",
+            prediction_exported=False,
+            split=args.split,
+            taxonomy_source=args.taxonomy_source,
+            data_manifest_sha256=manifest_hash,
+            selected_ordered_ids=[record.sample_id for record in records],
+            progress_file=str(progress_path),
+        )
+        write_json(output.with_suffix(".run.json"), failed)
+        raise
     export_predictions(output, predictions, records, mock=args.dry_run)
     metrics = evaluate(records, predictions, traces, args.taxonomy_source)
     metrics["test_only_mock"] = args.dry_run
