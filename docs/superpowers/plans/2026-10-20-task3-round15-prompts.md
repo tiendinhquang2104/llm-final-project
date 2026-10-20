@@ -9,8 +9,8 @@ Design: new opt-in direct prompt asks exactly taxonomy_error+Vietnamese feedback
 - [x] VerifyHEAD/status/docs and Round14checksum; inventory compatible model/tokenizer/config and trainselection metadata.
 - [x] Freeze new train-only development, excluding R14selection families/group/codehashes; disjoint trainexample bank with source-reviewed shortreferences. Recordlimitations of prior corpus exposure.
 - [x] TDD prompt/fullsource budgeting, schema/rawcapture/disclosure boundaries and retry/resume. Implement independent opt-in CLI/config; no default/oldartifact edits.
-- [ ] Run zero/few/R14control on same newdevelopment IDs/Levels/model/shareddecoding. Save allraws, review perrecord model vs postprocess errors, usefulL2location/cause and usefulL3action. Reportlabels/claims separatelyfromschema/fallback. No publicsemanticinspection forselection.
-- [ ] Choose prompt on development and commit/hashfreeze. FullTask3suite includingC++sandbox; historicalfullrepomissingTask1dependencies remains a reportedlimit.
+- [x] Run zero/few/R14control on same newdevelopment IDs/Levels/model/shareddecoding. Save allraws, review perrecord model vs postprocess errors, usefulL2location/cause and usefulL3action. Reportlabels/claims separatelyfromschema/fallback. No publicsemanticinspection forselection.
+- [x] Choose prompt on development and commit/hashfreeze. FullTask3suite includingC++sandbox; historicalfullrepomissingTask1dependencies remains a reportedlimit.
 - [ ] Run selected frozenprompt on public328 to newoutputdir. ValidateofficialID/Level/schema, capture raw/audit/fallback and usefulfeedback assessment scope. PreserveRound14bytes, no public-derivedpromptrevision.
 - [ ] Commitreport/config/code/tests, giveartifactSHA/path and honestqualitylimits; verifycleanstatus, no rawstaged/push/submission.
 

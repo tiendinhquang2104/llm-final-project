@@ -84,3 +84,12 @@ def test_cjk_and_praise_are_audit_cues_only(level):
 def test_invalid_levels_are_rejected_as_api_arguments(level):
     with pytest.raises(ValueError):
         disclosure_violations('Bài làm chưa đạt.', level)
+
+
+@pytest.mark.parametrize('text',[
+    'Bạn đã viết các hàm cần thiết để xử lý yêu cầu. Hãy tiếp tục cố gắng.',
+    'Hãy tự đối chiếu các hàm phù hợp với đề bài.',
+    'Em đã tổ chức các hàm tương ứng cho từng phần.'
+])
+def test_level1_generic_function_noun_phrases_are_not_identifiers(text):
+    assert 'level1_identifier_disclosure' not in disclosure_violations(text,1)

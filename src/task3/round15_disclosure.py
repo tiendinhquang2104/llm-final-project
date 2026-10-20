@@ -82,7 +82,8 @@ def disclosure_violations(text: str, level: int) -> list[str]:
     if level == 1:
         if _LOCATION.search(normalized):
             violations.append('level1_location_disclosure')
-        if _IDENTIFIER.search(normalized):
+        identifier_text=re.sub(r'\bham\s+(?:can thiet|phu hop|tuong ung)\b','chuc nang',normalized)
+        if _IDENTIFIER.search(identifier_text):
             violations.append('level1_identifier_disclosure')
         if _DIAGNOSIS.search(normalized):
             violations.append('level1_diagnosis_disclosure')
