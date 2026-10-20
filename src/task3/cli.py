@@ -101,7 +101,7 @@ def run_main(argv=None):
     p.add_argument("--taxonomy-source", choices=["gold", "task2-json", "self-diagnosis"], default="gold")
     p.add_argument("--taxonomy-json")
     p.add_argument("--requested-levels", help="required public ID/Level input used to order and validate inference")
-    p.add_argument("--oracle-findings", help="human-approved findings; non-public gold-mode diagnostic experiment only")
+    p.add_argument("--oracle-findings", help="review-approved findings; non-public gold-mode diagnostic experiment only")
     p.add_argument("--diagnosis-audit", help="validated local diagnosis audit to share across paired experiments")
     p.add_argument(
         "--allow-unverified-task2-export",
@@ -167,7 +167,7 @@ def run_main(argv=None):
     oracle_findings = load_reviewed_findings(args.oracle_findings, records) if args.oracle_findings else None
     if args.oracle_findings:
         config["oracle_findings_sha256"] = hashlib.sha256(Path(args.oracle_findings).read_bytes()).hexdigest()
-        config["oracle_condition"] = "C2_human_approved_findings"
+        config["oracle_condition"] = "C2_approved_for_oracle_experiment_findings"
 
     if config.get("guard_policy_version", 1) >= 2:
         config["runtime_implementation_sha256"] = implementation_digest()

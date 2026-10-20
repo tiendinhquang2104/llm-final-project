@@ -88,7 +88,7 @@ def test_oracle_finding_loader_rejects_unapproved_and_wrong_source(tmp_path):
     r=record('TEST-ORACLE')
     p=tmp_path/'findings.json'
     p.write_text(json.dumps({'review_status':'draft_not_human_verified','samples':[]}))
-    with pytest.raises(ValueError,match='human approval'):
+    with pytest.raises(ValueError,match='review approval'):
         load_reviewed_findings(p,[r])
 
 
@@ -104,7 +104,7 @@ def test_oracle_context_persists_across_feedback_retry_and_never_runs_on_public(
         calls=[]
         def generate(self,messages,config):
             self.calls.append(messages)
-            assert any('HUMAN_REVIEWED_ORACLE_FINDINGS_JSON' in m['content'] for m in messages)
+            assert any('REVIEW_APPROVED_ORACLE_FINDINGS_JSON' in m['content'] for m in messages)
             text='Hãy thay return 17 bằng giá trị khác.' if len(self.calls)==1 else 'Vấn đề ở giá trị trả về cố định.'
             return Generation(text,30,0.01,'eos',True)
     b=Backend()
@@ -123,8 +123,8 @@ def test_reviewed_findings_bind_approval_to_exact_source_and_statement(tmp_path)
     r=record('TEST-APPROVED')
     finding={'finding_id':'TEST-FACT','problem_id':None,'proposed_taxonomy_label':'Lỗi logic',
              'source_quote':'return 17;','error':'TEST observed fixed value','cause':'TEST fixed return',
-             'permitted_repair_direction':'TEST direction','review_status':'human_approved'}
-    value={'review_status':'human_approved','human_approval':{'reviewer':'TEST-ONLY','provenance':'artificial test fixture'},
+             'permitted_repair_direction':'TEST direction','review_status':'approved_for_oracle_experiment'}
+    value={'review_status':'approved_for_oracle_experiment','review_approval':{'reviewer':'TEST-ONLY','provenance':'artificial test fixture'},
            'samples':[{'sample_id':r.sample_id,'source_code_utf8_sha256':'WRONG',
                        'statement_utf8_sha256':hashlib.sha256(r.statement.encode()).hexdigest(),'findings':[finding]}]}
     p=tmp_path/'approved.json';p.write_text(json.dumps(value))
@@ -145,7 +145,7 @@ def test_level1_oracle_context_keeps_only_issue_flag_without_technical_finding()
     class Backend:
         tokenizer=MockTokenizer()
         def generate(self,messages,config):
-            context=[m for m in messages if m['content'].startswith('HUMAN_REVIEWED_ORACLE_FINDINGS_JSON\n')]
+            context=[m for m in messages if m['content'].startswith('REVIEW_APPROVED_ORACLE_FINDINGS_JSON\n')]
             assert len(context)==1
             assert 'SECRET_' not in context[0]['content']
             assert 'approved_issue_present' in context[0]['content']

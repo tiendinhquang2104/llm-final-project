@@ -314,7 +314,7 @@ def build_messages(
         # diagnosis/planning context remains suppressed as before.
         additional_messages = tuple(
             message for message in additional_messages
-            if message.get("role") == "user" and message.get("content", "").startswith("HUMAN_REVIEWED_ORACLE_FINDINGS_JSON\n")
+            if message.get("role") == "user" and message.get("content", "").startswith("REVIEW_APPROVED_ORACLE_FINDINGS_JSON\n")
         )
         system_addendum = ""
     if level1_modern:
