@@ -269,3 +269,5 @@ The controller saves each completed ID and exact attempts under ignored outputs/
 ```
 
 The metadata verifier checks the supplied supplemental ZIP/member hashes, exact328 IDs, official Level counts115/163/50/0, label definitions and sample output **shape**. Public source is loaded only after the selection freeze passes. Final predictions are a candidate for review, not a leaderboard submission or quality certification. Historical QLoRA comparisons are documented in the final/follow-up reports; their adapters are absent in this Docker workspace and were not silently substituted.
+
+If the original public pass exhausts classification schema retries, `--recover-from-freeze <original-freeze>` requires an amended freeze explicitly hashing that immutable original. It snapshots the original artifacts, validates the full old input identity, and migrates to amended implementation hashes. Only eligible unresolved IDs use the already evaluated `classify` prompt; completed outputs/traces stay invariant. Rescue attempts remain bounded across resume. This is a disclosed post-freeze protocol amendment, not an unchanged one-pass result; see the Round14 report.

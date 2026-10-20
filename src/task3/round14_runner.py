@@ -42,7 +42,7 @@ def verified_projection(record,assessment):
             'usefulness':'bounded_finding_only_not_complete_coverage','verified_findings':result['findings']}
 
 
-def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessment_cache=None):
+def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessment_cache=None,schema_recovery=None):
     out=Path(output_dir);out.mkdir(parents=True,exist_ok=True)
     binding=identity(records,backend,dict(config,oracle_labels=oracle_labels,assessment_cache=assessment_cache))
     state_path=out/'progress.json'
@@ -54,9 +54,19 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
     else:
         state={'identity':binding,'completed':{},'errors':{}}
         write_json(state_path,state)
+    if (out/'schema-recovery.json').exists() and schema_recovery is None:
+        raise ValueError('amended checkpoint requires explicit schema recovery metadata')
+    recovery_ids=set()
+    if schema_recovery is not None:
+        if schema_recovery.get('new_identity')!=binding or config.get('method')!='direct' or oracle_labels is not None or assessment_cache is not None:
+            raise ValueError('schema recovery identity/method mismatch')
+        recovery_ids=set(schema_recovery['eligible_ids'])
+        if not recovery_ids<={r.sample_id for r in records}:
+            raise ValueError('schema recovery IDs outside inputs')
     methods={'direct','two_stage'}
     if config.get('method') not in methods:raise ValueError('Round14 method required')
     journal=out/'attempts.jsonl';repair_journal_tail(journal);journal.touch(mode=0o600,exist_ok=True);journal.chmod(0o600);traces=[];predictions=[]
+    prior_rows=[json.loads(line) for line in journal.read_text().split('\n') if line] if recovery_ids else []
     max_retries=int(config.get('max_retries',1))
     if max_retries not in (0,1,2):raise ValueError('bounded max_retries must be 0..2')
     for record in records:
@@ -67,12 +77,25 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
             validate_taxonomy(item['output']['taxonomy_error'])
             if not item['output']['feedback'].strip():raise ValueError('invalid completed feedback')
             predictions.append({'sample_id':sid,'output':item['output']});traces.append(item['trace']);continue
-        trace={'sample_id':sid,'attempts':[],'classification_fallback':False,'fallback_used':False}
+        recovering=sid in recovery_ids
+        trace={'sample_id':sid,'attempts':[row for row in prior_rows if row['sample_id']==sid] if recovering else [],
+               'classification_fallback':recovering,'fallback_used':False}
+        if recovering:trace['schema_recovery']=True
+        def parse_response(stage,text,assessment):
+            if stage=='feedback':
+                v=object_json(text)
+                if set(v)!={'feedback'}:raise ValueError('feedback response must contain exactly feedback')
+                return finish_feedback(record,assessment,v['feedback'])
+            return parse_assessment(text,record,direct=stage=='direct')
         def request(stage,assessment=None):
-            error=None
+            previous=[row for row in trace['attempts'] if row['stage']==stage] if recovering else []
+            # The rescue budget is global across restarts; reuse a captured valid answer.
+            if previous and previous[-1].get('error') is None:
+                return parse_response(stage,previous[-1]['raw_text'],assessment)
+            error=previous[-1].get('error') if previous else None
             cap=int(config.get('classification_max_tokens',768)) if stage in {'classify','classifier_fallback'} else int(config.get('direct_max_tokens',1024)) if stage=='direct' else int(config.get('feedback_max_tokens',640))
             if int(record.target_feedback_level[6])==4 and stage in {'direct','feedback'}:cap=int(config.get('level4_max_tokens',1536))
-            for number in range(max_retries+1):
+            for number in range(len(previous),max_retries+1):
                 call_config={**config,'max_new_tokens':cap}
                 messages,count=fitted_messages(record,stage,backend.tokenizer,call_config,assessment=assessment,retry=error)
                 generation_started=time.perf_counter()
@@ -88,11 +111,7 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
                      'latency_s':generation.latency_s,'finish_reason':generation.finish_reason,'eos_reached':generation.eos_reached,
                      'prompt_sha256':digest(messages),'prompt_messages':messages,'raw_text':generation.text}
                 try:
-                    if stage=='feedback':
-                        v=object_json(generation.text)
-                        if set(v)!={'feedback'}:raise ValueError('feedback response must contain exactly feedback')
-                        parsed=finish_feedback(record,assessment,v['feedback'])
-                    else:parsed=parse_assessment(generation.text,record,direct=stage=='direct')
+                    parsed=parse_response(stage,generation.text,assessment)
                     row['error']=None;trace['attempts'].append(row)
                     with journal.open('a',encoding='utf-8') as f:f.write(json.dumps(row,ensure_ascii=False)+'\n');f.flush();os.fsync(f.fileno())
                     return parsed
@@ -104,12 +123,18 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
             # Explicit oracle labels are available only in a development diagnostic CLI path.
             # Classification is still predicted; the oracle controls only feedback labels.
             primary='direct' if config['method']=='direct' else 'classify'
-            assessment=assessment_cache[sid] if assessment_cache is not None else request(primary)
-            if assessment is None and config['method']=='two_stage':
-                trace['classification_fallback']=True;assessment=request('direct')
-            if assessment is None:
-                trace['classification_fallback']=True;assessment=request('classifier_fallback')
-            if assessment is None:raise ValueError('classification_unresolved_after_bounded_independent_fallback')
+            if recovering:
+                # Existing pre-public B classifier prompt, only for authenticated schema failures.
+                # Do not replay exhausted direct/boolean routes or weaken rationale/evidence checks.
+                assessment=request('classify')
+                if assessment is None:raise ValueError('classification_unresolved_after_schema_recovery')
+            else:
+                assessment=assessment_cache[sid] if assessment_cache is not None else request(primary)
+                if assessment is None and config['method']=='two_stage':
+                    trace['classification_fallback']=True;assessment=request('direct')
+                if assessment is None:
+                    trace['classification_fallback']=True;assessment=request('classifier_fallback')
+                if assessment is None:raise ValueError('classification_unresolved_after_bounded_independent_fallback')
             trace['assessment']=assessment
             feedback_assessment=assessment
             if oracle_labels is not None:

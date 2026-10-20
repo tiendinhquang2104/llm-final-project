@@ -129,3 +129,64 @@ def test_jsonl_uses_physical_lf_not_unicode_string_separators(tmp_path,separator
     out=run_records([sample()],Scripted([json.dumps(v,ensure_ascii=False)]),config(),tmp_path)
     assert len(out['predictions'])==1
     assert journal_totals(tmp_path/'attempts.jsonl')['attempts']==1
+
+
+def _schema_recovery_checkpoint(tmp_path):
+    from dataclasses import replace
+    from src.task3.round14_runner import run_records
+    from src.task3.round14_recovery import prepare_schema_recovery
+    rows=[sample(1),replace(sample(1),sample_id='RECOVER')]
+    old=dict(config(),implementation_sha256={'controller':'old'})
+    new=dict(config(),implementation_sha256={'controller':'new'})
+    first=run_records(rows,Scripted([json.dumps(value())]+['bad']*4),old,tmp_path)
+    meta=prepare_schema_recovery(rows,Scripted([]),new,tmp_path,
+        prior_config=config(),prior_implementation_sha256=old['implementation_sha256'],
+        prior_freeze_sha256='old-freeze',current_freeze_sha256='new-freeze')
+    return rows,new,first,meta
+
+
+def test_schema_recovery_routes_only_failed_ids_to_existing_classifier(tmp_path):
+    from src.task3.round14_runner import run_records
+    rows,cfg,first,meta=_schema_recovery_checkpoint(tmp_path)
+    decision=value();decision.pop('feedback')
+    backend=Scripted([json.dumps(decision)])
+    result=run_records(rows,backend,cfg,tmp_path,schema_recovery=meta)
+    assert backend.calls==1 and len(result['predictions'])==2
+    assert result['predictions'][0]==first['predictions'][0]
+    assert result['traces'][0]==first['traces'][0]
+    assert [r['stage'] for r in result['traces'][1]['attempts']]==['direct','direct','classifier_fallback','classifier_fallback','classify']
+    assert result['traces'][1]['schema_recovery']
+    again=run_records(rows,backend,cfg,tmp_path,schema_recovery=meta)
+    assert backend.calls==1 and again['predictions']==result['predictions']
+
+
+def test_exhausted_schema_rescue_cannot_renew_budget_on_resume(tmp_path):
+    from src.task3.round14_runner import run_records
+    rows,cfg,_,meta=_schema_recovery_checkpoint(tmp_path)
+    backend=Scripted(['bad','bad'])
+    first=run_records(rows,backend,cfg,tmp_path,schema_recovery=meta)
+    assert backend.calls==2 and 'RECOVER' in first['errors']
+    assert len(first['predictions'])==1 and not (tmp_path/'predictions.json').exists()
+    second=run_records(rows,backend,cfg,tmp_path,schema_recovery=meta)
+    assert backend.calls==2 and 'RECOVER' in second['errors']
+
+
+def test_schema_recovery_runtime_failure_uses_only_remaining_attempt(tmp_path):
+    from src.task3.round14_runner import run_records
+    rows,cfg,_,meta=_schema_recovery_checkpoint(tmp_path)
+    backend=Scripted([RuntimeError('infrastructure interruption')])
+    first=run_records(rows,backend,cfg,tmp_path,schema_recovery=meta)
+    assert first['errors'] and backend.calls==1
+    decision=value();decision.pop('feedback')
+    backend.answers.append(json.dumps(decision))
+    second=run_records(rows,backend,cfg,tmp_path,schema_recovery=meta)
+    assert backend.calls==2 and len(second['predictions'])==2
+
+
+def test_amended_checkpoint_requires_explicit_recovery_metadata(tmp_path):
+    from src.task3.round14_runner import run_records
+    rows,cfg,_,meta=_schema_recovery_checkpoint(tmp_path)
+    with pytest.raises(ValueError,match='recovery'):
+        run_records(rows,Scripted([]),cfg,tmp_path)
+    with pytest.raises(ValueError,match='recovery'):
+        run_records(rows,Scripted([]),cfg,tmp_path,schema_recovery={**meta,'new_identity':'wrong'})

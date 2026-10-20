@@ -25,7 +25,7 @@ from src.task3.public_contract import verify_public_contract
 from src.task3.submission import validate_submission
 
 IMPLEMENTATION=('src/task3/round14.py','src/task3/round14_runner.py','src/task3/round14_eval.py',
-                'src/task3/public_contract.py','src/task3/inference.py','src/task3/compiler.py',
+                'src/task3/public_contract.py','src/task3/round14_recovery.py','src/task3/inference.py','src/task3/compiler.py',
                 'src/task3/discovery.py','src/task3/discovery_render.py','src/task3/renderer.py',
                 'scripts/task3_round14.py','src/task3/compliance.py','src/task3/quality_review.py',
                 'src/task3/schema.py','src/task3/dataset.py','src/task3/submission.py',
@@ -44,6 +44,7 @@ def main():
     parser.add_argument('--output-dir',required=True)
     parser.add_argument('--per-level',type=int,default=6)
     parser.add_argument('--freeze')
+    parser.add_argument('--recover-from-freeze',help='public-only authenticated schema recovery from an immutable original freeze')
     parser.add_argument('--oracle-from',help='development-only B traces to hold stage1 context fixed')
     parser.add_argument('--public-root',default='data/raw/public_test_release')
     args=parser.parse_args()
@@ -51,7 +52,7 @@ def main():
     if not out.is_relative_to(REPO/'outputs/task3'):parser.error('private outputs must be under ignored outputs/task3/')
     if config.get('few_shot_k',0)!=0:parser.error('Round14 frozen K=0 method does not read public demonstrations')
     out.mkdir(parents=True,exist_ok=True)
-    oracle_labels=assessment_cache=None;selection=None;contract=None
+    oracle_labels=assessment_cache=None;selection=None;contract=None;prior_freeze=None;recovery_metadata=None
     if args.phase=='public':
         if args.oracle_from:parser.error('oracle taxonomy forbidden for public')
         if not args.freeze:parser.error('public requires a pre-public development selection freeze')
@@ -60,12 +61,23 @@ def main():
             parser.error('frozen method/config implementation mismatch; do not tune on public')
         if not freeze.get('development_evidence') or freeze.get('public_used_for_selection') is not False:
             parser.error('train-only selection evidence required')
+        if args.recover_from_freeze:
+            prior_path=Path(args.recover_from_freeze)
+            prior_freeze=json.loads(prior_path.read_text())
+            expected=freeze.get('schema_recovery',{}).get('prior_freeze_sha256')
+            if expected!=hashlib.sha256(prior_path.read_bytes()).hexdigest() or prior_freeze['config']!=config or config['method']!='direct':
+                parser.error('schema recovery original freeze/config mismatch')
+            previous_run=out/'pre-schema-recovery/run.json' if (out/'schema-recovery.json').exists() else out/'run.json'
+            prior_run=json.loads(previous_run.read_text())
+            if prior_run['phase']!='public' or prior_run['condition']!='no_gold_inference' or prior_run['implementation_sha256']!=prior_freeze['implementation_sha256'] or prior_run['config']!=config:
+                parser.error('schema recovery original run provenance mismatch')
         contract=verify_public_contract(args.public_root)
         requested=contract['requested_levels']
         levels_path=out/'official-requested-levels.json';write_json(levels_path,requested)
         records=load_task3(args.public_root,'public',levels_path)
         by_id={r.sample_id:r for r in records};records=[by_id[sid] for sid in requested]
     else:
+        if args.recover_from_freeze:parser.error('schema recovery is public-only')
         records,selection=select_development(config.get('data_dir','data/processed/task3'),per_level=args.per_level)
         write_json(out/'development-selection.json',selection)
         if args.oracle_from:
@@ -99,8 +111,15 @@ def main():
     write_json(out/'tokenizer-budget.json',{'tokenizer':tokenizer_metadata(tokenizer),'records':budgets})
     backend=HFBackend(config,tokenizer)
     backend.model.generation_config.max_time=float(config.get('generation_max_time_s',45))
-    result=run_records(sanitized,backend,dict(config,implementation_sha256=implementation_hashes()),out,
-                       oracle_labels=oracle_labels,assessment_cache=assessment_cache)
+    run_config=dict(config,implementation_sha256=implementation_hashes())
+    if prior_freeze is not None:
+        from src.task3.round14_recovery import prepare_schema_recovery
+        recovery_metadata=prepare_schema_recovery(sanitized,backend,run_config,out,
+            prior_config=prior_freeze['config'],prior_implementation_sha256=prior_freeze['implementation_sha256'],
+            prior_freeze_sha256=hashlib.sha256(Path(args.recover_from_freeze).read_bytes()).hexdigest(),
+            current_freeze_sha256=hashlib.sha256(Path(args.freeze).read_bytes()).hexdigest())
+    result=run_records(sanitized,backend,run_config,out,
+                       oracle_labels=oracle_labels,assessment_cache=assessment_cache,schema_recovery=recovery_metadata)
     completed_ids={p['sample_id'] for p in result['predictions']}
     scored_records=[r for r in records if r.sample_id in completed_ids]
     metrics={'feedback':feedback_metrics(scored_records,result['predictions'],result['traces']),
@@ -132,7 +151,7 @@ def main():
               'resume_identity':result['identity'],'unresolved_ids':list(result['errors']),
               'compiler_status':dict(Counter(e['status'] for e in evidence_cache.values())),
               'compiler_unique_sources':len(evidence_cache),'standard':'c++11','student_programs_executed':False,
-              'selection':selection,'public_contract':contract,'freeze':args.freeze,
+              'selection':selection,'public_contract':contract,'freeze':args.freeze,'schema_recovery':recovery_metadata,
               'generation_max_time_s':backend.model.generation_config.max_time,
               'cumulative_attempts':journal_totals(out/'attempts.jsonl'),
               'attempt_output_tokens':journal_totals(out/'attempts.jsonl')['output_tokens'],
