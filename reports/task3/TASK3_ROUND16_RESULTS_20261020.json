@@ -1,0 +1,1405 @@
+{
+  "metrics": {
+    "control": {
+      "completion": 24,
+      "requested": 24,
+      "raw_schema": 23,
+      "taxonomy_available": {
+        "count": 24,
+        "macro_f1": 0.16666666666666666,
+        "micro_f1": 0.13043478260869565,
+        "exact_set_accuracy": 0.25,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 2,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1": 0.6666666666666666
+          },
+          "Lỗi logic": {
+            "tp": 0,
+            "fp": 16,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 0,
+        "gold_empty_false_positive_rate": 0.0,
+        "requested": 24,
+        "missing_ids": []
+      },
+      "raw_taxonomy_available": {
+        "count": 23,
+        "macro_f1": 0.16666666666666666,
+        "micro_f1": 0.13636363636363635,
+        "exact_set_accuracy": 0.2608695652173913,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 2,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1": 0.6666666666666666
+          },
+          "Lỗi logic": {
+            "tp": 0,
+            "fp": 15,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 0,
+        "gold_empty_false_positive_rate": 0.0,
+        "requested": 24,
+        "missing_ids": [
+          "SYN-REVSTR-0004-L2"
+        ]
+      },
+      "compiler_agreement": {
+        "first_raw": {
+          "TP": 1,
+          "FP": 0,
+          "FN": 0,
+          "TN": 22,
+          "unknown": 0
+        },
+        "final": {
+          "TP": 1,
+          "FP": 0,
+          "FN": 0,
+          "TN": 23,
+          "unknown": 0
+        }
+      },
+      "attempts": 27,
+      "fallback": 0,
+      "output_tokens": 2040,
+      "latency_s": 26.26166802085936,
+      "raw_to_final_changed_ids": [
+        "SYN-PERFECT-0004",
+        "SYN-REVSTR-0004-L2",
+        "SYN-SUMPAIR-0003"
+      ],
+      "taxonomy_common_completed": {
+        "count": 23,
+        "macro_f1": 0.15,
+        "micro_f1": 0.09090909090909091,
+        "exact_set_accuracy": 0.21739130434782608,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5
+          },
+          "Lỗi logic": {
+            "tp": 0,
+            "fp": 16,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 0,
+        "gold_empty_false_positive_rate": 0.0,
+        "requested": 23,
+        "missing_ids": []
+      }
+    },
+    "one_shot": {
+      "completion": 23,
+      "requested": 24,
+      "raw_schema": 23,
+      "taxonomy_available": {
+        "count": 23,
+        "macro_f1": 0.10909090909090909,
+        "micro_f1": 0.08333333333333333,
+        "exact_set_accuracy": 0.043478260869565216,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 20,
+            "fn": 0,
+            "precision": 0.047619047619047616,
+            "recall": 1.0,
+            "f1": 0.09090909090909091
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 24,
+        "missing_ids": [
+          "SYN-REVSTR-0003"
+        ]
+      },
+      "raw_taxonomy_available": {
+        "count": 23,
+        "macro_f1": 0.10909090909090909,
+        "micro_f1": 0.08333333333333333,
+        "exact_set_accuracy": 0.043478260869565216,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 20,
+            "fn": 0,
+            "precision": 0.047619047619047616,
+            "recall": 1.0,
+            "f1": 0.09090909090909091
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 24,
+        "missing_ids": [
+          "SYN-REVSTR-0003"
+        ]
+      },
+      "compiler_agreement": {
+        "first_raw": {
+          "TP": 1,
+          "FP": 0,
+          "FN": 0,
+          "TN": 22,
+          "unknown": 0
+        },
+        "final": {
+          "TP": 1,
+          "FP": 0,
+          "FN": 0,
+          "TN": 22,
+          "unknown": 0
+        }
+      },
+      "attempts": 26,
+      "fallback": 0,
+      "output_tokens": 1435,
+      "latency_s": 19.60464288108051,
+      "raw_to_final_changed_ids": [],
+      "taxonomy_common_completed": {
+        "count": 23,
+        "macro_f1": 0.10909090909090909,
+        "micro_f1": 0.08333333333333333,
+        "exact_set_accuracy": 0.043478260869565216,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 20,
+            "fn": 0,
+            "precision": 0.047619047619047616,
+            "recall": 1.0,
+            "f1": 0.09090909090909091
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 23,
+        "missing_ids": []
+      }
+    },
+    "few_shot": {
+      "completion": 23,
+      "requested": 24,
+      "raw_schema": 23,
+      "taxonomy_available": {
+        "count": 23,
+        "macro_f1": 0.11000000000000001,
+        "micro_f1": 0.0851063829787234,
+        "exact_set_accuracy": 0.043478260869565216,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 18,
+            "fn": 0,
+            "precision": 0.05263157894736842,
+            "recall": 1.0,
+            "f1": 0.1
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 24,
+        "missing_ids": [
+          "SYN-REVSTR-0003"
+        ]
+      },
+      "raw_taxonomy_available": {
+        "count": 23,
+        "macro_f1": 0.11000000000000001,
+        "micro_f1": 0.0851063829787234,
+        "exact_set_accuracy": 0.043478260869565216,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 18,
+            "fn": 0,
+            "precision": 0.05263157894736842,
+            "recall": 1.0,
+            "f1": 0.1
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 24,
+        "missing_ids": [
+          "SYN-REVSTR-0003"
+        ]
+      },
+      "compiler_agreement": {
+        "first_raw": {
+          "TP": 1,
+          "FP": 0,
+          "FN": 0,
+          "TN": 22,
+          "unknown": 0
+        },
+        "final": {
+          "TP": 1,
+          "FP": 0,
+          "FN": 0,
+          "TN": 22,
+          "unknown": 0
+        }
+      },
+      "attempts": 26,
+      "fallback": 0,
+      "output_tokens": 1442,
+      "latency_s": 20.051738971844316,
+      "raw_to_final_changed_ids": [],
+      "taxonomy_common_completed": {
+        "count": 23,
+        "macro_f1": 0.11000000000000001,
+        "micro_f1": 0.0851063829787234,
+        "exact_set_accuracy": 0.043478260869565216,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 18,
+            "fn": 0,
+            "precision": 0.05263157894736842,
+            "recall": 1.0,
+            "f1": 0.1
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 23,
+        "missing_ids": []
+      }
+    },
+    "evidence_cot": {
+      "completion": 24,
+      "requested": 24,
+      "raw_schema": 24,
+      "taxonomy_available": {
+        "count": 24,
+        "macro_f1": 0.14576441102756893,
+        "micro_f1": 0.18181818181818182,
+        "exact_set_accuracy": 0.08333333333333333,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 3,
+            "fn": 0,
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1": 0.4
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 2,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1": 0.6666666666666666
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 17,
+            "fn": 0,
+            "precision": 0.05555555555555555,
+            "recall": 1.0,
+            "f1": 0.10526315789473684
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 4,
+            "precision": 0.5,
+            "recall": 0.2,
+            "f1": 0.2857142857142857
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 24,
+        "missing_ids": []
+      },
+      "raw_taxonomy_available": {
+        "count": 24,
+        "macro_f1": 0.14576441102756893,
+        "micro_f1": 0.18181818181818182,
+        "exact_set_accuracy": 0.08333333333333333,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 3,
+            "fn": 0,
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1": 0.4
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 2,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1": 0.6666666666666666
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 17,
+            "fn": 0,
+            "precision": 0.05555555555555555,
+            "recall": 1.0,
+            "f1": 0.10526315789473684
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 4,
+            "precision": 0.5,
+            "recall": 0.2,
+            "f1": 0.2857142857142857
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 24,
+        "missing_ids": []
+      },
+      "compiler_agreement": {
+        "first_raw": {
+          "TP": 1,
+          "FP": 3,
+          "FN": 0,
+          "TN": 20,
+          "unknown": 0
+        },
+        "final": {
+          "TP": 1,
+          "FP": 3,
+          "FN": 0,
+          "TN": 20,
+          "unknown": 0
+        }
+      },
+      "attempts": 24,
+      "fallback": 0,
+      "output_tokens": 6536,
+      "latency_s": 79.06409634649754,
+      "raw_to_final_changed_ids": [],
+      "taxonomy_common_completed": {
+        "count": 23,
+        "macro_f1": 0.12968253968253968,
+        "micro_f1": 0.15384615384615385,
+        "exact_set_accuracy": 0.08695652173913043,
+        "per_group": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 3,
+            "fn": 0,
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1": 0.4
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5
+          },
+          "Lỗi logic": {
+            "tp": 1,
+            "fp": 16,
+            "fn": 0,
+            "precision": 0.058823529411764705,
+            "recall": 1.0,
+            "f1": 0.1111111111111111
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 4,
+            "precision": 0.5,
+            "recall": 0.2,
+            "f1": 0.2857142857142857
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 7,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "gold_empty_count": 3,
+        "gold_empty_false_positive_count": 3,
+        "gold_empty_false_positive_rate": 1.0,
+        "requested": 23,
+        "missing_ids": []
+      }
+    }
+  },
+  "quality": {
+    "control": {
+      "raw_has_source_supported_material_claim": 19,
+      "raw_has_materially_false_claim": 10,
+      "raw_has_unassessed_claim": 3,
+      "final_has_source_supported_material_claim": 17,
+      "final_has_materially_false_claim": 10,
+      "final_has_unassessed_claim": 3,
+      "raw_L1_disclosure": 1,
+      "final_L1_disclosure": 1,
+      "raw_L2_repair_leak": 4,
+      "final_L2_repair_leak": 2,
+      "strict_L2_useful_final": 1,
+      "strict_L3_feasible_repair_final": 0,
+      "contamination_observed_erroneous_transfer": 0,
+      "raw_false_any_attempt_ids": [
+        "SYN-PALIN-0012",
+        "SYN-PERFECT-0004",
+        "SYN-PROD-0004",
+        "SYN-REVSTR-0004-L2",
+        "SYN-SUMPAIR-0003",
+        "SYN-BASE2-0005",
+        "SYN-BASE2-0011",
+        "SYN-DISTINCT-0008-L3",
+        "SYN-FIB-0004",
+        "SYN-SUMEVEN-0007"
+      ],
+      "L1_exact_template_repeated_records": 0,
+      "L1_false_praise_count": 0,
+      "final_feedback_chars_median": 172
+    },
+    "one_shot": {
+      "raw_has_source_supported_material_claim": 16,
+      "raw_has_materially_false_claim": 10,
+      "raw_has_unassessed_claim": 8,
+      "final_has_source_supported_material_claim": 15,
+      "final_has_materially_false_claim": 10,
+      "final_has_unassessed_claim": 7,
+      "raw_L1_disclosure": 0,
+      "final_L1_disclosure": 0,
+      "raw_L2_repair_leak": 3,
+      "final_L2_repair_leak": 2,
+      "strict_L2_useful_final": 1,
+      "strict_L3_feasible_repair_final": 1,
+      "contamination_observed_erroneous_transfer": 1,
+      "raw_false_any_attempt_ids": [
+        "SYN-PROD-0004",
+        "SYN-REVSTR-0004-L2",
+        "SYN-SUMPAIR-0003",
+        "SYN-BASE2-0005",
+        "SYN-BASE2-0011",
+        "SYN-COUNTEVEN-0006-L3",
+        "SYN-DISTINCT-0008-L3",
+        "SYN-FIB-0004",
+        "SYN-SUMEVEN-0007",
+        "SYN-DISTINCT-0016"
+      ],
+      "L1_exact_template_repeated_records": 2,
+      "L1_false_praise_count": 0,
+      "final_feedback_chars_median": 91
+    },
+    "few_shot": {
+      "raw_has_source_supported_material_claim": 15,
+      "raw_has_materially_false_claim": 11,
+      "raw_has_unassessed_claim": 6,
+      "final_has_source_supported_material_claim": 14,
+      "final_has_materially_false_claim": 11,
+      "final_has_unassessed_claim": 5,
+      "raw_L1_disclosure": 2,
+      "final_L1_disclosure": 2,
+      "raw_L2_repair_leak": 1,
+      "final_L2_repair_leak": 0,
+      "strict_L2_useful_final": 2,
+      "strict_L3_feasible_repair_final": 2,
+      "contamination_observed_erroneous_transfer": 1,
+      "raw_false_any_attempt_ids": [
+        "SYN-PALIN-0008",
+        "SYN-PALIN-0012",
+        "SYN-PERFECT-0004",
+        "SYN-PROD-0004",
+        "SYN-REVSTR-0004-L2",
+        "SYN-BASE2-0005",
+        "SYN-BASE2-0011",
+        "SYN-DISTINCT-0008-L3",
+        "SYN-FIB-0004",
+        "SYN-PERFECT-0008",
+        "SYN-SUMEVEN-0007"
+      ],
+      "L1_exact_template_repeated_records": 0,
+      "L1_false_praise_count": 0,
+      "final_feedback_chars_median": 102
+    },
+    "evidence_cot": {
+      "raw_has_source_supported_material_claim": 18,
+      "raw_has_materially_false_claim": 20,
+      "raw_has_unassessed_claim": 7,
+      "final_has_source_supported_material_claim": 18,
+      "final_has_materially_false_claim": 16,
+      "final_has_unassessed_claim": 10,
+      "raw_L1_disclosure": 4,
+      "final_L1_disclosure": 4,
+      "raw_L2_repair_leak": 3,
+      "final_L2_repair_leak": 3,
+      "strict_L2_useful_final": 0,
+      "strict_L3_feasible_repair_final": 3,
+      "contamination_observed_erroneous_transfer": 0,
+      "raw_false_any_attempt_ids": [
+        "SYN-COUNTEVEN-0000",
+        "SYN-MAXDIFF-0000",
+        "SYN-MINA-0001",
+        "SYN-PALIN-0008",
+        "SYN-MAXDIFF-0002",
+        "SYN-MINA-0005-L2",
+        "SYN-PALIN-0012",
+        "SYN-PERFECT-0004",
+        "SYN-PROD-0004",
+        "SYN-REVSTR-0003",
+        "SYN-SUMPAIR-0003",
+        "SYN-BASE2-0005",
+        "SYN-COUNTEVEN-0006-L3",
+        "SYN-DISTINCT-0008-L3",
+        "SYN-PERFECT-0008",
+        "SYN-SUMEVEN-0007",
+        "SYN-SUMPAIR-0011",
+        "SYN-DISTINCT-0016",
+        "SYN-FIB-0002",
+        "SYN-PROD-0020-L2"
+      ],
+      "L1_exact_template_repeated_records": 0,
+      "L1_false_praise_count": 0,
+      "final_feedback_chars_median": 153
+    }
+  },
+  "common_completed_ids": [
+    "SYN-BASE2-0005",
+    "SYN-BASE2-0011",
+    "SYN-COUNTEVEN-0000",
+    "SYN-COUNTEVEN-0006-L3",
+    "SYN-DISTINCT-0008-L3",
+    "SYN-DISTINCT-0016",
+    "SYN-FIB-0002",
+    "SYN-FIB-0004",
+    "SYN-MAXDIFF-0000",
+    "SYN-MAXDIFF-0002",
+    "SYN-MINA-0001",
+    "SYN-MINA-0005-L2",
+    "SYN-PALIN-0008",
+    "SYN-PALIN-0012",
+    "SYN-PERFECT-0004",
+    "SYN-PERFECT-0008",
+    "SYN-PROD-0004",
+    "SYN-PROD-0020-L2",
+    "SYN-REVSTR-0004-L2",
+    "SYN-SUMEVEN-0007",
+    "SYN-SUMEVEN-0014",
+    "SYN-SUMPAIR-0003",
+    "SYN-SUMPAIR-0011"
+  ],
+  "manual_review_sha256": "12589055b6baab7b58c51b178aee400d0ebe198555d7765f428c009daed7c49c",
+  "review_provenance": "single assistant; assistant-reviewed, not human-verified",
+  "claim_unit": "records containing at least one material claim, NOT atomic claim precision/recall. Raw includes evidence and first malformed JSON; retry notes included. S and F may overlap. Subjective style and unsupported scope assertions are U.",
+  "candidate_hashes_verified": {
+    "outputs/task3/round14/public-candidate/predictions.json": "75f9acd13c183cf40154548eb3d530f14af6959c20b34b413d778eca756ba0d4",
+    "outputs/task3/round15/public-candidate-zero/predictions.json": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45"
+  },
+  "raw_attempt_count": 103,
+  "decision": "no winner; retain R15 control, preserve other prompts as experimental artifacts; no prompt tuning after outputs"
+}

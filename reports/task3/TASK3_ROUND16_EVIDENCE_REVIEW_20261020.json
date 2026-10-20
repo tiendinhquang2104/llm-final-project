@@ -1,0 +1,41 @@
+{
+  "unit": "finding; S=supported defect/conditional limitation, F=source/requirement contradiction, U=insufficient or subjective defect",
+  "active_code_excerpt_count": 47,
+  "total_findings": 47,
+  "quote_scope": "All contain active code (some full function quotes also include comments); whitespace normalized manually. No gate or response changes.",
+  "judgements": {
+    "SYN-COUNTEVEN-0000": "SS",
+    "SYN-MAXDIFF-0000": "FF",
+    "SYN-MINA-0001": "UF",
+    "SYN-PALIN-0008": "SF",
+    "SYN-MAXDIFF-0002": "SF",
+    "SYN-MINA-0005-L2": "SF",
+    "SYN-PALIN-0012": "FU",
+    "SYN-PERFECT-0004": "FS",
+    "SYN-PROD-0004": "SF",
+    "SYN-REVSTR-0003": "SF",
+    "SYN-REVSTR-0004-L2": "US",
+    "SYN-SUMPAIR-0003": "FF",
+    "SYN-BASE2-0005": "FF",
+    "SYN-BASE2-0011": "S",
+    "SYN-COUNTEVEN-0006-L3": "SS",
+    "SYN-DISTINCT-0008-L3": "FF",
+    "SYN-FIB-0004": "SU",
+    "SYN-PERFECT-0008": "SF",
+    "SYN-SUMEVEN-0007": "SF",
+    "SYN-SUMPAIR-0011": "FS",
+    "SYN-DISTINCT-0016": "FF",
+    "SYN-FIB-0002": "SF",
+    "SYN-PROD-0020-L2": "SF",
+    "SYN-SUMEVEN-0014": "SU"
+  },
+  "direct_evidence_to_feedback_contradictions": [
+    "SYN-PERFECT-0004",
+    "SYN-PROD-0004"
+  ],
+  "compiler_contradiction_ids": [
+    "SYN-COUNTEVEN-0000",
+    "SYN-MINA-0001",
+    "SYN-DISTINCT-0016"
+  ]
+}

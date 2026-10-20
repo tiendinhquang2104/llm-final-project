@@ -1,0 +1,6 @@
+extends: r15_common.yaml
+prompt_variant: evidence_cot
+prompt_policy: round16-paired-prompts-v1
+completion_policy: schema_only_preserve_content_project_evidence
+example_bank: outputs/task3/round16/train-examples.json
+few_shot_k: 2
