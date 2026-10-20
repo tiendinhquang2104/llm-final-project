@@ -146,6 +146,7 @@ def feedback_errors(record,labels,text):
         for sentence in re.split(r'(?<=[.!?])\s+|\n',text):
             if re.search(r'(?i)chưa (?:đủ căn cứ|xác định|có bằng chứng)|không (?:thấy|tìm thấy|xác định)',sentence):continue
             if re.search(r'(?i)\b(?:lỗi|sai|thiếu|thừa|chưa khai báo|không khởi tạo)\b',sentence):errors.append('empty_taxonomy_error_diagnosis')
+    if not labels and level==3 and re.search(r'(?i)hướng sửa|(?:^|[.!?;,:]\s*|\n)\s*(?:hãy|nên|cần|bổ sung|sử dụng|dùng|đặt|thay|đổi|sửa|loại bỏ|khai báo|khởi tạo|gán|cập nhật)\b',text):errors.append('empty_taxonomy_repair')
     if level in (2,3) and labels and not re.search(r'(?i)hàm|dòng|vị trí|biến|vòng lặp|điều kiện|phép|thân|tại|phần|mảng|chuỗi|lệnh|giá trị',text):
         errors.append('missing_location_or_diagnosis')
     if level==3 and labels:

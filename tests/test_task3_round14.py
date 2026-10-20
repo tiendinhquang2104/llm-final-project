@@ -159,3 +159,9 @@ def test_merely_naming_function_and_asking_correct_processing_is_not_specific():
     from src.task3.round14 import feedback_errors
     assert 'level3_action_not_source_bound' in feedback_errors(sample(3),['Lỗi logic'],
         'Hàm main trả sai giá trị. Hướng sửa: Sửa hàm main để tính toán đúng theo yêu cầu đề cho mọi đầu vào.')
+
+
+def test_empty_taxonomy_cannot_request_a_concrete_repair_even_without_error_keyword():
+    from src.task3.round14 import feedback_errors
+    assert 'empty_taxonomy_repair' in feedback_errors(sample(3),[],
+        'Ở hàm main, thay x thành 0 để phù hợp yêu cầu đề.')

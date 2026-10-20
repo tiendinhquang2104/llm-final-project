@@ -70,6 +70,8 @@ def main():
         write_json(out/'development-selection.json',selection)
         if args.oracle_from:
             if config['method']!='two_stage':parser.error('paired oracle control requires B')
+            prior_manifest=json.loads(Path(args.oracle_from).with_name('run.json').read_text())
+            if prior_manifest['phase']!='development' or prior_manifest['condition']!='no_gold_inference' or prior_manifest['config']!=config or prior_manifest['selection']['selection_id']!=selection['selection_id']:parser.error('paired assessment provenance mismatch')
             prior=json.loads(Path(args.oracle_from).read_text())
             assessment_cache={r['sample_id']:r['assessment'] for r in prior}
             if set(assessment_cache)!={r.sample_id for r in records}:parser.error('paired assessment IDs mismatch')
@@ -103,8 +105,21 @@ def main():
     scored_records=[r for r in records if r.sample_id in completed_ids]
     metrics={'feedback':feedback_metrics(scored_records,result['predictions'],result['traces']),
              'completion':{'requested':len(records),'completed':len(result['predictions']),'unresolved_ids':list(result['errors'])}}
-    if args.phase=='development':metrics['taxonomy']=taxonomy_metrics(scored_records,result['predictions'])
+    if args.phase=='development':
+        metrics['taxonomy']=taxonomy_metrics(scored_records,result['predictions']) if oracle_labels is None else {'condition':'oracle_taxonomy_supplied_not_model_scored'}
     write_json(out/'metrics.json',metrics)
+    trace_by_id={t['sample_id']:t for t in result['traces']}
+    write_json(out/'audit-summary.json',[{'sample_id':r.sample_id,'requested_level':int(r.target_feedback_level[6]),
+        'compiler_status':r.provenance['_task3_compile_check']['status'],
+        'taxonomy_error':trace_by_id[r.sample_id]['assessment']['taxonomy_error'],
+        'epistemic_status':trace_by_id[r.sample_id]['assessment']['epistemic_status'],
+        'uncertain':trace_by_id[r.sample_id]['assessment']['uncertain'],
+        'classification_fallback':trace_by_id[r.sample_id]['classification_fallback'],
+        'feedback_origin':trace_by_id[r.sample_id]['feedback_origin'],
+        'feedback_fallback':trace_by_id[r.sample_id]['fallback_used'],
+        'policy_flags':trace_by_id[r.sample_id]['feedback_level_errors'],
+        'rejected_support_count':len(trace_by_id[r.sample_id]['assessment'].get('rejected_rationales',[])),
+        'attempts':len(trace_by_id[r.sample_id]['attempts'])} for r in sanitized if r.sample_id in trace_by_id])
     manifest={'status':'complete_candidate_not_submitted' if not result['errors'] else 'incomplete_resumable',
               'phase':args.phase,'method':config['method'],'condition':'oracle_taxonomy_development_diagnostic' if oracle_labels is not None else 'no_gold_inference',
               'git_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
