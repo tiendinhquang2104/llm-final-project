@@ -1,0 +1,212 @@
+{
+  "date_utc": "2026-10-20",
+  "method": "reuse fixed R15 zero-shot public candidate without generation or response edits",
+  "upload_path": "/workspace/llm-final-project/outputs/task3/submission-r15-20261020/predictions.json",
+  "predictions_sha256": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+  "original_candidate_path": "/workspace/llm-final-project/outputs/task3/round15/public-candidate-zero/predictions.json",
+  "generation_git_commit": "f6a17b13a3954755dd55809d9082784e36391546",
+  "handoff_parent_commit": "21ecd6472f67519bd508a7c3e0c3283acfea9aab",
+  "generation_config": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "seed": 42,
+    "data_dir": "data/processed/task3",
+    "context_limit": 16384,
+    "max_new_tokens": 1024,
+    "level4_max_tokens": 1536,
+    "max_attempts": 3,
+    "generation_max_time_s": 45,
+    "do_sample": false,
+    "few_shot_k": 0,
+    "load_in_4bit": true,
+    "cpp_compiler": "/usr/bin/g++",
+    "compiler_timeout_s": 3,
+    "prompt_policy": "round15-short-direct-v1",
+    "example_bank": "outputs/task3/round15/train-examples.json",
+    "completion_policy": "preserve_qwen_content_with_schema_and_explicit_l1_l2_only",
+    "prompt_variant": "zero_shot"
+  },
+  "model_runtime": {
+    "actual_precision": "nf4",
+    "parameter_storage_elements_by_dtype": {
+      "torch.float16": 1090328064,
+      "torch.uint8": 3262644224
+    },
+    "parameter_storage_elements_by_device": {
+      "cuda:0": 4352972288
+    },
+    "hf_device_map": {
+      "": "0"
+    },
+    "is_loaded_in_4bit": true,
+    "quantized_compute_dtypes": [
+      "torch.bfloat16"
+    ],
+    "resolved_model_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "load_latency_s": 5.6045269295573235,
+    "peak_gpu_memory_allocated_bytes": 7071596544,
+    "peak_gpu_memory_reserved_bytes": 7212105728,
+    "current_gpu_memory_allocated_bytes": 5566237184,
+    "free_gpu_memory_bytes": 25795297280,
+    "total_gpu_memory_bytes": 33671348224
+  },
+  "tokenizer": {
+    "class": "Qwen2TokenizerFast",
+    "chat_template_sha256": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
+    "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "mock": false
+  },
+  "freeze_path": "outputs/task3/round15/selected-prompt-freeze.json",
+  "freeze_sha256": "031c546bb5a83236725a158176585183c78799f7a8c4adc502d197cb3c858795",
+  "new_dataset": {
+    "path": "/workspace/llm-final-project/generate-dataset_v2.zip",
+    "supplied_filename": "generate-dataset_v2(1).zip",
+    "zip_sha256": "6bda70c29254a3bce91933b65f4a311d73a052e72d181c97e977152e14602f9b",
+    "metadata_member": "generate-dataset/task3_feedback.json",
+    "metadata_sha256": "38da5e36636ba74315b3e0d6e8e25e7240595b7cb2dcf33ef00dcc21542f9a32",
+    "root_records": 627,
+    "root_unique_ids": 627,
+    "algorithm_positive_records": 27,
+    "used_for_this_submission": false,
+    "label_space_sha256": "056a4d1a0ccfd60688b43efdf5df64a4c1310e3c6f1d99ab813691a2da27a9dc"
+  },
+  "release_metadata_sha256": "6020f0687f661dadf11600a8c50cb7c6cec6cef347ef13f71b09be42a6e631bb",
+  "release_label_space_sha256": "056a4d1a0ccfd60688b43efdf5df64a4c1310e3c6f1d99ab813691a2da27a9dc",
+  "requested_levels_path": "/workspace/llm-final-project/outputs/task3/submission-r15-20261020/task3_requested_levels.json",
+  "requested_levels_sha256": "7246a8cb36f52c113440d4b76874022f54d16d254058ea9945e853859dd4f85f",
+  "requested_levels_derivation": "Only sample_id and input.target_feedback_level, in release order; exact match with cached official mapping and run manifest",
+  "validator": {
+    "command": [
+      ".venv-task3/bin/python",
+      "scripts/validate_task3_submission.py",
+      "--predictions",
+      "/workspace/llm-final-project/outputs/task3/submission-r15-20261020/predictions.json",
+      "--requested-levels",
+      "/workspace/llm-final-project/outputs/task3/submission-r15-20261020/task3_requested_levels.json"
+    ],
+    "exit_code": 0,
+    "result": {
+      "status": "VALID",
+      "records": 328,
+      "levels": {
+        "Level 1 - Gợi ý nhẹ": 115,
+        "Level 2 - Chẩn đoán": 163,
+        "Level 3 - Gợi ý sửa": 50,
+        "Level 4 - Lời giải mẫu": 0
+      }
+    }
+  },
+  "statistics": {
+    "records": 328,
+    "level_counts": {
+      "2": 163,
+      "3": 50,
+      "1": 115
+    },
+    "label_counts": {
+      "Lỗi biên dịch": 86,
+      "Lỗi nhập/xuất": 32,
+      "Lỗi logic": 86,
+      "Lỗi vòng lặp": 0,
+      "Lỗi mảng/chuỗi": 0,
+      "Lỗi hàm": 4,
+      "Lỗi edge case": 0,
+      "Lỗi thuật toán": 0,
+      "Lỗi hard-code": 0,
+      "Lỗi style": 0
+    },
+    "label_assignments": 208,
+    "empty_taxonomy": 120,
+    "empty_feedback": 0,
+    "feedback_length_characters": {
+      "min": 28,
+      "median": 134.0,
+      "mean": 145.027,
+      "max": 662
+    },
+    "fallback_records": 9,
+    "fallback_by_level": {
+      "1": 3,
+      "2": 6
+    },
+    "final_origin": {
+      "qwen_initial": 304,
+      "qwen_retry": 15,
+      "disclosure_fallback": 9
+    },
+    "attempts": 361,
+    "schema_failed_attempts": 1,
+    "unresolved_ids": 0,
+    "placeholder_fixture_marker_matches": 0,
+    "feedback_with_cjk": 5,
+    "raw_first_disclosure_records_by_level": {
+      "2": 19,
+      "3": 0,
+      "1": 4
+    },
+    "final_disclosure_records_by_level": {
+      "2": 0,
+      "3": 0,
+      "1": 0
+    },
+    "disclosure_scope": "existing R15 regex screen, only L1/L2; L3/L4 not assessed",
+    "factual_correctness_and_semantic_level_compliance": "not established by validator or aggregate audit"
+  },
+  "checks": {
+    "config_and_all_17_implementation_hashes_match_run_and_pre_public_freeze": true,
+    "generation_commit_exists": true,
+    "raw_journal_prompt_and_attempt_identity_verified": true,
+    "all_decisions_replayed_offline": true,
+    "all_finals_match_original_runner_including_existing_fallback": true,
+    "all_328_checkpoint_and_trace_outputs_match_predictions": true,
+    "all_ids_unique_complete_and_release_order": true,
+    "raw_and_original_artifacts_unchanged": true,
+    "new_inference": false,
+    "manual_public_response_edits": false,
+    "prompt_changes": false,
+    "training": false,
+    "push": false,
+    "leaderboard_submission": false,
+    "all_328_first_prompts_match_current_public_release_and_original_cached_diagnostics": true,
+    "full_runner_input_identity_recomputed_without_model_or_compiler": true,
+    "all_17_implementation_blobs_match_generation_commit": true
+  },
+  "protected_artifact_sha256": {
+    "outputs/task3/round15/public-candidate-zero/predictions.json": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+    "outputs/task3/round15/public-candidate-zero/compiler-evidence.json": "1e7a6e6304ee1b09cc6a887c68903f8a8c669f696c3fffb3907edd94258d3abe",
+    "outputs/task3/round15/public-candidate-zero/raw-first.predictions.json": "b22a0a370cc5e0313f1ed31809cb39bdc60d4f416cae0b341964e66b8731e96b",
+    "outputs/task3/round15/public-candidate-zero/validator-cli.log": "0fac64d88a34c896225b8a43cb1d01b22eac4d89df68310953600b08aca5822a",
+    "outputs/task3/round15/public-candidate-zero/public-aggregate.json": "1e4d84934ca645eac790313363cf8d14fe0c6f1fe83cd308d54fd7a2e000f0e3",
+    "outputs/task3/round15/public-candidate-zero/completed.predictions.json": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+    "outputs/task3/round15/public-candidate-zero/metrics.json": "30b58dce1b9c3db6182d357bdf6e70fc47e62d514477d74e5287350079b6bb42",
+    "outputs/task3/round15/public-candidate-zero/official-requested-levels.json": "7246a8cb36f52c113440d4b76874022f54d16d254058ea9945e853859dd4f85f",
+    "outputs/task3/round15/public-candidate-zero/traces.json": "ba6f4ef99fca8a8cb44404ffb78d9a9d0c77f769d3c029723bcbd05a7ce20280",
+    "outputs/task3/round15/public-candidate-zero/validation-report.json": "5cf68385362a6a0e25b092b763c90bc0168a19b2c04dd0f10002f77dfa03d3dc",
+    "outputs/task3/round15/public-candidate-zero/run.json": "ca4afeedf2f3115fcacef0a5dc7ac23601d2ad433522a9628def4cb34dd2705c",
+    "outputs/task3/round15/public-candidate-zero/raw-and-final.audit.json": "a663c597ce8fdd4de6f31ae937f36cb938e28a44663ce5fc868cc71fe3d98a39",
+    "outputs/task3/round15/public-candidate-zero/attempts.jsonl": "5fe9989bda25ca4643e9c379e0669d1d14f31a4f3085e069de83993ace38b5ad",
+    "outputs/task3/round15/public-candidate-zero/decisions.jsonl": "326db480317d5d2fe09797a488be220ce706536e896cc470f2b8e469380d4203",
+    "outputs/task3/round15/public-candidate-zero/tokenizer-budget.json": "9e3b72e4869b5e87542bf8f940a8c31f9ec65b28ca199c8892b4d92ebaa256d8",
+    "outputs/task3/round15/public-candidate-zero/progress.json": "8246908fef874815277aaa4b05eda307c430a1b01767727c938aa110d116ba62",
+    "outputs/task3/round14/public-candidate/predictions.json": "75f9acd13c183cf40154548eb3d530f14af6959c20b34b413d778eca756ba0d4",
+    "configs/task3/r15_zero_shot.yaml": "846defe2e2e63b441ef264c7eca7dd7b20d1476af24d4e4c1c7d3f30bd3edae8",
+    "outputs/task3/round15/selected-prompt-freeze.json": "031c546bb5a83236725a158176585183c78799f7a8c4adc502d197cb3c858795",
+    "scripts/task3_round15.py": "1a3ebc3df8b7239232731a16037551ad0ff8876d43edb0ab1d8237a541785375",
+    "src/task3/round15.py": "9f367db21ee0bffba82a56950734e830606b52fafa32b70f4f8312e6492c3f9c",
+    "src/task3/round15_runner.py": "d59530f8fff1feffe26e62cb89d47fa240de4a6442c94c5cf9df3546429c5807",
+    "src/task3/round15_disclosure.py": "3b8a7009c491e4def66ee63f849c15580842b88fcdc74315324e81798496e941",
+    "src/task3/round15_selection.py": "42dcbd9c80204587afa3e0448418d2521a72c98c1186ac0fcf4aeae0a90f2ff9",
+    "src/task3/inference.py": "84c4b0166dfcadc1d79aba365ed9dba84058e55954c459f6f4eb3724c452eea2",
+    "src/task3/compiler.py": "6e3c8baf92c01b6e20cbee20de7554bdd061513590676dc720ee6ec656868dd4",
+    "src/task3/dataset.py": "25610f40d9c26ef836650e258a8b91e39a835491717184a78db68e6791d229d1",
+    "src/task3/schema.py": "0b00e448051ef33848c81291f13849c777d7d5d9f54d13632b9e2f0a09d1bac8",
+    "src/task3/public_contract.py": "14c95708c7d30a162bfd2e06dd0ef338bcf9414d2cac2f2f5cf0874bd4d3347b",
+    "src/task3/submission.py": "ea92b410e6d60ca88f84aa1caebaeba0ace3a70eff8b54c5a360b99f1461cd93",
+    "src/task3/round14.py": "011517072e140818541020734cd13bdb32c407f157843535ed78a4029492d653",
+    "src/task3/round14_runner.py": "aba9c09da7bc6a34de0837f8698dff7f9c614faf35ad40931de309cd028414e0",
+    "src/task3/round14_eval.py": "80cbeb0aa5f5e5c2d20f901174bd93f575cd44eaccf8ec36ea1e45092f67443a",
+    "src/synth/taxonomy.py": "c6f4a3cece36e70e94d1f9abd38d0f3c8abfe77140690b4dbe8ac0058a585288",
+    "src/utils/config.py": "8f4bf2fd8b4a6d4401d556549ec00c08020f3c8d713d48195d2474c8968dd591",
+    "src/utils/json_extractor.py": "c770a250b9b96b79e21dce539ef5bee4023939a9321790fc75f7faa29f2c2161"
+  }
+}
