@@ -1,0 +1,3 @@
+extends: r15_common.yaml
+prompt_variant: few_shot
+few_shot_k: 2
