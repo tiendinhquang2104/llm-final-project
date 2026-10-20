@@ -15,5 +15,5 @@ few_shot_k: 0
 load_in_4bit: true
 cpp_compiler: /usr/bin/g++
 compiler_timeout_s: 3
-prompt_policy: round14-v2
+prompt_policy: round14-v3
 completion_policy: model_best_effort_with_explicit_fallback_audit

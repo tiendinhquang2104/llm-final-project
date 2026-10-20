@@ -67,7 +67,7 @@ def test_level3_generic_direction_not_considered_useful_and_full_solution_blocke
     from src.task3.round14 import feedback_errors
     assert feedback_errors(sample(3),['Lỗi logic'],'Hàm main trả sai giá trị. Hướng sửa: Kiểm tra lại.')
     assert feedback_errors(sample(3),['Lỗi logic'],'Hàm main trả sai.\n```cpp\nint main(){return 2;}\n```')
-    assert not feedback_errors(sample(3),['Lỗi logic'],'Vị trí: hàm main. Giá trị trả về khác yêu cầu. Hướng sửa: Thay giá trị trả về x bằng giá trị tính từ đầu vào theo yêu cầu đề.')
+    assert not feedback_errors(sample(3),['Lỗi logic'],'Vị trí: hàm main. Giá trị trả về khác yêu cầu. Hướng sửa: Thay giá trị trả về x bằng hằng 0 theo yêu cầu đề.')
 
 
 def test_feedback_cannot_add_unpredicted_group_or_praise_without_verification():
@@ -128,3 +128,34 @@ def test_explicit_binary_classifier_decisions_are_not_exception_defaults():
 def test_level4_needs_solution_artifact_not_diagnosis_only():
     from src.task3.round14 import feedback_errors
     assert 'missing_level4_solution' in feedback_errors(sample(4),['Lỗi logic'],'Hàm main trả sai kết quả. Hãy dùng phép cộng hai số.')
+
+
+def test_negative_label_rationale_does_not_invalidate_explicit_classifier_no_error_decision():
+    from src.task3.round14 import parse_assessment
+    v=value(labels=[]);v.pop('feedback')
+    v['rationales']=[{'taxonomy_group':'Lỗi biên dịch','reason':'Không có lỗi biên dịch; compiler đã chạy qua.','source_quote':''}]
+    out=parse_assessment(json.dumps(v),sample())
+    assert out['taxonomy_error']==[] and out['rationales']==[]
+    assert out['rejected_rationales'][0]['reason']=='group_not_predicted'
+    assert out['epistemic_status']=='model_predicted_clean_unverified'
+
+
+def test_nonexact_model_quote_is_rejected_support_not_a_default_label_decision():
+    from src.task3.round14 import parse_assessment
+    v=value();v['rationales'][0]['source_quote']='NONEXISTENT SOURCE'
+    out=parse_assessment(json.dumps(v),sample(),direct=True)
+    assert out['taxonomy_error']==['Lỗi logic']
+    assert out['rationales'][0]['source_quote']==''
+    assert out['rejected_rationales'][0]['reason']=='nonexact_source_quote'
+
+
+@pytest.mark.parametrize('prefix',['Ở hàm main, ','Trong hàm main, ','Vị trí: hàm main; '])
+def test_location_prefix_does_not_hide_level2_imperative(prefix):
+    from src.task3.round14 import feedback_errors
+    assert 'level2_imperative_repair' in feedback_errors(sample(2),['Lỗi logic'],prefix+'bổ sung phép cộng hai số đầu vào trước khi trả kết quả.')
+
+
+def test_merely_naming_function_and_asking_correct_processing_is_not_specific():
+    from src.task3.round14 import feedback_errors
+    assert 'level3_action_not_source_bound' in feedback_errors(sample(3),['Lỗi logic'],
+        'Hàm main trả sai giá trị. Hướng sửa: Sửa hàm main để tính toán đúng theo yêu cầu đề cho mọi đầu vào.')

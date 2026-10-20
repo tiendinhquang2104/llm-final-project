@@ -92,3 +92,31 @@ def test_unbound_existing_final_artifact_is_rejected(tmp_path):
     with pytest.raises(ValueError,match='unbound'):
         run_records([sample()],Scripted([RuntimeError('fault')]),config(),tmp_path)
     assert (tmp_path/'predictions.json').read_text()=='["STALE"]'
+
+
+def test_bound_incomplete_state_cannot_keep_a_final_artifact(tmp_path):
+    from src.task3.round14_runner import run_records,identity
+    backend=Scripted([RuntimeError('fault')]);r=sample()
+    binding=identity([r],backend,dict(config(),oracle_labels=None,assessment_cache=None))
+    (tmp_path/'progress.json').write_text(json.dumps({'identity':binding,'completed':{},'errors':{}}))
+    (tmp_path/'predictions.json').write_text('["STALE"]')
+    with pytest.raises(ValueError,match='incomplete'):
+        run_records([r],backend,config(),tmp_path)
+
+
+def test_journal_totals_include_failed_and_resumed_attempts(tmp_path):
+    from src.task3.round14_runner import journal_totals
+    p=tmp_path/'attempts.jsonl'
+    row={'stage':'classify','output_tokens':20,'input_tokens':30,'latency_s':.1,'error':'bad'}
+    p.write_text(json.dumps(row)+'\n'+json.dumps(row)+'\n'+json.dumps(dict(row,error=None))+'\n')
+    assert journal_totals(p)['output_tokens']==60
+    assert journal_totals(p)['attempts']==3
+
+
+def test_interrupted_attempt_tail_is_preserved_before_resume_append(tmp_path):
+    from src.task3.round14_runner import run_records,journal_totals
+    journal=tmp_path/'attempts.jsonl';journal.write_bytes(b'{"incomplete":')
+    out=run_records([sample()],Scripted([json.dumps(value())]),config(),tmp_path)
+    assert len(out['predictions'])==1 and journal_totals(journal)['attempts']==1
+    backups=list(tmp_path.glob('attempts.jsonl.interrupted-*.raw'))
+    assert len(backups)==1 and backups[0].read_bytes()==b'{"incomplete":'

@@ -19,7 +19,7 @@ from src.task3.dataset import write_json,load_task3
 from src.task3.compiler import check_cpp_syntax
 from src.task3.inference import HFBackend,load_tokenizer,tokenizer_metadata
 from src.task3.round14 import sanitize
-from src.task3.round14_runner import run_records,digest
+from src.task3.round14_runner import run_records,digest,journal_totals
 from src.task3.round14_eval import select_development,taxonomy_metrics,feedback_metrics
 from src.task3.public_contract import verify_public_contract
 from src.task3.submission import validate_submission
@@ -117,8 +117,10 @@ def main():
               'compiler_unique_sources':len(evidence_cache),'standard':'c++11','student_programs_executed':False,
               'selection':selection,'public_contract':contract,'freeze':args.freeze,
               'generation_max_time_s':backend.model.generation_config.max_time,
-              'attempt_output_tokens':sum(a['output_tokens'] for t in result['traces'] for a in t['attempts']),
-              'attempt_latency_s':sum(a['latency_s'] for t in result['traces'] for a in t['attempts'])}
+              'cumulative_attempts':journal_totals(out/'attempts.jsonl'),
+              'attempt_output_tokens':journal_totals(out/'attempts.jsonl')['output_tokens'],
+              'attempt_latency_s':journal_totals(out/'attempts.jsonl')['latency_s'],
+              'wall_time_scope':'this invocation; cumulative generation counters come from append-only journal'}
     if not result['errors']:
         requested={r.sample_id:r.target_feedback_level for r in records}
         manifest['validation']=validate_submission(out/'predictions.json',requested)

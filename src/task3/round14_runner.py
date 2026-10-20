@@ -7,6 +7,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import time
+import uuid
 from pathlib import Path
 from src.task3.dataset import write_json
 from src.task3.inference import tokenizer_metadata
@@ -48,12 +50,13 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
     if state_path.exists():
         state=json.loads(state_path.read_text())
         if state.get('identity')!=binding:raise ValueError('resume identity mismatch')
+        if (out/'predictions.json').exists() and set(state['completed'])!={r.sample_id for r in records}:raise ValueError('incomplete progress cannot own a final predictions artifact')
     else:
         state={'identity':binding,'completed':{},'errors':{}}
         write_json(state_path,state)
     methods={'direct','two_stage'}
     if config.get('method') not in methods:raise ValueError('Round14 method required')
-    journal=out/'attempts.jsonl';traces=[];predictions=[]
+    journal=out/'attempts.jsonl';repair_journal_tail(journal);journal.touch(mode=0o600,exist_ok=True);journal.chmod(0o600);traces=[];predictions=[]
     max_retries=int(config.get('max_retries',1))
     if max_retries not in (0,1,2):raise ValueError('bounded max_retries must be 0..2')
     for record in records:
@@ -72,7 +75,15 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
             for number in range(max_retries+1):
                 call_config={**config,'max_new_tokens':cap}
                 messages,count=fitted_messages(record,stage,backend.tokenizer,call_config,assessment=assessment,retry=error)
-                generation=backend.generate(messages,call_config)
+                generation_started=time.perf_counter()
+                try:generation=backend.generate(messages,call_config)
+                except RuntimeError as exc:
+                    failed={'sample_id':sid,'stage':stage,'attempt':number+1,'input_tokens':count,'output_tokens':0,
+                            'token_count_unknown':True,'latency_s':time.perf_counter()-generation_started,'finish_reason':'runtime_error',
+                            'prompt_sha256':digest(messages),'prompt_messages':messages,'raw_text':None,'error':str(exc)}
+                    trace['attempts'].append(failed)
+                    with journal.open('a',encoding='utf-8') as f:f.write(json.dumps(failed,ensure_ascii=False)+'\n');f.flush();os.fsync(f.fileno())
+                    raise
                 row={'sample_id':sid,'stage':stage,'attempt':number+1,'input_tokens':count,'output_tokens':generation.output_tokens,
                      'latency_s':generation.latency_s,'finish_reason':generation.finish_reason,'eos_reached':generation.eos_reached,
                      'prompt_sha256':digest(messages),'prompt_messages':messages,'raw_text':generation.text}
@@ -134,3 +145,30 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
     write_json(out/'traces.json',traces)
     if len(predictions)==len(records):write_json(out/'predictions.json',predictions)
     return {'predictions':predictions,'traces':traces,'errors':state['errors'],'identity':binding}
+
+
+def journal_totals(path):
+    rows=[];incomplete_tail=False
+    raw=Path(path).read_text().splitlines() if Path(path).exists() else []
+    for index,line in enumerate(raw):
+        try:rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            if index!=len(raw)-1:raise ValueError('corrupt attempt journal before final line')
+            incomplete_tail=True
+    return {'attempts':len(rows),'output_tokens':sum(r.get('output_tokens',0) for r in rows),
+            'input_tokens':sum(r.get('input_tokens',0) for r in rows),
+            'latency_s':sum(r.get('latency_s',0) for r in rows),'incomplete_tail':incomplete_tail,
+            'unknown_token_attempts':sum(r.get('token_count_unknown',False) for r in rows)}
+
+
+def repair_journal_tail(path):
+    if not path.exists():return
+    raw=path.read_bytes();lines=raw.splitlines(keepends=True)
+    for i,line in enumerate(lines):
+        try:json.loads(line)
+        except (json.JSONDecodeError,UnicodeDecodeError):
+            if i!=len(lines)-1:raise ValueError('corrupt journal before final attempt; preserve and inspect')
+            backup=path.with_name(path.name+'.interrupted-'+uuid.uuid4().hex+'.raw')
+            backup.write_bytes(raw);backup.chmod(0o600)
+            path.write_bytes(b''.join(lines[:i]));return
+    if raw and not raw.endswith(b'\n'):path.write_bytes(raw+b'\n')
