@@ -23,7 +23,7 @@ def digest(value):
 def identity(records,backend,config):
     return digest({'version':VERSION,'config':config,'tokenizer':tokenizer_metadata(backend.tokenizer),
         'records':[{'id':r.sample_id,'code':r.code,'statement':r.statement,'problems':r.problems,
-                    'level':r.target_feedback_level,'compiler':{k:v for k,v in r.provenance.get('_task3_compile_check',{}).items() if k!='latency_s'}} for r in records]})
+                    'level':r.target_feedback_level,'grading_policy':r.grading_policy,'level_definitions':r.level_definitions,'compiler':{k:v for k,v in r.provenance.get('_task3_compile_check',{}).items() if k!='latency_s'}} for r in records]})
 
 
 def verified_projection(record,assessment):
@@ -44,6 +44,7 @@ def run_records(records,backend,config,output_dir,*,oracle_labels=None,assessmen
     out=Path(output_dir);out.mkdir(parents=True,exist_ok=True)
     binding=identity(records,backend,dict(config,oracle_labels=oracle_labels,assessment_cache=assessment_cache))
     state_path=out/'progress.json'
+    if not state_path.exists() and (out/'predictions.json').exists():raise ValueError('unbound existing final prediction artifact')
     if state_path.exists():
         state=json.loads(state_path.read_text())
         if state.get('identity')!=binding:raise ValueError('resume identity mismatch')

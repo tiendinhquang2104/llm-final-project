@@ -87,3 +87,44 @@ def test_level4_allows_full_solution_instead_of_tiny_certificate_gate():
     from src.task3.round14 import feedback_errors
     text='Hàm main cần trả kết quả theo đề. Lời giải:\n```cpp\n#include <iostream>\nint main(){int a,b;std::cin>>a>>b;std::cout<<a+b;}\n```'
     assert not feedback_errors(sample(4),['Lỗi logic'],text)
+
+
+@pytest.mark.parametrize('text',[
+ 'Hàm main trả sai giá trị. Bổ sung phép cộng hai số đầu vào trước khi trả kết quả.',
+ 'Tại hàm main, kết quả sai. Sử dụng tổng hai số đầu vào làm giá trị trả về.',
+])
+def test_level2_rejects_unprefixed_imperative_repairs(text):
+    from src.task3.round14 import feedback_errors
+    assert 'level2_imperative_repair' in feedback_errors(sample(2),['Lỗi logic'],text)
+
+
+@pytest.mark.parametrize('direction',[
+ 'Đọc lại yêu cầu và kiểm tra cẩn thận từng bước của chương trình.',
+ 'Thêm phần xử lý thích hợp để chương trình đáp ứng đúng yêu cầu.'
+])
+def test_level3_long_generic_advice_lacks_source_bound_action(direction):
+    from src.task3.round14 import feedback_errors
+    assert 'level3_action_not_source_bound' in feedback_errors(sample(3),['Lỗi logic'],'Hàm main trả sai giá trị. Hướng sửa: '+direction)
+
+
+def test_empty_taxonomy_does_not_allow_positive_error_diagnosis():
+    from src.task3.round14 import feedback_errors
+    assert 'empty_taxonomy_error_diagnosis' in feedback_errors(sample(2),[],'Hàm main trả sai kết quả vì không tính tổng hai số đầu vào.')
+    assert 'empty_taxonomy_error_diagnosis' not in feedback_errors(sample(2),[],'Chưa xác định được lỗi cụ thể có căn cứ trong phần mã hiện có.')
+
+
+def test_explicit_binary_classifier_decisions_are_not_exception_defaults():
+    from src.task3.round14 import parse_assessment
+    v=value(labels=[]);v.pop('feedback');v.pop('taxonomy_error')
+    v['label_decisions']={g:False for g in LABEL_SPACE}
+    parsed=parse_assessment(json.dumps(v),sample())
+    assert parsed['taxonomy_error']==[]
+    v['label_decisions']['Lỗi logic']=True;v['rationales']=value()['rationales']
+    assert parse_assessment(json.dumps(v),sample())['taxonomy_error']==['Lỗi logic']
+    del v['label_decisions']['Lỗi style']
+    with pytest.raises(ValueError):parse_assessment(json.dumps(v),sample())
+
+
+def test_level4_needs_solution_artifact_not_diagnosis_only():
+    from src.task3.round14 import feedback_errors
+    assert 'missing_level4_solution' in feedback_errors(sample(4),['Lỗi logic'],'Hàm main trả sai kết quả. Hãy dùng phép cộng hai số.')

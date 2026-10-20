@@ -76,3 +76,19 @@ def test_oracle_diagnostic_reuses_assessment_and_changes_only_feedback_labels(tm
                     oracle_labels={r.sample_id:[]},assessment_cache={r.sample_id:a})
     assert backend.calls==1 and out['predictions'][0]['output']['taxonomy_error']==[]
     assert out['traces'][0]['assessment']==a
+
+
+@pytest.mark.parametrize('field,value',[('grading_policy','Different prerequisites.'),('level_definitions',[{'new':'definition'}])])
+def test_resume_binds_every_prompt_input(field,value):
+    from src.task3.round14_runner import identity
+    from dataclasses import replace
+    r=sample();backend=Scripted([])
+    assert identity([r],backend,config())!=identity([replace(r,**{field:value})],backend,config())
+
+
+def test_unbound_existing_final_artifact_is_rejected(tmp_path):
+    from src.task3.round14_runner import run_records
+    (tmp_path/'predictions.json').write_text('["STALE"]')
+    with pytest.raises(ValueError,match='unbound'):
+        run_records([sample()],Scripted([RuntimeError('fault')]),config(),tmp_path)
+    assert (tmp_path/'predictions.json').read_text()=='["STALE"]'

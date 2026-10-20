@@ -27,7 +27,10 @@ from src.task3.submission import validate_submission
 IMPLEMENTATION=('src/task3/round14.py','src/task3/round14_runner.py','src/task3/round14_eval.py',
                 'src/task3/public_contract.py','src/task3/inference.py','src/task3/compiler.py',
                 'src/task3/discovery.py','src/task3/discovery_render.py','src/task3/renderer.py',
-                'scripts/task3_round14.py')
+                'scripts/task3_round14.py','src/task3/compliance.py','src/task3/quality_review.py',
+                'src/task3/schema.py','src/task3/dataset.py','src/task3/submission.py',
+                'src/synth/taxonomy.py','src/synth/feedback.py','src/synth/compliance.py',
+                'src/utils/config.py','src/utils/json_extractor.py','src/task3/adequacy.py')
 
 
 def implementation_hashes():

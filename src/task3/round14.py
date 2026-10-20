@@ -12,7 +12,7 @@ from src.task3.compliance import check
 from src.task3.quality_review import validate_code_claims
 from src.utils.json_extractor import strip_thinking
 
-VERSION='round14-v1'
+VERSION='round14-v2'
 _CJK=re.compile(r'[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]')
 _PRAISE=re.compile(r'(?i)hoàn toàn (?:đúng|chính xác)|đúng hết|gần (?:đúng|hoàn thiện)|bài (?:làm )?(?:đúng|tốt|hoàn thiện)|không (?:có|còn) lỗi')
 LEVELS={
@@ -62,11 +62,20 @@ def build_messages(record,stage,*,assessment=None,retry=None):
                            'reason':'one concise evidence-based decision summary; not a chain of thought','confidence':'low|medium|high'}],
             'assessment':'brief evidence limitations, or why [] is predicted','uncertain':'boolean'}
         if stage=='direct':payload['response_schema']['feedback']='Vietnamese feedback compliant with requested Level'
+    if stage=='classifier_fallback':
+        schema=payload['response_schema']
+        schema.pop('taxonomy_error',None)
+        schema['label_decisions']={g:'boolean: true only for an actual error present, false otherwise' for g in LABEL_SPACE}
+        system+='Quyết định đủ 10 boolean độc lập. Rationale CHỈ cho nhóm present=true. Không gán tên nhóm chỉ vì đang nói về việc kiểm tra nhóm đó. '
     if stage in {'direct','feedback'}:
         payload.update(requested_level=level,level_policy=LEVELS[level],official_level_definitions=record.level_definitions)
         system+='Feedback đúng Level; nội dung rationale nội bộ có thể kỹ thuật, nhưng không được lộ vào feedback Level 1. '
     if retry:system+=' Lần trước bị từ chối: '+retry[:700]+'. Sửa đúng lỗi đó, JSON đủ schema, không lặp lại response cũ. '
-    return [{'role':'system','content':system},{'role':'user','content':'UNTRUSTED_TASK_DATA_JSON\n'+json.dumps(payload,ensure_ascii=False)+'\nEND_UNTRUSTED_TASK_DATA_JSON'}]
+    final_rule='\nCHỈ xuất JSON theo response_schema. taxonomy_error chỉ liệt kê lỗi THỰC SỰ HIỆN DIỆN, không liệt kê nhóm đang được kiểm tra. Ví dụ nhân tạo: đề trả 0, code int main(){return 0;} và compiler compiled => taxonomy_error=[], rationales=[]. Compiler compile_error có tên chưa khai báo => có thể gán Lỗi biên dịch với rationale lỗi đó. '
+    if _compiler(record)['status']=='compiled':final_rule+='Compiler C++11 đã PASS: KHÔNG xuất Lỗi biên dịch. Có thể có lỗi logic khác nhưng không được bịa; cũng có thể dự đoán [] nếu không thấy lỗi. '
+    if stage in {'direct','feedback'}:final_rule+=' Giữ đúng Level '+str(level)+': '+LEVELS[level]
+    if retry:final_rule+=' Lỗi cần sửa ở lần này: '+retry[:500]
+    return [{'role':'system','content':system},{'role':'user','content':'UNTRUSTED_TASK_DATA_JSON\n'+json.dumps(payload,ensure_ascii=False)+'\nEND_UNTRUSTED_TASK_DATA_JSON'+final_rule}]
 
 
 def object_json(text):
@@ -82,6 +91,12 @@ def object_json(text):
 
 def parse_assessment(text,record,*,direct=False):
     v=object_json(text)
+    if 'label_decisions' in v:
+        decisions=v['label_decisions']
+        if not isinstance(decisions,dict) or set(decisions)!=set(LABEL_SPACE) or any(type(x) is not bool for x in decisions.values()):raise ValueError('all 10 explicit boolean label_decisions required')
+        derived=[g for g in LABEL_SPACE if decisions[g]]
+        if 'taxonomy_error' in v and set(v['taxonomy_error'])!=set(derived):raise ValueError('binary decisions disagree with taxonomy')
+        v['taxonomy_error']=derived
     required={'taxonomy_error','rationales','assessment'}|({'feedback'} if direct else set())
     if not required<=set(v):raise ValueError('missing classification schema keys: '+','.join(sorted(required-set(v))))
     from src.task3.schema import validate_taxonomy
@@ -121,13 +136,25 @@ def feedback_errors(record,labels,text):
     for group in LABEL_SPACE:
         if group.casefold() in text.casefold() and group not in labels:errors.append('taxonomy_feedback_mismatch:'+group)
     if _compiler(record)['status']=='compiled' and re.search(r'(?i)không biên dịch|lỗi biên dịch|compiler (?:báo|error)',text):errors.append('unsupported_compile_claim')
+    if level==2 and re.search(r'(?i)(?:^|[.!?;]\s*|\n)\s*(?:hãy|nên|cần|bổ sung|sử dụng|dùng|đặt|thay|đổi|sửa|loại bỏ|khai báo|khởi tạo|gán|cập nhật)\b|hướng sửa|cách sửa|gợi ý sửa',text):errors.append('level2_imperative_repair')
+    if not labels and level>1:
+        for sentence in re.split(r'(?<=[.!?])\s+|\n',text):
+            if re.search(r'(?i)chưa (?:đủ căn cứ|xác định|có bằng chứng)|không (?:thấy|tìm thấy|xác định)',sentence):continue
+            if re.search(r'(?i)\b(?:lỗi|sai|thiếu|thừa|chưa khai báo|không khởi tạo)\b',sentence):errors.append('empty_taxonomy_error_diagnosis')
     if level in (2,3) and labels and not re.search(r'(?i)hàm|dòng|vị trí|biến|vòng lặp|điều kiện|phép|thân|tại|phần|mảng|chuỗi|lệnh|giá trị',text):
         errors.append('missing_location_or_diagnosis')
     if level==3 and labels:
         direction=re.search(r'(?i)hướng sửa\s*:\s*(.*)',text,re.S)
         action=direction[1].strip() if direction else ''
-        if not action or re.fullmatch(r'(?i)(?:hãy |cần |nên )?(?:kiểm tra lại|rà soát lại|khai báo biến)\.?',action):errors.append('generic_or_missing_level3_action')
-        if len(re.findall(r'\w+',action))<7:errors.append('underspecified_level3_action')
+        if not direction:
+            direction=re.search(r'(?i)(?:^|[.!?]\s*|\n)\s*((?:sửa|thay|đổi|cập nhật|khởi tạo|đặt|bổ sung|thêm|bỏ|tăng|giảm)\b.*)',text,re.S)
+            action=direction[1].strip() if direction else ''
+        identifiers=set(re.findall(r'\b[A-Za-z_]\w*\b',record.code))-set('int long void bool char double float unsigned signed return if else while for const std namespace using include true false'.split())
+        anchored=any(re.search(r'\b'+re.escape(name)+r'\b',action) for name in identifiers)
+        operation=bool(re.search(r'(?i)\b(?:thay|đổi|khởi tạo|cập nhật|gán|đặt|tăng|giảm|bổ sung|thêm|bỏ|đọc|duyệt|trả về|chuyển|dùng|sử dụng|sửa)\b',action))
+        relation=bool(re.search(r'(?i)\b(?:bằng|thành|từ|để|cho|trước|sau|mỗi|theo|vào|trong|đến|làm)\b|=',action))
+        if not (anchored and operation and relation):errors.append('level3_action_not_source_bound')
+    if level==4 and labels and not re.search(r'```(?:cpp|c\+\+)?\s*[\s\S]*?```',text):errors.append('missing_level4_solution')
     return list(dict.fromkeys(errors))
 
 
