@@ -47,6 +47,11 @@ LEVEL_POLICY_V3 = {
     3: "Level 3: Nêu ngắn vị trí/nguyên nhân có căn cứ, rồi một hướng sửa cụ thể gắn với mã gốc. Chỉ chẩn đoán là chưa đủ. Không viết lời giải hoàn chỉnh.",
     4: "Level 4: Giải thích đúng nguyên nhân rồi đưa phần sửa tập trung, ngắn, có thể tích hợp theo đúng prototype. Không chép lại cả file khi không cần. Đủ khai báo/header, đóng khối mã và dấu ngoặc. Không khẳng định đã biên dịch/chạy khi chưa có bằng chứng.",
 }
+LEVEL_POLICY_R10 = {
+    1: "Level 1: Nếu có bằng chứng bài còn vấn đề, chỉ nói nhẹ rằng bài cần được rà soát thêm; không nêu tên lỗi, vị trí, nguyên nhân, định danh, hướng sửa hay mã. Nếu chưa rõ đúng sai thì không khen kết quả.",
+    2: "Level 2: Chỉ nêu vị trí và nguyên nhân có bằng chứng, ưu tiên lỗi chặn câu tiên quyết. Có thể dùng khuôn ‘Vấn đề nằm ở [vị trí]: [nguyên nhân quan sát được].’ Không bịa lỗi từ nhãn; không đề xuất cách làm tiếp theo, không đưa mã.",
+    3: "Level 3: Nêu ngắn vị trí/nguyên nhân có căn cứ, rồi ghi rõ ‘Hướng sửa:’ và đưa một hành động hữu ích gắn với mã gốc. Chỉ chẩn đoán là chưa đủ. Không viết lời giải hoàn chỉnh.",
+}
 
 
 # R8 changes only Level 1. Other Levels use byte-identical v3 messages.
@@ -81,7 +86,7 @@ LEVEL1_POLICY_V5 = (
 
 def exemplar_feedback(demo, *, prompt_policy_version=1):
     """Versioned presentation of train evidence; never mutate instructor gold."""
-    neutral = prompt_policy_version in (4, 5, 6) and int(demo.target_feedback_level[6]) == 1
+    neutral = prompt_policy_version in (4, 5, 6, 7) and int(demo.target_feedback_level[6]) == 1
     return {
         "sample_id": demo.sample_id,
         "source": demo.source,
@@ -288,20 +293,27 @@ def build_messages(
     prompt_policy_version=1,
 ):
     validate_taxonomy(taxonomy)
-    if isinstance(prompt_policy_version, bool) or prompt_policy_version not in (1, 2, 3, 4, 5, 6):
-        raise ValueError("prompt_policy_version must be 1, 2, 3, 4, 5 or 6")
-    level1_modern = prompt_policy_version in (4, 5, 6) and int(record.target_feedback_level[6]) == 1
-    effective_policy = 3 if prompt_policy_version in (4, 5, 6) and not level1_modern else prompt_policy_version
+    if isinstance(prompt_policy_version, bool) or prompt_policy_version not in (1, 2, 3, 4, 5, 6, 7):
+        raise ValueError("prompt_policy_version must be 1, 2, 3, 4, 5, 6 or 7")
+    level1_modern = prompt_policy_version in (4, 5, 6, 7) and int(record.target_feedback_level[6]) == 1
+    effective_policy = 3 if prompt_policy_version in (4, 5, 6, 7) and not level1_modern else prompt_policy_version
     # R9 delegates the entire message sequence, including mixed-Level demos.
-    render_policy = effective_policy if prompt_policy_version in (5, 6) else prompt_policy_version
+    render_policy = effective_policy if prompt_policy_version in (5, 6, 7) else prompt_policy_version
     if level1_modern:
         # No diagnostic plan or planning addendum is student-facing at Level 1.
         additional_messages = ()
         system_addendum = ""
     if level1_modern:
-        system_content = SYSTEM_LEVEL1_V5 + "\n" + LEVEL1_POLICY_V5 if prompt_policy_version in (5, 6) else SYSTEM_LEVEL1_V4 + LEVEL1_POLICY_V4
+        if prompt_policy_version == 7:
+            system_content = SYSTEM_LEVEL1_V5 + "\n" + LEVEL_POLICY_R10[1]
+        else:
+            system_content = SYSTEM_LEVEL1_V5 + "\n" + LEVEL1_POLICY_V5 if prompt_policy_version in (5, 6) else SYSTEM_LEVEL1_V4 + LEVEL1_POLICY_V4
     else:
-        system_content = SYSTEM if effective_policy == 1 else (SYSTEM_V3 + LEVEL_POLICY_V3[int(record.target_feedback_level[6])] if effective_policy == 3 else SYSTEM_V2 + LEVEL_POLICY_V2[int(record.target_feedback_level[6])])
+        level = int(record.target_feedback_level[6])
+        if prompt_policy_version == 7 and level in LEVEL_POLICY_R10:
+            system_content = SYSTEM_V3 + LEVEL_POLICY_R10[level]
+        else:
+            system_content = SYSTEM if effective_policy == 1 else (SYSTEM_V3 + LEVEL_POLICY_V3[level] if effective_policy == 3 else SYSTEM_V2 + LEVEL_POLICY_V2[level])
     system_content += ("\n" + system_addendum if system_addendum else "")
     messages = [{"role": "system", "content": system_content}]
     for demo in exemplars:

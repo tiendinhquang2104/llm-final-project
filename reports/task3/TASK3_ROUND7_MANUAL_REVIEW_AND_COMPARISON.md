@@ -234,3 +234,56 @@ Round 9 reproduction commands (choose fresh output names; the direct runner refu
 .venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split synthetic-heldout --taxonomy-source self-diagnosis --output outputs/task3/repro-round9-pipeline-heldout.json
 .venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot.yaml --split synthetic-heldout --taxonomy-source gold --output outputs/task3/repro-round9-oracle-heldout.json
 ```
+
+## Round 10 follow-up: private attempt diagnosis and blocked Qwen rerun
+
+### Investigation of Round 9 raw attempts
+
+The review below reads local attempt journals and source privately. This tracked report contains no source excerpts, prompts, or raw model output. Validation categories are reported separately: factual/content issue, requested-Level disclosure, JSON/schema, and missing Level 3 direction. A dash means the category does not apply.
+
+| ID / arm | Content accuracy and taxonomy | Level violation | JSON/schema | Missing Level 3 direction | Attempts and outcome |
+|---|---|---|---|---|---|
+| `EX02-S201`, B strict direct | The first response claimed the valid digit-count variable was being used instead of the stated digit count; the variable is the digit count, so this diagnosis is unsupported. Attempts 2–3 avoided that exact claim but directed attention to the otherwise valid Armstrong calculation. Candidate `Lỗi logic` disagrees with unchanged gold `[]`; the overflow risk remains a separate source-review candidate, not gold. | All three disclosed the Armstrong computation/condition at Level 1. | None; all three were strict JSON objects. | —, requested Level 1. | Three complete model outputs, all rejected; no direct predictions export. |
+| `SYN-HO-SINGLE-0000`, B strict direct | The source does read a string, so the diagnosis has a factual basis. The suggested conversion to an integer is a direct repair instruction and too specific for Level 1. Candidate `Lỗi logic` disagrees with unchanged gold `[]`. | All three disclosed the input representation and a specific conversion at Level 1. | All three wrapped JSON in markdown fences; strict parser rejected all three. | —, requested Level 1. | Three complete model outputs, all rejected; the run stopped on this ID with no full-split score/export. |
+| `EX01-S106`, C oracle feedback | The repeated claim that the node array was allocated for `n` elements conflicts with the source’s single-node allocation. | All three responses included prohibited Level 2 repair instructions. | None; feedback was generated as plain text. | —, requested Level 2. | Three complete responses; guard retries exhausted and the accepted output was a neutral fallback. |
+| `EX01-S112`, C oracle feedback | The responses included one supported hard-coded filename finding among several additional unsupported diagnoses. | All three included code-like excerpts and repair instructions at Level 2. | None. | —, requested Level 2. | Three complete responses; guard retries exhausted and fallback used. |
+| `EX02-S201`, C oracle feedback | The responses singled out the power loop although the source’s digit traversal and accumulator are valid; they do not diagnose the possible integer overflow. | All three disclosed the computation at Level 1. | None. | —, requested Level 1. | Three complete responses; Level policy retries exhausted and fallback used. |
+| `EX02-S211`, C oracle feedback | The first response incorrectly said the required output was produced correctly despite the extra stdout prompt. Later responses remained vague about correctness and did not identify that I/O risk. | All three disclosed the digit-count/power computation at Level 1. | None. | —, requested Level 1. | Three complete responses; Level policy retries exhausted and fallback used. |
+
+None of these reviewed outputs failed because the model produced no text. B’s strict run rejected Level 1 disclosure at `EX02-S201` and invalid JSON at `SYN-HO-SINGLE-0000`; C’s four fallbacks were policy/content rejections, not schema failures. No Level 3 fallback among these six IDs lacked a direction: `EX02-S212` passed the Level 3 adequacy screen. The A/C Round 9 oracle fallback set is exactly `EX01-S106`, `EX01-S112`, `EX02-S201`, `EX02-S211`.
+
+### Bounded prompt experiment
+
+Two changes were made, with hypotheses recorded before measurement:
+
+1. **Level 1 flag without a diagnosis:** use the `label_space.json` ceiling to permit one brief, non-specific statement that the work needs review when evidence supports a problem. Hypothesis: this can be relevant without naming the error, location, cause, identifier, or repair, reducing empty neutral fallback. The 26 permitted real-train records include only two Level 1 examples, so no wording was fitted to either one; both were used only to assess that training evidence was sparse.
+2. **Separate Level 2 diagnosis from Level 3 action:** Level 2 can use a location-plus-observed-cause sentence and forbids a next-step suggestion; Level 3 explicitly labels one useful action `Hướng sửa:`. Hypothesis: this may reduce Level 2 repair leakage and Level 3 direction omissions without weakening the guard.
+
+These are prompt changes only. Retry limits, guard version 2, strict JSON parsing, taxonomy validation, and fail-closed export were not relaxed. The new policy is version 7 in `configs/task3/self_diagnosis_zero_shot_round10.yaml`; pinned R9 prompt policies remain byte-identical. No per-ID prompt/rule was added. No public test data was read for method selection. A filename-only search found no Task 2 export or checkpoint under `outputs/task2` or `checkpoints/task2`; consequently no Task 2 branch is reported.
+
+The new prompt test was first run and failed on the absent contract, then passed after implementation. The complete Task 3 suite passed with **354 passed, 7 skipped**. Repository-wide tests reported **631 passed, 30 skipped, 4 failed**. The four failures were outside Task 3: `tests/test_colab_task1_secrets.py::test_timeout_falls_back_to_hidden_input_once`, `tests/test_colab_task1_secrets.py::test_selected_provider_only_requires_its_key`, `tests/test_synth_gate.py::TestLabelerGate::test_known_noise_is_flagged`, and `tests/test_synth_gate.py::TestLabelerGate::test_observable_single_samples_all_match`.
+
+### Round 10 inference status
+
+The Qwen run was attempted with the new fixed R10 config on `real-val`, but pipeline A stopped during CUDA/model initialization with `CUDA error: out of memory`, before any model response or per-record trace was written. The only artifact from that attempt is the ignored tokenizer audit; it is not a prediction result. Immediately afterward `nvidia-smi` reported **31,822 / 32,607 MiB** in use and **99%** GPU utilization on the RTX 5090, while listing no process that could be safely identified or stopped. No GPU workload was interrupted. Direct B and oracle C were not started under the same unavailable runtime. Synthetic-heldout was not started. There is no Round 10 Qwen comparison, no accepted output to validate, and no taxonomy or feedback score for this changed method.
+
+| Arm | Requested | Completed | Accepted predictions | Taxonomy metrics | Feedback evaluation |
+|---|---:|---:|---:|---|---|
+| A pipeline | 6 real-val | 0 | 0 | Not scored | No model feedback generated |
+| B direct | 6 real-val, then 47 synthetic-heldout | 0 | 0 | Not scored | Not run |
+| C oracle | 6 real-val, then 47 synthetic-heldout | 0 | 0 | Gold input would be an oracle condition, not a taxonomy score; not run | Not run |
+
+The earlier Round 9 Qwen numbers remain historical evidence for the previous prompt policy only; they are not pooled with R10 and do not measure these changes. Six real-val rows are repeatedly reviewed development cases, not an independent benchmark. The method remains **not frozen**. The specific blocker is GPU memory already occupied by an unidentifiable workload; the next feasible step is to obtain an isolated GPU session, rerun A/B/C on the fixed six rows, review the resulting private attempts, and only then attempt the full 47-row synthetic-heldout split. Do not infer full-split quality from partial output.
+
+Round 10 offline reproduction and authorized inference commands:
+
+```bash
+.venv-task3/bin/pytest tests/test_task3_*.py -q
+.venv-task3/bin/pytest tests/ -q
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot_round10.yaml --split real-val --taxonomy-source self-diagnosis --output outputs/task3/task3-round10-pipeline-real-val.json
+.venv-task3/bin/python scripts/run_task3_direct_baseline.py --config configs/task3/self_diagnosis_zero_shot_round10.yaml --split real-val --output outputs/task3/task3-round10-direct-real-val.json
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot_round10.yaml --split real-val --taxonomy-source gold --output outputs/task3/task3-round10-oracle-real-val.json
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot_round10.yaml --split synthetic-heldout --taxonomy-source self-diagnosis --output outputs/task3/task3-round10-pipeline-heldout.json
+.venv-task3/bin/python scripts/run_task3_direct_baseline.py --config configs/task3/self_diagnosis_zero_shot_round10.yaml --split synthetic-heldout --output outputs/task3/task3-round10-direct-heldout.json
+.venv-task3/bin/python scripts/run_task3.py --config configs/task3/self_diagnosis_zero_shot_round10.yaml --split synthetic-heldout --taxonomy-source gold --output outputs/task3/task3-round10-oracle-heldout.json
+```
