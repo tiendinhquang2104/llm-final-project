@@ -1,0 +1,2 @@
+extends: r11_compiler_control.yaml
+direct_taxonomy_minimum: 1

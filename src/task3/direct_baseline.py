@@ -62,7 +62,9 @@ _SYSTEM = (
 )
 
 
-def build_direct_messages(record: Task3Record, compiler_evidence: dict | None = None) -> list[dict]:
+def build_direct_messages(record: Task3Record, compiler_evidence: dict | None = None, *, taxonomy_minimum: int = 0) -> list[dict]:
+    if type(taxonomy_minimum) is not int or taxonomy_minimum not in (0, 1):
+        raise ValueError("direct taxonomy minimum must be zero or one")
     evidence = compiler_evidence or {"status": "unavailable", "diagnostic": ""}
     status = evidence.get("status", "unavailable")
     if status == "compiled":
@@ -95,7 +97,7 @@ def build_direct_messages(record: Task3Record, compiler_evidence: dict | None = 
         "test_report": record.test_report,
         "allowed_taxonomy_labels": list(LABEL_SPACE),
         "output_schema": {
-            "taxonomy_error": ["one or more exact allowed Vietnamese labels"],
+            "taxonomy_error": [("zero" if taxonomy_minimum == 0 else "one") + " or more exact allowed Vietnamese labels"],
             "feedback": "nonempty Vietnamese text compliant with target_feedback_level",
         },
     }
@@ -183,7 +185,7 @@ def run_direct_baseline(records, backend, config: dict, *, attempts_path: str | 
     with path.open("w", encoding="utf-8") as journal:
         for record in records:
             evidence = (record.provenance or {}).get("_task3_compile_check", {})
-            messages = build_direct_messages(record, evidence)
+            messages = build_direct_messages(record, evidence, taxonomy_minimum=config.get("direct_taxonomy_minimum", 0))
             input_tokens = _input_tokens(backend.tokenizer, messages)
             if input_tokens + max_new_tokens > context_limit:
                 raise ValueError(f"{record.sample_id}: direct prompt exceeds tokenizer context budget")
@@ -211,6 +213,7 @@ def run_direct_baseline(records, backend, config: dict, *, attempts_path: str | 
                     "finish_reason": generated.finish_reason,
                     "validation_error": error,
                     "raw_text": generated.text,
+                    "prompt_messages": current_messages,
                 }
                 attempt_rows.append(row)
                 journal.write(json.dumps(row, ensure_ascii=False) + "\n")

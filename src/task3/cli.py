@@ -13,7 +13,11 @@ from src.task3.diagnosis import (
     audit_taxonomy_prompts,
     diagnose_taxonomies,
     load_taxonomy_diagnosis_audit,
+    require_resolved_taxonomy,
+    diagnosis_states,
+    UnresolvedTaxonomyError,
 )
+from src.task3.oracle_findings import load_reviewed_findings
 from src.task3.evaluator import evaluate, write_benchmark, write_review_csv
 from src.task3.inference import HFBackend, MockBackend, MockTokenizer, load_tokenizer, tokenizer_metadata
 from src.task3.pipeline import (
@@ -97,6 +101,7 @@ def run_main(argv=None):
     p.add_argument("--taxonomy-source", choices=["gold", "task2-json", "self-diagnosis"], default="gold")
     p.add_argument("--taxonomy-json")
     p.add_argument("--requested-levels", help="required public ID/Level input used to order and validate inference")
+    p.add_argument("--oracle-findings", help="human-approved findings; non-public gold-mode diagnostic experiment only")
     p.add_argument("--diagnosis-audit", help="validated local diagnosis audit to share across paired experiments")
     p.add_argument(
         "--allow-unverified-task2-export",
@@ -138,6 +143,8 @@ def run_main(argv=None):
         p.error("public inference must cover the complete requested-level ID set")
     if args.taxonomy_source == "self-diagnosis" and args.taxonomy_json:
         p.error("--taxonomy-json is only valid with --taxonomy-source task2-json")
+    if args.oracle_findings and (args.taxonomy_source != "gold" or args.split == "public"):
+        p.error("--oracle-findings is restricted to non-public oracle gold evaluation")
     root = config.get("data_dir", "data/processed/task3")
     manifest_hash = verify_prepared(root)
     records = load_prepared(root, args.split)
@@ -157,6 +164,11 @@ def run_main(argv=None):
         records = select_sample_records(records, args.sample_ids)
     if not records:
         raise ValueError("selected split is empty")
+    oracle_findings = load_reviewed_findings(args.oracle_findings, records) if args.oracle_findings else None
+    if args.oracle_findings:
+        config["oracle_findings_sha256"] = hashlib.sha256(Path(args.oracle_findings).read_bytes()).hexdigest()
+        config["oracle_condition"] = "C2_human_approved_findings"
+
     if config.get("guard_policy_version", 1) >= 2:
         config["runtime_implementation_sha256"] = implementation_digest()
     if args.taxonomy_json:
@@ -241,7 +253,19 @@ def run_main(argv=None):
                 json.dumps(diagnosis_audit, sort_keys=True, ensure_ascii=False).encode()
             ).hexdigest(),
         }
-    prompt_audit = audit_prompts(records, tokenizer, config, args.taxonomy_source, predicted, demos, diagnoses=diagnosis_audit)
+    if args.taxonomy_source == "self-diagnosis" and not args.dry_run:
+        try:
+            predicted = require_resolved_taxonomy(diagnosis_audit, [record.sample_id for record in records])
+        except UnresolvedTaxonomyError:
+            blocked = runtime_manifest(config, tokenizer, backend=backend)
+            blocked.update(status="blocked_uncertain_taxonomy", prediction_exported=False,
+                           split=args.split, taxonomy_source=args.taxonomy_source,
+                           data_manifest_sha256=manifest_hash,
+                           selected_ordered_ids=[record.sample_id for record in records],
+                           diagnosis_epistemic_states=diagnosis_states(diagnosis_audit))
+            write_json(output.with_suffix(".run.json"), blocked)
+            raise
+    prompt_audit = audit_prompts(records, tokenizer, config, args.taxonomy_source, predicted, demos, diagnoses=diagnosis_audit, oracle_findings=oracle_findings)
     prompt_audit["tokenizer_metadata"] = tokenizer_metadata(tokenizer)
     audit_path = output.with_suffix(".tokenizer-audit.json")
     write_json(audit_path, prompt_audit)
@@ -278,6 +302,7 @@ def run_main(argv=None):
             cache_context=manifest_hash,
             attempt_journal_path=progress_path.with_suffix(".attempts.jsonl"),
             diagnoses=diagnosis_audit,
+            oracle_findings=oracle_findings,
         )
     except (RuntimeError, ValueError):
         failed = runtime_manifest(config, backend.tokenizer, backend=backend)

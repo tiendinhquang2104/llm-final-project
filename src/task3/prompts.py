@@ -217,6 +217,15 @@ def user_context(record: Task3Record, taxonomy, log_chars=8000, report_chars=800
         "target_feedback_level": record.target_feedback_level,
         "official_level_definitions": record.level_definitions,
     }
+    compile_check = record.provenance.get("_task3_compile_check") if isinstance(record.provenance, dict) else None
+    if compile_check is not None:
+        status = compile_check.get("status", "unavailable")
+        data["compiler_check_status"] = status
+        data["compile_log_note"] = (
+            "syntax-only passed; logic correctness is unknown" if status == "compiled"
+            else "syntax-only compiler diagnostic confirms a syntax failure" if status == "compile_error"
+            else "compiler unavailable/timeout/disabled; compilation remains unknown"
+        )
     suffix = "Viết phản hồi đúng mức được yêu cầu."
     if prompt_policy_version in (3, 4, 5, 6):
         data["official_level_definitions"] = [d for d in record.level_definitions if record.target_feedback_level in json.dumps(d, ensure_ascii=False)]
@@ -301,7 +310,12 @@ def build_messages(
     render_policy = effective_policy if prompt_policy_version in (5, 6, 7) else prompt_policy_version
     if level1_modern:
         # No diagnostic plan or planning addendum is student-facing at Level 1.
-        additional_messages = ()
+        # Only the explicitly scoped oracle flag survives at Level 1; ordinary
+        # diagnosis/planning context remains suppressed as before.
+        additional_messages = tuple(
+            message for message in additional_messages
+            if message.get("role") == "user" and message.get("content", "").startswith("HUMAN_REVIEWED_ORACLE_FINDINGS_JSON\n")
+        )
         system_addendum = ""
     if level1_modern:
         if prompt_policy_version == 7:

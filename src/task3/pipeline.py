@@ -15,6 +15,7 @@ from src.synth.compliance import level_of
 from src.task3.compliance import check, fallback
 from src.task3.dataset import read_json, write_json
 from src.task3.diagnosis import parse_taxonomy_diagnosis, untrusted_diagnosis_message
+from src.task3.oracle_findings import oracle_finding_message, validate_oracle_scope
 from src.task3.generation_audit import inspect_generation
 from src.task3.inference import tokenizer_metadata
 from src.task3.prompts import RETRY_HINT, ContextTooLong, budget_prompt, exemplar_feedback, retry_hint, select_exemplars
@@ -114,12 +115,14 @@ def taxonomy_for(record, source, predicted=None):
     return validate_taxonomy(predicted[record.sample_id])
 
 
-def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=None, demo_pool=(), diagnoses=None):
+def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=None, demo_pool=(), diagnoses=None, oracle_findings=None):
     """Measure selected prompts and both CoT stages before inference."""
     strategy = validate_strategy(
         config.get("prompt_strategy", "few_shot" if config.get("few_shot_k", 0) else "zero_shot")
     )
     structured = strategy in {"structured_cot", "few_shot_structured_cot"}
+    if oracle_findings is not None:
+        validate_oracle_scope(records, taxonomy_source, oracle_findings)
     if taxonomy_source == "self-diagnosis" and diagnoses is None:
         raise ValueError("self-diagnosis requires validated diagnosis details")
     quality_version = config.get("cot_quality_version", 1)
@@ -138,6 +141,8 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
         try:
             taxonomy = taxonomy_for(record, taxonomy_source, predicted)
             diagnostic_context = [untrusted_diagnosis_message(diagnoses[record.sample_id]["diagnosis"])] if diagnoses else []
+            if oracle_findings is not None:
+                diagnostic_context.append(oracle_finding_message(record, oracle_findings[record.sample_id]))
             demos = select_exemplars(
                 demo_pool,
                 record,
@@ -574,7 +579,10 @@ def infer(
     cache_context=None,
     attempt_journal_path=None,
     diagnoses=None,
+    oracle_findings=None,
 ):
+    if oracle_findings is not None:
+        validate_oracle_scope(records, taxonomy_source, oracle_findings)
     outputs, traces = [], []
     guard_policy = config.get("guard_policy_version", 1)
     completion_policy = config.get("completion_policy_version", 0)
@@ -638,6 +646,8 @@ def infer(
     for record in records:
         taxonomy = taxonomy_for(record, taxonomy_source, predicted)
         diagnostic_context = [untrusted_diagnosis_message(diagnoses[record.sample_id]["diagnosis"])] if diagnoses else []
+        oracle_context = [oracle_finding_message(record, oracle_findings[record.sample_id])] if oracle_findings is not None else []
+        diagnostic_context.extend(oracle_context)
         demos = select_exemplars(
             demo_pool,
             record,
@@ -825,7 +835,7 @@ def infer(
                         config.get("max_new_tokens", 512),
                         demos,
                         strict_hint=active_retry_instruction,
-                        additional_messages=([] if compact_v3 and level_of(record.target_feedback_level) == 1 else [untrusted_plan_message(cot_plan_audit["validated_plan"], compact_v3=compact_v3)]) if structured else (),
+                        additional_messages=[*(([] if compact_v3 and level_of(record.target_feedback_level) == 1 else [untrusted_plan_message(cot_plan_audit["validated_plan"], compact_v3=compact_v3)]) if structured else ()), *oracle_context],
                         system_addendum=item["system_addendum"],
                         prompt_policy_version=level_policy,
                     )

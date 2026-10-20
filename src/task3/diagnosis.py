@@ -87,6 +87,36 @@ def _unavailable_diagnosis(reason):
     }
 
 
+class UnresolvedTaxonomyError(RuntimeError):
+    """An unknown diagnosis cannot become an explicit clean-code prediction."""
+
+
+def diagnosis_states(audit):
+    states = {}
+    for sid, detail in audit.items():
+        diagnosis = detail.get("diagnosis", {})
+        if detail.get("status") == "diagnosis_unavailable":
+            states[sid] = "unavailable"
+        elif diagnosis.get("status") == "uncertain" or not diagnosis.get("taxonomy_error"):
+            states[sid] = "uncertain"
+        else:
+            states[sid] = "predicted_errors"
+    return states
+
+
+def require_resolved_taxonomy(audit, selected_ids):
+    if set(audit) != set(selected_ids):
+        raise UnresolvedTaxonomyError("unresolved taxonomy: audit ID coverage mismatch")
+    states = diagnosis_states(audit)
+    unknown = [sid for sid in selected_ids if states[sid] != "predicted_errors"]
+    if unknown:
+        raise UnresolvedTaxonomyError(
+            "unresolved taxonomy for " + ", ".join(unknown) +
+            "; refusing complete prediction export: submission schema has no unknown label state"
+        )
+    return {sid: audit[sid]["diagnosis"]["taxonomy_error"] for sid in selected_ids}
+
+
 @dataclass
 class DiagnosticPrompt:
     messages: list[dict]
@@ -491,6 +521,35 @@ def _append_diagnosis_attempt(path, row):
         os.fsync(stream.fileno())
 
 
+def _noncompile_rediagnosis_once(record, backend, config, base_prompt):
+    """One explicitly audited probe, not a relabeling of a rejected compiler claim."""
+    messages = base_prompt.messages + [{"role": "user", "content": (
+        "non-compile re-diagnosis: Finding biên dịch trước không có bằng chứng compiler phù hợp nên đã bị loại. "
+        "Chỉ xét lỗi KHÔNG phải Lỗi biên dịch từ yêu cầu và mã; không đổi tên lỗi compile thành nhóm khác. "
+        "Mỗi finding mới phải có source_quote nguyên văn đúng trường, problem_id đúng và nhãn chính thức. "
+        "Nếu không đủ căn cứ thì giữ status uncertain và danh sách rỗng, không kết luận code đúng. "
+        "Trả đúng schema JSON cũ; không feedback/hướng sửa."
+    )}]
+    tokens = _token_count(backend.tokenizer, messages)
+    reserve = config.get("taxonomy_max_new_tokens", 384)
+    if tokens + reserve > config.get("context_limit", 4096):
+        return None, {"status": "context_blocked", "prompt_messages": messages, "input_tokens": tokens}
+    generated = backend.generate(messages, {**config, "max_new_tokens": reserve})
+    audit = {"prompt_messages": messages, "raw_text": generated.text, "input_tokens": tokens,
+             "output_tokens": generated.output_tokens, "latency_s": generated.latency_s,
+             "finish_reason": generated.finish_reason}
+    try:
+        parsed = parse_taxonomy_diagnosis(generated.text, record)
+        if any(f["taxonomy_label"] == "Lỗi biên dịch" for f in parsed["findings"]):
+            raise ValueError("non-compile retry returned a compile finding")
+        parsed, removed = _filter_source_contradictions(parsed, record)
+        audit.update(status="accepted", diagnosis=parsed, source_contradictions_removed=removed)
+        return parsed, audit
+    except ValueError as exc:
+        audit.update(status="rejected", reason=str(exc))
+        return None, audit
+
+
 def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
     """Run a fail-closed local diagnosis pass and retain private provenance by ID."""
     if len({record.sample_id for record in records}) != len(records):
@@ -680,6 +739,16 @@ def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
                 "diagnosis_after_filter": diagnosis,
                 "rejected_findings": contradicted,
             })
+        noncompile_audit = None
+        removed_compile = any(
+            finding.get("taxonomy_label") == "Lỗi biên dịch"
+            for finding in (evidence_filter or {}).get("findings", [])
+        )
+        if config.get("noncompile_rediagnosis", False) and removed_compile and diagnosis["status"] == "uncertain":
+            revised, noncompile_audit = _noncompile_rediagnosis_once(record, backend, config, prompt)
+            _append_diagnosis_attempt(journal, {"sample_id": record.sample_id, "stage": "noncompile_rediagnosis", **noncompile_audit})
+            if revised is not None:
+                diagnosis = revised
         predicted[record.sample_id] = diagnosis["taxonomy_error"]
         audit[record.sample_id] = {
             "status": "diagnosis_unavailable" if any(a.get("status") == "parse_failed" for a in attempts) else "validated",
@@ -696,6 +765,14 @@ def diagnose_taxonomies(records, backend, config, *, attempt_journal_path=None):
             "evidence_filter": evidence_filter,
             "failure_reason": next((a.get("failure_reason") for a in reversed(attempts) if a.get("status") == "parse_failed"), None),
         }
+        if noncompile_audit is not None:
+            audit[record.sample_id]["noncompile_rediagnosis"] = noncompile_audit
+            audit[record.sample_id]["input_tokens"] += noncompile_audit.get("input_tokens", 0)
+            audit[record.sample_id]["output_tokens"] += noncompile_audit.get("output_tokens", 0)
+            audit[record.sample_id]["latency_s"] += noncompile_audit.get("latency_s", 0)
+        epistemic = diagnosis_states({record.sample_id: audit[record.sample_id]})[record.sample_id]
+        audit[record.sample_id]["epistemic_status"] = epistemic
+        audit[record.sample_id]["taxonomy_prediction"] = list(diagnosis["taxonomy_error"]) if epistemic == "predicted_errors" else None
     return predicted, audit
 
 

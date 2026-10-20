@@ -74,7 +74,7 @@ def main(argv=None):
     )
     prompt_budget = []
     for record in records:
-        messages = build_direct_messages(record, record.provenance["_task3_compile_check"])
+        messages = build_direct_messages(record, record.provenance["_task3_compile_check"], taxonomy_minimum=config.get("direct_taxonomy_minimum", 0))
         ids = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
         prompt_tokens = int(ids.shape[-1]) if hasattr(ids, "shape") else len(ids)
         prompt_budget.append({
