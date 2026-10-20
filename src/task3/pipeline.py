@@ -585,6 +585,9 @@ def infer(
         validate_oracle_scope(records, taxonomy_source, oracle_findings)
     outputs, traces = [], []
     guard_policy = config.get("guard_policy_version", 1)
+    quality_policy = config.get("quality_review_policy_version", 3 if guard_policy == 3 else 2 if guard_policy == 2 else 1)
+    if isinstance(quality_policy, bool) or quality_policy not in (1, 2, 3, 4):
+        raise ValueError("quality_review_policy_version must be 1, 2, 3 or 4")
     completion_policy = config.get("completion_policy_version", 0)
     adequacy_policy = config.get("adequacy_retry_policy_version", 0)
     if isinstance(guard_policy, bool) or guard_policy not in (1, 2, 3):
@@ -876,7 +879,7 @@ def infer(
             result = check(generated.text, record.target_feedback_level, version=guard_policy)
             generation_audit = inspect_generation(generated.text, output_tokens=generated.output_tokens, max_new_tokens=config.get("max_new_tokens", 512), finish_reason=generated.finish_reason, eos_reached=generated.eos_reached)
             completion_incomplete = bool(completion_policy and not generation_audit["mechanically_complete"])
-            quality_flags = quality_review_flags(record, generated.text, version=3 if guard_policy == 3 else 2 if guard_policy == 2 else 1)
+            quality_flags = quality_review_flags(record, generated.text, version=quality_policy)
             retry_reasons = list(result.violations)
             if completion_incomplete:
                 retry_reasons.append("incomplete_response")
@@ -969,7 +972,7 @@ def infer(
             "model_response_complete": bool(not used_fallback and generation_audit.get("mechanically_complete", False)),
             "completion_retry_rescued": bool(first_feedback_attempt and not first_feedback_attempt.get("mechanically_complete", True) and not used_fallback and generation_audit.get("mechanically_complete")),
             "adequacy_retry_rescued": bool(first_feedback_attempt and "level3_direction_candidate" in first_feedback_attempt.get("retry_reasons", []) and not used_fallback and "LEVEL3_ACTIONABILITY_REVIEW_CANDIDATE" not in quality_flags.get("flags", [])),
-            "quality_review_candidates": quality_review_flags(record, feedback, fallback_used=used_fallback, version=3 if guard_policy == 3 else 2 if guard_policy == 2 else 1),
+            "quality_review_candidates": quality_review_flags(record, feedback, fallback_used=used_fallback, version=quality_policy),
             "semantic_quality": "NOT_MEASURED",
             "final_guard": asdict(final),
             "input_tokens": prompt.input_tokens,

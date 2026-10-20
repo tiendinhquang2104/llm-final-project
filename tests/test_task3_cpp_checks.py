@@ -280,3 +280,16 @@ def test_configured_portable_compiler_does_not_require_global_path(api, tmp_path
     result = api.check_correction(record(), fence(GOOD), work_root=tmp_path, case_tag="portable-only")
     assert result["status"] == "SMALL_CASES_MATCH"
     assert result["compile"]["command"][0] == str(Path(root) / "usr/bin/g++")
+
+
+def test_runtime_cannot_read_compiler_helper_tree(api, tmp_path):
+    compiler_or_skip(api)
+    compiler = shutil.which('g++')
+    if not compiler:
+        pytest.skip('System compiler not installed')
+    helper = Path(subprocess.check_output([compiler, '-print-prog-name=cc1plus'], text=True).strip())
+    if not str(helper).startswith('/usr/libexec/gcc/'):
+        pytest.skip('Toolchain does not use separate libexec helper tree')
+    run = isolated_python(api, tmp_path, 'import sys\ntry:open(sys.argv[1],"rb").read(1);print("ALLOWED")\nexcept OSError:print("DENIED")', extra_args=[str(helper)])
+    assert run['returncode'] == 0
+    assert run['stdout'].strip() == 'DENIED'

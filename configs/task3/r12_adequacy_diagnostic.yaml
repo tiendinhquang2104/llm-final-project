@@ -1,0 +1,4 @@
+# Experimental source-relation screen; no prompt/model/guard/retry change.
+# Bounded support: counted for-loop bounds only. Not a frozen inference method.
+extends: r11_compiler_control.yaml
+quality_review_policy_version: 4

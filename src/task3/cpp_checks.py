@@ -29,7 +29,7 @@ import time
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 
-VERSION = "r7-bounded-cpp11-v1"
+VERSION = "r12-bounded-cpp11-v2"
 _DIGITS = 'Đọc số nguyên không âm n (0 <= n <= 10^9). In "True" nếu tổng các chữ số của n chia hết cho 3, ngược lại in "False".'
 _GCD = (
     "Đọc hai số nguyên không âm a, b (0 <= a, b <= 10^9, không đồng thời bằng 0). In ra ước chung lớn nhất của a và b."
@@ -130,7 +130,9 @@ def _landlock(scratch: Path, executable: Path, phase: str, toolchain_root: Path 
         if phase == "compile":
             if toolchain_root is not None:
                 allow(toolchain_root / "usr", read_exec)
-            for path in ("/usr/bin", "/bin", "/usr/include", "/usr/local/include"):
+            # Debian/Ubuntu GCC helpers may live outside /usr/lib. Grant only
+            # this toolchain tree, only in compile phase; runtime cannot read it.
+            for path in ("/usr/bin", "/bin", "/usr/include", "/usr/local/include", "/usr/libexec/gcc"):
                 allow(Path(path).resolve(), read_exec)
             # Plain files/directories only: never device/socket/symlink creation.
             writes = (1 << 1) | (1 << 4) | (1 << 5) | (1 << 7) | (1 << 8) | (1 << 14)

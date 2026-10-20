@@ -78,8 +78,20 @@ def validate_code_claims(code: str, claims: list[dict], *, statement: str = "") 
 def quality_review_flags(record, feedback: str, *, fallback_used: bool = False, version=1) -> dict:
     """Return review candidates only; never assign semantic correctness or a quality score."""
     text = feedback or ""
-    if isinstance(version, bool) or version not in (1, 2, 3):
-        raise ValueError("quality review version must be 1, 2 or 3")
+    if isinstance(version, bool) or version not in (1, 2, 3, 4):
+        raise ValueError("quality review version must be 1, 2, 3 or 4")
+    if version == 4:
+        from src.task3.adequacy import assess_repair_action
+        base = quality_review_flags(record, feedback, fallback_used=fallback_used, version=2)
+        base["version"] = 4
+        if record.target_feedback_level == "Level 3 - Gợi ý sửa" and not fallback_used:
+            action = assess_repair_action(record, text)
+            base["repair_action_review"] = action
+            base["flags"] = [f for f in base["flags"] if f not in {
+                "LEVEL3_ACTIONABILITY_REVIEW_CANDIDATE", "LEVEL3_DIRECTION_REVIEW_CANDIDATE"}]
+            if action["kind"] != "specific":
+                base["flags"].append("LEVEL3_DIRECTION_REVIEW_CANDIDATE")
+        return base
     source_candidate = False
     if record.target_feedback_level != "Level 1 - Gợi ý nhẹ":
         source_reviews = validate_code_claims(
