@@ -50,6 +50,10 @@ def main():
     parser.add_argument("--output_file", default="outputs/task2/task2_predictions_lora.json")
     args = parser.parse_args()
 
+    import os
+    os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
     import torch
     from peft import PeftModel
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
@@ -62,10 +66,11 @@ def main():
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
     )
+    device_map = {"": 0} if torch.cuda.is_available() else None
     base_model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
         quantization_config=bnb_config,
-        device_map="auto",
+        device_map=device_map,
         trust_remote_code=True,
     )
     print(f"==> Loading LoRA adapter from {args.adapter_dir}...")

@@ -8,6 +8,11 @@ import argparse
 import json
 import os
 from pathlib import Path
+
+# Prevent multi-GPU pipeline memory imbalance on T4 x2 & eliminate fragmentation
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 import torch
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from transformers import (
@@ -17,8 +22,6 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
-
-os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 
 def encode_row(tokenizer, messages, max_length=2048):
@@ -64,9 +67,7 @@ def train(args):
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    device_map = None
-    if torch.cuda.is_available():
-        device_map = "auto" if torch.cuda.device_count() > 1 else {"": torch.cuda.current_device()}
+    device_map = {"": 0} if torch.cuda.is_available() else None
 
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -115,6 +116,7 @@ def train(args):
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
         optim="paged_adamw_8bit",
+        dataloader_pin_memory=False,
         report_to="none",
     )
 
@@ -140,11 +142,11 @@ if __name__ == "__main__":
     parser.add_argument("--data_path", default="data/processed/task2_sft_train.jsonl")
     parser.add_argument("--output_dir", default="outputs/task2/qlora_adapter")
     parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--batch_size", type=int, default=2)
-    parser.add_argument("--grad_accum", type=int, default=4)
+    parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument("--grad_accum", type=int, default=8)
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--lora_r", type=int, default=16)
     parser.add_argument("--lora_alpha", type=int, default=32)
-    parser.add_argument("--max_seq_len", type=int, default=2048)
+    parser.add_argument("--max_seq_len", type=int, default=1792)
     args = parser.parse_args()
     train(args)
