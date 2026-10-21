@@ -1,0 +1,1022 @@
+{
+  "calibration": {
+    "A": {
+      "n": 53,
+      "mean_proxy": 0.32075471698113206,
+      "sum_proxy": 17.0,
+      "false_technical_claim": 18,
+      "false_clean": 9,
+      "location_correct": 7,
+      "cause_correct": 9,
+      "feasible_repair": 1,
+      "generic": 6,
+      "level_violation": 7,
+      "repair_disclosure": 7,
+      "unknown": 0,
+      "core_finding_coverage": {
+        "covered": 7,
+        "total": 44,
+        "scope": "preselected core findings only; not exhaustive coverage of every source defect"
+      },
+      "per_level": {
+        "1": {
+          "n": 24,
+          "mean_proxy": 0.4166666666666667,
+          "false_technical_claim": 1,
+          "false_clean": 9,
+          "location_correct": 0,
+          "cause_correct": 0,
+          "feasible_repair": 0,
+          "generic": 6,
+          "level_violation": 2,
+          "repair_disclosure": 2,
+          "unknown": 0
+        },
+        "2": {
+          "n": 18,
+          "mean_proxy": 0.2777777777777778,
+          "false_technical_claim": 9,
+          "false_clean": 0,
+          "location_correct": 4,
+          "cause_correct": 6,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 5,
+          "repair_disclosure": 5,
+          "unknown": 0
+        },
+        "3": {
+          "n": 7,
+          "mean_proxy": 0.21428571428571427,
+          "false_technical_claim": 5,
+          "false_clean": 0,
+          "location_correct": 2,
+          "cause_correct": 2,
+          "feasible_repair": 1,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "4": {
+          "n": 4,
+          "mean_proxy": 0.125,
+          "false_technical_claim": 3,
+          "false_clean": 0,
+          "location_correct": 1,
+          "cause_correct": 1,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        }
+      },
+      "taxonomy_source_core_reference": {
+        "micro_f1": 0.2894736842105263,
+        "macro_f1_10_labels": 0.14928104575163398,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "tp": 4,
+            "fp": 5,
+            "fn": 4,
+            "f1": 0.47058823529411764
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 6,
+            "f1": 0.2222222222222222
+          },
+          "Lỗi logic": {
+            "tp": 5,
+            "fp": 14,
+            "fn": 1,
+            "f1": 0.4
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 3,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          },
+          "Lỗi thuật toán": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 3,
+            "f1": 0.4
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          }
+        }
+      },
+      "fallback": 6,
+      "retries": 14,
+      "raw_first_regex_disclosure": 7,
+      "final_regex_disclosure": 0
+    },
+    "B": {
+      "n": 53,
+      "mean_proxy": 0.330188679245283,
+      "sum_proxy": 17.5,
+      "false_technical_claim": 14,
+      "false_clean": 0,
+      "location_correct": 12,
+      "cause_correct": 14,
+      "feasible_repair": 0,
+      "generic": 12,
+      "level_violation": 13,
+      "repair_disclosure": 3,
+      "unknown": 0,
+      "core_finding_coverage": {
+        "covered": 12,
+        "total": 44,
+        "scope": "preselected core findings only; not exhaustive coverage of every source defect"
+      },
+      "per_level": {
+        "1": {
+          "n": 24,
+          "mean_proxy": 0.2916666666666667,
+          "false_technical_claim": 1,
+          "false_clean": 0,
+          "location_correct": 0,
+          "cause_correct": 0,
+          "feasible_repair": 0,
+          "generic": 12,
+          "level_violation": 10,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "2": {
+          "n": 18,
+          "mean_proxy": 0.4444444444444444,
+          "false_technical_claim": 7,
+          "false_clean": 0,
+          "location_correct": 7,
+          "cause_correct": 9,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 3,
+          "repair_disclosure": 3,
+          "unknown": 0
+        },
+        "3": {
+          "n": 7,
+          "mean_proxy": 0.21428571428571427,
+          "false_technical_claim": 4,
+          "false_clean": 0,
+          "location_correct": 3,
+          "cause_correct": 3,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "4": {
+          "n": 4,
+          "mean_proxy": 0.25,
+          "false_technical_claim": 2,
+          "false_clean": 0,
+          "location_correct": 2,
+          "cause_correct": 2,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        }
+      },
+      "taxonomy_source_core_reference": {
+        "micro_f1": 0.24,
+        "macro_f1_10_labels": 0.1402930402930403,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "tp": 3,
+            "fp": 3,
+            "fn": 5,
+            "f1": 0.42857142857142855
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 7,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "tp": 4,
+            "fp": 16,
+            "fn": 2,
+            "f1": 0.3076923076923077
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          },
+          "Lỗi thuật toán": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.6666666666666666
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          }
+        }
+      },
+      "fallback": 1,
+      "retries": 8,
+      "raw_first_regex_disclosure": 6,
+      "final_regex_disclosure": 0
+    },
+    "C": {
+      "n": 53,
+      "mean_proxy": 0.41509433962264153,
+      "sum_proxy": 22.0,
+      "false_technical_claim": 17,
+      "false_clean": 12,
+      "location_correct": 10,
+      "cause_correct": 10,
+      "feasible_repair": 1,
+      "generic": 3,
+      "level_violation": 1,
+      "repair_disclosure": 0,
+      "unknown": 0,
+      "core_finding_coverage": {
+        "covered": 10,
+        "total": 44,
+        "scope": "preselected core findings only; not exhaustive coverage of every source defect"
+      },
+      "per_level": {
+        "1": {
+          "n": 24,
+          "mean_proxy": 0.5,
+          "false_technical_claim": 1,
+          "false_clean": 9,
+          "location_correct": 0,
+          "cause_correct": 0,
+          "feasible_repair": 0,
+          "generic": 2,
+          "level_violation": 1,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "2": {
+          "n": 18,
+          "mean_proxy": 0.5,
+          "false_technical_claim": 6,
+          "false_clean": 3,
+          "location_correct": 9,
+          "cause_correct": 9,
+          "feasible_repair": 0,
+          "generic": 1,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "3": {
+          "n": 7,
+          "mean_proxy": 0.14285714285714285,
+          "false_technical_claim": 6,
+          "false_clean": 0,
+          "location_correct": 1,
+          "cause_correct": 1,
+          "feasible_repair": 1,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "4": {
+          "n": 4,
+          "mean_proxy": 0.0,
+          "false_technical_claim": 4,
+          "false_clean": 0,
+          "location_correct": 0,
+          "cause_correct": 0,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        }
+      },
+      "taxonomy_source_core_reference": {
+        "micro_f1": 0.2631578947368421,
+        "macro_f1_10_labels": 0.1551126651126651,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "tp": 2,
+            "fp": 3,
+            "fn": 6,
+            "f1": 0.3076923076923077
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 1,
+            "fp": 4,
+            "fn": 6,
+            "f1": 0.16666666666666666
+          },
+          "Lỗi logic": {
+            "tp": 5,
+            "fp": 11,
+            "fn": 1,
+            "f1": 0.45454545454545453
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 3,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 1,
+            "fp": 2,
+            "fn": 5,
+            "f1": 0.2222222222222222
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          },
+          "Lỗi thuật toán": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 3,
+            "f1": 0.4
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 5,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          }
+        }
+      },
+      "fallback": 3,
+      "retries": 7,
+      "raw_first_regex_disclosure": 4,
+      "final_regex_disclosure": 0
+    }
+  },
+  "calibration_paired": {
+    "B": {
+      "n": 53,
+      "wins": 11,
+      "losses": 12,
+      "ties": 30,
+      "net": -1,
+      "per_level": {
+        "1": {
+          "n": 24,
+          "wins": 5,
+          "losses": 10,
+          "ties": 9,
+          "net": -5
+        },
+        "2": {
+          "n": 18,
+          "wins": 4,
+          "losses": 1,
+          "ties": 13,
+          "net": 3
+        },
+        "3": {
+          "n": 7,
+          "wins": 1,
+          "losses": 1,
+          "ties": 5,
+          "net": 0
+        },
+        "4": {
+          "n": 4,
+          "wins": 1,
+          "losses": 0,
+          "ties": 3,
+          "net": 1
+        }
+      }
+    },
+    "C": {
+      "n": 53,
+      "wins": 12,
+      "losses": 7,
+      "ties": 34,
+      "net": 5,
+      "per_level": {
+        "1": {
+          "n": 24,
+          "wins": 4,
+          "losses": 2,
+          "ties": 18,
+          "net": 2
+        },
+        "2": {
+          "n": 18,
+          "wins": 7,
+          "losses": 3,
+          "ties": 8,
+          "net": 4
+        },
+        "3": {
+          "n": 7,
+          "wins": 1,
+          "losses": 1,
+          "ties": 5,
+          "net": 0
+        },
+        "4": {
+          "n": 4,
+          "wins": 0,
+          "losses": 1,
+          "ties": 3,
+          "net": -1
+        }
+      }
+    }
+  },
+  "fresh": {
+    "A": {
+      "n": 48,
+      "mean_proxy": 0.34375,
+      "sum_proxy": 16.5,
+      "false_technical_claim": 18,
+      "false_clean": 5,
+      "location_correct": 15,
+      "cause_correct": 15,
+      "feasible_repair": 4,
+      "generic": 6,
+      "level_violation": 6,
+      "repair_disclosure": 3,
+      "unknown": 4,
+      "core_finding_coverage": {
+        "covered": 12,
+        "total": 36,
+        "scope": "preselected core findings only; not exhaustive coverage of every source defect"
+      },
+      "per_level": {
+        "1": {
+          "n": 12,
+          "mean_proxy": 0.4166666666666667,
+          "false_technical_claim": 1,
+          "false_clean": 1,
+          "location_correct": 0,
+          "cause_correct": 0,
+          "feasible_repair": 0,
+          "generic": 6,
+          "level_violation": 3,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "2": {
+          "n": 12,
+          "mean_proxy": 0.3333333333333333,
+          "false_technical_claim": 5,
+          "false_clean": 3,
+          "location_correct": 4,
+          "cause_correct": 4,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 3,
+          "repair_disclosure": 3,
+          "unknown": 0
+        },
+        "3": {
+          "n": 12,
+          "mean_proxy": 0.4583333333333333,
+          "false_technical_claim": 4,
+          "false_clean": 0,
+          "location_correct": 8,
+          "cause_correct": 8,
+          "feasible_repair": 3,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 2
+        },
+        "4": {
+          "n": 12,
+          "mean_proxy": 0.16666666666666666,
+          "false_technical_claim": 8,
+          "false_clean": 1,
+          "location_correct": 3,
+          "cause_correct": 3,
+          "feasible_repair": 1,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 2
+        }
+      },
+      "taxonomy_source_core_reference": {
+        "micro_f1": 0.6571428571428571,
+        "macro_f1_10_labels": 0.14124293785310735,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 0,
+            "f1": 0.6666666666666666
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          },
+          "Lỗi logic": {
+            "tp": 22,
+            "fp": 10,
+            "fn": 5,
+            "f1": 0.7457627118644068
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          },
+          "Lỗi hàm": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          }
+        }
+      },
+      "fallback": 6,
+      "retries": 15,
+      "raw_first_regex_disclosure": 9,
+      "final_regex_disclosure": 0
+    },
+    "C": {
+      "n": 48,
+      "mean_proxy": 0.46875,
+      "sum_proxy": 22.5,
+      "false_technical_claim": 14,
+      "false_clean": 8,
+      "location_correct": 17,
+      "cause_correct": 17,
+      "feasible_repair": 7,
+      "generic": 1,
+      "level_violation": 3,
+      "repair_disclosure": 3,
+      "unknown": 4,
+      "core_finding_coverage": {
+        "covered": 10,
+        "total": 36,
+        "scope": "preselected core findings only; not exhaustive coverage of every source defect"
+      },
+      "per_level": {
+        "1": {
+          "n": 12,
+          "mean_proxy": 0.6666666666666666,
+          "false_technical_claim": 0,
+          "false_clean": 4,
+          "location_correct": 0,
+          "cause_correct": 0,
+          "feasible_repair": 0,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 0
+        },
+        "2": {
+          "n": 12,
+          "mean_proxy": 0.4166666666666667,
+          "false_technical_claim": 4,
+          "false_clean": 2,
+          "location_correct": 5,
+          "cause_correct": 5,
+          "feasible_repair": 0,
+          "generic": 1,
+          "level_violation": 3,
+          "repair_disclosure": 3,
+          "unknown": 0
+        },
+        "3": {
+          "n": 12,
+          "mean_proxy": 0.375,
+          "false_technical_claim": 4,
+          "false_clean": 1,
+          "location_correct": 7,
+          "cause_correct": 7,
+          "feasible_repair": 4,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 2
+        },
+        "4": {
+          "n": 12,
+          "mean_proxy": 0.4166666666666667,
+          "false_technical_claim": 6,
+          "false_clean": 1,
+          "location_correct": 5,
+          "cause_correct": 5,
+          "feasible_repair": 3,
+          "generic": 0,
+          "level_violation": 0,
+          "repair_disclosure": 0,
+          "unknown": 2
+        }
+      },
+      "taxonomy_source_core_reference": {
+        "micro_f1": 0.5757575757575758,
+        "macro_f1_10_labels": 0.10533333333333332,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "f1": 0.0
+          },
+          "Lỗi nhập/xuất": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          },
+          "Lỗi logic": {
+            "tp": 18,
+            "fp": 5,
+            "fn": 9,
+            "f1": 0.72
+          },
+          "Lỗi vòng lặp": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "tp": 1,
+            "fp": 3,
+            "fn": 1,
+            "f1": 0.3333333333333333
+          },
+          "Lỗi edge case": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "f1": 0
+          }
+        }
+      },
+      "fallback": 1,
+      "retries": 3,
+      "raw_first_regex_disclosure": 2,
+      "final_regex_disclosure": 0
+    }
+  },
+  "decision": {
+    "eligible": false,
+    "checks": {
+      "all_complete_valid": true,
+      "no_l1_l2_repair_disclosure": false,
+      "false_technical_claim_not_increased": true,
+      "net_wins_ge6": true,
+      "l2_net_ge3": false,
+      "l3_net_ge1": false,
+      "l1_false_clean_not_increased": false,
+      "no_unresolved_material_unknown": false
+    },
+    "paired": {
+      "n": 48,
+      "wins": 15,
+      "losses": 8,
+      "ties": 25,
+      "net": 7,
+      "per_level": {
+        "1": {
+          "n": 12,
+          "wins": 6,
+          "losses": 2,
+          "ties": 4,
+          "net": 4
+        },
+        "2": {
+          "n": 12,
+          "wins": 2,
+          "losses": 1,
+          "ties": 9,
+          "net": 1
+        },
+        "3": {
+          "n": 12,
+          "wins": 2,
+          "losses": 3,
+          "ties": 7,
+          "net": -1
+        },
+        "4": {
+          "n": 12,
+          "wins": 5,
+          "losses": 2,
+          "ties": 5,
+          "net": 3
+        }
+      }
+    },
+    "action": "retain R15; stop before public"
+  },
+  "fresh_uncertainty": {
+    "paired_mean_difference": 0.125,
+    "bootstrap_95_percent_interval": [
+      -0.03125,
+      0.28125
+    ],
+    "method": "10,000 fixed-seed paired source bootstrap; descriptive only, shared task families/author review violate independent sampling; not leaderboard uncertainty"
+  },
+  "strict44": {
+    "A": {
+      "n": 44,
+      "mean_proxy": 0.375
+    },
+    "C": {
+      "n": 44,
+      "mean_proxy": 0.5113636363636364
+    }
+  },
+  "strict44_decision": {
+    "eligible": false,
+    "checks": {
+      "all_complete_valid": true,
+      "no_l1_l2_repair_disclosure": false,
+      "false_technical_claim_not_increased": true,
+      "net_wins_ge6": true,
+      "l2_net_ge3": false,
+      "l3_net_ge1": false,
+      "l1_false_clean_not_increased": false,
+      "no_unresolved_material_unknown": true
+    },
+    "paired": {
+      "n": 44,
+      "wins": 15,
+      "losses": 8,
+      "ties": 21,
+      "net": 7,
+      "per_level": {
+        "1": {
+          "n": 12,
+          "wins": 6,
+          "losses": 2,
+          "ties": 4,
+          "net": 4
+        },
+        "2": {
+          "n": 12,
+          "wins": 2,
+          "losses": 1,
+          "ties": 9,
+          "net": 1
+        },
+        "3": {
+          "n": 10,
+          "wins": 2,
+          "losses": 3,
+          "ties": 5,
+          "net": -1
+        },
+        "4": {
+          "n": 10,
+          "wins": 5,
+          "losses": 2,
+          "ties": 3,
+          "net": 3
+        }
+      }
+    },
+    "action": "retain R15; stop before public"
+  },
+  "strict44_uncertainty": {
+    "paired_mean_difference": 0.13636363636363635,
+    "bootstrap_95_percent_interval": [
+      -0.03409090909090909,
+      0.3068181818181818
+    ],
+    "method": "10,000 fixed-seed paired source bootstrap; descriptive only, shared task families/author review violate independent sampling; not leaderboard uncertainty"
+  },
+  "strict44_distribution": {
+    "1": 12,
+    "2": 12,
+    "3": 10,
+    "4": 10
+  },
+  "preservation": {
+    "unchanged_session_start_paths": 630,
+    "changed": [],
+    "historical_root_prediction_hash_differs_from_R15": true
+  },
+  "journal_audit": {
+    "calibration": {
+      "A": {
+        "attempts": 67,
+        "scalar_payloads_audited": 67,
+        "all_full_messages_exact_replay": true,
+        "validator": {
+          "records": 53,
+          "levels": {
+            "Level 1 - Gợi ý nhẹ": 24,
+            "Level 2 - Chẩn đoán": 18,
+            "Level 3 - Gợi ý sửa": 7,
+            "Level 4 - Lời giải mẫu": 4
+          }
+        },
+        "output_sha256": "1342d5ac368ad6cb970d0df70eba1106b4417c3fde0622b20a1b9a41e9cffc6f",
+        "identity": "4b9f66a7b4152d76d2f86ce2b6df5915ba56355cfd984f4a9a84a5c0fc10aba1"
+      },
+      "B": {
+        "attempts": 61,
+        "scalar_payloads_audited": 61,
+        "all_full_messages_exact_replay": true,
+        "validator": {
+          "records": 53,
+          "levels": {
+            "Level 1 - Gợi ý nhẹ": 24,
+            "Level 2 - Chẩn đoán": 18,
+            "Level 3 - Gợi ý sửa": 7,
+            "Level 4 - Lời giải mẫu": 4
+          }
+        },
+        "output_sha256": "e9c52da42d3dcb668b37dc2dfb28fcd5dbf442092ed157a05532be34bffa32a5",
+        "identity": "cdc84008798354f44db6ecae7a14267c192e46b1634ddd56c4ab24f3916b7e8d"
+      },
+      "C": {
+        "attempts": 60,
+        "scalar_payloads_audited": 180,
+        "all_full_messages_exact_replay": true,
+        "validator": {
+          "records": 53,
+          "levels": {
+            "Level 1 - Gợi ý nhẹ": 24,
+            "Level 2 - Chẩn đoán": 18,
+            "Level 3 - Gợi ý sửa": 7,
+            "Level 4 - Lời giải mẫu": 4
+          }
+        },
+        "output_sha256": "ac864918c90b64b6c85de2e8fa3bb5a5c8c03bc1a50becd9a49d16482d107d83",
+        "identity": "725aadb2667add8f150209ee8ef1b1298fe2ad9adcae3866908ed7cf232a1a0c"
+      }
+    },
+    "fresh": {
+      "A": {
+        "attempts": 63,
+        "scalar_payloads_audited": 63,
+        "all_full_messages_exact_replay": true,
+        "validator": {
+          "records": 48,
+          "levels": {
+            "Level 1 - Gợi ý nhẹ": 12,
+            "Level 2 - Chẩn đoán": 12,
+            "Level 3 - Gợi ý sửa": 12,
+            "Level 4 - Lời giải mẫu": 12
+          }
+        },
+        "output_sha256": "9884fa84a5976d373060ebcfaf45990c45439b7c9a2829d53874c7bee5b3a226",
+        "identity": "9328f7d6585850a15643f8312c363fbb9ec150d27b0a5142d8beaa908105f679"
+      },
+      "C": {
+        "attempts": 51,
+        "scalar_payloads_audited": 153,
+        "all_full_messages_exact_replay": true,
+        "validator": {
+          "records": 48,
+          "levels": {
+            "Level 1 - Gợi ý nhẹ": 12,
+            "Level 2 - Chẩn đoán": 12,
+            "Level 3 - Gợi ý sửa": 12,
+            "Level 4 - Lời giải mẫu": 12
+          }
+        },
+        "output_sha256": "9e8dce7293410c066effcbbdba459c73961fce0ac8ee4b522fc4d42007ac9a1d",
+        "identity": "3ba5c24a470b1616d887d6b9bea2646fab8b9f6bfb5d3b63f17665a0de6af128"
+      }
+    }
+  }
+}
