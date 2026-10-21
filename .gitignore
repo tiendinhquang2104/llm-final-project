@@ -62,6 +62,7 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/task2_sft_train.jsonl
 # Competition data (real student code, must not be published)
 data/public-test/
 data/public-test-*.zip

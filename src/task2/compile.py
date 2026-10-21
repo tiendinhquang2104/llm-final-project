@@ -72,12 +72,14 @@ class NativeCompiler:
 
     def _run_tests(self, d: Path, tests: list) -> list[dict]:
         runs = []
+        exe = "./student.exe" if (d / "student.exe").exists() else "./student"
+        preexec = None if os.name == "nt" else _limit_child
         for i, inp in enumerate(tests):
             out = d / f"out_{i}"
             with out.open("wb") as fo:
                 try:
-                    p = subprocess.run(["./student"], cwd=d, input=inp.encode("utf-8"), stdout=fo,
-                                       stderr=subprocess.DEVNULL, timeout=RUN_TIMEOUT, preexec_fn=_limit_child)
+                    p = subprocess.run([exe], cwd=d, input=inp.encode("utf-8"), stdout=fo,
+                                       stderr=subprocess.DEVNULL, timeout=RUN_TIMEOUT, preexec_fn=preexec)
                     rc, timed_out = p.returncode, False
                 except subprocess.TimeoutExpired:
                     rc, timed_out = 124, True
@@ -89,7 +91,8 @@ class NativeCompiler:
         results = []
         for job in jobs:
             code, exam_type, tests = job[0], job[1], (job[2] if len(job) > 2 else None)
-            d = Path(tempfile.mkdtemp(prefix="tmp", dir="/tmp"))
+            tmp_dir = "/tmp" if os.path.exists("/tmp") else None
+            d = Path(tempfile.mkdtemp(prefix="tmp", dir=tmp_dir))
             try:
                 (d / "student.cpp").write_text(code, encoding="utf-8")
                 args = [self.cxx, *compile_args(exam_type)[1:]]
@@ -104,7 +107,7 @@ class NativeCompiler:
                 if tests is None:
                     results.append((log, rc))
                 else:
-                    ok = rc == 0 and (d / "student").exists()
+                    ok = rc == 0 and ((d / "student").exists() or (d / "student.exe").exists())
                     results.append((log, rc, self._run_tests(d, tests) if ok else None))
             finally:
                 shutil.rmtree(d, ignore_errors=True)
