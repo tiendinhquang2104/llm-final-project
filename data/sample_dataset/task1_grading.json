@@ -1,0 +1,729 @@
+{
+  "task": "task1_rubric_grading",
+  "description": "Input = đề bài (tra theo exam_id trong exams.json) + code sinh viên (đọc từ code_file) (+ compile_log, test_report tuỳ chọn). Output = 6 điểm thành phần và tổng điểm 0-10.",
+  "input_fields": [
+    "exam_id",
+    "exam_type",
+    "language",
+    "code_file (đường dẫn tương đối tới file .cpp)",
+    "compile_log (optional)",
+    "test_report (optional)"
+  ],
+  "output_fields": [
+    "rubric.compilable(0-1)",
+    "rubric.io_format(0-1)",
+    "rubric.logic(0-4)",
+    "rubric.edge_case(0-2)",
+    "rubric.complexity(0-1)",
+    "rubric.code_quality(0-1)",
+    "total_score(0-10)"
+  ],
+  "metric": "QWK trên total_score; MAE; exact-match từng chiều",
+  "n_samples": 32,
+  "samples": [
+    {
+      "sample_id": "EX01-S101",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S101.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 8,
+        "rubric": {
+          "logic": 2,
+          "io_format": 1,
+          "compilable": 1,
+          "code_quality": 1,
+          "complexity": 1,
+          "edge_case": 2
+        }
+      }
+    },
+    {
+      "sample_id": "EX01-S102",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S102.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 9,
+        "rubric": {
+          "code_quality": 1,
+          "edge_case": 1,
+          "compilable": 1,
+          "io_format": 1,
+          "logic": 4,
+          "complexity": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX01-S103",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S103.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 0,
+        "rubric": {
+          "logic": 0,
+          "code_quality": 0,
+          "complexity": 0,
+          "compilable": 0,
+          "edge_case": 0,
+          "io_format": 0
+        }
+      }
+    },
+    {
+      "sample_id": "EX01-S104",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S104.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "edge_case": 2,
+          "compilable": 1,
+          "code_quality": 1,
+          "logic": 3,
+          "io_format": 1,
+          "complexity": 1
+        },
+        "total_score": 9
+      }
+    },
+    {
+      "sample_id": "EX01-S105",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S105.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 1,
+        "rubric": {
+          "logic": 0,
+          "complexity": 0,
+          "io_format": 0,
+          "compilable": 1,
+          "edge_case": 0,
+          "code_quality": 0
+        }
+      }
+    },
+    {
+      "sample_id": "EX01-S106",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S106.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "code_quality": 0,
+          "compilable": 1,
+          "complexity": 0,
+          "io_format": 1,
+          "edge_case": 0,
+          "logic": 0
+        },
+        "total_score": 2
+      }
+    },
+    {
+      "sample_id": "EX01-S107",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S107.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "logic": 0,
+          "complexity": 0,
+          "edge_case": 0,
+          "compilable": 1,
+          "io_format": 1,
+          "code_quality": 0
+        },
+        "total_score": 2
+      }
+    },
+    {
+      "sample_id": "EX01-S108",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S108.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 6,
+        "rubric": {
+          "compilable": 1,
+          "code_quality": 1,
+          "io_format": 1,
+          "logic": 1,
+          "edge_case": 1,
+          "complexity": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX01-S109",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S109.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "edge_case": 0,
+          "io_format": 0,
+          "logic": 0,
+          "complexity": 0,
+          "compilable": 0,
+          "code_quality": 0
+        },
+        "total_score": 0
+      }
+    },
+    {
+      "sample_id": "EX01-S110",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S110.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 7,
+        "rubric": {
+          "io_format": 0,
+          "compilable": 1,
+          "edge_case": 2,
+          "logic": 2,
+          "code_quality": 1,
+          "complexity": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX01-S111",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S111.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "code_quality": 0,
+          "complexity": 0,
+          "logic": 0,
+          "compilable": 0,
+          "edge_case": 0,
+          "io_format": 0
+        },
+        "total_score": 0
+      }
+    },
+    {
+      "sample_id": "EX01-S112",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S112.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "code_quality": 1,
+          "complexity": 1,
+          "edge_case": 2,
+          "compilable": 1,
+          "logic": 3,
+          "io_format": 1
+        },
+        "total_score": 9
+      }
+    },
+    {
+      "sample_id": "EX01-S113",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S113.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "complexity": 0,
+          "edge_case": 0,
+          "io_format": 0,
+          "compilable": 1,
+          "code_quality": 0,
+          "logic": 0
+        },
+        "total_score": 1
+      }
+    },
+    {
+      "sample_id": "EX01-S114",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S114.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 1,
+        "rubric": {
+          "edge_case": 0,
+          "complexity": 0,
+          "compilable": 1,
+          "logic": 0,
+          "code_quality": 0,
+          "io_format": 0
+        }
+      }
+    },
+    {
+      "sample_id": "EX01-S115",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S115.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 10,
+        "rubric": {
+          "complexity": 1,
+          "logic": 4,
+          "io_format": 1,
+          "compilable": 1,
+          "code_quality": 1,
+          "edge_case": 2
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S201",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S201.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 10,
+        "rubric": {
+          "edge_case": 2,
+          "logic": 4,
+          "code_quality": 1,
+          "io_format": 1,
+          "compilable": 1,
+          "complexity": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S202",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S202.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "complexity": 1,
+          "code_quality": 1,
+          "edge_case": 2,
+          "io_format": 1,
+          "compilable": 1,
+          "logic": 4
+        },
+        "total_score": 10
+      }
+    },
+    {
+      "sample_id": "EX02-S203",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S203.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "io_format": 0,
+          "complexity": 0,
+          "code_quality": 1,
+          "compilable": 0,
+          "logic": 0,
+          "edge_case": 0
+        },
+        "total_score": 1
+      }
+    },
+    {
+      "sample_id": "EX02-S204",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S204.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 7,
+        "rubric": {
+          "code_quality": 1,
+          "complexity": 1,
+          "logic": 2,
+          "edge_case": 1,
+          "compilable": 1,
+          "io_format": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S205",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S205.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "compilable": 1,
+          "logic": 4,
+          "io_format": 0,
+          "complexity": 1,
+          "edge_case": 2,
+          "code_quality": 1
+        },
+        "total_score": 9
+      }
+    },
+    {
+      "sample_id": "EX02-S206",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S206.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 3,
+        "rubric": {
+          "logic": 0,
+          "code_quality": 1,
+          "complexity": 1,
+          "io_format": 0,
+          "edge_case": 0,
+          "compilable": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S207",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S207.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 7,
+        "rubric": {
+          "edge_case": 1,
+          "code_quality": 1,
+          "io_format": 1,
+          "complexity": 1,
+          "logic": 2,
+          "compilable": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S208",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S208.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 7,
+        "rubric": {
+          "compilable": 1,
+          "code_quality": 1,
+          "io_format": 1,
+          "edge_case": 1,
+          "logic": 2,
+          "complexity": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S209",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S209.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "complexity": 1,
+          "io_format": 1,
+          "logic": 2,
+          "compilable": 1,
+          "code_quality": 1,
+          "edge_case": 1
+        },
+        "total_score": 7
+      }
+    },
+    {
+      "sample_id": "EX02-S210",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S210.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "logic": 0,
+          "code_quality": 1,
+          "compilable": 1,
+          "complexity": 0,
+          "io_format": 0,
+          "edge_case": 0
+        },
+        "total_score": 2
+      }
+    },
+    {
+      "sample_id": "EX02-S211",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S211.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 10,
+        "rubric": {
+          "io_format": 1,
+          "code_quality": 1,
+          "compilable": 1,
+          "logic": 4,
+          "complexity": 1,
+          "edge_case": 2
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S212",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S212.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 1,
+        "rubric": {
+          "logic": 0,
+          "code_quality": 1,
+          "io_format": 0,
+          "compilable": 0,
+          "edge_case": 0,
+          "complexity": 0
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S213",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S213.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 7,
+        "rubric": {
+          "logic": 2,
+          "complexity": 1,
+          "edge_case": 1,
+          "code_quality": 1,
+          "compilable": 1,
+          "io_format": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S214",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S214.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "rubric": {
+          "io_format": 1,
+          "complexity": 1,
+          "code_quality": 1,
+          "edge_case": 2,
+          "logic": 4,
+          "compilable": 1
+        },
+        "total_score": 10
+      }
+    },
+    {
+      "sample_id": "EX02-S215",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S215.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 7,
+        "rubric": {
+          "complexity": 1,
+          "code_quality": 1,
+          "logic": 2,
+          "compilable": 1,
+          "io_format": 1,
+          "edge_case": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S216",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S216.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 7,
+        "rubric": {
+          "edge_case": 1,
+          "io_format": 1,
+          "compilable": 1,
+          "logic": 2,
+          "code_quality": 1,
+          "complexity": 1
+        }
+      }
+    },
+    {
+      "sample_id": "EX02-S217",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S217.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "total_score": 1,
+        "rubric": {
+          "complexity": 0,
+          "compilable": 0,
+          "io_format": 0,
+          "logic": 0,
+          "edge_case": 0,
+          "code_quality": 1
+        }
+      }
+    }
+  ]
+}

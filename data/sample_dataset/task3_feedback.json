@@ -1,0 +1,570 @@
+{
+  "task": "task3_pedagogical_feedback",
+  "description": "Sinh phản hồi tiếng Việt cho sinh viên, ĐÚNG mức độ được yêu cầu ở target_feedback_level. Nhãn lỗi được cho sẵn ở input để tách task này khỏi task 2.",
+  "level_definition_ref": "label_space.json -> feedback_level",
+  "input_fields": [
+    "exam_id",
+    "exam_type",
+    "language",
+    "code_file (đường dẫn tương đối tới file .cpp)",
+    "compile_log (optional)",
+    "taxonomy_error",
+    "target_feedback_level"
+  ],
+  "output_fields": [
+    "feedback: str (tiếng Việt)"
+  ],
+  "metric": "level compliance (không được vượt mức, VD Level 1-2 mà đưa code sửa là vi phạm) + độ chính xác chẩn đoán so với phản hồi của giảng viên",
+  "n_samples": 32,
+  "samples": [
+    {
+      "sample_id": "EX01-S101",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S101.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 đúng; P2 đúng; P4 crash: xóa fail nếu node nằm ở giữa list, cách xóa của SV (line 121-123) chỉ phù hợp cho node đầu list; P3 không làm"
+      }
+    },
+    {
+      "sample_id": "EX01-S102",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S102.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi thuật toán"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 đúng; P2 list rỗng: P3 đúng (20); P4 đúng (30);"
+      }
+    },
+    {
+      "sample_id": "EX01-S103",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S103.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi hard-code",
+          "Lỗi biên dịch"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "student.cpp:5:10: fatal error: 50-best-european-generals-cleaned-first-20.csv: No such file or directory (SV include file này -> không hiểu cách đọc file)"
+      }
+    },
+    {
+      "sample_id": "EX01-S104",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S104.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi thuật toán"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 đúng; P2 đúng; P3 sai công thức tính tuổi với \"BC\" (trước công nguyên) -> chỉ cần lấy abs(năm mất - năm sinh), lấy 100 trừ ra như SV là sai; P4 đúng;"
+      }
+    },
+    {
+      "sample_id": "EX01-S105",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S105.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi mảng/chuỗi",
+          "Lỗi logic"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 sai, SV assume n là số dòng cho trước -> sai, ngoài ra SV đọc vào 1 mảng tĩnh rồi return địa chỉ phần tử đầu tiên -> ra khỏi hàm là mảng ko còn; Với P2, SV không set giá trị cho node -> list tạo ra trống"
+      }
+    },
+    {
+      "sample_id": "EX01-S106",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S106.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi vòng lặp"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P3 lặp vô tận vì không có cur = cur->next -> theo quy định là 0; P2 SV chỉ đọc vào 1 giá trị Node* duy nhất -> giả sử có nhiều hơn 1 dòng trong file data thì list cuối cùng của SV cũng chỉ có 1 node"
+      }
+    },
+    {
+      "sample_id": "EX01-S107",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S107.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi vòng lặp"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P3 lặp vô tận (không có head = head->next), theo quy định là 0"
+      }
+    },
+    {
+      "sample_id": "EX01-S108",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S108.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi hard-code"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 SV hardcode kích thước mảng -> không đọc đúng số lượng phần tử trong file, dẫn đến đọc file sai; câu 1 là câu tiên quyết nên không chấm các câu còn lại P3, P4 không làm"
+      }
+    },
+    {
+      "sample_id": "EX01-S109",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S109.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi biên dịch"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "student.h: In function 'Node* prob2(General*, int)':\nstudent.h:91:9: error: return-statement with no value, in function returning 'Node*' [-fpermissive]\n   91 |         return;"
+      }
+    },
+    {
+      "sample_id": "EX01-S110",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S110.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 đọc file sai: sinh viên assume n trong parameter là số dòng trong file, trên thực tế sinh viên phải đếm số dòng để có n. Các câu còn lại SV có làm nhưng câu 1 là tiên quyết -> không có điểm các câu sau."
+      }
+    },
+    {
+      "sample_id": "EX01-S111",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S111.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi biên dịch"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "student.cpp:51:26: error: expected primary-expression before ')' token\n   51 |             getline(sa,s,);"
+      }
+    },
+    {
+      "sample_id": "EX01-S112",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S112.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi hard-code"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 gán cứng \"filename\", câu 1 là câu tiên quyết  nên không chấm các câu còn lại;"
+      }
+    },
+    {
+      "sample_id": "EX01-S113",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S113.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi hàm"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 lỗi stof khi convert string sang số, câu 1 là câu tiên quyết (SV không làm các câu còn lại)"
+      }
+    },
+    {
+      "sample_id": "EX01-S114",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S114.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi hàm"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1: lỗi stoi khi convert string sang số, câu 1 là câu tiên quyết (SV không làm các câu còn lại)"
+      }
+    },
+    {
+      "sample_id": "EX01-S115",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S115.cpp",
+        "compile_log": "",
+        "taxonomy_error": [],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "P1 đúng; P2 đúng; P3 đúng; P4 đúng;"
+      }
+    },
+    {
+      "sample_id": "EX02-S201",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S201.cpp",
+        "compile_log": "",
+        "taxonomy_error": [],
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      },
+      "output": {
+        "feedback": "Tốt."
+      }
+    },
+    {
+      "sample_id": "EX02-S202",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S202.cpp",
+        "compile_log": "",
+        "taxonomy_error": [],
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      },
+      "output": {
+        "feedback": "Tốt."
+      }
+    },
+    {
+      "sample_id": "EX02-S203",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S203.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi biên dịch"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Lỗi biên dịch. Em nên chú ý học kỹ cú pháp và làm bài tập nhiều hơn nhaa."
+      }
+    },
+    {
+      "sample_id": "EX02-S204",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S204.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi style"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Hàm tính mũ có vẻ phức tạp, và không tính đúng, em xem lại."
+      }
+    },
+    {
+      "sample_id": "EX02-S205",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S205.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi nhập/xuất"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Tốt, nhưng em in thừa 1 dấu cách ở trước."
+      }
+    },
+    {
+      "sample_id": "EX02-S206",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S206.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi nhập/xuất",
+          "Lỗi logic"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Mũ d, chứ không phải nhân d, nên em bị sai. Output cũng không đúng quy định: True/False chứ không phải TRUE/FALSE."
+      }
+    },
+    {
+      "sample_id": "EX02-S207",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S207.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi thuật toán"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Hàm luythua của em bị sai dẫn đến kết quả sai. Sửa rất dễ, bỏ chữ int ở dòng số 9 là được"
+      }
+    },
+    {
+      "sample_id": "EX02-S208",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S208.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi hàm"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Gọi hàm chưa đúng, em coi kỹ lại kiến thức về sử dụng hàm."
+      }
+    },
+    {
+      "sample_id": "EX02-S209",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S209.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi thuật toán",
+          "Lỗi vòng lặp"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Em sai nhiều lỗi: chưa khởi tạo cẩn thận (ví dụ temp, count), hàm isArm vòng lặp for sai chỉ số nên em đã bỏ qua chữ số đầu tiên."
+      }
+    },
+    {
+      "sample_id": "EX02-S210",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S210.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "Chưa hoàn thiện."
+      }
+    },
+    {
+      "sample_id": "EX02-S211",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S211.cpp",
+        "compile_log": "",
+        "taxonomy_error": [],
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      },
+      "output": {
+        "feedback": "Tốt."
+      }
+    },
+    {
+      "sample_id": "EX02-S212",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S212.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi biên dịch",
+          "Lỗi vòng lặp"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Lỗi biên dịch, do có vòng lặp for em cho i <= cnt mà cnt không có."
+      }
+    },
+    {
+      "sample_id": "EX02-S213",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S213.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi hàm",
+          "Lỗi logic"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "Hàm tính tích bị sai."
+      }
+    },
+    {
+      "sample_id": "EX02-S214",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S214.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi style"
+        ],
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      },
+      "output": {
+        "feedback": "Tốt, nhắc nhở em đã nộp phiên bản bị comment hết cả bài."
+      }
+    },
+    {
+      "sample_id": "EX02-S215",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S215.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi vòng lặp",
+          "Lỗi hàm"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Sau vòng lặp sum quá lớn, do hàm tính mũ bị sai."
+      }
+    },
+    {
+      "sample_id": "EX02-S216",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S216.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi vòng lặp"
+        ],
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      },
+      "output": {
+        "feedback": "Sau vòng lặp sum rất lớn nên tính tích bị sai."
+      }
+    },
+    {
+      "sample_id": "EX02-S217",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S217.cpp",
+        "compile_log": "",
+        "taxonomy_error": [
+          "Lỗi biên dịch",
+          "Lỗi logic"
+        ],
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      },
+      "output": {
+        "feedback": "Code chưa hoàn thiện, lỗi biên dịch."
+      }
+    }
+  ]
+}

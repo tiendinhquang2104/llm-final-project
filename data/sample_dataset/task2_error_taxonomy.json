@@ -1,0 +1,548 @@
+{
+  "task": "task2_error_taxonomy",
+  "description": "Phân loại đa nhãn lỗi của bài nộp. Danh sách rỗng nghĩa là bài không mắc lỗi nào trong taxonomy.",
+  "label_space": [
+    "Lỗi biên dịch",
+    "Lỗi nhập/xuất",
+    "Lỗi logic",
+    "Lỗi vòng lặp",
+    "Lỗi mảng/chuỗi",
+    "Lỗi hàm",
+    "Lỗi edge case",
+    "Lỗi thuật toán",
+    "Lỗi hard-code",
+    "Lỗi style"
+  ],
+  "input_fields": [
+    "exam_id",
+    "exam_type",
+    "language",
+    "code_file (đường dẫn tương đối tới file .cpp)",
+    "compile_log (optional)",
+    "test_report (optional)"
+  ],
+  "output_fields": [
+    "taxonomy_error: list[str] (0..10 nhãn)"
+  ],
+  "metric": "macro-F1 và micro-F1 trên 10 nhãn",
+  "n_samples": 32,
+  "samples": [
+    {
+      "sample_id": "EX01-S101",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S101.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S102",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S102.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi thuật toán"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S103",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S103.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi hard-code",
+          "Lỗi biên dịch"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S104",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S104.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi thuật toán"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S105",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S105.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi mảng/chuỗi",
+          "Lỗi logic"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S106",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S106.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi vòng lặp"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S107",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S107.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi vòng lặp"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S108",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S108.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi hard-code"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S109",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S109.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi biên dịch"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S110",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S110.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S111",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S111.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi biên dịch"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S112",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S112.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi hard-code"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S113",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S113.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi hàm"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S114",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S114.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi hàm"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX01-S115",
+      "input": {
+        "exam_id": "EX01",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX01/EX01-S115.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": []
+      }
+    },
+    {
+      "sample_id": "EX02-S201",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S201.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": []
+      }
+    },
+    {
+      "sample_id": "EX02-S202",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S202.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": []
+      }
+    },
+    {
+      "sample_id": "EX02-S203",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S203.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi biên dịch"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S204",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S204.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi style"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S205",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S205.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi nhập/xuất"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S206",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S206.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi nhập/xuất",
+          "Lỗi logic"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S207",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S207.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi thuật toán"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S208",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S208.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi hàm"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S209",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S209.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi thuật toán",
+          "Lỗi vòng lặp"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S210",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S210.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S211",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S211.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": []
+      }
+    },
+    {
+      "sample_id": "EX02-S212",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S212.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi biên dịch",
+          "Lỗi vòng lặp"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S213",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S213.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi hàm",
+          "Lỗi logic"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S214",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S214.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi style"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S215",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S215.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi vòng lặp",
+          "Lỗi hàm"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S216",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S216.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi logic",
+          "Lỗi vòng lặp"
+        ]
+      }
+    },
+    {
+      "sample_id": "EX02-S217",
+      "input": {
+        "exam_id": "EX02",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/EX02/EX02-S217.cpp",
+        "compile_log": "",
+        "test_report": null
+      },
+      "output": {
+        "taxonomy_error": [
+          "Lỗi biên dịch",
+          "Lỗi logic"
+        ]
+      }
+    }
+  ]
+}

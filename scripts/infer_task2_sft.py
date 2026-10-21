@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.task2.data import load_task2
 from src.task2.labels import normalize_labels
-from src.task2.evaluator import validate_predictions, write_submission
+from src.task2.evaluator import validate_predictions, write_submission, f1_scores
 from scripts.prepare_task2_sft import SYSTEM_PROMPT, format_user_prompt
 
 
@@ -115,6 +115,23 @@ def main():
 
         gen = tokenizer.decode(out_ids[0][inputs["input_ids"].shape[-1] :], skip_special_tokens=True).strip()
         preds[s.sample_id] = extract_taxonomy_labels(gen)
+
+    # Evaluate if dataset has ground truth labels
+    if any(s.has_gold for s in ds.samples):
+        gold = {s.sample_id: s.labels for s in ds.samples if s.has_gold}
+        scores = f1_scores(gold, preds)
+        print("\n" + "=" * 60)
+        print(f"📊 EVALUATION REPORT ({len(gold)} samples with ground truth)")
+        print(f"  Macro-F1 (competition metric): {scores['macro_f1']:.4f}")
+        print(f"  Micro-F1                     : {scores['micro_f1']:.4f}")
+        print(f"  Exact Match                  : {scores['exact_match']:.4f}")
+        print("\nDetail by error label:")
+        for lab, stats in scores["per_label"].items():
+            f1_val = f"{stats['f1']:.4f}" if stats['f1'] is not None else "   N/A"
+            p_val = f"{stats['precision']:.4f}" if stats['precision'] is not None else "   N/A"
+            r_val = f"{stats['recall']:.4f}" if stats['recall'] is not None else "   N/A"
+            print(f"  - {lab:<18}: F1={f1_val} | P={p_val} | R={r_val} (Support={stats['support']})")
+        print("=" * 60 + "\n")
 
     out_path = Path(args.output_file)
     write_submission(out_path, preds, [s.sample_id for s in ds.samples])

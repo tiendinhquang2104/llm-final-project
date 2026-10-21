@@ -1,0 +1,99 @@
+{
+  "exams": [
+    {
+      "exam_id": "EX01",
+      "exam_type": "multi_problem",
+      "language": "cpp11",
+      "course": "Cấu trúc dữ liệu & Giải thuật",
+      "week": 3,
+      "topic": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng",
+        "Hàm",
+        "Rẽ nhánh",
+        "Chuỗi",
+        "Linked Lists"
+      ],
+      "learning_outcome": "Sinh viên ôn tập lại các kĩ năng đã học ở Cơ sở lập trình: File, Linked List, kết hợp xử lý chuỗi.",
+      "bloom_level": [
+        "Apply",
+        "Analyze"
+      ],
+      "programming_skill": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng",
+        "Hàm",
+        "Rẽ nhánh",
+        "Chuỗi"
+      ],
+      "problem_type": "Hoàn thiện hàm, thiết kế thuật toán giải quyết dựa trên dữ liệu cho trước",
+      "difficulty_teacher": "D2 - Dễ",
+      "estimated_time_min": 60,
+      "statement": "# Test 1 — Data Structures and Algorithms\n**Thời gian: 60 phút — Ngôn ngữ: C++ (chuẩn C++11)**\n\n## Quy định nộp bài\n- Sinh viên làm bài và nộp bài tại lớp.\n- Nộp duy nhất một file `ID.cpp` chỉ chứa các hàm được yêu cầu. Có thể viết hàm `main` để tự kiểm thử nhưng phải xoá trước khi nộp.\n\n## Quy định chấm\n- Bài nộp được biên dịch bằng: `g++ id.cpp --std=c++11 -o id` rồi chạy `./id`.\n- Hàm nào không làm thì để thân hàm rỗng.\n- KHÔNG được thay đổi prototype của các hàm/struct cho sẵn.\n- Không có điểm cho ý tưởng, chỉ chấm chương trình chạy được.\n- Nhận 0 điểm nếu: vi phạm quy định, giống bài người khác, không biên dịch được, hoặc tạo vòng lặp vô hạn.\n\n## Nội dung\n*Chỉ được dùng các thư viện: `iostream, fstream, sstream, string, cstring, cmath`.*\n\nCho các cấu trúc lưu thông tin một vị tướng, dựa trên file `generals.csv` được cung cấp. Lưu ý không phải trường nào trong file cũng được dùng.\n\n```cpp\nstruct Date { int day, month, year; string era; /* AD or BC */ };\nstruct General {\n    string name, nationality;\n    Date born, death;\n    int total_known_battles;\n    string* known_battles;\n};\n```\n\n**Problem 1 (1 điểm).** Viết hàm đọc **toàn bộ** bản ghi từ file `filename` vào một mảng `General` cấp phát động. Thứ tự trong mảng phải khớp thứ tự trong file.\n*Lưu ý: nếu không đọc được file thì các câu còn lại **không** được chấm.*\n```cpp\nGeneral* prob1(string filename, int& n);\n```\n\nCác câu sau dùng cấu trúc `Node` của danh sách liên kết đơn:\n```cpp\nstruct Node { General general; Node* next; };\n```\n\n**Problem 2 (4 điểm).** Tạo danh sách liên kết từ mảng `General` cho trước, giữ nguyên thứ tự.\n```cpp\nNode* prob2(General* generals, int n);\n```\n\n**Problem 3 (2 điểm).** Tuổi của một vị tướng tính bằng `death.year - born.year`; tuy nhiên một số vị sinh trước Công nguyên (BC) nên phải điều chỉnh công thức. Tìm vị tướng nhiều tuổi nhất trong danh sách ở Problem 2. Nếu có nhiều người cùng tuổi lớn nhất, trả về người **đầu tiên** gặp. Phải làm in-place (không dùng thêm mảng/danh sách phụ).\n```cpp\nGeneral prob3(Node* head);\n```\n\n**Problem 4 (3 điểm).** Xoá **tất cả** các vị tướng có `nationality` cho trước khỏi danh sách ở Problem 2. Phải xoá in-place.\n```cpp\nvoid prob4(Node*& head, string nationality);\n```\n",
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 2.5,
+          "prototype": "General* prob1(string filename, int& n);",
+          "is_prerequisite_for": [
+            "P2",
+            "P3",
+            "P4"
+          ]
+        },
+        {
+          "pid": "P2",
+          "max_score": 2.5,
+          "prototype": "Node* prob2(General* generals, int n);"
+        },
+        {
+          "pid": "P3",
+          "max_score": 2.5,
+          "prototype": "General prob3(Node* head);"
+        },
+        {
+          "pid": "P4",
+          "max_score": 2.5,
+          "prototype": "void prob4(Node*& head, string nationality);"
+        }
+      ],
+      "grading_policy": "Nếu P1 (đọc file) sai thì các câu P2–P4 không được chấm.",
+      "has_hidden_testcases": false,
+      "note": "Bài nộp chỉ chứa hàm, không có main; compile_log được sinh bằng `g++ -std=c++11 -fsyntax-only`."
+    },
+    {
+      "exam_id": "EX02",
+      "exam_type": "single_problem",
+      "language": "cpp11",
+      "course": "Cơ sở lập trình",
+      "week": 5,
+      "topic": [
+        "Hàm"
+      ],
+      "learning_outcome": "Sinh viên vận dụng hàm và vòng lặp để kiểm tra số Armstrong.",
+      "bloom_level": [
+        "Analyze"
+      ],
+      "programming_skill": [
+        "Hàm"
+      ],
+      "problem_type": "Lập trình",
+      "difficulty_teacher": "D3 - Trung bình",
+      "estimated_time_min": 30,
+      "statement": "# Midterm — Bài 1: Số Armstrong\n**Ngôn ngữ: C++**\n\nMột **số Armstrong** (số narcissistic) là số `n` có `d` chữ số thoả:\n\n    n = a_1^d + a_2^d + ... + a_d^d\n\nvới `a_i` là chữ số thứ `i` của `n`. Ví dụ 153 (d = 3) là số Armstrong vì\n`1^3 + 5^3 + 3^3 = 1 + 125 + 27 = 153`.\n\n**Ràng buộc:** `1 <= n <= 10^9`.\n\n**Input:** một số nguyên `n` duy nhất.\n\n**Output:** in `True` nếu `n` là số Armstrong, ngược lại in `False`.\n\n| Input | Output |\n|---|---|\n| `1634` | `True` |\n| `123` | `False` |\n\n*Giải thích:* với 1634, `1^4 + 6^4 + 3^4 + 4^4 = 1634` (d = 4) nên in `True`. Với 123, `1^3 + 2^3 + 3^3 = 36 != 123` nên in `False`.\n\n*Lưu ý: không được dùng hàm* `pow`.\n",
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 10,
+          "io_mode": "stdin/stdout",
+          "constraints": "1 <= n <= 10^9; không được dùng pow"
+        }
+      ],
+      "grading_policy": "Chấm trên một bài duy nhất; điểm rubric là điểm của cả bài.",
+      "has_hidden_testcases": true,
+      "note": "compile_log sinh bằng `g++ -std=c++11`; test_report chạy trên 8 test công khai."
+    }
+  ]
+}
