@@ -1,0 +1,141 @@
+{
+  "branch": "feat/task3-quality-round5",
+  "created_utc": "2026-10-21T09:42:12.774022+00:00",
+  "decision": {
+    "action": "keep R15; stop further training; no public generation",
+    "checks": {
+      "complete": true,
+      "false_claim": false,
+      "l1_false_clean": true,
+      "l2_location_cause": true,
+      "l2_strict": false,
+      "l3_cause_feasible_repair": false,
+      "semantic_complete": false,
+      "taxonomy_retained": true
+    },
+    "eligible": false,
+    "public_generation_authorized": false,
+    "taxonomy_floors": {
+      "annotation": {
+        "macro": 0.35420955700677376,
+        "micro": 0.4861818181818182
+      },
+      "source": {
+        "macro": 0.34268272186923554,
+        "micro": 0.45954455445544556
+      }
+    }
+  },
+  "final_handoff_review": "pass_no_unresolved_findings; final verification metadata bound by root after independent report/test/metric review",
+  "frozen_verification": {
+    "command": ".venv-task3/bin/python scripts/task3_direct_sft_v2_prepare.py verify",
+    "manifest_sha256": "d20c770aeab47a2c5bacc955d8675a581aa6ec452e2b257ca4c8f8ecfc2a0566",
+    "runtime_files": 83,
+    "seal_sha256": "d0636ee311155eaefe7ad7e43749dce2fbb403cb2f4f0753498c988cd7e7fcb9",
+    "verified": true
+  },
+  "head_before": "97b8cc608036722615bae82fbd24672ca4ed42c6",
+  "independent_audits_sha256": {
+    "review/final-handoff-audit.private.json": "126e7aa8524728052888845c40b43745ced86e149b559c0c8ca82cac9985f28f",
+    "review/independent-score-audit.private.json": "f5abeaa86ff44d23c23b0775b520d9164db3c117164edf21e99d1d3d898341bc",
+    "review/postrun-integrity-audit.private.json": "287f00233341c899d6d6b4ebbddb661530715388bcde6ace335a1af03298463e",
+    "review/preflight-runtime-audit.private.json": "0873e9eda4d182218dfaca41ec4c92830a1255c4b117b170482727bf4fdf4860",
+    "review/pretrain-target-audit.private.json": "0f9829fb4bb5a5b0e47f3cdb09c50437a48ae557e643e27521a1ab3a51c47aa6"
+  },
+  "inference": {
+    "new_arm": "V2",
+    "new_raw_calls": 60,
+    "new_requests": 60,
+    "public_calls": 0,
+    "reused_arms": [
+      "BASE",
+      "V1"
+    ]
+  },
+  "limitations": [
+    "Static agent review, no human verification or C++ source execution.",
+    "Evaluation v2 is development with prior exposure, not family-disjoint or blind.",
+    "Old validation parsed targets preserved; JSON key order differs.",
+    "All60V2reviews present,3falseclaim flagsunknown; oldV1two unknown staynull.",
+    "No L4 training or improvement claim; no semantic independence proof from lexical gates."
+  ],
+  "logs_sha256": {
+    "global-tests.log": "20744f2a64d7cf41a466710e3b5e8cac6ee567644bc1a276437507ebced12cd5",
+    "inference-V2.log": "aa17e32b45cb313010fc73fe1f70aad065bcc69d68374dc6ea2d5e6e5f0e6f21",
+    "prepare.log": "9f495ecca5c220c49988e246de76feb9457f5b4e824bafa679f6e653d9839f0d",
+    "scoring.log": "90f38b945fd7836d966120fa50d9a4ddba6e6a54f740449aee29c6815ffb7fff",
+    "task3-tests-before-model.log": "0022cbb88e04ddff593e597acfda7d1868117d24df81dbe3a3689bfe43ff6f63",
+    "task3-tests-final.log": "06a01f8e62dcfeb7495369d9237c4859dca201a34032c94877181f76366859a9",
+    "training-console.log": "ad2aa32ff17f0cc094a682fc4ffaf5834e1b52191518dc98238c7a496b99135b",
+    "verify-final.log": "1f7d3f329782dbc921963bfd940011f6f3be0857804ed7cff8577183d197d438"
+  },
+  "new_tracked_files_only": true,
+  "preservation": {
+    "all_unchanged": true,
+    "baseline897_checked": 897,
+    "changed": [],
+    "inherited_baseline663_checked": 663,
+    "public_predictions_sha256": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+    "unique_files_checked": 898
+  },
+  "private_analysis_sha256": {
+    "analysis/pretrain-case-analysis.private.md": "178bd568e54cbaefa81a0f708b8421bf6a3a157da083d7510f571f5f7e591c14",
+    "analysis/v1-error-audit.private.json": "b7a946339a9ce74d4450dfe85276feaca384cd82738599abe17107c4925670cf",
+    "preservation-final.private.json": "e88b01509e3b972153b5b20388e270eefd8e9441ef4f04d1c24d7ca069a7a70d",
+    "review/ledger-BASE.private.json": "bf4a00c3cab0eea7eee04154b7fdd30e5634f41e37890c139384dcb45547a300",
+    "review/ledger-V1.private.json": "e4fc47bb8d7f4b6fd26517d7bcef4fb66b89d39d954979deff0cfcd19d2dc397",
+    "review/ledger-V2.private.json": "2b999832604ae36f75e3639656553b51c6b2cb02af239a217c9f47860fdba3c6",
+    "targets/approved-sources.private.json": "5832322141cabee1a194c0c004a6edf05b34d17fd5ccb84242543a7036185d79",
+    "targets/targets-reviewed-final.private.json": "e6e9df17916f8c072175ae7dc38c8c70f21a1150cb571314098678fca765721f",
+    "three-arm-results.private.json": "885629ce8e3073cbd1f4060b540053f7911f0d4e35bdf385d684d8842532c1db"
+  },
+  "production_changed": false,
+  "public_artifacts_sha256": {
+    "configs/task3/direct_sft_v2_20261021.json": "95cd7a8f266ab2a02a3ec4bc7a26cebe1e00984ae48b3685a2e25e1248993f30",
+    "docs/superpowers/plans/2026-10-21-task3-direct-sft-v2.md": "336bb9462b759bdf2212fddb8fbae35e3f96de61b3d7f37fc4ca4caf989c1695",
+    "reports/task3/TASK3_DIRECT_SFT_V2_FREEZE_20261021.json": "c38c4fcfe6c9b2a15644d16d39714dfff8a3110242fd9f94faa7305f0b2ef449",
+    "reports/task3/TASK3_DIRECT_SFT_V2_HANDOFF_20261021.md": "94e75fad8b4f6a62e14ff41cd1c4556db916b82067850def9eb911feb50079cc",
+    "reports/task3/TASK3_DIRECT_SFT_V2_RESULTS_20261021.json": "6b8d6bc59c925b1c080da4a6d53de9aab58aa21266f8ab3b9b2cc8084d9eb905",
+    "scripts/task3_direct_sft_v2_infer.py": "6c7e18241590067691d905352ff355c38827c36bad7bf5aaf380f0b88009bcba",
+    "scripts/task3_direct_sft_v2_prepare.py": "2745b05c0aff9dde34fad26538f53dedf36b55cc3f44f5b2d43a5abb63ee7cae",
+    "scripts/task3_direct_sft_v2_report.py": "7d717b6c41a8b85673baf872fa3b7f18959473faa9c26ab875b1829af75f5897",
+    "scripts/task3_direct_sft_v2_train.py": "470cc034bea07dbbd6abf2fbf10f1b0bc8e4cf2550602e07d4e8d0ed2e5e187f",
+    "src/task3/direct_sft_v2_data.py": "b1407c4109d9722821bb10ed71a1bdf5ed73099a2844f2ded6f062d402d67560",
+    "src/task3/direct_sft_v2_training.py": "96580bf53f90d82c944fa5e812ca2574e6f6ee4ccaf9847678580704cef736f2",
+    "tests/test_task3_direct_sft_v2_report.py": "2c0e4ab0ea4a136f5e983d72b8df72d4ac82babf1ddf31ed39c44a7a7d888448",
+    "tests/test_task3_direct_sft_v2_runtime.py": "1909af629da64ffab57e3d372c8d37fa6f63113b139f6fd22f46a0c76a30fed6"
+  },
+  "public_candidate_created": false,
+  "push_or_submission": false,
+  "tests": {
+    "global_pytest": {
+      "command": ".venv-task3/bin/python -m pytest -q",
+      "errors": 2,
+      "modules": [
+        "tests/test_clm_zeroshot_task1.py",
+        "tests/test_task1_clm_probe.py"
+      ],
+      "reason": "No module named sklearn",
+      "status": "collection_error"
+    },
+    "new_artificial_tests": 30,
+    "source_cpp_compile_or_testcase_execution": 0,
+    "task3_before": {
+      "command": ".venv-task3/bin/python -m pytest -q tests/test_task3*.py",
+      "result": "1019 passed, 2 skipped in 17.32s"
+    },
+    "task3_final": {
+      "command": ".venv-task3/bin/python -m pytest -q tests/test_task3*.py",
+      "result": "1019 passed, 2 skipped in 12.77s"
+    }
+  },
+  "training": {
+    "attempts": 1,
+    "optimizer_markers": 1,
+    "optimizer_steps": 144,
+    "selected_adapter_sha256": "7e7fcf74c2fb22e4360cd3880e4beb68daa50f7661abd170a3c37cdfae88cd51",
+    "selected_epoch": 2,
+    "selection": "fixed TRAIN-only internal validation, not development"
+  },
+  "version": "direct-sft-v2-20261021"
+}
