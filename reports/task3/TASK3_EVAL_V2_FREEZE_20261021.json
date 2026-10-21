@@ -1,0 +1,2582 @@
+{
+  "archive_members_sha256": {
+    "generate-dataset/exams.json": "9e9150ed65f47efbe5f2bebd2b55c271265b1434f46fe5a29288e1c686eaa17c",
+    "generate-dataset/heldout/exams.json": "bb0490bd55632c427c1e37160cf2ce0c1e45202d618d617d60f466999ee66261",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0000.cpp": "ef0b625073f9717ad8c6387b9a0cdd07bc3e65a74188c756b354d4df1ad96894",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0001.cpp": "b1b3d773b1b033b695fb02101a081235c410efd86bcdd31ca43d004e258635c7",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0002.cpp": "190e095fa1544e225e9f3bcacde508350bd005db205e897fbcb778b9f3d94eab",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0003.cpp": "1213fe9d7fc5ba72f3543034f9318fbf60a9f884c9618bd9b982801e82a99888",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0004.cpp": "3f98a7f48844d4862da86e6a0c35d915247ea69598e6fd2d2dcd9cacef535a85",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0005.cpp": "f8e0c49c999bf791439793c81581059116507ef8f386e7bd6636cc9ca69e6dae",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0006.cpp": "012dbc8fa510449e38fd9f3f8765642fa746f4dd8dfcfdf94befd3fb5b1667be",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0007.cpp": "62a71ae5e28c1dd15eac62265a823dd6759e37bafe0e176dc423eadd96d3d544",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0008.cpp": "564e1019ab02870c6285a163cb55d057d79a533397d4c912dfa8e864efbd11e6",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0009.cpp": "18b5c567968ac05660012e541919b13feef5ad0546a135efda96a200f9f8fb12",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0010.cpp": "915878c7554731edf24b3c4ef5cebe3d473ac7436a07d252309382d3f91efb6f",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0011.cpp": "dbb893deb79cc428d08c05586028f949760a86bb97f7ca8da726eecdb19ab50f",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0012.cpp": "4101be36edbea9b99ccef3498b1d1c01e8c8ff075bb0b37539b1446c45a3a630",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0013.cpp": "466833fb1448cc8f5961b0e6ede9f151256f8ade0eb1ba4da48f3a85943bfc28",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0014.cpp": "2b35cf63236d9573007d22001ac4aa787f2039248aede64e2ce6e7697dfc449d",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0015.cpp": "564e1019ab02870c6285a163cb55d057d79a533397d4c912dfa8e864efbd11e6",
+    "generate-dataset/heldout/submissions/SYN-HELDOUT/SYN-HELDOUT-0016.cpp": "446eee550cf00e9aabdd627d0b5face3207560ebbce2d51c3d93fdeaeffc7392",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0000.cpp": "db8547633b8b6f9a95370c4357ae4f084857e4f7e6fa1177f7e8572cf0d91ef7",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0001.cpp": "fd618a257eb3a8655630eb6e312422465ec41f5ce848058c9d4e27c7ba2e96bc",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0002.cpp": "98695b913e270422597d02bbd46a90cb01bc4802c7d9659d03567927fc7226ee",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0003.cpp": "aedd89fdeed2081320d60e823af50bc5360e03089ed969159b11ef9d459cb5cf",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0004.cpp": "46f758f1431a82e8c980dfb7179d63ab75152054cc91a6d2753ea4cca95bbf3f",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0005.cpp": "873583136e6b1f97e276718aea49397c907edbba3894cbf8b79cc73f163f7cb9",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0006.cpp": "ed5595758315d33bf96106009e74a60412653e47b6ba43f3fdbc5bb74ab0d928",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0007.cpp": "b889c61139316133e40ad9c3987831266d87ec48ab19661d2f3985f8074cba97",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0008.cpp": "ae9486b9516c96d1c140daf290c04fd930ff406ced026657ab5cd22a24c7cee4",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0009.cpp": "1d66f434fef7058777993742013a239bb40c55519151d3459ff9e68804a11f04",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0010.cpp": "57e6dc328bbe291618d5c23cd33b06d2bbf1ce83a778ca9ef7bafa03c54e74fb",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0011.cpp": "0332b6b8274a8e466472495ac0076692c9caf7308433bd6d3b3a357d08a43b97",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0012.cpp": "199b29bd23074411f30f95aa1201e9c5c8029f38cf2041bc414732eebbbaba65",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0013.cpp": "4fbcc4d0fc80c810c2263c73f998af415e6df20dd2b70241ca92bf9026669b5c",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0014.cpp": "30c7e85b741325fc1f2eea02121dbdb5788a0a02c843d9e7df3d83ec7d39eaf1",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0015.cpp": "c75b81c01002c14b2d56ce313bb0d64ada74aebe992865ae8aafe89b4f7c3b08",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0016.cpp": "90f77362c4f485464629e576c5b0b2d95d09136b744246c4e554c893ebef9d72",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0017.cpp": "450d96cf0bbbf98d948334141fc815160339cdda664df2ec54caa0194a4d5734",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI1/SYN-HO-MULTI1-0018.cpp": "df15796af0cbf0a7bbe287d7490af42e69636760fda178eb4756bd706723f24a",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0000.cpp": "648adb94da2d5765f402cbbc90557f28dd0854e8f026cd785e0d0815aa0e7659",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0001.cpp": "9142ea6204d4f1dd6ef03ca8e6ae886bc57542a5abe5d65627d8271ab449a60f",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0002.cpp": "90483dfeecc4bbb48f54137036f5681e9d95beecfe31e3a01d304aaa88f4b5c0",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0003.cpp": "61c7df51cd0558a92171fcbacb14a0587a135c956d84fe86757ee623224191fa",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0004.cpp": "c17ac09dcc1d54e1c2494069fa277de513f210794559a5292a5773297c81e658",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0005.cpp": "b261740480cdf6ddd62288b3bfda074408d37853b032ba3963581fbc982b674f",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0006.cpp": "82954d2d5b5deee294c79a4a4a396a0346fc52c03864816f01de6b97a7443235",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0007.cpp": "3e6997ce0146fb11e2bd390c5e263d0a1034c4973a16886ef2d71d3d94d2909b",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0008.cpp": "bb7eb4a7dcb7097106b62fb926bf1dc81f4072b9ab67b25b1e25330bf97161b6",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0009.cpp": "116365d591606150ed4be59c7864e545022ef33cb9eb47d4f5c16ca4a2a6857f",
+    "generate-dataset/heldout/submissions/SYN-HO-MULTI2/SYN-HO-MULTI2-0010.cpp": "a7529cd27b1c9930f82806eb6a6fbcfdde874d4906f2822de2437e29a24a3d18",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0000.cpp": "5a2e32f7630296275525065d89ca14e369543d8fd6684d9e3c5bd7a442658ac8",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0001.cpp": "15807eada98999f85e877c57ed14af5c4cca34a04078597a10f03095b968aaf0",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0002.cpp": "04e4ee8503d7425bd7042051871b2dde99afe9e31999beefaed6a619381b9fca",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0003.cpp": "23e132a7346c29e00358b16c3d33e1ee6200dc6b168fd32be97f08845a5b87f6",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0004.cpp": "5f62edfd77ce4f1dbd2f9d0bbc3a3bbbcb14f699b21687416f0dffbfea290433",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0005.cpp": "6e548545a8d64ad9226c0b53792a1d1cd34d1cf16aaeae4074dac7b97bbed3d4",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0006.cpp": "c14ed0bf6ce21cc403e2c8be228afc4ccc385acca70b0641bee441a8bc2d9ecd",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0007.cpp": "32c84cdebda1eddb49349af09a5979c61a99c37fd7316b1a83b3f049b956b089",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0008.cpp": "32c84cdebda1eddb49349af09a5979c61a99c37fd7316b1a83b3f049b956b089",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0009.cpp": "f12ba10513b82230e79a595665b10867be6346b4eb16ebf5c0e3e0ed8269a728",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0010.cpp": "39b17e5413be617cdb0afc5f72a6898b24f731b6614e9c1ca1d9252e641193b3",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0011.cpp": "b77465838aa92ea49470d7faec8f794d2ad199e898fc7fa98f4c2f34ed2b074a",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0012.cpp": "5f9778b506aeeac35368624d2f08f21d9fd6b79a9d1d5b94649d8656afd261b3",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0013.cpp": "76cd7aa4e7af30bb36abf6e9842075fed1c81de4d4ebc0e4a899d73b75146565",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0014.cpp": "e40d3fa7e76a411c4b76c10786e0c93f79ddea782382d8a7e467d496a900de7c",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0015.cpp": "e815de2f62a71f3f94229502a782b7d61fb0bbd461a94b05f075b57fcfc15e5b",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0016.cpp": "55823d5ecf3794551e5cd93e5dad9f046b48c61da2bda0a4f21a7c467e6df1e5",
+    "generate-dataset/heldout/submissions/SYN-HO-SINGLE/SYN-HO-SINGLE-0017.cpp": "02e0bc583e2b7365e6cddead2b632c539ea9b054d7ed6b67db0f1516a3aab340",
+    "generate-dataset/heldout/task3_feedback.json": "e875c3ea534c6dc7e7ebf1457a54856584c38f5fa55c9721824607240accdfaf",
+    "generate-dataset/label_space.json": "056a4d1a0ccfd60688b43efdf5df64a4c1310e3c6f1d99ab813691a2da27a9dc",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0000.cpp": "ca826e604c1b98374de352bcf314391a9e4e785d43164cfe775ba388e25c5c14",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0001.cpp": "41f8445b46b8a5b3b5a821353eb1d673c4772c3c431e153ff4ba60045c5b8efa",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0002.cpp": "a12968f088417d3d5e80bb18d7610a8fe718d6ec7136418fea4059fc8dc778d3",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0003.cpp": "88dff15030b521e6b234e33485ccd42db11d47b4821dfe7e6ac51911f7e9284f",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0004.cpp": "88dff15030b521e6b234e33485ccd42db11d47b4821dfe7e6ac51911f7e9284f",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0005.cpp": "9115c05ddbeeade9f28088d1f1aa5fc0b537068a532c96877e5e059875ceddf8",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0006.cpp": "9115c05ddbeeade9f28088d1f1aa5fc0b537068a532c96877e5e059875ceddf8",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0007.cpp": "7765dd1ffdbf6b3146059022a16d8aa9ceaf01d83771368209830a64e2127412",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0008.cpp": "7a75abb7827ee51ddba1a1e1702b6236430ee9e48fd379b8d305b6f90ca4ad25",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0009.cpp": "89a07689af21a4068694bc21c305fad0f337589a9616e50766cc769ab6f8249f",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0010.cpp": "a159794210c09c68ef3300e2f0e8987c4c14d0074c3ba9118e9b7e412272481d",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0011.cpp": "5266f76515625078eada112c7a817a7c29e62b536f0a2b3d20e1806ae59c3703",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0012.cpp": "0156b42f871993fee9e885f4772fded48b2f9fe028e6aa7af854e583f8e9be47",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0013.cpp": "251349a56202baa713a6f12193913ad38f2536cf81823333c3ee7777130cb016",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0014.cpp": "3cdba71ade1579acabdb05913ef808e8778999b6b78384a3e3709480cd60bef0",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0015.cpp": "3cdba71ade1579acabdb05913ef808e8778999b6b78384a3e3709480cd60bef0",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0016.cpp": "0c7d8eed18c929fe31372c963fd91442f9581e8f47b1046c218740c28b13d7b6",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0017.cpp": "fa2ae0f642179bce6e1281a6b08028f0c8f2500f248c5b920445152d8f53c1ff",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0018.cpp": "40093a03ea9174d989255edf9106a8aa136f303488b46c67ceefa1660d30f2bc",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0019.cpp": "13a92939c510d2092414eb639a57f9789d8bbed6fa139d1ea8befcf343c087b6",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0020.cpp": "d68c7fd49b214bb0e40ad1f2636cfc6ad3fb77306c7f083ef3f476f47654d704",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0021.cpp": "e3f29d8b72461b6ecf61dac7e57913955056ee86d32bfc405e5a02de69355b33",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0022.cpp": "65b769ac65f7716089d52f25df320f51336268edae121cd63337f417104709af",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0023.cpp": "65b769ac65f7716089d52f25df320f51336268edae121cd63337f417104709af",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0024.cpp": "08460e4d52ff0f83a30b7078eabb6692582de6760f83afce7f5c87db0904dac3",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0025.cpp": "3cdba71ade1579acabdb05913ef808e8778999b6b78384a3e3709480cd60bef0",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0026.cpp": "322ac2aafb85c5a193c840cac560f4eb07ae5d9283003db80e8f6c4a8f0288f2",
+    "generate-dataset/submissions/SYN-ARM/SYN-ARM-0027.cpp": "952023d704a4fdd284bd52c98d21002d535fc636cf26ef86291e1df9dc0d79cc",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0000.cpp": "b86af829e299cfe56847044bedce1be5118e195f911cc0dcc653f9df9586e15c",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0001.cpp": "a9ccf6452dc2a36b34f510629789ef25587723302fc76d9e2a685f657fb929a7",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0002.cpp": "a9ccf6452dc2a36b34f510629789ef25587723302fc76d9e2a685f657fb929a7",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0003.cpp": "f0aeff62c3655f5adbf5de3322afa4a934ec1ccead4a0961ae42c2defb82ee2e",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0004.cpp": "b37a5e03fbebc3a889692ed6611f2516ab59ffb9e9b94efd482f46470c527dbe",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0005.cpp": "fd82c3a6efa249bdfb863309e302ef11362d08f6dbfa5bed2e7c880230bad19f",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0006.cpp": "3016309caaced63cf7e55027d9a9c4ce96b01f42b376837fac2f8b4627e46afc",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0007.cpp": "9582f397cbf522a9e14a30be61289421935519e5008984b85619cab37a1cc958",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0008.cpp": "e578b847a2eee6f74ed057df7a1f7cb6ba3029dd396604485a63a6753f619d6c",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0009.cpp": "dae21425775668266eac5011c0e84aa3f7fe021abd7df685f4aa6adc877be776",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0010.cpp": "7b1090cc74f616e086c5aaec214b9b6068b2d089117ffe21908825c18279f0de",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0011.cpp": "2424fa25d78b1614ef0f1400cb32a715c63dd4b4c230f2e76962407f847ccfdb",
+    "generate-dataset/submissions/SYN-BASE2/SYN-BASE2-0012.cpp": "2424fa25d78b1614ef0f1400cb32a715c63dd4b4c230f2e76962407f847ccfdb",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0000.cpp": "40b05f4d6c286b6a3acf5e72d02c81c0b1decd6bc73170ec313fab61666c7a7a",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0001.cpp": "7670139b910d4473b2153a39f082b9069dd533b4052830bd1ee319284ffc8983",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0002.cpp": "aac63d7fd9309c6bd0ee0f367f74d5fa1d2cb9028bfc84b65ab243c8bf233030",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0003.cpp": "66242fb64bbed1dd304979d7f38813911769620cf33fe04ba67db71d495ba44b",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0004.cpp": "d468ea344f84730419ca3188c37fb01f2557044aa9d1340f98c02aec87618a8a",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0005.cpp": "a8a14a6dae833e2665cb598ebc8b18f68e05a49e4db4ec5da67dd92b7c499b54",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0007.cpp": "36f5dadc155d1f6ed1815b0ab7ca3d3bdfd2645360663efe22623d6082bcb7ff",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0008.cpp": "2da1a83dc40b682dc3e2877b21286b855539c062059953a8245eb9f5becb223c",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0009.cpp": "14c689c3c74f254e08e840b8f573b64ac5dd494168444f5458656ae0d3297b59",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0010.cpp": "1e531b9fe4d5ed5b0b8fba2f54505bf48b266516d710356d5a954f1398409a60",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0011.cpp": "4a0f6035cb52a2aea88ad771b28b9a2453ea9ad96d01d6c6dd71349be798de8d",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0012.cpp": "118a9290a6c8d5790b2693e452173ed3d683f18d6d21b6331bfa33daa03d7d3e",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0013.cpp": "9444b0712b927efcc5cd56b866a9301f2e59434a7fc52c3c9ac7feedf75ab653",
+    "generate-dataset/submissions/SYN-COUNT/SYN-COUNT-0014.cpp": "7413bfa3180c6cfb374a196cf0569a2aef7f9b84e9afedc321b0e4e6b7f28955",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0000.cpp": "3a131a541eb605b891f14145cfb9155740eab3f3d6c90885ce8d076101111773",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0001.cpp": "86d1b6763674bdc2c0db5b0f45675948c879f201eba2afb45eb2ec7584910475",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0002.cpp": "45ca234bc25dfbf5e8bd1d2d49838d694f802a0f564509fd3ad2adc7ab20be8c",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0003.cpp": "49b7ff522bb23842b4191370c4f901d456cbf90345d104a8e6a98c4c13a109bc",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0004.cpp": "a5482e4676c23b94865d6814e8e6dc74a0a88094acb12867976a9dd44da5dc7e",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0005.cpp": "ef46d0dd04461b838659fc2713503317940b8defbee1ce8d1f346583bb23e489",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0006.cpp": "ef67e090de869fd9259ce36fa4a221ec5428f331113977fabaac9ecacb734b5d",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0007.cpp": "597c38bf652684dc7f1db4f4bc3921ad4b38bc8e5fa7add0e75934eeb5236dfe",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0008.cpp": "f3f705c44c502b4cb3a5e7846e319ee92068b9481d83dd04a704f9048f71c510",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0009.cpp": "9c33632d518b43e892ff08569358dbeec263c2efe63c114e5ce29825325089ba",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0010.cpp": "dd711d9b2dba96224c8b1762588e7f965118b2cbe6a93c223dbb8c15124b87a5",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0011.cpp": "d2cfdd80965909cd34608fa113eb0843cb07db5184e0dcce977033ff046de423",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0012.cpp": "6c3f0255b48ccb23550154e6e8978218c3d8393a4aef3cc81962cb0746746747",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0013.cpp": "2ce85b05f0e102949157e72290f214eed17ae51930dccf64676dac1968a91abd",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0014.cpp": "fbb10c3daf3278f433395109db25fc004a89b52caab42dd3f8f88802b29b5650",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0015.cpp": "9afc0902756cbe49a0c9e5b2e9472de6d9aa7a79982cd7f6aeb2c2b0d9f7ea6e",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0016.cpp": "18c760e99fc21ed99d194f86b695df9e3230cde173f827f28b6ffa36f91216c7",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0017.cpp": "a5f94089cf9bf05e6d163568956b4723eb497bd0cfc067a5db18dfc257c06d25",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0018.cpp": "474d0bff52fb842cc2e1ec906b776bfe5f0fefe082c610321241af388a4a0fbb",
+    "generate-dataset/submissions/SYN-COUNTEVEN/SYN-COUNTEVEN-0019.cpp": "0733bc95ecfd237615676dc4f1fd5e44f7f307c65ae84b844c3db589fbcf8187",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0000.cpp": "63e24dee0990d796d10a6e9ee871e1ad1e2cf063437fb6558b3041a44e1796b0",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0001.cpp": "7761cd6465f49b9fdfafbbb9a5d3c7964fd765cde7a6c3d69efa036268833e35",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0002.cpp": "38354c9c411e9494eb65f36c3301970b5c7d4e27d0ba28c970962395aec80f2f",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0003.cpp": "c68c92cd4d0583ad2ff1f4c99570e2e64c2f4791ed0722ee6ef02da50696cda0",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0004.cpp": "8f934bfd4643fb19c06f9735d2987ae8269279f64dd5979a532ee658f9619ca2",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0005.cpp": "4c358f50a005e98b0848b44ecd14105f51f33c9292f263c16a966c15ac3f8517",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0006.cpp": "ae4c62d41b833cd03c19615a97c152c50e9e411f0592f6568f6e46033f30a1e7",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0007.cpp": "820ec7817761d9a52a44c601cc0deae1fb5ec1382efa5b9180b205926f401433",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0008.cpp": "bf48cf77e4c24e19fbdc73644a10c14bbf90a7423f292550757ef3fa8ff39fb0",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0009.cpp": "4e6d1f7a6f1ed1ef0fc355e7dead6a928a3d49727472a7fc7e94420df6dcff55",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0010.cpp": "d0b47c1ef49d83b3f19f84f3dbf20a518e7d78e7f84057502368fb2c2f5934d0",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0011.cpp": "92510f04a431d743d8d5db3ad3d22ab0387467faf68d7c39d890866120be2da7",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0012.cpp": "a1e2c65ea8007dd978020c91f74569f9dcab2cd65397157a25ac8edafa118887",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0013.cpp": "935b949784a1bb585dc9b0958765c6fdbb7694e186ba7e1797dc1f4491735e8a",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0014.cpp": "199b29bd23074411f30f95aa1201e9c5c8029f38cf2041bc414732eebbbaba65",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0015.cpp": "199b29bd23074411f30f95aa1201e9c5c8029f38cf2041bc414732eebbbaba65",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0016.cpp": "de691aaf31788569aada975d8f729b1207943cbdbba7e872d50b0e61cdcabe51",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0017.cpp": "9fdfc162fb02957f19bac59821886d2cb2d7e4b1653facc5bf7af694f57e1239",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0018.cpp": "30c7e85b741325fc1f2eea02121dbdb5788a0a02c843d9e7df3d83ec7d39eaf1",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0019.cpp": "f108f670dae94994d95b05becca9ee1a0fab2123d6199a1f4c1f386271f75464",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0020.cpp": "8fe70c1c44975dc0d28a367762fb3e6889494b5ae9974c4a3c86fda1a8e14588",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0021.cpp": "04338a03a61137b2c6341ca94c2c6c5fbae11ae37d1ef8c4cd554c27670d2ea2",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0022.cpp": "c11f5c216602f30710526e757712802e9a85eaa80803930629e82f8bbe5809fd",
+    "generate-dataset/submissions/SYN-COUNTGT/SYN-COUNTGT-0023.cpp": "2c256805890ac306a57ea477485562bdf526a4b03ea1669b8412557f63b2ec07",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0000.cpp": "c2430c2d34b3e602b60365e1b8300d8f5de70f758499ce71295bfc76832447bf",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0001.cpp": "420513e1b6076d7fb9bd92df3ae8db35548c08f74955af9e9d75736d65520bec",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0002.cpp": "5bf53ff5c8c14c637ce228ae1046e38f4224ade563a108dc0c3c2a16d4b13145",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0003.cpp": "56655c9bc12a9daa1b8b3cc08d3097e6b7ce192954b0842bf00706f9ab9ed6dc",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0004.cpp": "5a5d0039196b99b9c6db7a02a04bc3669be353ca49a0344b96e45e3079b866d4",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0005.cpp": "5a5d0039196b99b9c6db7a02a04bc3669be353ca49a0344b96e45e3079b866d4",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0006.cpp": "226160b3728ccc524f2a601f33c81fcb48b7911a87b6224d3cfecbdacf4822fc",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0007.cpp": "7c83d5e6b9e45a36af60c893d49e2c5b37627b586c08e5da7c21126630074430",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0008.cpp": "02f26e87624a22a80bc1fd934d7aa519e8321c7cc5b5b1073f3dd883c0795c56",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0009.cpp": "caffc2538f2e95fa7ffcd3808c3b8b2437e5e8c09d4f39020969c830a6474445",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0010.cpp": "104a8a8a03d32f8a6b0e7c8d94336f67553601e0716c2ea9594ae93916378ae6",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0011.cpp": "9923c942c3602615365efcd16ada08dbb772c8044be58f4fd5ca64e4a4f3acbc",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0012.cpp": "a197943bca1c7270b7e2dd589b7e8e7f7f7c08399be1663baa6177f46e564976",
+    "generate-dataset/submissions/SYN-COUNTUPPER/SYN-COUNTUPPER-0013.cpp": "5643d07af5d76c1a34f137ed501410cc63ae9bdf92ad2cdd5017b491d4bb010f",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0000.cpp": "b09fb749539e2d8523eb28103c4a8680b9ebc8e8b18f304960a1aec53a96484b",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0001.cpp": "e66063e710ebe5858102a65d3990bee328183fd66d059f0c399747ecbe7109c5",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0002.cpp": "3ac3e6444ee10768df4414ee6cf3d14c8fe6d1fff1b0e977324623ac96edb93c",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0003.cpp": "82d832c29a0b5235332ae3b3af4643f79503d74bf193b51ec0b597d0c7c3f2ee",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0004.cpp": "3103a777ed8f99f3ee89721575c9c89f18842a5798899b5ac71747a4642a59bc",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0005.cpp": "bf7de3187a67876e336c683f7e461854b4182c329e4cfa3b1852272381e72f6b",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0006.cpp": "3c7b47fe7ccdf1b78429bbca6fd8cf35cf3c139fb3cdc67eb62f3d5d5e3864a1",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0007.cpp": "340df844428aac1ddf122129248bd9914e7b44f68c0e62840ad2141a1c026950",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0008.cpp": "bfc42b0bdc7c36b2962abc688cd3f84d845c002df4afb1ac6e4a5521b7823a35",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0009.cpp": "f7b84b74367e87d866bad166d1910ec4f35a94b80a359fe6872d3aa8b4817a5f",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0010.cpp": "6e6ac68d81ccde62353dcdc6795d235e24e54d1c341e5253382b41e6be3a738b",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0011.cpp": "36a314054c41b6387b371d37ad86c1d9fa42fe888f0f01f001640b016ab3c176",
+    "generate-dataset/submissions/SYN-COUNTVOWEL/SYN-COUNTVOWEL-0012.cpp": "dbefb03228c6ca1b18388412fb0ace5123c12ed74faa6060797d78cc1c4368d0",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0000.cpp": "54f0589ff0f73d4927e7e1f120431876d826a6d37a6391817744a72adcf64abe",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0001.cpp": "86044603e4beaeef81a14b43e4758e78980c8a4d1a7918e76b78f93e69180892",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0002.cpp": "efde906b33b1eb515ca8dffe31f13e41b83b698ad658796fcd1172a6e34f8eac",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0003.cpp": "7cf0e2016be4435ef9abca7a3d373b225d78db4d5302e5420031238c006fb848",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0004.cpp": "49e545be1221b2527fccfbecce8dee8dc144b315672da14a29da90281aec1f2e",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0005.cpp": "f1b77f2f9b0170793cfb0378c26e51b7e2a4429c314f2d07a86dbea852a6e746",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0006.cpp": "edea2140cd39f778be955f2fc44b2ebe674e6d491f62e211dab0789f1b8aa3f1",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0007.cpp": "18ecdab857da4e736c94b842af785cadbe198c63f185e74a12fd377e659424a2",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0008.cpp": "14d8ad44bcac90549ae040d97bf72c239d07252b8e0bfd9e5ef1725f481c0bbc",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0009.cpp": "93ac9455c489ff0d368fd128c414951fb084134433d3eaa32016c7f4838141ee",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0010.cpp": "4b9de4f9744a7f4f6e7f0f771d34322304239573a16fbe381a7c4bcc4d2ccfb4",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0011.cpp": "79cb238393ef30a9d8706cabf82a8256e65730fae33a9850bf52a58abcf50ae0",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0012.cpp": "64b28048927262b4e22f9b9909e842ad4ac1e31d3824c0f8e300e6d4bcd78477",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0013.cpp": "0ecb93d68f86b829c40eb9d2638f1c19de1bb11d5a804ce9a791e631e9fab4bc",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0014.cpp": "c8ce65d93c81c9c1f3f362602ada62534d1fc92333ed56fdaf00b08c75e6785e",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0015.cpp": "d4b03a802d3c0c4d6eaa0800270e59262c2323a9a253c68987cd45d4554132b4",
+    "generate-dataset/submissions/SYN-DIGITSUM/SYN-DIGITSUM-0016.cpp": "30516dccbd5b5054e7665b11071962251096a3d353bc7a85b2e382d5ba06a737",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0000.cpp": "608ec29893b8a118d7d0dc33d233b748528c870a3943f648f2117db89ad7a39a",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0001.cpp": "6ad461ef0b8e0095e0b45b89aa2a84082ee63c8bf9672294fe9cad307301fec3",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0002.cpp": "9833e475b6c2ce7d73be74efcb4521fe29bc5b9227dc7c029dab92efdb762088",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0003.cpp": "29dafddd7f1244986cb213a917fd9bca48f01ad84abad2efad02b395058d0c9b",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0004.cpp": "1df9548e0f07177c15f4de9329f0cde61d5d773fced572f768ca108dab0811c8",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0005.cpp": "1df9548e0f07177c15f4de9329f0cde61d5d773fced572f768ca108dab0811c8",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0006.cpp": "f1007e5c07d23a5bf33e892d502b68dd281c407ebfe0ec66b0e04b5f10851c3a",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0007.cpp": "34ae1c00033875a31c99d28b453b4c64f971d229140551a86f2cbc857c6c6cbb",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0008.cpp": "0db9a274fb59ce2f3699edd72912ede92521ee4a88c231cb6722cc4db0c65be8",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0009.cpp": "34ae1c00033875a31c99d28b453b4c64f971d229140551a86f2cbc857c6c6cbb",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0010.cpp": "e7eeb8b41fbe91fc6b23362c15287bfdad9f8b0d91fff8d5fb903d966bb3ffc4",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0011.cpp": "1b4933e70f9d605f78c9caa47b46d1513eacc9d501680a2ac749e685b85a1e68",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0012.cpp": "f98624563c2754ba41e35a0a05fe2930eb17b920c4c9b73b13c48ca9913508f1",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0013.cpp": "9563c55fd4a2d83fd47f5e43306161cc1cab25cb6e4c1fef28c9a4fb68f57fb3",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0014.cpp": "3799cf47b8434d71ed314badcd0caa242db6f701e95b1fc43b43bc090084b82c",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0015.cpp": "872d8aeaabd2ab2db351f83a2ae14e9f985e8bb0734a69678747f692ecd4ac4d",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0016.cpp": "34ae1c00033875a31c99d28b453b4c64f971d229140551a86f2cbc857c6c6cbb",
+    "generate-dataset/submissions/SYN-DISTINCT/SYN-DISTINCT-0017.cpp": "111724d280b682063bde7ffdf81ccf2a77b11b376b867cb7360b72281866efa6",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0000.cpp": "9a22087faabb703501fc18b3652b2fd800ed30ae97e08a35977f491a3adf7784",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0001.cpp": "5e2871829de9c91115f92d413dcdb8da3b25110c24621559db124e467004e877",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0002.cpp": "4bb4c751aaaac0c7661fefce650a1fe98ef50eac2fb3f5bfd3deb75669e272e3",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0003.cpp": "dfd69e4a39c4123759db1b4e9385a497956c64f2fdf2c5ab29b831e1f1f2ebcf",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0004.cpp": "c7a031aa72026b0e75caaefa50811c35233095b7f8f6796c8b34baa53f1f4fb4",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0005.cpp": "2dc34b6ddf8404163cc1a9feef483b91fef82c47a983380c1f6b8fd3f946b708",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0006.cpp": "0d53611a8c2402d4f1b588ba2d3c28bb5827de0dfde1a60c9fa64384343b7f25",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0007.cpp": "27290fbbe31a1ac5569a134edd9bc4290119ff93df09faaf1931b473cec38278",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0008.cpp": "4a15963bb65eac0bcd50ad8de4f883bc2dd820d508a00d9fc336f236f3bc0ee4",
+    "generate-dataset/submissions/SYN-FACT/SYN-FACT-0009.cpp": "c60c2ebb29e9ce706b31d804ec413b434a0b6cd71e5e769127632825bfeb7a13",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0000.cpp": "3702b734dd706b42aafc92de50f2641dfc323ce92596b5c53f40d3f0aaa1e81c",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0001.cpp": "4e3adac0fd242979052546d2a60357b2edbbae2c695957d4d81a9c71d2b65fab",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0002.cpp": "770f2711562c6759e89338386806ac0e6e303fb3e412bb940ac8aa5b6093c731",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0003.cpp": "fef0e6da232fd3fcdb370668092dbb4d04591a9a82b8495d61a8c1ca24f6bddc",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0004.cpp": "d9e5c676fe1c1a46ae9a576626e4a8e73f15412833e832dbc54199724324e323",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0005.cpp": "ea88cc73df6a29b18a7ddf76824bc0209751870deaf072abb5065ae272bf206a",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0006.cpp": "323b30fbe32cc6064bce42170c2cc5bf4dde91760f2c6f5259393f77b10a17fc",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0007.cpp": "3074af867af837024c43c1384d422331d602a9d7a621970b8809a3f4c9667666",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0008.cpp": "ea69ac5cb46a59baffd5e22a99f8d54be5f718c79bafdb08cb2057389c6f6121",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0009.cpp": "382b56522ffb52385b96e17bab28c6c9831a251a4d4ddedb71ada1ba021406b8",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0010.cpp": "c520b344e72bc358a46d38f9fc3b2c7dad545b17da75371b349695ff1dcb588b",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0011.cpp": "9eea0ab2d989999d458c370881fca7f1fba5dfae14d8b8149f8439ef91428d7d",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0012.cpp": "b1e4100ca15f341dbdb03bad795452f0db1569991abfe07510a678d4acdf629a",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0013.cpp": "037f6f12425bcf1a535b1132cbe43557dc904d74ec606b70a379e475e49b971d",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0014.cpp": "f7a1d4f80d109a989fc5437cc13b16b49df4d39cc79ffa1dc0a4a39e3b1edd4e",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0015.cpp": "09c9a715291a625a0d5b575f3cdaf3686381716445a837b33eab52cf4eff5326",
+    "generate-dataset/submissions/SYN-FIB/SYN-FIB-0016.cpp": "d7b453a86f33139ecd7c08b3f95d0b2b314884d2a48595a63d753affea52e1b7",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0000.cpp": "fde76e4ec586b8d2ca5f67f5e0acc97cab95f5f3af52a2fb4d6a9299639c5f8d",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0001.cpp": "65c7efba1ca5e2be869ddbe1dccf9689d0172c07d3f6814894b0ec05693a13c7",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0002.cpp": "76528ff62bace97c8c052ca149b5847c4145f8666fa16981f3a2c786e49d5d6b",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0003.cpp": "70a68314fb64a5cfc3aa9120627f478a94c73f3bb89839a947d47099b8a1ab8b",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0004.cpp": "815cbb6a4a2f4de59ccd4d2e88d4715d0eff5672a88eb50e7c1e27b2eb329136",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0005.cpp": "6e5dc254d02f80c5fe5dba1292c1614d4a9d70a53dfea7d48f91a6a0b82ab43a",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0006.cpp": "cf7ca5e60da35e05516194578df2039d4def062c8c5bf2323c935033a240ba7e",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0007.cpp": "cada26ac620b565081001a38b0aac78dbc84de0996cb4674b5213a34048872ee",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0008.cpp": "5619127ee3b795e188f73870bc4c28b04a9d08c9970da050aded826fbd25232f",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0009.cpp": "23aa265539e816be9967019bba517c8cb76cf3096abdd1c1189940c4075c94f7",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0010.cpp": "7dbb9786a23b5ba196e68068276c82a0f68d02529ac9441352a8efb97e06e83b",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0011.cpp": "3daac7e0c913020c434b645f3122285f01ad4f28b830d8b0c81d710654956ad9",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0012.cpp": "243665ae11328d0db8b1a10d573ffdb4ceaeae0d9ca584a439844e4ac3107dac",
+    "generate-dataset/submissions/SYN-GCDARR/SYN-GCDARR-0013.cpp": "ba3f78ef02274553d8baf5d7f2cf351920aa9dfd17addde35d9f080ece46b448",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0000.cpp": "ae02ee3b65d177a8480eed496eb409fc6c12226f1d9bd9e2327a03aae4b9e760",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0001.cpp": "467100862c5fbd6f8bcb0c666086c5a16923c6ea6d6ccfd42a64e2b181442864",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0002.cpp": "eca74a770fcfcede4fc1d821f074a0872fc79955779dd9efb692828d1689baa9",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0003.cpp": "38b6353cb84355677c333e28661987afb1bdd36b48084b5618fa5d193412b3ce",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0004.cpp": "0ca7bb5c677296c920e02c02cd4b8f519e78c0c786d2fc3c0cb7f8aa19196b1b",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0006.cpp": "0f169dd6065262c59469e62fa5b9208d29bd18b4a25f3d9809e64536dbecb801",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0007.cpp": "f9eb045acd50349b68866121d8da4e264c26eca795ab4fb973bc82beba81c31b",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0008.cpp": "3be8351d6654f5986c258f720b8bbc2748459278eb5e595e750f211de388b0f9",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0009.cpp": "e59616dee5618d9c4fbce3dabe13bc5c2a284d2eae10fe37fa3f8764b13c7795",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0010.cpp": "db865302dc28566d980a29d9c072f6a33b8d7461d8360680eee4e520ba58147c",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0011.cpp": "f4a6beaa2b2fa1e51bc49efb89749e67d6c9b4477be4be1ccc8326da48a96119",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0012.cpp": "39ba0186b3cae3a5e22d7ba6d04e455804293619c991d447f3b3dd18997a0512",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0013.cpp": "64d738b9184eeb3f52e3d0bbe2bc80a6fe55f8b421d498888b260001448a9893",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0014.cpp": "e9246a237401ad660f0a1d2924a21551127d66de79a3a5a213408286bd6dda8e",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0015.cpp": "38b12314a509dbd52e8ccc8cc6090601c656f8dee5414761f5f61459253b2f97",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0016.cpp": "0cc79fdf5089db9f13e9f45b7942cc3270eff9ab3699144b2bc92cd80c92c1da",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0017.cpp": "2944a0688f6d3f7eeed8ddffafe4253acb0ed99b8e8d6ac2ba3fbf80df12d58a",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0018.cpp": "5fe8def727105d4ab06e6911abea015090cbf6cd821accfd43522fd5cb69f1e6",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0020.cpp": "03c2f8f4a41c2c5067e863ad3ab0eb1b29c8847fd53e61695d4036315510800f",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0021.cpp": "46c7d53d18797791c5ef98d1eca798502af470ea38f678414cffa7fa4e5e5f5d",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0022.cpp": "d380b839bfa284c365da845f5eea212148593999e2e3f91088d23460b5efff31",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0023.cpp": "39311da3780584fd1b2983d293f2908c0db5b33dcdcb4e56c5f29f9fa65c1776",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0024.cpp": "8d9aff3529c8bcb15a6967ed2471fdad8674a1be1d3f9248a6589589e020d026",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0025.cpp": "5b4feb63e641fe563788e296c112df321c5291fd6e066a01705b1990b3af27cf",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0026.cpp": "21bb1c1012d847414c756dc692377691f57cc9bd4866405641433efb17b0c0d3",
+    "generate-dataset/submissions/SYN-GEN/SYN-GEN-0027.cpp": "0f169dd6065262c59469e62fa5b9208d29bd18b4a25f3d9809e64536dbecb801",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0000.cpp": "3498c89aa32e57a618c43b1239b4cca28704186d5ef2011d18978fb166300fc8",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0001.cpp": "8b6d061bb954b7570ff91a0e1d753f8e759b0303aa3b7907e3d51b3b5464becc",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0002.cpp": "ed5add976409ff25d81f06497c366a2d0c4dc4303b7d4b9ba9ebbac7971db61a",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0003.cpp": "396b3d567e841b3f58657ad00561cb499e508411aa85519209d8e7a5bb4f23ca",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0004.cpp": "afd6f77e7ade4fc833f5183b56026a067c0f8c5acf1c919be620a6e50e772180",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0005.cpp": "3dc48b87d0974aec82caa51889386599b52b1f9e8aac09565b363ed4038a7cd6",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0006.cpp": "7012d4b5f9aaa48e3b8bc9e6cf8db10f86d1c48e74d800d6bfed34518648b21e",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0007.cpp": "e2c206db8a70747e085b2dcdab944c03a5f5d180c14fad28bec5702a024ef5ae",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0008.cpp": "3f5d48d3e25aa886fc3b966ad581a930ddd437f9c30f4f014eed42f3ce90f296",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0009.cpp": "e8357573aa677d9cdb099db5e8b98c793e9c80c759ce7d2d57897e952f09f294",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0010.cpp": "954ee5b412fbf2bd71df5995770d4dc5c7c065f89f2a0047c565f41f2b22280f",
+    "generate-dataset/submissions/SYN-MAXARR/SYN-MAXARR-0011.cpp": "2d042cbcec9911d2f485ea4c935da84412552675e207ad658a494b21433cc3a2",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0000.cpp": "7351cf6afee25c65ea6bb305353dc3bbcd7f8fbc80df9ba4a88056a39a3b3c92",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0001.cpp": "22e022d31ec44a609b58a5b66c4f1dd3bafbbecc43fe9fb6c8d7257a13678e0a",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0002.cpp": "dbe5e0573b15aad6d7d3f9bda84ae1af83655d7d0b537145eb5d1d6a4d1148ef",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0003.cpp": "11a6c174f09d17ed0e22a22229fc895acabaa1c27ee49ba0a4d1c623dda5af87",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0004.cpp": "37e3d9da8770f212b75b33a9e0f685466fcad2f3fb5de5827f4491fd45f3d561",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0005.cpp": "c7124ad263653156e836745698ee41b05037b8df13014c06ddc73b31efc69a90",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0006.cpp": "aec92be4aa6f5368f11647c824c017678d006dae044a4ef7b32aa723aa5b0f71",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0007.cpp": "09347791f3a551f9e8919a867eee38834147c6ab45a889d3fc340fecf8f45e0c",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0008.cpp": "ab5a353acd84eeb8206ab99320267e0b67e9697650d57a710d774d58da7f553f",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0009.cpp": "13ebbb0cfefe76f1dbee667d6418c615238708acb019cff24e2b9ca9d7334eff",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0010.cpp": "693e2ca60615fd20c8302e6b966435c1b5b099bab45f79da25e1932da4e2096e",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0011.cpp": "326c527e92ee17bfc4cb53de8e5638d1e0fe6ebe31742a1b00c26e74c58dc5d4",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0012.cpp": "926cc86c48e21f80d9dbdf361122c4730becff11e392252b8f560ac272c4b39c",
+    "generate-dataset/submissions/SYN-MAXDIFF/SYN-MAXDIFF-0013.cpp": "9328f7f342f3ab26b64dff9dac49234fec1545bcce2886ffb17d50e55cd8eeb3",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0000.cpp": "954cd508e538f42948ece61c7f01811cff8818c6fcd6019f8fcfbfb793ab2890",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0001.cpp": "ee4fdcc18f4d1cfa6cbab9c55200f23b5e5b7bb475b176a8308230f66801d6a3",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0002.cpp": "10adcb13178031f17bd5c7216a14d81b461fefcf90aab86f14bb1147f067bb78",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0003.cpp": "7868dab390cd4101bf5f568cd973ced7d845b17efc36db462aaae8f88d3eec17",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0004.cpp": "5b91d487a1b3f574a105d8a47391094e647f013075cbb325eb06dd9216620f51",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0005.cpp": "7f358b46b6e52bdabb3c1f3ce0c40ee04686ada6436c653fa2be78d700cf20ae",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0006.cpp": "9be2ec9d75585b808d96510eff8be2863d550ef99a2bd183a0c1ac6592112646",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0007.cpp": "09f41077fc8bd0586332fb22feadd18094433dd85cc53bcfb46eea000a7e8f25",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0008.cpp": "20b9b08d10b4a1709cacf1e0707887295ee45aaea4394ba78ab542f798a0b9f3",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0009.cpp": "54a6d021713cd1f3b9b98d4e86ca04a01a058aea765a55406cda6da2b89f059b",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0010.cpp": "d84d0e0da8cd455d8062e25cec61e0d4465d72828c22bcd85d9d1a6fe91030e0",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0011.cpp": "e9ee50f64e2dedf42282fd3d7db6795015af4a1e5e2cf6e03dbc7e4bd2dd2af3",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0012.cpp": "e9c41eeb41ecc70e0b711631b15d1da695eb108a1fc69956167a6fb19f7d1f76",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0013.cpp": "292d73227e62fabc0fd6a56c9b86e6a55df38cc14afeda25b72a783fc3b58864",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0014.cpp": "4f6cb9339897eca6fbdb308228f7630f2faeb6a9bd1cccd47484e0bdea2c4e05",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0015.cpp": "b974ef08b252cb57ebb0f662f5f8fee75f0617b4762f04c4654b0dd3a0a56da3",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0016.cpp": "7caf2e322799907ffb649eab6c6942c14ae13232710245cc5bc00b172413b4c1",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0017.cpp": "d14751d8fbb2d73d900b74b91e5a0ff1add530e3a38e14325e3d9fd5416bdb92",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0018.cpp": "e86ee74f180f88a6aa48570e6913eb3af7605e618d0e6b49278e24d8df7bbc1c",
+    "generate-dataset/submissions/SYN-MINA/SYN-MINA-0019.cpp": "a39aa728fae175910008b354744ef23068ee9bbf57b1682eb22363443dc1c4a8",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0000.cpp": "47f01891d3efd1e96bfbcb5571f790243d9a37fd3fc79162a5a74ab19ba616a5",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0001.cpp": "efabfdad0c55e18fbb344bd1f5f348191f5e5cbb9e471cac88079d7772d92534",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0002.cpp": "efabfdad0c55e18fbb344bd1f5f348191f5e5cbb9e471cac88079d7772d92534",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0003.cpp": "7e862058c66c07c640c90b9426088162b1868c3a9d1e282420b693315af38141",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0004.cpp": "4c22c2fb77bfafe5e9163cee7b19b355a7477bc92140bcb77cac6fe3f52c9702",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0005.cpp": "14807e6fa7e6fba971249e8ecae8ad64e2b1a3dafa390ebcf4ef081c3d95ace4",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0006.cpp": "14807e6fa7e6fba971249e8ecae8ad64e2b1a3dafa390ebcf4ef081c3d95ace4",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0007.cpp": "8e81926087155fe994fd5e081b132cada6465d199190325fa7bd49408f7ec3dc",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0008.cpp": "8db0a0cde9c2022930ad0c2feeba7d0447421827c231e8183ee1d222f4a335e3",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0009.cpp": "7e70a1416e6015faa1fc53ba13975978d97c88d4ff3fdff921b1431b75f7cb39",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0010.cpp": "21168a6d7ba3460c0df4aadfc1db88d3928cf00666b91b0c53772852931de3a9",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0011.cpp": "8270582b779b8d5c4fa3aecfb97c03afd9c65a4f82246012acf3fca00ff9a197",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0012.cpp": "8270582b779b8d5c4fa3aecfb97c03afd9c65a4f82246012acf3fca00ff9a197",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0013.cpp": "0133ed9a5d22c795bf41b1af64d558ed5dd16f9bbe5a2ffd803ef86aa2986ae3",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0014.cpp": "e64a78a1f2c4da8eadc4dfaca7f59c84278b3310bf0f62791dbac6657d4ddae1",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0015.cpp": "2be8006b74248283950c53d05fee140fe134e01dcafa410c4e00b6fdd83341f2",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0016.cpp": "788cf4841afc96c2d3205564b7909d26a0f70d0555eaf4c6263bc06d3d25460e",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0017.cpp": "050127e8d26fcb239ebd85a53eeb761de1c8af21ad62f7222b6a333af3245da9",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0018.cpp": "71ec2e9cc78ecdb96d19c0dacaf7bbc160504535adda95fcd0008da902f1e93d",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0019.cpp": "1d8467445456da097e7125e2413622ba7fee9856385ade1fa83a4f220d58a5d8",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0020.cpp": "1d8467445456da097e7125e2413622ba7fee9856385ade1fa83a4f220d58a5d8",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0021.cpp": "af79cbc9bc95abdeaa3172394d0c1b95764b8bb8f651bd4121ca6593c03b92e0",
+    "generate-dataset/submissions/SYN-PALIN/SYN-PALIN-0022.cpp": "f8026b131bf322c00ab4451b216a54336e1cc40166ad6ff190ffe404a54c81f7",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0000.cpp": "0d39d659589260ebe705e7ac61df5d206671f630f83df6e5d1ddbb9b2e916626",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0001.cpp": "13d3dd2239ffe16cf4df77bf0a4033478283d9ce7b1f38d64809946c0c9072ef",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0002.cpp": "279ed8b0f07d0f53c78e0be5c3b3354c370e301d7bd650914843f665241fd9e3",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0003.cpp": "a8b16d3e637ee9343d8b9b41e2a68ffed3f9ffcc28f5145708bb5cfcd72ca867",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0004.cpp": "cec3b4a2d2bd1ceafe8c12579d7de9ac9ec81d058db0a1e619520675958758b0",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0005.cpp": "174c2a1399e77bef0e4749d1ec19056a24de2044325dbba0d7b834822414ecb7",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0006.cpp": "174c2a1399e77bef0e4749d1ec19056a24de2044325dbba0d7b834822414ecb7",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0007.cpp": "118ab73912e0126bdf67c41cfea2da0221a5bc414d3300966f265c3d03ad2d90",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0008.cpp": "61ba7d61aea981375b81886954118a502c90cedae81e8141b18e44999e0c0f45",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0009.cpp": "bb4911c8c2f94a304527da69d9ff727a023bbc5f147c7ab61acae6c48a6cbc08",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0010.cpp": "bb4911c8c2f94a304527da69d9ff727a023bbc5f147c7ab61acae6c48a6cbc08",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0011.cpp": "0f5e5f0ea37628abcb5147c0f09169e9170dac1700de6eac782a1e10ab5e0ae2",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0012.cpp": "cb2d862a52cd2b11a1e993d8d0e2c1eb3a1124097908563d4de1509209adac18",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0013.cpp": "f2ee0ead6f6bc700542c20876b72ef6b49f7cca815d040b9e0b01630b308f595",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0014.cpp": "80dd8fbc3ca75a179650a54a7646593e59db6e15df7972c0b1a9ae5ed0a2ef65",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0015.cpp": "d6104ac9772037ecb02b9a116bdf4d920a602dd0bed1c3c8ddb5d211a4fd6da5",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0016.cpp": "f8503690dc77d9e10a4401a380882437e5dc5550fee352ba021cfafe47067d8d",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0017.cpp": "a43bc9e2c697133ab3f1b80df88ad14dfd492adece21375dbcc5806bff3fc456",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0018.cpp": "649491af175b4a8c4d4aef6c8235f723e89bf139d32df3f202b9660216c599b6",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0019.cpp": "1196f927da5903aeb53d3b0c84b59f27193cd52b570fe776c0903f5b866a7be8",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0020.cpp": "ee36dc5c2409536e791620e24e2158ec24d06fbc4b620bf054ebb81df9d4d3ef",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0021.cpp": "ee36dc5c2409536e791620e24e2158ec24d06fbc4b620bf054ebb81df9d4d3ef",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0022.cpp": "b2bb82ad1ca3ae590ac4beaac7a4c8876341bd837a8371441a04fa2c0c7ee15b",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0023.cpp": "fe89beef30b5f053b6541e3f57a4d62f54f33c8b0cfaf8798a7e4ebc23e89d93",
+    "generate-dataset/submissions/SYN-PERFECT/SYN-PERFECT-0024.cpp": "80a318a0a0a62c9c6c2980ffdccba73ff943d40af34d3a077333863d9fb56894",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0000.cpp": "e4f8db30716e920b1a567542fb2cb057786fa019b7e8a1dc8b5b542707ca330c",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0001.cpp": "94f94b0a728d643d5e4c87cf001daf06deeaaf1064114a35a33ec3442d1e73fe",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0002.cpp": "a0f98d76f030d7c7092e02b8673c9b1bfaffb636d6845e9f6d095faab9a45781",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0003.cpp": "b98ec5a069853632490f4acab66ccfbe6437275146eb9f0d25b665eb5f6f32cb",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0004.cpp": "5bb8fb8a7c18519413cf8f4a4afccbadee9e7db9c790d1d22061a33cc4677369",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0005.cpp": "3f5dd5914d3753a8f3f9e49efc3fa0f315aefc73ca54f4045d8a8eb1987280ae",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0006.cpp": "befbbc3e95bfb8a4579f2599f31ca52f400ffea69aee54aab3d60aadaf227c5b",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0007.cpp": "e743c37c32099eeabcab9d23e8bc4d8b1e255be32d64d3afca128c2468c971bd",
+    "generate-dataset/submissions/SYN-POWER/SYN-POWER-0008.cpp": "8df35c468ae9db11ac8cd842af75e1dcf34a7f671f1725f1cb011e306716767d",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0000.cpp": "2a718142db649882cc01f7d913bbc9ab479fcfc202d2f042b262624625808c6d",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0001.cpp": "4e7d6d39c15c5df4897f3d5f705c446520f7471c07548b4a41fef2d7259fb762",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0002.cpp": "0642a9ff468fca2b9725a87200713378fa9fd5881d64cc0dd6e1251716a0687a",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0003.cpp": "6e2d2ee4607d270ece017f560a2fbb8d2bcdc2b82f1d7430b828c3c9675918a1",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0004.cpp": "a9fa15d9a176c9cd76cee7172cc6c5dbe6436fb94d04cc2e74f146be30d04dc4",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0005.cpp": "7ab2891188571ba4d85f615a694e6ee49f1c8865af0076c27584f30cafb51880",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0006.cpp": "e90385f54f5bcc4b206204aeefcd8dd37d9649c9cf7d90a4e1e1cf985e6cb4d1",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0007.cpp": "4e459d3559571453b6af9e075e4d9b995f33be27b1258f14e62f2c7d5bde680a",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0008.cpp": "c4718626821980714e51c7430987d21adab8a7806140e50eb954d2edaa68c505",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0009.cpp": "f0779fcc6d16c412c0ff83906de0ed39c3d791fbd4dbfbe9acf586a213a09f09",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0010.cpp": "b62e443b28be7b52aa2106abc5b1206b3ce9d1a9499178f1fdb88d5ed9f8a16d",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0011.cpp": "9e9f6ade79180f7619abcb51d592fd0fdfb653c1a3680c1cf5e3febe592d7429",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0012.cpp": "fa9b47186ec16e2afbd42f80f7ebdc05f6f6b4a0cdddfe90e65084e47736dc7c",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0013.cpp": "255ce3879eec382e015a4a4ec234af20e7c7bd675fca5aeda5a270aeeb8fdf08",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0014.cpp": "0823e7d94bf1764d69ea82038edc51d6f1a20b8f7a66a8c6ad0cf8335a18d5bb",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0015.cpp": "ac4621e29fc81fc982c22ce05ed46c45d0a578cbec9f965c77bd375720c38cd8",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0016.cpp": "8759145a8955241b8783f8d3e14b5ed6179961130da522d3c85ccfdee2a6fff1",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0017.cpp": "85bf47431d7d3dea9d3712af1e44997b24287e942c36d00bea00134661e9f1a4",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0018.cpp": "bb158f6c4695bcd4dbbececa6cb340a6398d4d0bc74c9d9bd1f4b3c13f53f711",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0019.cpp": "9e5975dac9bf8c5c81e54dfc287fa7e74831da2645c305699d571a96151f3f68",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0020.cpp": "c3f14bb67b75b146c8b4b759e81bb7441576372efa23e286bd441d89a86be38f",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0021.cpp": "10a699e99f03f074fbc32b3aac81c034ee390e209d4dc4bb74096a29ec1be4b2",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0022.cpp": "84211045a29735a052b2ee2427343e32ef561a833e0be3f153161f8768d45cc8",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0023.cpp": "84f5e59d0b89344167e4c6a9a109299766176a05b9685b76f76232cb66cdf9c6",
+    "generate-dataset/submissions/SYN-PRIME/SYN-PRIME-0024.cpp": "8b14f4675eee473ff9c9d2d0b592bc18f1f34139e1d57404fbcade6bc6030759",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0000.cpp": "30a567064db6e12966bca6f05407b8c5e10ca27f21de1d8aef723330a4aae9fe",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0001.cpp": "8b60348b7450037fc47754535fe0957b3a2a07044893296333bdb862686cccbf",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0002.cpp": "6909235c1aef3a07dbbc5272d166d3be78d8326b308cc4b77d4ff5114ef8a996",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0003.cpp": "09928eef848e02697e2daf25899f44087821e92acde2923116b43c212bcc138a",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0004.cpp": "223f0d356c8278978ea91a9bdae2d0fe9f8681c67afb5d736bf2083d2a395d21",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0005.cpp": "561f726742a2ecbaab39ff0c1e6d7ea7f3a0df8e437aed7bcb43e8240772b3b2",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0006.cpp": "52ad0a6f08116d00a03c53dacfdb4b3efcc8d38f17ffa08741cf7086839d01ad",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0007.cpp": "4d72baad14ac6db39419afc802467073bc149134df8c40e958201e38a74dd2ce",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0008.cpp": "cdc3113a6b2ad313239a1e0b93adbe3622d0da5fdf4d70cba38693926ef0dcd0",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0009.cpp": "bfe82b9e659f40ba019b4c16b5929d01bcf21b6f87104dc49dedcf9c0c4fb51a",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0010.cpp": "e008acc7e25583c0b28a23efa869d27479e0af2335641577f64ead13a30f1909",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0011.cpp": "18413fdf08af832d3baca93b738d7a6e8b36bd0afa349470cc1dc7141be69055",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0012.cpp": "5658fecf62dc0b92c4c03db03531958672b95f49f20be18112309161f00e61c0",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0013.cpp": "90783a6e3e0588448e8cfb5788b0e222dc2d87d94b89bfd8e6029e0301f53250",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0014.cpp": "f9c11c49fe008feef9968234c73107319fbe1554a62bd3fb82be29ef9b5b61ca",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0015.cpp": "ddd880f40602541ed4ff0fe1330f29d58d9d999d31e74a9cd9418f7db7b54f3c",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0016.cpp": "85acbb6b2c16c592248869bf96607dab80b2ba26d00005c29341799826709727",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0017.cpp": "fc0250a07a00bb0a30901573c79f0df62368cb214dcf75a4e0124804f038b994",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0018.cpp": "be67504ac8d5c6e2ff9d18bf9c6670f706d8019fac7b637f10e036c80bc86c74",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0019.cpp": "327274088a07ee4d817e41bd1e32ded0996ed641c30d2a1caacc7e38f6afaac3",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0020.cpp": "5e625176eec92480149c1da44864f8a9c56760571f56013e10d85422157471a5",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0021.cpp": "729fd1b1380c00f86193a1ee94fc5b86505382bb671281e013d50b3732cb0014",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0022.cpp": "a4d6c3f96eb53b4ae7ad9358df2de34dfbddb67205071333b286bde49a36326a",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0023.cpp": "e0963abc4de8574024e129ea6e908c4672902c27482e53a8d18978c2ec24b2b2",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0024.cpp": "09c01d87b3ad9554edc3651dca8ae8cb2147a0a25fdb6e4652d9d5f06daa4919",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0025.cpp": "f162d1d195e9179d1c1f4d514956ecb549facc381526c41cca70536650f70eea",
+    "generate-dataset/submissions/SYN-PROD/SYN-PROD-0026.cpp": "9a9891c5495e4a650068a35faa770d4bb584b903729663383d9f362b91e31967",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0000.cpp": "041ad4691e69f311d58cc068301e8eac94776435f7cacf2bf8dac2a0d93ba1b3",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0001.cpp": "48d2b089aa4a362e13d21288cd08680a92567d2c4a1c7b2c69236d7e33eb8ed1",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0002.cpp": "49f5688cb54d2df12ada278e5cea8bc61f9f9c777b7ec240426dd021b68c7a9d",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0003.cpp": "359c567e948a9843e0c01bbbc0108dbf46d23525fdd0cf54c1dd2ebbb5f476c5",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0004.cpp": "ea46bd208d50f6113585c36e1aa16deda7e9d3f6cb05a21ee7e0968f2fcea701",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0005.cpp": "42ef561117f4807e06df080d22019b6fa7baa437b630221c0d88725754b399ee",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0006.cpp": "fd4365f4bbfba5cd8029975fcd9fbfc8d2b2e0a708d8aaa31353046e33c6fcf4",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0007.cpp": "8af400ebcb431459a2a86ff37f49bd2c677fef4fc555dc25f2319ac079066740",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0009.cpp": "5976f26cb7743e66ee312753c39991ad17e2981aeb0ef1bf6b4e9d92c0d268b0",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0011.cpp": "6764a4b6993d55f0046dacbd8a4e964ddddeec7cd162ab4f0a0022083087550d",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0012.cpp": "bcbb93350d12847e058df4134ee14a842e2792e3e26dc09cabf9104f12cb0463",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0013.cpp": "0e4fa413190c9d1dd726bf0b1d1ec515cb30440fa3cf344594e05471862b5eeb",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0014.cpp": "692bf0b0fe1076da68877af4b473786e03d7b741af786cb45d9f141845524762",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0015.cpp": "047ab3d04059f4963fdba33412ea5858904c55f50c7ae6e2f7c512ebee66e279",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0016.cpp": "cc3828706bd661c59004c73b6334ad10dc628a9941e972681b98f88c582019d8",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0017.cpp": "1a9d20e8894fa6c794abb17b9bf100d62068e49d529b9522cd0760aa698e4db8",
+    "generate-dataset/submissions/SYN-RANGE/SYN-RANGE-0019.cpp": "215d7cf242edf09af435f3fff67bd4eb425579bf91f1ea34d86b240d6091b757",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0000.cpp": "a641f2e354a0c2694566f402cb5c3e06f4515d6d5ca1446751cf18e070945d24",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0001.cpp": "00a765251f6ab534091fd723524da732bcbf1f92ceeae0d673703e1b43c8d1fb",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0002.cpp": "58ba2c116a572f03fd5c1f2de3e9446be89fcb30f85ce2613d7763f1a110ac4e",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0003.cpp": "ad5ebdb1c51207235924a9ea84c54e34c97980c297d624e1252203f5dd7d0d67",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0004.cpp": "cd92475c32f784aeda9232880d53d46da83116a018a46790c44808c4ad85d04d",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0005.cpp": "cd92475c32f784aeda9232880d53d46da83116a018a46790c44808c4ad85d04d",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0006.cpp": "b6976cb9081ceb1ec226f43f6d42db5bd4802abb4f02d5e0d33bb0aab4371d7e",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0007.cpp": "0d2bfa0f5735ac54ddfff4f57de55eb4e6e3c3ccde05a79e592616c2f1baf3ee",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0008.cpp": "3348d1c37e9256dbba5b10b3fc8033051fa57b5111be0e91a9af1039d6e9d1f8",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0009.cpp": "3c726476266ab49f26f5bb900f3205ca91856bde0798affe9eca918440320256",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0010.cpp": "89dadb173b7042c7ef079172e7de6d671bf52f7a7b818ce4a725c4cd9ad3d00b",
+    "generate-dataset/submissions/SYN-REVSTR/SYN-REVSTR-0011.cpp": "24bdc60805e80989c671cb2af7447591bc0c368be682cc5a3711400e42424f2c",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0000.cpp": "cc3347768d20e22eaa5d36ee43fce3dbffc2b5af0e10bea644e4c74b96273825",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0001.cpp": "3724df920e19b5b4198f9623aa7e38f2228e91e775eff038f65ef6bc0938af91",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0002.cpp": "fc6bcd8fb024a68a9bcada7f1744140a993486a309716957c8152f0eb6d882ea",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0003.cpp": "b8599e1021de1150ed12c03e92678008e677c0f450868e635c6578f7e0b18547",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0004.cpp": "226b079905e772f179ec4a4bf25bb86a29cff24bc8f80a9052928367faa1548c",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0005.cpp": "6baf676cf22ba438d4d3175154440e61020e54572f615f70179633774fcca8d3",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0006.cpp": "e3072553ed9018ac97c985d237400874a2778107cfe4ad9daf6d29a46ec10aa0",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0007.cpp": "81866a9b7fc957b3d9ca270d91f7c02a98b14c2f99a8bfed046eb5d42aa2270a",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0008.cpp": "a87add880e99df03fdcf9a4d2e63d2974f345b70d0e4a06f964db18e1e93a9b9",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0009.cpp": "0f1cec088653f457f9079e0fecd3f79836ad488ee50b7ff2042f04cb7b0adecc",
+    "generate-dataset/submissions/SYN-SECONDMAX/SYN-SECONDMAX-0010.cpp": "09096925457cfc5c214453d36d6c4f17a7e92620b0d061ea392ed1bea482657e",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0000.cpp": "4e90b6327c00282109e92a0a997b566d9a1f80005d380003048474a9406564d0",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0001.cpp": "667dcae5680d1e665d8b372ea8a133851a4ae8666e4fc04af05dbfea8a64ee47",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0003.cpp": "b27b829626b4fc7156b8bd6c5824e3584d2934030694f0ebbdd3c085e3d07776",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0005.cpp": "e7d09953c34fd94ec1cf22c68b20687afe4ff13b07f1de74889ff4a6d411f17a",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0007.cpp": "67e521bbbb59f97613c97f0562b5a22620362197162769bded7cd167c388478a",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0008.cpp": "c58368e872af8207c8927ecfe51a5585e2435afe04c01c49efad25f30f1c2e16",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0009.cpp": "51216e2c5a09c434c1e1bea79b3b70472f04124bb42658cb9bad17cce7d130dd",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0010.cpp": "e1c920b05ed5c417b8102ec3b0d37893cee0c85367039c0a0a52606346315dbd",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0011.cpp": "d27ce52244235ae458228f1ab16795dec44aa7997e2570dea32546b000c41f36",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0012.cpp": "21ee2b97650c2d73d8648f6b8f6beb47493cedd7e96d7ff59482491918fd6ced",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0013.cpp": "ea643bbbbe5411d7ddfbb17c9c473f274386c12fe16a69837d9d4dd1e3f616e1",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0017.cpp": "063a886fc82c2f78de9ede2cd2b506bb90a202566aaa5887154e3d825a37d938",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0019.cpp": "79ffbe546537f2f098611b9be4051236e63bef8f9b733c8bcb81da25116db347",
+    "generate-dataset/submissions/SYN-SUMB/SYN-SUMB-0034.cpp": "fc2e40aad9a80fdf779618e8f56a41fbce6b8cf10b183fe58e7bd82e54577782",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0000.cpp": "56fbcb4431812105001a125ed800a319b5b26aef07846143bbe7ae7c84eaca74",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0001.cpp": "c7c6bf33c8a3c1a509c89e9869f0486aa27cd8b433e6e5a79600f8f9b0b6373e",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0002.cpp": "b8862977e97d0573a0a7c9de1eaec268c7a429823ea5cfdb3fc2dff19016ddaf",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0003.cpp": "7e67973c8a4e739a5f1c7214b73c411fe8c8b98221afb763747090f99a31bfe9",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0004.cpp": "d524a79d7cf68ab4d783ea37ceb53f62b5e03b3151330d5f8f517d0d5db30bfe",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0005.cpp": "69ca29bb9ba0cc802eb7a452964372d2b7b17b2d74f97ef7461b84f8a825c4a7",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0006.cpp": "d524a79d7cf68ab4d783ea37ceb53f62b5e03b3151330d5f8f517d0d5db30bfe",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0007.cpp": "e167d1d3ec146bbf0376b087d9fd04bb9ea1555615dca2111ebe81ead5da7f41",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0008.cpp": "da03220b6d4ec86fe4d7d8e2c4b18559b3830daa574426d55e50f647168f4384",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0009.cpp": "86c0df95318841403515146aab84ff48bb8d307970ba96c7090b3666a42e1fca",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0010.cpp": "3b5f1404ad8040473156fac6fa072b8555202adb2e8e03f96069fec3bd1dacf7",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0011.cpp": "fc87a5f2d00cdd847db2f53109acee6d2a65aba951a44119762bb5683d4c4eab",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0012.cpp": "96d4b917c7758a80e5f9287af6acc49d05f5774e649ae8b7d74f5f2d32ce6ebb",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0013.cpp": "13fb5da328e95d72a75dcbb098927d54b973530a367aae75f56e90dcdd88c666",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0014.cpp": "a86d524fb509dc9b7705f422a876faae248f943a2c2a509a9bece7e3efa31892",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0015.cpp": "fa9986176a7c909b34a9178575f981491a98647cc9537ca9336422619e532947",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0016.cpp": "bb744689e3bae87bf074d5d0e68c82b991e63f46715ee49728b54db8080728cb",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0017.cpp": "543f390b28bba24482ff71db832a5b21187271a620e01d6f82017014921d5726",
+    "generate-dataset/submissions/SYN-SUMEVEN/SYN-SUMEVEN-0018.cpp": "86c0df95318841403515146aab84ff48bb8d307970ba96c7090b3666a42e1fca",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0000.cpp": "34b4fd02e2865153b3f2f5744e6ffeadd806ed16135c72fc2904ddc5e0ecfad7",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0001.cpp": "2d3385bdb82e29fbe4b0ceabe24b83382fd12a4f250b5a297b6c559dc8b26428",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0003.cpp": "66f5766d46181fc99dee7b0247f49b2977e28e0f22afb2c032fe5a499ffc6846",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0005.cpp": "78025d9abc352da279f800ed132cb2416f359922fa4c62c10160eec020de97a5",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0008.cpp": "14e2d71d3a43a70fbd49a5c4d0f36ffd3ab2a086575fdee75fe3b28dbdcefa20",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0009.cpp": "97a780e296f0588ba5ff071bfed9ccfae09c7509674f55ce104daa3e23db65ee",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0011.cpp": "02ad1263111e188074895e2f582d51353b7db9294519fadc9b6299965f4336e2",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0012.cpp": "d5e8c1bb3b52fb284cc78c3b256b115f418d685eacaa0693eaa3c7c67d405054",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0016.cpp": "dacccf56f86a873921e55ef72b0c2cc6ca790a6f9c75b447a92e06da6b92eedc",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0017.cpp": "8683948402434a5d3519681ebceeb94a051aaf5737ef385717932a84bfe77943",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0018.cpp": "37f2069b1dff2f7817e456822fef83a81bc45353c984b99d80861c4c55fa17fe",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0021.cpp": "cefed4b3237963be714b6fc28616bb7769984c1d64fe054dfc0a9c94e4e73ec9",
+    "generate-dataset/submissions/SYN-SUMPAIR/SYN-SUMPAIR-0022.cpp": "dacccf56f86a873921e55ef72b0c2cc6ca790a6f9c75b447a92e06da6b92eedc",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0000.cpp": "024ed226ca8c24068d49e850f24650523834f272208273c3795d7942cb5aa039",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0001.cpp": "de232f10f419426636dd0c9e6e6d40171581d723a8524e18639653bb9933a551",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0002.cpp": "49b5a65e04f2480e1ca31c517f7b75f284847663901ed44ec1ae4135eb9fe2de",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0003.cpp": "5517820bbf5232f5ec92673735a582ab81a027c8aa5cc536b85fa1ba7caecb01",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0004.cpp": "c2e3816b8d4a04803674175a73ccb13d9c22a2498c7df20d52e58e63d8fc0d92",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0005.cpp": "38dc3c4e126878fb3503fcc58abc7e03ff41d272a09291a9b2463142ca59c498",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0006.cpp": "c45d8b2263969be4632836fdb9cba9b93c14774398a6c63b3e27557e4ac80c7d",
+    "generate-dataset/submissions/SYN-UPPER/SYN-UPPER-0007.cpp": "5b3369383c41717136dce74703e47e055704425dbc828dc92b12a0fc4f68ee6e",
+    "generate-dataset/task3_feedback.json": "38da5e36636ba74315b3e0d6e8e25e7240595b7cb2dcf33ef00dcc21542f9a32"
+  },
+  "archive_sha256": "6bda70c29254a3bce91933b65f4a311d73a052e72d181c97e977152e14602f9b",
+  "evaluation_selection": [
+    {
+      "annotation_v2": [],
+      "code_identity": "9c963d37631c48b3aca7c4dc33485981a33daa63b385b553e2a8e817f5768437",
+      "family": "SYN-ARM",
+      "group": "9c963d37631c48b3aca7c4dc33485981a33daa63b385b553e2a8e817f5768437",
+      "level": 1,
+      "reference_sha256": "0db6ca993a0d4b4de291e08bbf0627b04e034f76a03724e24e59411092f740b2",
+      "renamed_identity": "355c4d866ee5002ff607542b89d41cb6cf7fb67670505dd869cf96620854314a",
+      "sample_id": "SYN-ARM-0000",
+      "source_reference": [
+        "Lỗi nhập/xuất"
+      ],
+      "source_sha256": "ca826e604c1b98374de352bcf314391a9e4e785d43164cfe775ba388e25c5c14",
+      "statement_sha256": "7d86f48f211ffbd03386038755eb31f88dcc68ed5fb0b1a403a5803110a25a00"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "fe793509e67ce9efb43abdd155a6cac1fb65b79355e8dd374d60ed9c3a854f77",
+      "family": "SYN-ARM",
+      "group": "fe793509e67ce9efb43abdd155a6cac1fb65b79355e8dd374d60ed9c3a854f77",
+      "level": 4,
+      "reference_sha256": "7ceb1fd365b67048bc04e5eb02e802f4608d0f619a24602c39a3eba2a90ac469",
+      "renamed_identity": "906f5746b1169836c869c6b21ecd03a11c7f954372b04a630a65693cbac175c2",
+      "sample_id": "SYN-ARM-0008",
+      "source_reference": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "7a75abb7827ee51ddba1a1e1702b6236430ee9e48fd379b8d305b6f90ca4ad25",
+      "statement_sha256": "7d86f48f211ffbd03386038755eb31f88dcc68ed5fb0b1a403a5803110a25a00"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "code_identity": "350620d9764c631063e68509376043c6d2fed880b5541b6935a4aaa21164935e",
+      "family": "SYN-ARM",
+      "group": "350620d9764c631063e68509376043c6d2fed880b5541b6935a4aaa21164935e",
+      "level": 2,
+      "reference_sha256": "a21243e9e20599438a8a32d12325a20630035cfa506d66fec4232c6e57e542e6",
+      "renamed_identity": "01c9ce0463124d1edc506ad6088911cd87eeafdf4e439a78729994a6073dda9f",
+      "sample_id": "SYN-ARM-0026",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "322ac2aafb85c5a193c840cac560f4eb07ae5d9283003db80e8f6c4a8f0288f2",
+      "statement_sha256": "7d86f48f211ffbd03386038755eb31f88dcc68ed5fb0b1a403a5803110a25a00"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "code_identity": "8e622cf57904d516868f9d7655e289bb90aa300d6e307743e0e55992cf6d21fb",
+      "family": "SYN-ARM",
+      "group": "8e622cf57904d516868f9d7655e289bb90aa300d6e307743e0e55992cf6d21fb",
+      "level": 1,
+      "reference_sha256": "3c4f061b436ebdcd9381d417ce5f5ec999e30e9dc1f81510ffdcd4dc98e21a27",
+      "renamed_identity": "3452c6a813c5ee5d4628f8510b22c4cb5c11d75ac08c0fd623186021c2df1bfd",
+      "sample_id": "SYN-ARM-0027",
+      "source_reference": [
+        "Lỗi thuật toán"
+      ],
+      "source_sha256": "952023d704a4fdd284bd52c98d21002d535fc636cf26ef86291e1df9dc0d79cc",
+      "statement_sha256": "7d86f48f211ffbd03386038755eb31f88dcc68ed5fb0b1a403a5803110a25a00"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "955036f06ba11114bdfad2245a2b5e6d2337a1861615a1699aca70d2fe6556e7",
+      "family": "SYN-BASE2",
+      "group": "955036f06ba11114bdfad2245a2b5e6d2337a1861615a1699aca70d2fe6556e7",
+      "level": 2,
+      "reference_sha256": "54be99384e4c881ac9ae7384e8af39887bb3fe2116ff8c141393a82516f94d33",
+      "renamed_identity": "b8ced820891fc51f4fac6e104e41d61a9061e508235a71d60f8becb6cd8e8e80",
+      "sample_id": "SYN-BASE2-0000",
+      "source_reference": [
+        "Lỗi nhập/xuất"
+      ],
+      "source_sha256": "b86af829e299cfe56847044bedce1be5118e195f911cc0dcc653f9df9586e15c",
+      "statement_sha256": "03a8a1367a0c54e47f94f7f8056c6a01e64ae1f04a7df97167303e4aada29a44"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "code_identity": "07ca2d6b6246de21efaae8dc2dbafa710cb935b44b44be3040e502464e77f16d",
+      "family": "SYN-BASE2",
+      "group": "07ca2d6b6246de21efaae8dc2dbafa710cb935b44b44be3040e502464e77f16d",
+      "level": 4,
+      "reference_sha256": "fee283e23cd11f7761558a4d254b56931e02d9e655578986c9e124251ac478e3",
+      "renamed_identity": "dd4c3c2d3c7ff5c8526d094129dbde4298f88606250c2f08de84ae83e4117541",
+      "sample_id": "SYN-BASE2-0006",
+      "source_reference": [
+        "Lỗi hàm"
+      ],
+      "source_sha256": "3016309caaced63cf7e55027d9a9c4ce96b01f42b376837fac2f8b4627e46afc",
+      "statement_sha256": "03a8a1367a0c54e47f94f7f8056c6a01e64ae1f04a7df97167303e4aada29a44"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hard-code"
+      ],
+      "code_identity": "06f80569f82cea874af51974dd88f564ae2a39c398675060c38ce7799f0d8dbd",
+      "family": "SYN-BASE2",
+      "group": "06f80569f82cea874af51974dd88f564ae2a39c398675060c38ce7799f0d8dbd",
+      "level": 1,
+      "reference_sha256": "54db4985d57e4b32ade11918828d97ee7f17bc283a5f3d2030bb6d01edae138a",
+      "renamed_identity": "a3f04a2b4a6e7238bf8631801d2b187401cd6dfd88e2cc5c0b57e3b4a5ec3d36",
+      "sample_id": "SYN-BASE2-0007",
+      "source_reference": [
+        "Lỗi hard-code"
+      ],
+      "source_sha256": "9582f397cbf522a9e14a30be61289421935519e5008984b85619cab37a1cc958",
+      "statement_sha256": "03a8a1367a0c54e47f94f7f8056c6a01e64ae1f04a7df97167303e4aada29a44"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "4c394d29960cee11ea3c4061208ea2cf555ca153a48367d8dece75d15cce362b",
+      "family": "SYN-COUNTGT",
+      "group": "4c394d29960cee11ea3c4061208ea2cf555ca153a48367d8dece75d15cce362b",
+      "level": 4,
+      "reference_sha256": "f96b56c74944a1e9aad927e630cec3542b8360311ff76d44c8a20c3c7b1c9c32",
+      "renamed_identity": "7909fe3fec56824a3075c25a7a29b9f65c4891f398db3e79446ff15c77d65e10",
+      "sample_id": "SYN-COUNTGT-0000",
+      "source_reference": [],
+      "source_sha256": "63e24dee0990d796d10a6e9ee871e1ad1e2cf063437fb6558b3041a44e1796b0",
+      "statement_sha256": "fc011fdca20ce2a67e489072107f335678edfdb7746950c60805b55b5ad4289f"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "code_identity": "0acc8dc9dcce41c36044711015abfb234193ad4f27f102776bb94fef4e5fe00e",
+      "family": "SYN-COUNTGT",
+      "group": "0acc8dc9dcce41c36044711015abfb234193ad4f27f102776bb94fef4e5fe00e",
+      "level": 1,
+      "reference_sha256": "32e191270cf805fbd188074f0ddd8e6666fc6d707e6d98bdd4f08e9d26c5119f",
+      "renamed_identity": "3f226ff6de5ba3a1f009f18843d6c33d509411b953844e9f87f003f97ae9144e",
+      "sample_id": "SYN-COUNTGT-0004",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "8f934bfd4643fb19c06f9735d2987ae8269279f64dd5979a532ee658f9619ca2",
+      "statement_sha256": "fc011fdca20ce2a67e489072107f335678edfdb7746950c60805b55b5ad4289f"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "33be6bdf7dbd0a228a838566f4a76b0ab119fc5169b70e841411c7179b28abcc",
+      "family": "SYN-COUNTGT",
+      "group": "33be6bdf7dbd0a228a838566f4a76b0ab119fc5169b70e841411c7179b28abcc",
+      "level": 1,
+      "reference_sha256": "bc7fb5a2a0257fd7eedd1858fabbbf81be36e1e13f9f11a64d591a73963cef10",
+      "renamed_identity": "d15087c51eab8a03b9098f6fcc3c0b50fab912f1385ec5fa3317b1499edddd30",
+      "sample_id": "SYN-COUNTGT-0005",
+      "source_reference": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "4c358f50a005e98b0848b44ecd14105f51f33c9292f263c16a966c15ac3f8517",
+      "statement_sha256": "fc011fdca20ce2a67e489072107f335678edfdb7746950c60805b55b5ad4289f"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "75190df9faae421412e5b4b39985cfc4bc9848c0604f155ce1960e8bbbd617e0",
+      "family": "SYN-COUNTUPPER",
+      "group": "75190df9faae421412e5b4b39985cfc4bc9848c0604f155ce1960e8bbbd617e0",
+      "level": 3,
+      "reference_sha256": "a4a3cd1839022ed93d486da70cd4e4cd5f91276e52105d40b3c700f0634640ea",
+      "renamed_identity": "662659825f91cdf44811c016e2b356349d173908712ea732d1943e5ede8c09c4",
+      "sample_id": "SYN-COUNTUPPER-0001",
+      "source_reference": [],
+      "source_sha256": "420513e1b6076d7fb9bd92df3ae8db35548c08f74955af9e9d75736d65520bec",
+      "statement_sha256": "ad8370a0e67c630cb569e96d84b4fe08758588006520a5dd9e4125342ce9c4b8"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "code_identity": "9abd870d44f9d523a691b0a90fa83be826e0f23048cd5fcb8e71916e11a53ca3",
+      "family": "SYN-COUNTUPPER",
+      "group": "9abd870d44f9d523a691b0a90fa83be826e0f23048cd5fcb8e71916e11a53ca3",
+      "level": 2,
+      "reference_sha256": "2227040dd222a32d96dd6e54ae73099ca070555f18e1f2df0f4978dda2b273e7",
+      "renamed_identity": "ff988ea8a8e1ef12b10509c2109c0602f8bfd0d056faca45fa6a1ada0ac4a8be",
+      "sample_id": "SYN-COUNTUPPER-0007",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "7c83d5e6b9e45a36af60c893d49e2c5b37627b586c08e5da7c21126630074430",
+      "statement_sha256": "ad8370a0e67c630cb569e96d84b4fe08758588006520a5dd9e4125342ce9c4b8"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "d06181b23937e9dfcac7d3a11ff98e074bcf576e2275b8d6513547e88a248f0a",
+      "family": "SYN-COUNTUPPER",
+      "group": "d06181b23937e9dfcac7d3a11ff98e074bcf576e2275b8d6513547e88a248f0a",
+      "level": 2,
+      "reference_sha256": "270715dfb33fe69a20fe0d0c8179dae717db7ed6534025bd81c283f29e21f1f6",
+      "renamed_identity": "13a3eb44bebe3507f2243341a326f6e9231932875745b1ba1b7a8659091300cf",
+      "sample_id": "SYN-COUNTUPPER-0011",
+      "source_reference": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "9923c942c3602615365efcd16ada08dbb772c8044be58f4fd5ca64e4a4f3acbc",
+      "statement_sha256": "ad8370a0e67c630cb569e96d84b4fe08758588006520a5dd9e4125342ce9c4b8"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "code_identity": "15fae79b55960e8b70543bccbcfc6731ae72326f384068c5da2ea75296877df2",
+      "family": "SYN-COUNTUPPER",
+      "group": "15fae79b55960e8b70543bccbcfc6731ae72326f384068c5da2ea75296877df2",
+      "level": 2,
+      "reference_sha256": "9f44435b762ecd67807b84909ec7f1abd711a9829348d3cdd552f60d7d164d47",
+      "renamed_identity": "c957913f49bc08ef51b22969e6c03788bb313ec60d985ef25430d5b6b82f2adf",
+      "sample_id": "SYN-COUNTUPPER-0012",
+      "source_reference": [
+        "Lỗi hàm"
+      ],
+      "source_sha256": "a197943bca1c7270b7e2dd589b7e8e7f7f7c08399be1663baa6177f46e564976",
+      "statement_sha256": "ad8370a0e67c630cb569e96d84b4fe08758588006520a5dd9e4125342ce9c4b8"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "b6a5c496e7b01606e9b7367c400a48f4a8406b79300fd1204adafb201cc3d2a0",
+      "family": "SYN-DIGITSUM",
+      "group": "b6a5c496e7b01606e9b7367c400a48f4a8406b79300fd1204adafb201cc3d2a0",
+      "level": 2,
+      "reference_sha256": "dfcc4561582fff2bc6c45d9b65f4d7f0a8027f0dce00b9b52486680afe5eec43",
+      "renamed_identity": "9f7380b2b550a200077ee4e540dcb9b9c8db30c30292c201c5b46ce5eb5d25ca",
+      "sample_id": "SYN-DIGITSUM-0001",
+      "source_reference": [],
+      "source_sha256": "86044603e4beaeef81a14b43e4758e78980c8a4d1a7918e76b78f93e69180892",
+      "statement_sha256": "e70f5cfa9d52ad277268ed767150f6c783d31ddefff9132a2fbe72a0ec66a6f2"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "code_identity": "584125929976ead64d3c817249de74d8605546837b8e77d0e9ed0cdb643432a4",
+      "family": "SYN-DIGITSUM",
+      "group": "584125929976ead64d3c817249de74d8605546837b8e77d0e9ed0cdb643432a4",
+      "level": 2,
+      "reference_sha256": "a3809a5a21d35c404993bed1300bc7928f25c4fa231aade07b098b9a78547f95",
+      "renamed_identity": "aac3113bf15429a2b8483870bc85e846c93acc47afa0e9c297efc059dab331ed",
+      "sample_id": "SYN-DIGITSUM-0006",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "edea2140cd39f778be955f2fc44b2ebe674e6d491f62e211dab0789f1b8aa3f1",
+      "statement_sha256": "e70f5cfa9d52ad277268ed767150f6c783d31ddefff9132a2fbe72a0ec66a6f2"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "code_identity": "1e4d5f21b0391f164862a15dbac0955dd4b3118ae71f0bb11b57a88da64b96ae",
+      "family": "SYN-DIGITSUM",
+      "group": "1e4d5f21b0391f164862a15dbac0955dd4b3118ae71f0bb11b57a88da64b96ae",
+      "level": 2,
+      "reference_sha256": "0bacd5e82b4352b6a23c8c7cec341c924c2f80d5937643e8b9c768824e2765c8",
+      "renamed_identity": "f2262bccb605c538ea5251e958d5dcd9eb9743efedbe0788cf4213c73955f0f5",
+      "sample_id": "SYN-DIGITSUM-0007",
+      "source_reference": [
+        "Lỗi hàm"
+      ],
+      "source_sha256": "18ecdab857da4e736c94b842af785cadbe198c63f185e74a12fd377e659424a2",
+      "statement_sha256": "e70f5cfa9d52ad277268ed767150f6c783d31ddefff9132a2fbe72a0ec66a6f2"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "code_identity": "2f19ffaec6feb5b767b2960e59b92ed8edca239513b7bdf4cd8eae2c7b83d693",
+      "family": "SYN-DIGITSUM",
+      "group": "2f19ffaec6feb5b767b2960e59b92ed8edca239513b7bdf4cd8eae2c7b83d693",
+      "level": 3,
+      "reference_sha256": "5336b107157ac5bb132a91bbf9a1f5dfa3375646a49b6ade570ca500dda91cd0",
+      "renamed_identity": "d8591a4c2ad58ac9adf8b384d308b81ba4ea461c51c568eb48e5f0f0178cca52",
+      "sample_id": "SYN-DIGITSUM-0016",
+      "source_reference": [
+        "Lỗi thuật toán"
+      ],
+      "source_sha256": "30516dccbd5b5054e7665b11071962251096a3d353bc7a85b2e382d5ba06a737",
+      "statement_sha256": "e70f5cfa9d52ad277268ed767150f6c783d31ddefff9132a2fbe72a0ec66a6f2"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "168e27ae33346f6ff65d5d5f1ded29f0fe51696e4744c1bc0866681cecd1f763",
+      "family": "SYN-DISTINCT",
+      "group": "168e27ae33346f6ff65d5d5f1ded29f0fe51696e4744c1bc0866681cecd1f763",
+      "level": 2,
+      "reference_sha256": "5f4c00b23a69131009840fb7765cc45939429b5ae8aad3fdc729a27854645c46",
+      "renamed_identity": "c734707b99a046beacfe84030fd52d890e9246ab597b41fb53021ab0b2c52f78",
+      "sample_id": "SYN-DISTINCT-0000",
+      "source_reference": [],
+      "source_sha256": "608ec29893b8a118d7d0dc33d233b748528c870a3943f648f2117db89ad7a39a",
+      "statement_sha256": "c4ae996c4e9fe56f9ee1a13e426f1004769006fd19c0abd25befab9116446ae9"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "0d97c714c942b2e3f2338ed35d59637433b3c0a684a3f818b2b80680641c7d97",
+      "family": "SYN-DISTINCT",
+      "group": "0d97c714c942b2e3f2338ed35d59637433b3c0a684a3f818b2b80680641c7d97",
+      "level": 1,
+      "reference_sha256": "0fd391bc207b99b26ac7e1e7b0a24dc3a70218788e34055e47013fb06626a722",
+      "renamed_identity": "2d023fa5dd465aab11b4da2c8c28abfe6a958e3b0c378e3fb492bb08f3bc0fd5",
+      "sample_id": "SYN-DISTINCT-0001",
+      "source_reference": [],
+      "source_sha256": "6ad461ef0b8e0095e0b45b89aa2a84082ee63c8bf9672294fe9cad307301fec3",
+      "statement_sha256": "c4ae996c4e9fe56f9ee1a13e426f1004769006fd19c0abd25befab9116446ae9"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi vòng lặp"
+      ],
+      "code_identity": "70568b8e780e4fe0851a2bd7d890c066628384aaf3dfe1cc8f45c797b155cfcb",
+      "family": "SYN-DISTINCT",
+      "group": "70568b8e780e4fe0851a2bd7d890c066628384aaf3dfe1cc8f45c797b155cfcb",
+      "level": 1,
+      "reference_sha256": "80bfaa7d4c93e865e4275fc77a583ebafddf0190070af8237541da4d525f7b2e",
+      "renamed_identity": "7a51a3b12854d38069bacbba2825dde27990f1a9fa1a5ac28e1d39334840c912",
+      "sample_id": "SYN-DISTINCT-0010",
+      "source_reference": [
+        "Lỗi vòng lặp"
+      ],
+      "source_sha256": "e7eeb8b41fbe91fc6b23362c15287bfdad9f8b0d91fff8d5fb903d966bb3ffc4",
+      "statement_sha256": "c4ae996c4e9fe56f9ee1a13e426f1004769006fd19c0abd25befab9116446ae9"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "code_identity": "6d7d004afc58d084598423a03ff9530b0d51aaded4f6ec99dd76e85d90138fe5",
+      "family": "SYN-DISTINCT",
+      "group": "6d7d004afc58d084598423a03ff9530b0d51aaded4f6ec99dd76e85d90138fe5",
+      "level": 2,
+      "reference_sha256": "bcfa9999d6ca248e7c7c309ade199d767e1bada9ac37db23e8724d4e3f2fd520",
+      "renamed_identity": "0c1b2db56f33ee04bdfa4d10a4397fbff9598fdbe985f74b63e6d41355a1a45f",
+      "sample_id": "SYN-DISTINCT-0017",
+      "source_reference": [
+        "Lỗi thuật toán"
+      ],
+      "source_sha256": "111724d280b682063bde7ffdf81ccf2a77b11b376b867cb7360b72281866efa6",
+      "statement_sha256": "c4ae996c4e9fe56f9ee1a13e426f1004769006fd19c0abd25befab9116446ae9"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "d2b40a5ea3ad47ef83191ed64de7b722e68885da4390ff5bd66bfc7d507b8c8f",
+      "family": "SYN-FACT",
+      "group": "d2b40a5ea3ad47ef83191ed64de7b722e68885da4390ff5bd66bfc7d507b8c8f",
+      "level": 3,
+      "reference_sha256": "b9b18f2d0bcfc4b8f724af509654c8e3ae993758a5c36a3eb78aef3fce47486c",
+      "renamed_identity": "6239f293d3f028aeb92e816cd637ac4ed8a877e3df76c324f46ab951432db4c5",
+      "sample_id": "SYN-FACT-0001",
+      "source_reference": [],
+      "source_sha256": "5e2871829de9c91115f92d413dcdb8da3b25110c24621559db124e467004e877",
+      "statement_sha256": "22aa9cc722d77e97c41551b2fcc5f21319a2c915aa4877058aa9eb7c71ff8a2f"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "code_identity": "a956b365784acf8e97a146a6b3bb250cdf89246fdd32f08cf94d25956ae68798",
+      "family": "SYN-FACT",
+      "group": "a956b365784acf8e97a146a6b3bb250cdf89246fdd32f08cf94d25956ae68798",
+      "level": 1,
+      "reference_sha256": "5dd4637cb35be3933dbe761514b603a2c96c88437b66f4d5af4e976b5d4a5d89",
+      "renamed_identity": "f79a335485f4972e24560cd83bf58594c8c99a0af700f5e14a67998746652b95",
+      "sample_id": "SYN-FACT-0004",
+      "source_reference": [
+        "Lỗi thuật toán"
+      ],
+      "source_sha256": "c7a031aa72026b0e75caaefa50811c35233095b7f8f6796c8b34baa53f1f4fb4",
+      "statement_sha256": "22aa9cc722d77e97c41551b2fcc5f21319a2c915aa4877058aa9eb7c71ff8a2f"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "code_identity": "dc2c5fcdd098892a4949362aa62d5013359e5d033567088156ad2231920683bd",
+      "family": "SYN-FACT",
+      "group": "dc2c5fcdd098892a4949362aa62d5013359e5d033567088156ad2231920683bd",
+      "level": 2,
+      "reference_sha256": "2496410b488c9fddb3054ea353d341b819471b6f4c9a55885af3b507678576fc",
+      "renamed_identity": "59391655c25b25f0f855cb18fead81d2c0d8875f56bde579796f6de335487ae2",
+      "sample_id": "SYN-FACT-0006",
+      "source_reference": [
+        "Lỗi hàm"
+      ],
+      "source_sha256": "0d53611a8c2402d4f1b588ba2d3c28bb5827de0dfde1a60c9fa64384343b7f25",
+      "statement_sha256": "22aa9cc722d77e97c41551b2fcc5f21319a2c915aa4877058aa9eb7c71ff8a2f"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi biên dịch"
+      ],
+      "code_identity": "78961244e80b84e44968b14f8e455d51fa7d414fe5839cb962e0fed6aed8f6d0",
+      "family": "SYN-FACT",
+      "group": "78961244e80b84e44968b14f8e455d51fa7d414fe5839cb962e0fed6aed8f6d0",
+      "level": 2,
+      "reference_sha256": "f284d055904d534d7fa6acf46af0443f50ad18ef6902e55988d8129741b44402",
+      "renamed_identity": "017a549146745422caf4b6729fd2bc99d204756e74aa19434153f0eef5c960a9",
+      "sample_id": "SYN-FACT-0008",
+      "source_reference": [
+        "Lỗi biên dịch"
+      ],
+      "source_sha256": "4a15963bb65eac0bcd50ad8de4f883bc2dd820d508a00d9fc336f236f3bc0ee4",
+      "statement_sha256": "22aa9cc722d77e97c41551b2fcc5f21319a2c915aa4877058aa9eb7c71ff8a2f"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "6338b46d95ee357a517d24ce2622743b67ff61d206f1a167660d440fa6bba8c0",
+      "family": "SYN-FIB",
+      "group": "6338b46d95ee357a517d24ce2622743b67ff61d206f1a167660d440fa6bba8c0",
+      "level": 2,
+      "reference_sha256": "98d14a51863d4dedc6e4aa7f1faa8fd56af81c863c8f3f1bcec0a1ff8a7ae0f6",
+      "renamed_identity": "6612acffce5f14c7278e7c37a9efa4c3c71facac414518f6165b9147531e761b",
+      "sample_id": "SYN-FIB-0000",
+      "source_reference": [
+        "Lỗi nhập/xuất"
+      ],
+      "source_sha256": "3702b734dd706b42aafc92de50f2641dfc323ce92596b5c53f40d3f0aaa1e81c",
+      "statement_sha256": "7e6017f841a5af15708d7305f9fc0d6fa5b9ac6b6d4ea8a58facb4ed2016a1db"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "61639a3d40fd72143086984849eb16f6c45e1dfc69d992304e21a4e373aa77e6",
+      "family": "SYN-FIB",
+      "group": "61639a3d40fd72143086984849eb16f6c45e1dfc69d992304e21a4e373aa77e6",
+      "level": 2,
+      "reference_sha256": "a1c61267fe50d7acf219e3abed04e7c09c23b5757826af97fa65ad25b1c1836c",
+      "renamed_identity": "24cec47d580e8e43db80737f499cdba9e7875387dcd4e406055ae5ceda8a96f9",
+      "sample_id": "SYN-FIB-0007",
+      "source_reference": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "3074af867af837024c43c1384d422331d602a9d7a621970b8809a3f4c9667666",
+      "statement_sha256": "7e6017f841a5af15708d7305f9fc0d6fa5b9ac6b6d4ea8a58facb4ed2016a1db"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi vòng lặp",
+        "Lỗi logic"
+      ],
+      "code_identity": "c7fef65bca3320155f8621115df3c72e9a56d8475dd8aeb2df17737434f448b9",
+      "family": "SYN-FIB",
+      "group": "c7fef65bca3320155f8621115df3c72e9a56d8475dd8aeb2df17737434f448b9",
+      "level": 2,
+      "reference_sha256": "f6e539109803ecbaf5091a92d5384f0d51bd797c46cbfd672df876e4bad3bc19",
+      "renamed_identity": "ae1e4f4fe301b50bd457b8a6f72209f770061ba2fc1f11f6c603b2d431ca2b38",
+      "sample_id": "SYN-FIB-0014",
+      "source_reference": [
+        "Lỗi vòng lặp"
+      ],
+      "source_sha256": "f7a1d4f80d109a989fc5437cc13b16b49df4d39cc79ffa1dc0a4a39e3b1edd4e",
+      "statement_sha256": "7e6017f841a5af15708d7305f9fc0d6fa5b9ac6b6d4ea8a58facb4ed2016a1db"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "code_identity": "2b272b8fcb3a7a1867425e099cb91ac70be2ea1e1429e2921ca7f0141244a766",
+      "family": "SYN-GCDARR",
+      "group": "2b272b8fcb3a7a1867425e099cb91ac70be2ea1e1429e2921ca7f0141244a766",
+      "level": 2,
+      "reference_sha256": "a0d96d8c8dbc0f6d7272bd95d307ca8e725f9fb892dc4a4b02d584afc6239852",
+      "renamed_identity": "9844b7690c02bd185dd54911b886a365ffd9eba79d5d404eeb387756bee0a050",
+      "sample_id": "SYN-GCDARR-0005",
+      "source_reference": [
+        "Lỗi nhập/xuất",
+        "Lỗi vòng lặp"
+      ],
+      "source_sha256": "6e5dc254d02f80c5fe5dba1292c1614d4a9d70a53dfea7d48f91a6a0b82ab43a",
+      "statement_sha256": "1a0b4ff4230f50fe2a79a7d163faf9dd83724261068c0fda7a5cbe19355d64cc"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi biên dịch",
+        "Lỗi hard-code"
+      ],
+      "code_identity": "2c5684f8e62d47ec7f4047bbcc3d3ce20f507ab3c304d24abbebbebd2105ceb9",
+      "family": "SYN-GCDARR",
+      "group": "2c5684f8e62d47ec7f4047bbcc3d3ce20f507ab3c304d24abbebbebd2105ceb9",
+      "level": 3,
+      "reference_sha256": "6168ccc3a907d8ac8a41ae279da85edf514c7fd579aad8ee10fe956ee74e99de",
+      "renamed_identity": "3b328f84b090da67ab426830a1bda2f79cbbb6c005434964601dd977e3308792",
+      "sample_id": "SYN-GCDARR-0009",
+      "source_reference": [
+        "Lỗi biên dịch",
+        "Lỗi hard-code"
+      ],
+      "source_sha256": "23aa265539e816be9967019bba517c8cb76cf3096abdd1c1189940c4075c94f7",
+      "statement_sha256": "1a0b4ff4230f50fe2a79a7d163faf9dd83724261068c0fda7a5cbe19355d64cc"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "code_identity": "84cc680172f1031655303df1e9aff4f5b5080f2abd23ba6d2d993e9d7b8b0276",
+      "family": "SYN-GCDARR",
+      "group": "84cc680172f1031655303df1e9aff4f5b5080f2abd23ba6d2d993e9d7b8b0276",
+      "level": 2,
+      "reference_sha256": "7de2d8ed0d88d7568c42c79e76d00db4e6dc7b78fe226f1817a18d22d5f7371f",
+      "renamed_identity": "9f044fab995e38aa18dca4ba9f14fca89f0c361f1f98d175cebecc3039480f51",
+      "sample_id": "SYN-GCDARR-0013",
+      "source_reference": [
+        "Lỗi thuật toán"
+      ],
+      "source_sha256": "ba3f78ef02274553d8baf5d7f2cf351920aa9dfd17addde35d9f080ece46b448",
+      "statement_sha256": "1a0b4ff4230f50fe2a79a7d163faf9dd83724261068c0fda7a5cbe19355d64cc"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "329c02ec87738d505f3f00bde86ff59050c0512f88eead35a962fb138f145b93",
+      "family": "SYN-MAXDIFF",
+      "group": "329c02ec87738d505f3f00bde86ff59050c0512f88eead35a962fb138f145b93",
+      "level": 3,
+      "reference_sha256": "ca5347d18218d7f04a47362580fd32ded090353d73b53f7bb684c67d271c6131",
+      "renamed_identity": "528e77b93d616930852bfe4c6ff462be3af9f8348c3a81473175ea4c2cd22f64",
+      "sample_id": "SYN-MAXDIFF-0003",
+      "source_reference": [
+        "Lỗi hàm",
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "11a6c174f09d17ed0e22a22229fc895acabaa1c27ee49ba0a4d1c623dda5af87",
+      "statement_sha256": "4fe665371da43f5691032eaea65dc2281def3418a03559bcf514ba1bc417d933"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi vòng lặp",
+        "Lỗi logic"
+      ],
+      "code_identity": "916f0aaed76dbff14b11894e7d61fa6e2110830d54162696a02fba91ae39ae73",
+      "family": "SYN-MAXDIFF",
+      "group": "916f0aaed76dbff14b11894e7d61fa6e2110830d54162696a02fba91ae39ae73",
+      "level": 2,
+      "reference_sha256": "fa30c3e489a0915db01c4d8b3023232589489d9fcfb414ebfd99cd75d91e1a8b",
+      "renamed_identity": "11377a40cd0f13148d14f2262ca9711f78e55d82bf31be8eda17466ba3755148",
+      "sample_id": "SYN-MAXDIFF-0007",
+      "source_reference": [
+        "Lỗi vòng lặp"
+      ],
+      "source_sha256": "09347791f3a551f9e8919a867eee38834147c6ab45a889d3fc340fecf8f45e0c",
+      "statement_sha256": "4fe665371da43f5691032eaea65dc2281def3418a03559bcf514ba1bc417d933"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hard-code"
+      ],
+      "code_identity": "b4469b64bf567955f089a1fe1b777a1dbe7e3dccb10e925960419e37a8b767ea",
+      "family": "SYN-MAXDIFF",
+      "group": "b4469b64bf567955f089a1fe1b777a1dbe7e3dccb10e925960419e37a8b767ea",
+      "level": 2,
+      "reference_sha256": "ed584f9d660cda81bf18cb210383ecc59e70d53c55b8a50ec88bb0c4b52640bd",
+      "renamed_identity": "10e10983862b6b591550e55a7d2f4eec373132831b230981c7daffdfdd0ce4e2",
+      "sample_id": "SYN-MAXDIFF-0008",
+      "source_reference": [
+        "Lỗi hard-code"
+      ],
+      "source_sha256": "ab5a353acd84eeb8206ab99320267e0b67e9697650d57a710d774d58da7f553f",
+      "statement_sha256": "4fe665371da43f5691032eaea65dc2281def3418a03559bcf514ba1bc417d933"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "621ad8586e0713e39339d9e6ff2e999a6721556b6d1654b5cc71844da8eac5d8",
+      "family": "SYN-MINA",
+      "group": "621ad8586e0713e39339d9e6ff2e999a6721556b6d1654b5cc71844da8eac5d8",
+      "level": 2,
+      "reference_sha256": "905da35d3bbb5e57438188a294225fba35fa8d6769798f1df04ba5139ac8eb6f",
+      "renamed_identity": "4b63e12f13b4da590b744a7dfa9817d601b288a7a4ad9e187525af6a7542b248",
+      "sample_id": "SYN-MINA-0000",
+      "source_reference": [],
+      "source_sha256": "954cd508e538f42948ece61c7f01811cff8818c6fcd6019f8fcfbfb793ab2890",
+      "statement_sha256": "6f068ec8d57e6b84f91dcae6d686927b2c6542da80ed09c461db11ae2a4c02c2"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi vòng lặp",
+        "Lỗi edge case"
+      ],
+      "code_identity": "8925bfe8fead4072fca287a4ce3c3df57be60973c272209a7011210b65b33db5",
+      "family": "SYN-MINA",
+      "group": "8925bfe8fead4072fca287a4ce3c3df57be60973c272209a7011210b65b33db5",
+      "level": 3,
+      "reference_sha256": "6bdc9cb4c8d4bd38ed0139152b3038765ada45cd75acf3e19f06c05862257d9f",
+      "renamed_identity": "07b5a57dc7fa6b13ed2858af13c189d94d2659a738cfd61db7491740f43aee32",
+      "sample_id": "SYN-MINA-0004",
+      "source_reference": [
+        "Lỗi vòng lặp",
+        "Lỗi edge case"
+      ],
+      "source_sha256": "5b91d487a1b3f574a105d8a47391094e647f013075cbb325eb06dd9216620f51",
+      "statement_sha256": "6f068ec8d57e6b84f91dcae6d686927b2c6542da80ed09c461db11ae2a4c02c2"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hard-code"
+      ],
+      "code_identity": "2227114a1356fa403b26fbc6cb47fd888a1cc85d8d9fa943e6925703ad81a85b",
+      "family": "SYN-MINA",
+      "group": "2227114a1356fa403b26fbc6cb47fd888a1cc85d8d9fa943e6925703ad81a85b",
+      "level": 2,
+      "reference_sha256": "3cad96a94ededd535e5a80c4f54625deb0befcef58746d7257742517ddcb52e6",
+      "renamed_identity": "5c3f02a17379cb7721463443604738be0cd6ec494a5253c1b8e6336f24ea5fe9",
+      "sample_id": "SYN-MINA-0016",
+      "source_reference": [
+        "Lỗi hard-code"
+      ],
+      "source_sha256": "7caf2e322799907ffb649eab6c6942c14ae13232710245cc5bc00b172413b4c1",
+      "statement_sha256": "6f068ec8d57e6b84f91dcae6d686927b2c6542da80ed09c461db11ae2a4c02c2"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "code_identity": "c4630c825271472d161ef48771824f71b51e84fd92aea266dc03eec0870bf155",
+      "family": "SYN-PERFECT",
+      "group": "c4630c825271472d161ef48771824f71b51e84fd92aea266dc03eec0870bf155",
+      "level": 2,
+      "reference_sha256": "f83bdfc37ef191253086f71686a842a03b373945fc820b8cff4b4424d28a69f0",
+      "renamed_identity": "95f70c3e05eef9a40bcb070839e6421e7741b02967f851d898818262a5ead9c5",
+      "sample_id": "SYN-PERFECT-0007",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "118ab73912e0126bdf67c41cfea2da0221a5bc414d3300966f265c3d03ad2d90",
+      "statement_sha256": "db16d220804850e2ccc8eecfc522189b1a55296bbc1299c16765779834ab596e"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hard-code"
+      ],
+      "code_identity": "3bcb288a434df0fdb21ec498f14653138bfcec5b0e0d4a4ddfe407411aee51e3",
+      "family": "SYN-PERFECT",
+      "group": "3bcb288a434df0fdb21ec498f14653138bfcec5b0e0d4a4ddfe407411aee51e3",
+      "level": 4,
+      "reference_sha256": "7e79bb03b42e38b9ad603b17b9db013ee327f20a9ccd0a9e2006277e8c321b84",
+      "renamed_identity": "23ce1a073204f796b1664a7920eb260548c4bc5040e6c61ea64af61e31d6cf32",
+      "sample_id": "SYN-PERFECT-0011",
+      "source_reference": [
+        "Lỗi hard-code"
+      ],
+      "source_sha256": "0f5e5f0ea37628abcb5147c0f09169e9170dac1700de6eac782a1e10ab5e0ae2",
+      "statement_sha256": "db16d220804850e2ccc8eecfc522189b1a55296bbc1299c16765779834ab596e"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi vòng lặp",
+        "Lỗi logic"
+      ],
+      "code_identity": "862fc76ae417123242762364b0db6bfc52b284e8886c1445c306f9c940969529",
+      "family": "SYN-PERFECT",
+      "group": "862fc76ae417123242762364b0db6bfc52b284e8886c1445c306f9c940969529",
+      "level": 2,
+      "reference_sha256": "48746eceb7d1cf0c7a28b0afded676ea7256c3edac3c803c38c43fce2007616e",
+      "renamed_identity": "bfc9b3b22bb3b7b77182cf067d5a01d111110ed058926032ef2d8df59633e412",
+      "sample_id": "SYN-PERFECT-0018",
+      "source_reference": [
+        "Lỗi vòng lặp"
+      ],
+      "source_sha256": "649491af175b4a8c4d4aef6c8235f723e89bf139d32df3f202b9660216c599b6",
+      "statement_sha256": "db16d220804850e2ccc8eecfc522189b1a55296bbc1299c16765779834ab596e"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi edge case",
+        "Lỗi logic"
+      ],
+      "code_identity": "88808cb7a7f7c29bb623c5adc50e935d98e862074681fd92ec4c70fd20b2a50c",
+      "family": "SYN-PRIME",
+      "group": "88808cb7a7f7c29bb623c5adc50e935d98e862074681fd92ec4c70fd20b2a50c",
+      "level": 2,
+      "reference_sha256": "eeb930562c3fa8aa936a6c9f761c405928caa5d6bab3395d4fb2f198e02b8f0d",
+      "renamed_identity": "5031797477cbdde04502acfd446ec115dda528c0f06d59c8d74883828ac6db5c",
+      "sample_id": "SYN-PRIME-0005",
+      "source_reference": [
+        "Lỗi edge case",
+        "Lỗi logic"
+      ],
+      "source_sha256": "7ab2891188571ba4d85f615a694e6ee49f1c8865af0076c27584f30cafb51880",
+      "statement_sha256": "24de03a34e8c59bfa6214cb0af52de57feb013e85ff07950c7616203167f8a06"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "code_identity": "df50db3b2cf3f7dcffcae0a7109eec16bcbf8ebe41be9b290b3c650fa01b83f6",
+      "family": "SYN-PRIME",
+      "group": "df50db3b2cf3f7dcffcae0a7109eec16bcbf8ebe41be9b290b3c650fa01b83f6",
+      "level": 1,
+      "reference_sha256": "0e01b4d4ebddcab6cfc47b3159718afd574efc4d33deced1a6d8c87fbdbf43a9",
+      "renamed_identity": "1fbb002e58f16d9479afb62f895c33adc67717bf1c92fc93920339ec2e2fb9df",
+      "sample_id": "SYN-PRIME-0008",
+      "source_reference": [
+        "Lỗi hàm"
+      ],
+      "source_sha256": "c4718626821980714e51c7430987d21adab8a7806140e50eb954d2edaa68c505",
+      "statement_sha256": "24de03a34e8c59bfa6214cb0af52de57feb013e85ff07950c7616203167f8a06"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "code_identity": "6325b4be578025d23de9ca4f00b6fa523962b1b4959def8fd5efede332a1fa4b",
+      "family": "SYN-PRIME",
+      "group": "6325b4be578025d23de9ca4f00b6fa523962b1b4959def8fd5efede332a1fa4b",
+      "level": 3,
+      "reference_sha256": "afceac60b32877c5ba13443185de7cbaf8abb1cb4fbdc50f1941110c0db384b1",
+      "renamed_identity": "542a3efbb992405445f91bed5496db5a6012843095377cb4fa4f9afa41590651",
+      "sample_id": "SYN-PRIME-0010",
+      "source_reference": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "source_sha256": "b62e443b28be7b52aa2106abc5b1206b3ce9d1a9499178f1fdb88d5ed9f8a16d",
+      "statement_sha256": "24de03a34e8c59bfa6214cb0af52de57feb013e85ff07950c7616203167f8a06"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán"
+      ],
+      "code_identity": "e9e7502a8240522915063284994059d69eb8706276eb0302aaf5850593fe7e4a",
+      "family": "SYN-PRIME",
+      "group": "e9e7502a8240522915063284994059d69eb8706276eb0302aaf5850593fe7e4a",
+      "level": 1,
+      "reference_sha256": "cf3b4d8305ec7d6460a0ec147e42a12b49c4247aaf28d3de09bffd650003ac03",
+      "renamed_identity": "7ca46c7de9bcbf1505abe2917abda9a8dbfb437005d93417feab77c91d617799",
+      "sample_id": "SYN-PRIME-0024",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "8b14f4675eee473ff9c9d2d0b592bc18f1f34139e1d57404fbcade6bc6030759",
+      "statement_sha256": "24de03a34e8c59bfa6214cb0af52de57feb013e85ff07950c7616203167f8a06"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi vòng lặp"
+      ],
+      "code_identity": "0b0df68012e21734ec27ee8effa4835d01374a456f940cbfa8a9c32f8b3d219c",
+      "family": "SYN-PROD",
+      "group": "0b0df68012e21734ec27ee8effa4835d01374a456f940cbfa8a9c32f8b3d219c",
+      "level": 2,
+      "reference_sha256": "6d2aa58ec3103d63a7a02846d0afbd8435469beabbd579a1d757c7d7e4a5b90a",
+      "renamed_identity": "a9cce8b27fe5f0d4f2ce92ff9aabd1e65b5b3530416621cac916c9c98f8c6d97",
+      "sample_id": "SYN-PROD-0003",
+      "source_reference": [
+        "Lỗi vòng lặp"
+      ],
+      "source_sha256": "09928eef848e02697e2daf25899f44087821e92acde2923116b43c212bcc138a",
+      "statement_sha256": "33057c9048ee501a7dea9c88b9f9f81abb3a1ed23c557fad67c37925b1d60546"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi",
+        "Lỗi vòng lặp",
+        "Lỗi hàm"
+      ],
+      "code_identity": "32792eafe382b3f68866021ce2ed6e3c68e1e0091bd1ac79e24d4bcc12117e8b",
+      "family": "SYN-PROD",
+      "group": "32792eafe382b3f68866021ce2ed6e3c68e1e0091bd1ac79e24d4bcc12117e8b",
+      "level": 1,
+      "reference_sha256": "0d577c32e87da520a59534c71766929d9c9efd235747013a9048fca21ca602cc",
+      "renamed_identity": "0c6437d6de865421a2a15c5c16606860d9139fbe91a8d81eb1c910477a94919a",
+      "sample_id": "SYN-PROD-0015",
+      "source_reference": [
+        "Lỗi mảng/chuỗi",
+        "Lỗi vòng lặp",
+        "Lỗi hàm"
+      ],
+      "source_sha256": "ddd880f40602541ed4ff0fe1330f29d58d9d999d31e74a9cd9418f7db7b54f3c",
+      "statement_sha256": "33057c9048ee501a7dea9c88b9f9f81abb3a1ed23c557fad67c37925b1d60546"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi thuật toán",
+        "Lỗi vòng lặp",
+        "Lỗi hàm"
+      ],
+      "code_identity": "4abd010c9dd0e4562aa6dbd9eb2b5d227a1184a0267553041553f7b2f62fb65c",
+      "family": "SYN-PROD",
+      "group": "4abd010c9dd0e4562aa6dbd9eb2b5d227a1184a0267553041553f7b2f62fb65c",
+      "level": 3,
+      "reference_sha256": "069c91a48d7df0e7e9c31b6ba5c8efee0692c66e2e29df2dc513c5edfce8429a",
+      "renamed_identity": "e3d57a888fd10225129963edff62e00231b664b78875187224831a4a27fcc964",
+      "sample_id": "SYN-PROD-0017",
+      "source_reference": [
+        "Lỗi thuật toán",
+        "Lỗi vòng lặp",
+        "Lỗi hàm"
+      ],
+      "source_sha256": "fc0250a07a00bb0a30901573c79f0df62368cb214dcf75a4e0124804f038b994",
+      "statement_sha256": "33057c9048ee501a7dea9c88b9f9f81abb3a1ed23c557fad67c37925b1d60546"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "8562686ff0e987190b89f0cb0b149b2ca2e2caaf9a2c99fd2fc85127de3e65e9",
+      "family": "SYN-REVSTR",
+      "group": "8562686ff0e987190b89f0cb0b149b2ca2e2caaf9a2c99fd2fc85127de3e65e9",
+      "level": 4,
+      "reference_sha256": "e082cfe3d52bc63bdfae782a9208dbe08419e330a153d339a7dc40ba261dff74",
+      "renamed_identity": "83cf73555b18f84ccd8ffffd3656de31012a68553385efc10ea6b02b8492e870",
+      "sample_id": "SYN-REVSTR-0001",
+      "source_reference": [],
+      "source_sha256": "00a765251f6ab534091fd723524da732bcbf1f92ceeae0d673703e1b43c8d1fb",
+      "statement_sha256": "a54c8ef24dfb8a80c2548fb237ef35186e718ec53a395bb428c942aaead9bbda"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "0d29a838c73b35fe11e46f5cb6f65a1f369aa905bab8c8db3184c15b882c574d",
+      "family": "SYN-REVSTR",
+      "group": "0d29a838c73b35fe11e46f5cb6f65a1f369aa905bab8c8db3184c15b882c574d",
+      "level": 2,
+      "reference_sha256": "43ba20823de1b62ff5bb812e9e29d8fb41214a05a1834882c1e57c10e9765352",
+      "renamed_identity": "79ad2eb8abf46da3fa0ce3c132c2ba40fc9e64ce673f2e5410a91dcacb9f93d9",
+      "sample_id": "SYN-REVSTR-0007",
+      "source_reference": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "0d2bfa0f5735ac54ddfff4f57de55eb4e6e3c3ccde05a79e592616c2f1baf3ee",
+      "statement_sha256": "a54c8ef24dfb8a80c2548fb237ef35186e718ec53a395bb428c942aaead9bbda"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hàm"
+      ],
+      "code_identity": "13a8e1fd6e21f980c2d853f92768ac17ac45430620610c11b8bf5f8370b7d56b",
+      "family": "SYN-REVSTR",
+      "group": "13a8e1fd6e21f980c2d853f92768ac17ac45430620610c11b8bf5f8370b7d56b",
+      "level": 1,
+      "reference_sha256": "ae1a99638c46323789941b242b8139c56f01a6d9514e17df3fe9428d5118eec4",
+      "renamed_identity": "f51239c695855199b2880a27cc6fcc78fd2420fcbfda9761a12fb7c8dfd7dfff",
+      "sample_id": "SYN-REVSTR-0009",
+      "source_reference": [
+        "Lỗi hàm"
+      ],
+      "source_sha256": "3c726476266ab49f26f5bb900f3205ca91856bde0798affe9eca918440320256",
+      "statement_sha256": "a54c8ef24dfb8a80c2548fb237ef35186e718ec53a395bb428c942aaead9bbda"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "9a1844ba876d2cf375d424a96fdd1be19e72cdac49884f6fdcf00113f45500fb",
+      "family": "SYN-SECONDMAX",
+      "group": "9a1844ba876d2cf375d424a96fdd1be19e72cdac49884f6fdcf00113f45500fb",
+      "level": 1,
+      "reference_sha256": "4fc846f35340aeadc9696a666ba571c259daaaf63dac90cb5da112a75e43986a",
+      "renamed_identity": "ea1ce77e348cd9b9eb8e3cb51d65a5e49711d61221ce45ffe6335235ea0bf1dc",
+      "sample_id": "SYN-SECONDMAX-0004",
+      "source_reference": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "226b079905e772f179ec4a4bf25bb86a29cff24bc8f80a9052928367faa1548c",
+      "statement_sha256": "36ab2155a0a600d4175a10257ae93cb74069574fc333c74b62effaf349b47396"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi hard-code"
+      ],
+      "code_identity": "451bfd3bf47dbf9316ac25e0638a0b839bb2c24a8674839ca67f4f671762e688",
+      "family": "SYN-SECONDMAX",
+      "group": "451bfd3bf47dbf9316ac25e0638a0b839bb2c24a8674839ca67f4f671762e688",
+      "level": 1,
+      "reference_sha256": "1a37da18da425e001bf7cd70f015940e6fe48f0bc2332a563c82c3fd7db830db",
+      "renamed_identity": "05943d2367463320e70040125b5eb689aad4ffd6acaa76c9d09cbbe372becaa7",
+      "sample_id": "SYN-SECONDMAX-0006",
+      "source_reference": [
+        "Lỗi hard-code"
+      ],
+      "source_sha256": "e3072553ed9018ac97c985d237400874a2778107cfe4ad9daf6d29a46ec10aa0",
+      "statement_sha256": "36ab2155a0a600d4175a10257ae93cb74069574fc333c74b62effaf349b47396"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi biên dịch"
+      ],
+      "code_identity": "5a19c947fc856409ae06f1759adf92bfea7f752fb62d9df71f21eda4713bd069",
+      "family": "SYN-SECONDMAX",
+      "group": "5a19c947fc856409ae06f1759adf92bfea7f752fb62d9df71f21eda4713bd069",
+      "level": 1,
+      "reference_sha256": "dd19a9fd45436f7bbec0bfa2eb809b29ee77e5f3534dc042520ed6cd432312aa",
+      "renamed_identity": "b93c3083e09641af8996594fc6d1e6a485f997a722908f6854a08a4c903086fb",
+      "sample_id": "SYN-SECONDMAX-0009",
+      "source_reference": [
+        "Lỗi biên dịch"
+      ],
+      "source_sha256": "0f1cec088653f457f9079e0fecd3f79836ad488ee50b7ff2042f04cb7b0adecc",
+      "statement_sha256": "36ab2155a0a600d4175a10257ae93cb74069574fc333c74b62effaf349b47396"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "code_identity": "2d540b2127dae45ef4e0774b51d7d32a2d5be81ec3ba3f58c7e91ad03b22ac9a",
+      "family": "SYN-SUMB",
+      "group": "2d540b2127dae45ef4e0774b51d7d32a2d5be81ec3ba3f58c7e91ad03b22ac9a",
+      "level": 1,
+      "reference_sha256": "52fcefe308f36a862276687f8b3ec6fdf26d9b2ba1d0d8076edeea0281e912a7",
+      "renamed_identity": "6ee6ced5c3ce4196d901eb6bbf634c171f0db249f328abc500c24199290072e2",
+      "sample_id": "SYN-SUMB-0003",
+      "source_reference": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_sha256": "b27b829626b4fc7156b8bd6c5824e3584d2934030694f0ebbdd3c085e3d07776",
+      "statement_sha256": "a12983581f766b9f9d31718c5e37eea0ad45136af24590ca1f75e2c4b4dca5a3"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic",
+        "Lỗi style"
+      ],
+      "code_identity": "e3acbf049f6e292397b8d81d7cf9aafd0e4cec1f16e374ce6e08f0a7d1d93b35",
+      "family": "SYN-SUMB",
+      "group": "e3acbf049f6e292397b8d81d7cf9aafd0e4cec1f16e374ce6e08f0a7d1d93b35",
+      "level": 1,
+      "reference_sha256": "44e8788e43cd373aff1551f6bec01c7b197655b96b2ac17630c4de0250b878d1",
+      "renamed_identity": "1634bb7cfbf1a8571c0054670adb72f8890eff98ea6e40743c0c82b9934cbd5b",
+      "sample_id": "SYN-SUMB-0005",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "e7d09953c34fd94ec1cf22c68b20687afe4ff13b07f1de74889ff4a6d411f17a",
+      "statement_sha256": "a12983581f766b9f9d31718c5e37eea0ad45136af24590ca1f75e2c4b4dca5a3"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi biên dịch"
+      ],
+      "code_identity": "6d3916eb3dc62190961cd804254ed07be588f4ed0cfd64c70789f5128ef394a7",
+      "family": "SYN-SUMB",
+      "group": "6d3916eb3dc62190961cd804254ed07be588f4ed0cfd64c70789f5128ef394a7",
+      "level": 2,
+      "reference_sha256": "f28910cab0241d7e260833b86082e648844b4b2aaa7e324d5952882d893e962c",
+      "renamed_identity": "dfae67ab125f1ece6bc95190b11f8442cac9a55c26aed8ff64779c8c257479f4",
+      "sample_id": "SYN-SUMB-0034",
+      "source_reference": [
+        "Lỗi biên dịch"
+      ],
+      "source_sha256": "fc2e40aad9a80fdf779618e8f56a41fbce6b8cf10b183fe58e7bd82e54577782",
+      "statement_sha256": "a12983581f766b9f9d31718c5e37eea0ad45136af24590ca1f75e2c4b4dca5a3"
+    },
+    {
+      "annotation_v2": [],
+      "code_identity": "26dade9a241aba98fb7c3cb40d3c74997109166b2e6b7f8637cb4eba996dafd3",
+      "family": "SYN-SUMEVEN",
+      "group": "26dade9a241aba98fb7c3cb40d3c74997109166b2e6b7f8637cb4eba996dafd3",
+      "level": 1,
+      "reference_sha256": "3e48b863bebf7bb169f01dca4e6db41719438be1eb7494d3b6b7bf2d2264a64f",
+      "renamed_identity": "4d9271d90ab0472178b0d5552effd6a63510c7960d41d90a575dc767dc1fa6ae",
+      "sample_id": "SYN-SUMEVEN-0000",
+      "source_reference": [],
+      "source_sha256": "56fbcb4431812105001a125ed800a319b5b26aef07846143bbe7ae7c84eaca74",
+      "statement_sha256": "8515d4114d7e8f0c37e66373227c1a1781bc8bb2c2ca6967c343f8fabee95860"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi vòng lặp"
+      ],
+      "code_identity": "2b03aa2d1933dc6578872c65a7a39b13617b59a0c83dd4a4b3a9bb2835ac2446",
+      "family": "SYN-SUMEVEN",
+      "group": "2b03aa2d1933dc6578872c65a7a39b13617b59a0c83dd4a4b3a9bb2835ac2446",
+      "level": 4,
+      "reference_sha256": "9e83bdbd3692a52cd98441cb34d3986f3f4b719055dba418c5f00d6652339dea",
+      "renamed_identity": "aa42e1bd2ff8e44aa850bc2f710978d377d2f0293550490aea7d5a426a6e9c3f",
+      "sample_id": "SYN-SUMEVEN-0008",
+      "source_reference": [
+        "Lỗi vòng lặp"
+      ],
+      "source_sha256": "da03220b6d4ec86fe4d7d8e2c4b18559b3830daa574426d55e50f647168f4384",
+      "statement_sha256": "8515d4114d7e8f0c37e66373227c1a1781bc8bb2c2ca6967c343f8fabee95860"
+    },
+    {
+      "annotation_v2": [
+        "Lỗi logic"
+      ],
+      "code_identity": "c8ffc3049b6df19196725127d349e943f75c2e1e09f23678d1af2045a6a8dd60",
+      "family": "SYN-SUMEVEN",
+      "group": "c8ffc3049b6df19196725127d349e943f75c2e1e09f23678d1af2045a6a8dd60",
+      "level": 1,
+      "reference_sha256": "bd97ef1b09e036929ffd1b27da13cdad8df7cb10684ae06cbb8ee69a3300fa81",
+      "renamed_identity": "cb8996db16681e2d1d9fb3faf95622d5231006135f55bcf966bac93859252379",
+      "sample_id": "SYN-SUMEVEN-0012",
+      "source_reference": [
+        "Lỗi logic"
+      ],
+      "source_sha256": "96d4b917c7758a80e5f9287af6acc49d05f5774e649ae8b7d74f5f2d32ce6ebb",
+      "statement_sha256": "8515d4114d7e8f0c37e66373227c1a1781bc8bb2c2ca6967c343f8fabee95860"
+    }
+  ],
+  "historical_inputs_sha256": {
+    "data/processed/task3/real-train.jsonl": "12f2e897c1e374233754bec187de87c903f2142a582e6ad5eb72b81c9f58b1b4",
+    "data/processed/task3/real-val.jsonl": "7ba34debaf0112cba9600adf1f28a797afd787d144687e7d0d200e3a862b6c55",
+    "data/processed/task3/synthetic-heldout.jsonl": "03da0057bdae83de1a869d83974bfc669f4f481ae9eecdd8b34742d43de89666",
+    "data/processed/task3/synthetic-train.jsonl": "27a00fddb3bf17b0ee6af7ebaac14ffdf3deb6bdc98ebc57233d6cf7aac789e4",
+    "data/synth/generate-dataset/task3_feedback.json": "122d3736634394741ea8eaddb89dd1f068e4d23cd037f380a94c35b67f04bf4f",
+    "outputs/task3/round14/dev-A-final/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/dev-A-v3/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/dev-A/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/dev-B-final/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/dev-B-oracle-final/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/dev-B-v2/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/dev-B-v3/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/selection-A/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/selection-B-oracle/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/selection-B/development-selection.json": "49753fcb85620b82c7433c6b3a65b05bb37cc0d60d5e4fca3e03406ba9a57620",
+    "outputs/task3/round14/selection-freeze.json": "959768c59d5b3cbbe489991c7d4a62f3d2cca60e644327412a5f20d0267d5372",
+    "outputs/task3/round15/development-probe-freeze.json": "197e5fdbaa7fc76269c8b5a1fffdbba96799dd28652d57a64e5f37630a444e8b",
+    "outputs/task3/round15/development-selection.json": "0e229f0f80728cb06fd326418f02d4716a976dee5b9dce60eae62cbf8c27a26c",
+    "outputs/task3/round15/example-candidate-selection.json": "bdc8b82ed50bbb9756f596b086322cccb45ce05be40df888021b5e7cdf488eea",
+    "outputs/task3/round15/example-source-shortlist.json": "506fce25c6ab91f1cf640a7381dc3381de39b4d32846a24337d0464ad536b31d",
+    "outputs/task3/round15/train-examples.draft.json": "fe776cedec99cf669b482ed925579d8c449ab917ac94a1880ec2f5600fda7b03",
+    "outputs/task3/round15/train-examples.json": "731cc2b4caa43e4db83011a2bb73fb8919deb7138665e48964457e9962ee7938",
+    "outputs/task3/round16/development-selection.json": "0e229f0f80728cb06fd326418f02d4716a976dee5b9dce60eae62cbf8c27a26c",
+    "outputs/task3/round16/train-examples.json": "07af215d6f86ab73c248d0f11ed3cf79d7384ea991712ea5a7f1256b2b7a861b",
+    "outputs/task3/round17/train-examples.json": "b54ee57e2352bc84e192a7b17c3ab49ca1dbc72b81952ad3ccf91a2b298e9c3a",
+    "reports/task3/TASK3_ROUND16_FREEZE_20261020.json": "d73d273db9b2ab7933e08b8d43905f35dbec97c979c0e183d3065cdb7d9bd0cd",
+    "reports/task3/TASK3_ROUND17_FREEZE_20261020.json": "54102876e6f6598c3aad39ea95526330abfd6e7ef3fdfbb1527d489c4e97df5b",
+    "reports/task3/TASK3_ROUND18_FREEZE_20261020.json": "4388a9fa7be648af56ff20948c729d7b49d0fb93db378577bfa5549683dbb1a5",
+    "reports/task3/TASK3_ROUND18_PILOT_ELIGIBILITY_20261020.json": "e8ee4240dcbb1b63134127193ba7475e49a764d338adec5d5b12084e1e253c70",
+    "reports/task3/TASK3_ROUND18_TARGET_PROVENANCE_20261020.json": "ec62e404eb83e52a6d206c1fefd4ff49ee2279fed5eac7c3a7b84b067856ae49",
+    "tests/task3_discovery_cases.py": "653ad8fe51fba93fe1655849624f11da860342d56c1d2df4758f9bbff49c3eef"
+  },
+  "implementation_sha256": {
+    "scripts/task3_freeze_eval.py": "ed510cc3554da4e04f502ceeb5b49fdd484c9c098089bda2c47b0c15f9b56b0c",
+    "scripts/task3_freeze_eval_v2.py": "d86a8c5544d12e3863b2191f1c664ca9aea3ada6ef57a27827bb2c74b08a9b28",
+    "src/synth/feedback.py": "57e7533770e1fc585e5e9e0589b93b522abf9853812af0d94bbb426d5a7f0948",
+    "src/synth/taxonomy.py": "c6f4a3cece36e70e94d1f9abd38d0f3c8abfe77140690b4dbe8ac0058a585288",
+    "src/task3/eval_history.py": "dec609ad422e962040b85ed072cb41345028ff52e9125805cfe555e64825079e",
+    "src/task3/eval_snapshot.py": "c11f13dcf2ca0343e21b0183af017f98095b1bdf6fb518ff8478cb0dd437d1a1",
+    "src/task3/eval_v2.py": "33e64a21537ae65f08758b803252f1693bf25a515ce561b6bb26b7eba8d4851c",
+    "src/task3/frozen_eval.py": "e0a65c1aa2482f7e2975acf0132468e68697b93e28850cda553c0f96dc4a2a3c",
+    "src/task3/schema.py": "0b00e448051ef33848c81291f13849c777d7d5d9f54d13632b9e2f0a09d1bac8",
+    "tests/test_task3_eval_snapshot.py": "736c30a800051070e0fa4e422ae64e42a37a5360ff9921786b0f39fd0539b8c5",
+    "tests/test_task3_eval_v2.py": "19e0b29d4604fd8ea73bdcb2dbc83c77067a3d1df47d44ad0fde8029523d693d",
+    "tests/test_task3_freeze_cli.py": "a1b21fec77aef24c36472de072b7c30520e2e9bb8248a5f96e5554839570cd5e",
+    "tests/test_task3_frozen_eval.py": "bc72b49a17183ef5b9cf0ea73189d12717b10b5ced13acdcf1d29fd3c8163d16"
+  },
+  "no_model_calls": true,
+  "no_training": true,
+  "parent_v1_manifest_sha256": "f7693da146b174faefd12fae96f9a7a3fbca118c1f8fd01d164d16b30d619e83",
+  "partition_before_selection_sha256": "0bbd4c383a9127b64cc9aa30d01c7a2d0f9fcac68e54f2f447aef427bedeb5df",
+  "policy": {
+    "blind_benchmark": false,
+    "controlled_holdout": true,
+    "evaluation_policy": "Only assigned evaluation families.56 v1 source-reviewed references plus4 additional invariant-reviewed scoped-clean sources; no model outputs used.",
+    "family_partition": "10 TRAIN /18 EVALUATION families fixed before source selection; never optimize membership after eligibility counts",
+    "id_protection": "Historical examples/targets/output-reviewed IDs, reserved heldout and all86 v1 evaluation identities blocked individually with group/code/rename/near variants.",
+    "level_policy": "60 primary:19/27/8/6 at L1/2/3/4. Predeclared source-level assignments ensure L3 covers nine supported source groups; remaining L1/2 slots seeded42. Never infer taxonomy from Level.",
+    "model_scope": "Qwen2.5-Coder-7B-Instruct only (<10B); no model loading/training/inference performed.",
+    "near_policy": "Identifier-erased5-token shingle Jaccard>=0.85 blocks train against ALL evaluation-family sources, historical used/reserved identities. Mandatory independent source review also excludes obvious template clones below threshold; neither step proves absence of every semantic duplicate.",
+    "prior_exposure": "All28 families have prior exposure. This metadata does not ban an entire TRAIN family.",
+    "style_policy": "Only an explicit statement/policy requirement plus an actual source violation can support style. Comments/TODO/unused names alone do not. Explicit Armstrong pow restriction checked; no active calls present in its corpus.",
+    "train_policy": "Fixed prepared synthetic-train membership only; unique source/renamed code; sealed whitelist; recompute actual code and enforce both before_targets and before_optimizer. Eligibility is isolation eligibility, not correctness/target verification.",
+    "version": "evaluation-v2-family-first-20261021"
+  },
+  "private_files_sha256": {
+    "code-review-followup.private.json": "d6ffb1f351187fa736c8998c5b5e496c50c92eb6d7baa292cf006e7348112148",
+    "code-review.private.json": "027f5d884fcdb9b17dc63ff9bb2a06ca679faba338e2edc8b9506f1fa3bdd9a9",
+    "disagreement-review.private.json": "722881edc3ef251e038462526b0ef2c0f96f7280a568b29a7c4664039e8493de",
+    "family-exposure-registry.json": "f355b9fc5a5bfd0907d16957d968deaa285a468f9ad2d0bd1c956f294f09fc77",
+    "family-partition.json": "0bbd4c383a9127b64cc9aa30d01c7a2d0f9fcac68e54f2f447aef427bedeb5df",
+    "guard-registry.private.json": "148e889efa0c6b9bf9dff42a6650ea47b05950ec3d97aaa0dce129abb555c5d2",
+    "isolation-probe.json": "29965748ef81b7ee71659c25ece5bc992e9a71c0a0740b63ab32bf5f033f6d93",
+    "metric-definitions.json": "c2190e8b475fccd38fc0d45a0355fe969febb1f8238de4ae186dc28652a4d39d",
+    "model-inputs.private.json": "425b509e0068ecebdd2fa0e030920d6a9bd194c631e5db65e96cbf584d2e30f9",
+    "policy.json": "436408c0359749e4ff5e1bf730293a5bdcc484a452a974d277e910582d3181e0",
+    "prefreeze-final-report.json": "c98eea874f243f11234991d82ce7d94da143217cc68fb280eff2d86cc5c5d2c4",
+    "reference.private.json": "66e445413b112e7c7c41a7dfb4eaa964993aa4ad20be15651401003eb84a4809",
+    "review-packet.private.json": "16834213b7f632ed745c5c890f15fe58dc6b2c3811ecdd632d9ef844591f44b6",
+    "train-eligible.private.json": "cb624bfcd0057f5d6379736d35ef1fc82c5456ac437b179047851741d49638eb",
+    "train-near-review.private.json": "99ebcf092ea40407fd8302c50ac8fee4635dc7a3be2474957fdf2e271ab90cfa",
+    "train-rejections.private.json": "be89495139bdf8a30c398672b4aed976c199372e24b5f9eaeb71d8d4dd1286cc",
+    "used-identity-registry.private.json": "d51a0a97a2de8a07ff2727b7946332a3105f14e26083f5eca2e8b0da62e9ca0d"
+  },
+  "private_root": "/workspace/llm-final-project/outputs/task3/eval-freeze-v2-20261021/frozen",
+  "requests": [
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-ARM-0000@primary-L1",
+      "sample_id": "SYN-ARM-0000"
+    },
+    {
+      "kind": "primary",
+      "level": 4,
+      "request_id": "v2:SYN-ARM-0008@primary-L4",
+      "sample_id": "SYN-ARM-0008"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-ARM-0026@primary-L2",
+      "sample_id": "SYN-ARM-0026"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-ARM-0027@primary-L1",
+      "sample_id": "SYN-ARM-0027"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-BASE2-0000@primary-L2",
+      "sample_id": "SYN-BASE2-0000"
+    },
+    {
+      "kind": "primary",
+      "level": 4,
+      "request_id": "v2:SYN-BASE2-0006@primary-L4",
+      "sample_id": "SYN-BASE2-0006"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-BASE2-0007@primary-L1",
+      "sample_id": "SYN-BASE2-0007"
+    },
+    {
+      "kind": "primary",
+      "level": 4,
+      "request_id": "v2:SYN-COUNTGT-0000@primary-L4",
+      "sample_id": "SYN-COUNTGT-0000"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-COUNTGT-0004@primary-L1",
+      "sample_id": "SYN-COUNTGT-0004"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-COUNTGT-0005@primary-L1",
+      "sample_id": "SYN-COUNTGT-0005"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-COUNTUPPER-0001@primary-L3",
+      "sample_id": "SYN-COUNTUPPER-0001"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-COUNTUPPER-0007@primary-L2",
+      "sample_id": "SYN-COUNTUPPER-0007"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-COUNTUPPER-0011@primary-L2",
+      "sample_id": "SYN-COUNTUPPER-0011"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-COUNTUPPER-0012@primary-L2",
+      "sample_id": "SYN-COUNTUPPER-0012"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-DIGITSUM-0001@primary-L2",
+      "sample_id": "SYN-DIGITSUM-0001"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-DIGITSUM-0006@primary-L2",
+      "sample_id": "SYN-DIGITSUM-0006"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-DIGITSUM-0007@primary-L2",
+      "sample_id": "SYN-DIGITSUM-0007"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-DIGITSUM-0016@primary-L3",
+      "sample_id": "SYN-DIGITSUM-0016"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-DISTINCT-0000@primary-L2",
+      "sample_id": "SYN-DISTINCT-0000"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-DISTINCT-0001@primary-L1",
+      "sample_id": "SYN-DISTINCT-0001"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-DISTINCT-0010@primary-L1",
+      "sample_id": "SYN-DISTINCT-0010"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-DISTINCT-0017@primary-L2",
+      "sample_id": "SYN-DISTINCT-0017"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-FACT-0001@primary-L3",
+      "sample_id": "SYN-FACT-0001"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-FACT-0004@primary-L1",
+      "sample_id": "SYN-FACT-0004"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-FACT-0006@primary-L2",
+      "sample_id": "SYN-FACT-0006"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-FACT-0008@primary-L2",
+      "sample_id": "SYN-FACT-0008"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-FIB-0000@primary-L2",
+      "sample_id": "SYN-FIB-0000"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-FIB-0007@primary-L2",
+      "sample_id": "SYN-FIB-0007"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-FIB-0014@primary-L2",
+      "sample_id": "SYN-FIB-0014"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-GCDARR-0005@primary-L2",
+      "sample_id": "SYN-GCDARR-0005"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-GCDARR-0009@primary-L3",
+      "sample_id": "SYN-GCDARR-0009"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-GCDARR-0013@primary-L2",
+      "sample_id": "SYN-GCDARR-0013"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-MAXDIFF-0003@primary-L3",
+      "sample_id": "SYN-MAXDIFF-0003"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-MAXDIFF-0007@primary-L2",
+      "sample_id": "SYN-MAXDIFF-0007"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-MAXDIFF-0008@primary-L2",
+      "sample_id": "SYN-MAXDIFF-0008"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-MINA-0000@primary-L2",
+      "sample_id": "SYN-MINA-0000"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-MINA-0004@primary-L3",
+      "sample_id": "SYN-MINA-0004"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-MINA-0016@primary-L2",
+      "sample_id": "SYN-MINA-0016"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-PERFECT-0007@primary-L2",
+      "sample_id": "SYN-PERFECT-0007"
+    },
+    {
+      "kind": "primary",
+      "level": 4,
+      "request_id": "v2:SYN-PERFECT-0011@primary-L4",
+      "sample_id": "SYN-PERFECT-0011"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-PERFECT-0018@primary-L2",
+      "sample_id": "SYN-PERFECT-0018"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-PRIME-0005@primary-L2",
+      "sample_id": "SYN-PRIME-0005"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-PRIME-0008@primary-L1",
+      "sample_id": "SYN-PRIME-0008"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-PRIME-0010@primary-L3",
+      "sample_id": "SYN-PRIME-0010"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-PRIME-0024@primary-L1",
+      "sample_id": "SYN-PRIME-0024"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-PROD-0003@primary-L2",
+      "sample_id": "SYN-PROD-0003"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-PROD-0015@primary-L1",
+      "sample_id": "SYN-PROD-0015"
+    },
+    {
+      "kind": "primary",
+      "level": 3,
+      "request_id": "v2:SYN-PROD-0017@primary-L3",
+      "sample_id": "SYN-PROD-0017"
+    },
+    {
+      "kind": "primary",
+      "level": 4,
+      "request_id": "v2:SYN-REVSTR-0001@primary-L4",
+      "sample_id": "SYN-REVSTR-0001"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-REVSTR-0007@primary-L2",
+      "sample_id": "SYN-REVSTR-0007"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-REVSTR-0009@primary-L1",
+      "sample_id": "SYN-REVSTR-0009"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-SECONDMAX-0004@primary-L1",
+      "sample_id": "SYN-SECONDMAX-0004"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-SECONDMAX-0006@primary-L1",
+      "sample_id": "SYN-SECONDMAX-0006"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-SECONDMAX-0009@primary-L1",
+      "sample_id": "SYN-SECONDMAX-0009"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-SUMB-0003@primary-L1",
+      "sample_id": "SYN-SUMB-0003"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-SUMB-0005@primary-L1",
+      "sample_id": "SYN-SUMB-0005"
+    },
+    {
+      "kind": "primary",
+      "level": 2,
+      "request_id": "v2:SYN-SUMB-0034@primary-L2",
+      "sample_id": "SYN-SUMB-0034"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-SUMEVEN-0000@primary-L1",
+      "sample_id": "SYN-SUMEVEN-0000"
+    },
+    {
+      "kind": "primary",
+      "level": 4,
+      "request_id": "v2:SYN-SUMEVEN-0008@primary-L4",
+      "sample_id": "SYN-SUMEVEN-0008"
+    },
+    {
+      "kind": "primary",
+      "level": 1,
+      "request_id": "v2:SYN-SUMEVEN-0012@primary-L1",
+      "sample_id": "SYN-SUMEVEN-0012"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-COUNTGT-0000@cf-L1",
+      "sample_id": "SYN-COUNTGT-0000"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-COUNTGT-0000@cf-L2",
+      "sample_id": "SYN-COUNTGT-0000"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-COUNTGT-0000@cf-L3",
+      "sample_id": "SYN-COUNTGT-0000"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-MINA-0004@cf-L1",
+      "sample_id": "SYN-MINA-0004"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-MINA-0004@cf-L2",
+      "sample_id": "SYN-MINA-0004"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-MINA-0004@cf-L3",
+      "sample_id": "SYN-MINA-0004"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-SUMB-0005@cf-L1",
+      "sample_id": "SYN-SUMB-0005"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-SUMB-0005@cf-L2",
+      "sample_id": "SYN-SUMB-0005"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-SUMB-0005@cf-L3",
+      "sample_id": "SYN-SUMB-0005"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-MAXDIFF-0003@cf-L1",
+      "sample_id": "SYN-MAXDIFF-0003"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-MAXDIFF-0003@cf-L2",
+      "sample_id": "SYN-MAXDIFF-0003"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-MAXDIFF-0003@cf-L3",
+      "sample_id": "SYN-MAXDIFF-0003"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-PROD-0017@cf-L1",
+      "sample_id": "SYN-PROD-0017"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-PROD-0017@cf-L2",
+      "sample_id": "SYN-PROD-0017"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-PROD-0017@cf-L3",
+      "sample_id": "SYN-PROD-0017"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-ARM-0027@cf-L1",
+      "sample_id": "SYN-ARM-0027"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-ARM-0027@cf-L2",
+      "sample_id": "SYN-ARM-0027"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-ARM-0027@cf-L3",
+      "sample_id": "SYN-ARM-0027"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-BASE2-0006@cf-L1",
+      "sample_id": "SYN-BASE2-0006"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-BASE2-0006@cf-L2",
+      "sample_id": "SYN-BASE2-0006"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-BASE2-0006@cf-L3",
+      "sample_id": "SYN-BASE2-0006"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-COUNTUPPER-0007@cf-L1",
+      "sample_id": "SYN-COUNTUPPER-0007"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-COUNTUPPER-0007@cf-L2",
+      "sample_id": "SYN-COUNTUPPER-0007"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-COUNTUPPER-0007@cf-L3",
+      "sample_id": "SYN-COUNTUPPER-0007"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-DIGITSUM-0016@cf-L1",
+      "sample_id": "SYN-DIGITSUM-0016"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-DIGITSUM-0016@cf-L2",
+      "sample_id": "SYN-DIGITSUM-0016"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-DIGITSUM-0016@cf-L3",
+      "sample_id": "SYN-DIGITSUM-0016"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-FACT-0008@cf-L1",
+      "sample_id": "SYN-FACT-0008"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-FACT-0008@cf-L2",
+      "sample_id": "SYN-FACT-0008"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-FACT-0008@cf-L3",
+      "sample_id": "SYN-FACT-0008"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-GCDARR-0009@cf-L1",
+      "sample_id": "SYN-GCDARR-0009"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-GCDARR-0009@cf-L2",
+      "sample_id": "SYN-GCDARR-0009"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-GCDARR-0009@cf-L3",
+      "sample_id": "SYN-GCDARR-0009"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 1,
+      "request_id": "v2:SYN-DISTINCT-0001@cf-L1",
+      "sample_id": "SYN-DISTINCT-0001"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 2,
+      "request_id": "v2:SYN-DISTINCT-0001@cf-L2",
+      "sample_id": "SYN-DISTINCT-0001"
+    },
+    {
+      "kind": "counterfactual",
+      "level": 3,
+      "request_id": "v2:SYN-DISTINCT-0001@cf-L3",
+      "sample_id": "SYN-DISTINCT-0001"
+    }
+  ],
+  "source_inputs_sha256": {
+    "additional-reference.private.json": "fdbcd2418550225c0fbe1e03e9c267b05f456335f14269b12a97109f07e3004d",
+    "disagreement-review.private.json": "ae02f1c6cc053bde6faea68822a99e6acb031eb6c0751987093f9d68882b78b9",
+    "family-partition.json": "0bbd4c383a9127b64cc9aa30d01c7a2d0f9fcac68e54f2f447aef427bedeb5df",
+    "isolation-probe.json": "29965748ef81b7ee71659c25ece5bc992e9a71c0a0740b63ab32bf5f033f6d93",
+    "prefreeze-final-report.json": "c98eea874f243f11234991d82ce7d94da143217cc68fb280eff2d86cc5c5d2c4",
+    "train-near-review.private.json": "3763565881dca52303f6f3b262204577d4426b90d883d3c1645a8ef83211f0aa",
+    "v2-code-review-followup.private.json": "7309d3017d63b53d6c2b3e98f765fcd97de80fedf84bf3eb774424c346303072",
+    "v2-code-review.private.json": "efe888e812c723d813c82485be5d218e07d02a7ad4f2bbee280299d39aa9163b"
+  },
+  "summary": {
+    "assigned_evaluation_families": [
+      "SYN-ARM",
+      "SYN-BASE2",
+      "SYN-COUNTGT",
+      "SYN-COUNTUPPER",
+      "SYN-DIGITSUM",
+      "SYN-DISTINCT",
+      "SYN-FACT",
+      "SYN-FIB",
+      "SYN-GCDARR",
+      "SYN-MAXDIFF",
+      "SYN-MINA",
+      "SYN-PERFECT",
+      "SYN-PRIME",
+      "SYN-PROD",
+      "SYN-REVSTR",
+      "SYN-SECONDMAX",
+      "SYN-SUMB",
+      "SYN-SUMEVEN"
+    ],
+    "assigned_train_families": [
+      "SYN-COUNT",
+      "SYN-COUNTEVEN",
+      "SYN-COUNTVOWEL",
+      "SYN-GEN",
+      "SYN-MAXARR",
+      "SYN-PALIN",
+      "SYN-POWER",
+      "SYN-RANGE",
+      "SYN-SUMPAIR",
+      "SYN-UPPER"
+    ],
+    "blind_benchmark": false,
+    "controlled_holdout": true,
+    "evaluation_family_count": 18,
+    "evaluation_identity_sha256": "d206c75755914111f36adba4dda342899774c478b65145c7f1ce47c3a4db686b",
+    "evaluation_source_count": 60,
+    "manual_near_review_complete": true,
+    "manual_near_review_sha256": "3763565881dca52303f6f3b262204577d4426b90d883d3c1645a8ef83211f0aa",
+    "partition_sha256": "0bbd4c383a9127b64cc9aa30d01c7a2d0f9fcac68e54f2f447aef427bedeb5df",
+    "preliminary_train_source_count": 14,
+    "prior_exposure": true,
+    "requests": 96,
+    "support": {
+      "annotation_disagreements": 11,
+      "annotation_v2": {
+        "Lỗi biên dịch": 4,
+        "Lỗi edge case": 2,
+        "Lỗi hard-code": 6,
+        "Lỗi hàm": 8,
+        "Lỗi logic": 12,
+        "Lỗi mảng/chuỗi": 9,
+        "Lỗi nhập/xuất": 1,
+        "Lỗi style": 1,
+        "Lỗi thuật toán": 8,
+        "Lỗi vòng lặp": 9
+      },
+      "conditional_finding_count": 0,
+      "conditional_sources": 47,
+      "defect_status": {
+        "defect": 51,
+        "scoped_clean": 9
+      },
+      "evidence_kind": {
+        "static_counterexample": 51,
+        "static_reasoning": 10
+      },
+      "evidence_status": {
+        "agent-reviewed static reasoning": 61
+      },
+      "exam_type": {
+        "multi_problem": 15,
+        "single_problem": 45
+      },
+      "family": {
+        "SYN-ARM": 4,
+        "SYN-BASE2": 3,
+        "SYN-COUNTGT": 3,
+        "SYN-COUNTUPPER": 4,
+        "SYN-DIGITSUM": 4,
+        "SYN-DISTINCT": 4,
+        "SYN-FACT": 4,
+        "SYN-FIB": 3,
+        "SYN-GCDARR": 3,
+        "SYN-MAXDIFF": 3,
+        "SYN-MINA": 3,
+        "SYN-PERFECT": 3,
+        "SYN-PRIME": 4,
+        "SYN-PROD": 3,
+        "SYN-REVSTR": 3,
+        "SYN-SECONDMAX": 3,
+        "SYN-SUMB": 3,
+        "SYN-SUMEVEN": 3
+      },
+      "level": {
+        "1": 19,
+        "2": 27,
+        "3": 8,
+        "4": 6
+      },
+      "source_reference": {
+        "Lỗi biên dịch": 4,
+        "Lỗi edge case": 2,
+        "Lỗi hard-code": 6,
+        "Lỗi hàm": 9,
+        "Lỗi logic": 10,
+        "Lỗi mảng/chuỗi": 9,
+        "Lỗi nhập/xuất": 5,
+        "Lỗi style": 0,
+        "Lỗi thuật toán": 6,
+        "Lỗi vòng lặp": 10
+      },
+      "source_reference_by_exam_type": {
+        "multi_problem": {
+          "Lỗi biên dịch": 1,
+          "Lỗi edge case": 1,
+          "Lỗi hard-code": 2,
+          "Lỗi hàm": 3,
+          "Lỗi logic": 2,
+          "Lỗi mảng/chuỗi": 4,
+          "Lỗi nhập/xuất": 0,
+          "Lỗi style": 0,
+          "Lỗi thuật toán": 1,
+          "Lỗi vòng lặp": 5
+        },
+        "single_problem": {
+          "Lỗi biên dịch": 3,
+          "Lỗi edge case": 1,
+          "Lỗi hard-code": 4,
+          "Lỗi hàm": 6,
+          "Lỗi logic": 8,
+          "Lỗi mảng/chuỗi": 5,
+          "Lỗi nhập/xuất": 5,
+          "Lỗi style": 0,
+          "Lỗi thuật toán": 5,
+          "Lỗi vòng lặp": 5
+        }
+      },
+      "source_reference_by_level": {
+        "1": {
+          "Lỗi biên dịch": 1,
+          "Lỗi edge case": 0,
+          "Lỗi hard-code": 2,
+          "Lỗi hàm": 3,
+          "Lỗi logic": 4,
+          "Lỗi mảng/chuỗi": 4,
+          "Lỗi nhập/xuất": 1,
+          "Lỗi style": 0,
+          "Lỗi thuật toán": 2,
+          "Lỗi vòng lặp": 2
+        },
+        "2": {
+          "Lỗi biên dịch": 2,
+          "Lỗi edge case": 1,
+          "Lỗi hard-code": 2,
+          "Lỗi hàm": 3,
+          "Lỗi logic": 5,
+          "Lỗi mảng/chuỗi": 3,
+          "Lỗi nhập/xuất": 3,
+          "Lỗi style": 0,
+          "Lỗi thuật toán": 2,
+          "Lỗi vòng lặp": 5
+        },
+        "3": {
+          "Lỗi biên dịch": 1,
+          "Lỗi edge case": 1,
+          "Lỗi hard-code": 1,
+          "Lỗi hàm": 2,
+          "Lỗi logic": 1,
+          "Lỗi mảng/chuỗi": 1,
+          "Lỗi nhập/xuất": 1,
+          "Lỗi style": 0,
+          "Lỗi thuật toán": 2,
+          "Lỗi vòng lặp": 2
+        },
+        "4": {
+          "Lỗi biên dịch": 0,
+          "Lỗi edge case": 0,
+          "Lỗi hard-code": 1,
+          "Lỗi hàm": 1,
+          "Lỗi logic": 0,
+          "Lỗi mảng/chuỗi": 1,
+          "Lỗi nhập/xuất": 0,
+          "Lỗi style": 0,
+          "Lỗi thuật toán": 0,
+          "Lỗi vòng lặp": 1
+        }
+      },
+      "source_reference_families": {
+        "Lỗi biên dịch": [
+          "SYN-FACT",
+          "SYN-GCDARR",
+          "SYN-SECONDMAX",
+          "SYN-SUMB"
+        ],
+        "Lỗi edge case": [
+          "SYN-MINA",
+          "SYN-PRIME"
+        ],
+        "Lỗi hard-code": [
+          "SYN-BASE2",
+          "SYN-GCDARR",
+          "SYN-MAXDIFF",
+          "SYN-MINA",
+          "SYN-PERFECT",
+          "SYN-SECONDMAX"
+        ],
+        "Lỗi hàm": [
+          "SYN-BASE2",
+          "SYN-COUNTUPPER",
+          "SYN-DIGITSUM",
+          "SYN-FACT",
+          "SYN-MAXDIFF",
+          "SYN-PRIME",
+          "SYN-PROD",
+          "SYN-REVSTR"
+        ],
+        "Lỗi logic": [
+          "SYN-ARM",
+          "SYN-COUNTGT",
+          "SYN-COUNTUPPER",
+          "SYN-DIGITSUM",
+          "SYN-PERFECT",
+          "SYN-PRIME",
+          "SYN-SUMB",
+          "SYN-SUMEVEN"
+        ],
+        "Lỗi mảng/chuỗi": [
+          "SYN-ARM",
+          "SYN-COUNTGT",
+          "SYN-COUNTUPPER",
+          "SYN-FIB",
+          "SYN-MAXDIFF",
+          "SYN-PROD",
+          "SYN-REVSTR",
+          "SYN-SECONDMAX",
+          "SYN-SUMB"
+        ],
+        "Lỗi nhập/xuất": [
+          "SYN-ARM",
+          "SYN-BASE2",
+          "SYN-FIB",
+          "SYN-GCDARR",
+          "SYN-PRIME"
+        ],
+        "Lỗi style": [],
+        "Lỗi thuật toán": [
+          "SYN-ARM",
+          "SYN-DIGITSUM",
+          "SYN-DISTINCT",
+          "SYN-FACT",
+          "SYN-GCDARR",
+          "SYN-PROD"
+        ],
+        "Lỗi vòng lặp": [
+          "SYN-DISTINCT",
+          "SYN-FIB",
+          "SYN-GCDARR",
+          "SYN-MAXDIFF",
+          "SYN-MINA",
+          "SYN-PERFECT",
+          "SYN-PROD",
+          "SYN-SUMEVEN"
+        ]
+      },
+      "source_reference_known": 60
+    },
+    "train_by_family": {
+      "SYN-COUNTVOWEL": 1,
+      "SYN-MAXARR": 2,
+      "SYN-PALIN": 3,
+      "SYN-POWER": 1,
+      "SYN-UPPER": 1
+    },
+    "train_families_with_no_eligible_sources": [
+      "SYN-COUNT",
+      "SYN-COUNTEVEN",
+      "SYN-GEN",
+      "SYN-RANGE",
+      "SYN-SUMPAIR"
+    ],
+    "train_family_count": 5,
+    "train_identity_sha256": "4cad2d4bc619ae30d47eab6c88d05f3e016736a932522cb70efa760a7ec12bf0",
+    "train_source_count": 8,
+    "version": "evaluation-v2-family-first-20261021"
+  },
+  "train_eligible": [
+    {
+      "code_identity": "568ee59e0972f3c037e900f7f9887101cf617fe38a84d7fc3cb46663054cf93f",
+      "family": "SYN-COUNTVOWEL",
+      "group": "568ee59e0972f3c037e900f7f9887101cf617fe38a84d7fc3cb46663054cf93f",
+      "renamed_identity": "141095244493849ee337ca1030a4129f48b43e68983f8579ec43164b65787106",
+      "sample_id": "SYN-COUNTVOWEL-0010",
+      "source_sha256": "6e6ac68d81ccde62353dcdc6795d235e24e54d1c341e5253382b41e6be3a738b"
+    },
+    {
+      "code_identity": "90db2e516c109974de8edea1d16039058e1e245d7fc6a05aacdb649b72c0898d",
+      "family": "SYN-MAXARR",
+      "group": "90db2e516c109974de8edea1d16039058e1e245d7fc6a05aacdb649b72c0898d",
+      "renamed_identity": "4921a04191110b16be137c9d42baa2fb3ae98d707a94ef467f0fd3e904355b1f",
+      "sample_id": "SYN-MAXARR-0010",
+      "source_sha256": "954ee5b412fbf2bd71df5995770d4dc5c7c065f89f2a0047c565f41f2b22280f"
+    },
+    {
+      "code_identity": "e0f82cd64041a5354e2a9b88b4d51a52ddcb052d3b8a541a135ccd294d306e3a",
+      "family": "SYN-MAXARR",
+      "group": "e0f82cd64041a5354e2a9b88b4d51a52ddcb052d3b8a541a135ccd294d306e3a",
+      "renamed_identity": "281f9e575568cf661bd16af1f7c9c3b8d5b86ab3665beed0a15c31a61bb5a602",
+      "sample_id": "SYN-MAXARR-0011",
+      "source_sha256": "2d042cbcec9911d2f485ea4c935da84412552675e207ad658a494b21433cc3a2"
+    },
+    {
+      "code_identity": "67b1ba603111ff6c34d71584333da42a255fe2ef233117c0f16b8ac365f38411",
+      "family": "SYN-PALIN",
+      "group": "67b1ba603111ff6c34d71584333da42a255fe2ef233117c0f16b8ac365f38411",
+      "renamed_identity": "52923ff7bee1a36f43c9b94b46a738d12e6981f2851d1780b2a5ed32ff5618df",
+      "sample_id": "SYN-PALIN-0015",
+      "source_sha256": "2be8006b74248283950c53d05fee140fe134e01dcafa410c4e00b6fdd83341f2"
+    },
+    {
+      "code_identity": "d23bd26b227441d30e096d37bad034f377c845910745bfee3ef1bd6175c269dd",
+      "family": "SYN-PALIN",
+      "group": "d23bd26b227441d30e096d37bad034f377c845910745bfee3ef1bd6175c269dd",
+      "renamed_identity": "ce415dc2c2af85b2ca8a9745729d497de3ea1e59215c9b9fe06ae3383a692570",
+      "sample_id": "SYN-PALIN-0017",
+      "source_sha256": "050127e8d26fcb239ebd85a53eeb761de1c8af21ad62f7222b6a333af3245da9"
+    },
+    {
+      "code_identity": "bd4475f2de6be35cfbfd2bd3c090dddd58ac27faf374c28dd86445f94487f06e",
+      "family": "SYN-PALIN",
+      "group": "bd4475f2de6be35cfbfd2bd3c090dddd58ac27faf374c28dd86445f94487f06e",
+      "renamed_identity": "b60c3269a70d03dba5007a0a1c858c91db9cb0f9250dc1683b8cb08d8d51d691",
+      "sample_id": "SYN-PALIN-0019",
+      "source_sha256": "1d8467445456da097e7125e2413622ba7fee9856385ade1fa83a4f220d58a5d8"
+    },
+    {
+      "code_identity": "909fce87c02f027a35268bc1675e81405ea43b94adf35ecb8c2dd1e63ea1c37d",
+      "family": "SYN-POWER",
+      "group": "909fce87c02f027a35268bc1675e81405ea43b94adf35ecb8c2dd1e63ea1c37d",
+      "renamed_identity": "07d84867448ce1e7481eb6ce6499d83b9ae117d13711881f83fe1d2d114b8d68",
+      "sample_id": "SYN-POWER-0007",
+      "source_sha256": "e743c37c32099eeabcab9d23e8bc4d8b1e255be32d64d3afca128c2468c971bd"
+    },
+    {
+      "code_identity": "c6ef042c6c84b1135799b4d23fa3e9429c81bae75a3b0d38a95a08664bb93dae",
+      "family": "SYN-UPPER",
+      "group": "c6ef042c6c84b1135799b4d23fa3e9429c81bae75a3b0d38a95a08664bb93dae",
+      "renamed_identity": "4c7768e51770f004f4fa2858082fa049ce476d9f64d3f84bf993fa776f055d05",
+      "sample_id": "SYN-UPPER-0005",
+      "source_sha256": "38dc3c4e126878fb3503fcc58abc7e03ff41d272a09291a9b2463142ca59c498"
+    }
+  ],
+  "version": "evaluation-v2-family-first-20261021"
+}
