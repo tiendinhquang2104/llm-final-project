@@ -1,0 +1,29 @@
+{
+  "examples": 352,
+  "examples_by_kind": {
+    "diagnostic": 88,
+    "feedback": 264
+  },
+  "human_verified": false,
+  "level_counts": {
+    "1": 88,
+    "2": 88,
+    "3": 88
+  },
+  "no_inference": true,
+  "no_model_loading": true,
+  "no_training": true,
+  "review": "assistant-reviewed static drafts",
+  "source_manifest_sha256": "c51a35301869011c960325a979d76bcb115c15caae7b104b19512687c59cac84",
+  "source_seal_sha256": "f2eccd78817127e4ad8b89599912181a50efd4684b8c530c94f0af526e92b284",
+  "target_seal_files_sha256": {
+    "before-optimizer-gate-dry-check.json": "2528cafc69cdd566fb2ea302f42099d1f725075034468cdeb649714a999749b8",
+    "before-targets-gate.json": "5e6feb81079be7894931e668cf3eb16bd9aaca1408ca35fd6a5aa6b81d3a9e42",
+    "draft-targets.private.json": "d7b15446df10178ec04910515990472e03a8bd771152b43e935198d3f522d510",
+    "semantic-review.private.json": "b3df401cfc3cc87c08e05987f216a01064d633bfa5c9745d68ff6a23527e0b35"
+  },
+  "taxonomy_level_blind": true,
+  "training_configuration": "not selected or frozen; future separate authorization",
+  "unique_sources": 88,
+  "version": "train-supplement-v1-draft-targets"
+}
