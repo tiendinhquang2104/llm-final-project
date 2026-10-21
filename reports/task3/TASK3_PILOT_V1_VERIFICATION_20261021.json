@@ -1,0 +1,90 @@
+{
+  "branch": "feat/task3-quality-round5",
+  "checks": {
+    "all_arms_processed_requests": {
+      "A": 96,
+      "B": 96,
+      "C": 96
+    },
+    "baseline_files_checked": 595,
+    "baseline_unchanged": true,
+    "existing_tracked_modified": 0,
+    "metadata_artifact_hashes_independently_checked": 125,
+    "new_files_only": true,
+    "no_public_inference": true,
+    "no_push": true,
+    "one_optimizer_run": true,
+    "optimizer_steps": 140,
+    "parent_and_pilot_seals_verified": true,
+    "public_predictions_sha256": "9ba7411c35a3461b5747be367274631d5122455335061005c695276ed76c5a45",
+    "r18_protected_checked": 154,
+    "r18_protected_unchanged": true,
+    "review_ledger_counts": {
+      "A": 24,
+      "B": 0,
+      "C": 21
+    },
+    "review_selected_before_predictions": true,
+    "runtime_pin_count": 136,
+    "source_quotes_and_model_outputs_committed": false,
+    "staged_diff_check_passed": true,
+    "staged_new_files": 17,
+    "staged_private_payload_scan_passed": true,
+    "student_source_compiled_or_executed": false
+  },
+  "commands": [
+    {
+      "command": ".venv-task3/bin/python scripts/task3_pilot_prepare.py verify",
+      "exit_code": 0,
+      "log": "final-pilot-verify.log",
+      "log_sha256": "4571b37ff2476aea4fab3825f347c9e7fbb79ae1f3dc76836d777be55c5397d2"
+    },
+    {
+      "command": ".venv-task3/bin/python -m pytest -q tests/test_task3*.py",
+      "exit_code": 0,
+      "log": "final-task3-tests-after-report-fix.log",
+      "log_sha256": "ec1843455ff94d41db04ce74ba8bb2d81d5d0175054121199cf14253ec95f120",
+      "passed": 836,
+      "skipped": 2
+    },
+    {
+      "collected": 1132,
+      "collection_errors": 2,
+      "command": ".venv-task3/bin/python -m pytest --collect-only -q",
+      "exit_code": 2,
+      "log": "final-global-collection-after-report-fix.log",
+      "log_sha256": "e8143a541b701f51c047b698a67a67154c855d2137b62111ec8d3aa464e790a1",
+      "reason": "Task1 modules require absent sklearn; outside scope"
+    },
+    {
+      "command": ".venv-task3/bin/python -m pytest -q tests/test_task3_pilot_report.py",
+      "exit_code": 0,
+      "passed": 15,
+      "scope": "artificial offline reporting only"
+    },
+    {
+      "command": ".venv-task3/bin/python scripts/task3_pilot_report.py --score --ledger-A <privateA> --ledger-B <privateB> --ledger-C <privateC>",
+      "exit_code": 0,
+      "log": "offline-report-console.log",
+      "log_sha256": "2acc68b6e864409b36a03534e3cae0370d411431dc080b2bebe8df9853fdb884"
+    }
+  ],
+  "commit_policy": "Only new code/test/config/metadata/report; no source/target/raw/predictions/checkpoint. Final commit HEAD reported in chat.",
+  "created_utc": "2026-10-21T05:03:03.281961+00:00",
+  "final_publication_review_no_material_issues": true,
+  "final_publication_review_sha256": "4d07857f4934fd2d80092317e4027a0a9455be71675c891fa116df673e082c8a",
+  "final_result_sha256": "7dc281df49bf26be6004bd9f54e4984cdbf0212229d7c309d7a3423d8dc3e550",
+  "handoff_sha256": "1035cbf339b20098bd7cb75854e59b2d9914c36dbc2973708fef3b8794393fdb",
+  "head_before": "c7376ec25c84cdbdb79fef3803e0203c30e1faa9",
+  "independent_audit_passed": true,
+  "independent_audit_sha256": "6a0259857380e713eac6b381829a6b66278667eff0b61fcfebf631ef789c6858",
+  "limitations": [
+    "No compiler sandbox available; static agent source review only, not human-verified.",
+    "Global collection blocked in two unrelated Task1 modules by missing sklearn.",
+    "No conditional B/C final feedback comparison in selected24 because B completed0.",
+    "Controlled holdout has prior exposure; unreviewed semantics remain pending."
+  ],
+  "pilot_manifest_sha256": "4fe92d6c2437a18d41b724e909fc334820ce5d3e909989e0a207bc2f575b9dcf",
+  "reporting_only_fix": "Artificial failing regression reproduced legacy final-schema counter0; offline reporter fixed to count completed parsed finals96. Runtime/prompt/config/frozen evaluator unchanged. Final Task3 suite rerun.",
+  "version": "task3-pilot-v1-verification-20261021"
+}
