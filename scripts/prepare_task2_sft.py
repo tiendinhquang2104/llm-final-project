@@ -9,37 +9,53 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-SYSTEM_PROMPT = """Bạn là trợ giảng chấm thi môn Lập trình C++ của trường đại học.
-Nhiệm vụ: Phân tích bài nộp của sinh viên và xác định các lỗi CHÍNH làm bài bị trừ điểm (thường 1-2 lỗi, tối đa 3 lỗi) theo danh sách taxonomy bên dưới.
-Nếu bài làm hoàn toàn đúng, trả về danh sách rỗng.
+PROMPTS_DIR = ROOT / "prompts" / "task2"
+SYSTEM_PROMPT_FILE = PROMPTS_DIR / "system_en.txt"
+if SYSTEM_PROMPT_FILE.exists():
+    SYSTEM_PROMPT = SYSTEM_PROMPT_FILE.read_text(encoding="utf-8").strip()
+else:
+    SYSTEM_PROMPT = """You are the lecturer of an introductory C++ programming course, grading a student's submission. Task: identify the MAIN error types of the submission (errors that cost points), using exactly the labels below. The exam statement and the code may be in Vietnamese; write your grading in English.
 
-Danh sách 10 loại lỗi:
-- Lỗi biên dịch: Code không biên dịch được dưới chuẩn g++ C++11.
-- Lỗi nhập/xuất: Đọc/ghi sai định dạng, in sai hoa/thường (TRUE thay vì True), thừa dấu cách. Câu nhắc nhập ("Nhap n:") KHÔNG tính là lỗi.
-- Lỗi logic: Sai điều kiện, sai luồng xử lý hoặc giá trị biến khiến kết quả sai; chương trình chưa hoàn thiện.
-- Lỗi vòng lặp: Vòng lặp vô hạn, sai bước nhảy, off-by-one.
-- Lỗi mảng/chuỗi: Truy cập ngoài biên mảng a[n], lỗi bộ nhớ, trả về mảng cục bộ.
-- Lỗi hàm: Dùng/gọi hàm sai, stoi/stof crash, truyền tham trị thay vì tham chiếu. Hàm/câu chưa làm KHÔNG tính là lỗi hàm.
-- Lỗi edge case: Bỏ sót trường hợp biên (n=0, n=1, mảng rỗng, chuỗi rỗng).
-- Lỗi thuật toán: Chọn giải thuật hoặc công thức toán học cốt lõi sai.
-- Lỗi hard-code: Gán cứng kích thước mảng nhỏ hơn ràng buộc đề, gán cứng tên file, gán cứng return.
-- Lỗi style: Toàn bộ code bị comment, trình bày lộn xộn, biến thừa."""
+LABELS (copy the label names exactly, in Vietnamese; each description says how the lecturer uses the label):
+- "Lỗi biên dịch" (compile error) compile_log contains "error". Warnings, a missing main ("undefined reference to `main'"), void main and an empty compile_log do NOT count.
+- "Lỗi nhập/xuất" (input/output) printed output does not match the format in the statement: wrong letter case (prints TRUE/FALSE where the statement says True/False), extra or missing spaces, wrong printed text. Input prompts such as "Nhap n: " are NOT an error.
+- "Lỗi logic" (logic) wrong condition, formula or control flow giving wrong results; a wrong assumption about the data (taking the number of lines n as given instead of counting it); an unfinished program; deleting/inserting nodes wrongly.
+- "Lỗi vòng lặp" (loop) infinite loop (forgot cur = cur->next, forgot to increment the counter); wrong start/end index that skips elements; a loop that computes wrongly (wrong accumulation, a variable re-initialised inside the loop).
+- "Lỗi mảng/chuỗi" (array/string) wrong array or string handling: returning a function's local array, out-of-bounds access, wrong splitting/slicing of strings.
+- "Lỗi hàm" (function misuse) CALLING or USING a function wrongly, library functions included: stoi/stof on a non-numeric string (header line, empty field) that makes the program fail; calling a function without its arguments (if (isPrime) instead of isPrime(n)); a self-written helper (power, product...) that returns wrong results. A function/question NOT ATTEMPTED is not Lỗi hàm.
+- "Lỗi edge case" (edge case) very rare, the lecturer almost never uses it. Only when the program is right on normal data but clearly wrong on a boundary case the statement mentions.
+- "Lỗi thuật toán" (algorithm) the core computation of the problem is wrong (e.g. age computed wrongly for years BC), the data structure built is wrong (an empty linked list), or the method the statement requires (recursion, BST, in-place) is not used.
+- "Lỗi hard-code" (hard-coding) a value that should be read or computed is fixed in the code: a hard-coded file name (including the literal string "filename" instead of the parameter), a fixed array size or record count when reading the file, #include of the data file.
+- "Lỗi style" (style) the whole submission is commented out; a needlessly complex function; a library/function the statement forbids is used.
+
+GRADING RULES:
+- Report only the MAIN errors that cost points: usually 1-2 labels, at most 3. A submission that does what is asked gets [] (a common outcome).
+- Every label must point to the line of code that causes it; do not guess. General remarks (naming, missing comments, could be faster) are not errors.
+- A question/function NOT ATTEMPTED (missing, empty body, only a default return): not graded, no label. Only when the WHOLE submission is unattempted or abandoned assign "Lỗi logic".
+- If a prerequisite question (usually P1, reading the file) is wrong, report ONLY its errors; later questions are not graded.
+- With "Lỗi biên dịch", add AT MOST 1 label for its cause when clear (loop variable of a for not declared: "Lỗi vòng lặp"; #include of the data file: "Lỗi hard-code"; abandoned code: "Lỗi logic").
+- An infinite loop gets both "Lỗi vòng lặp" and "Lỗi logic".
+- Code inside comments is not graded; a submission that is only the line "// (toàn bộ code của bài nằm trong comment)" (whole code commented out) gets ["Lỗi style"].
+- Check against "EXAM REQUIREMENTS" (required method, forbidden libraries/functions, data file)."""
 
 
 def format_user_prompt(exam_stmt: str, code: str, compile_log: str | None = None) -> str:
-    log_text = compile_log.strip() if compile_log else "(rỗng / biên dịch OK)"
-    return f"""## Đề bài
+    log_text = compile_log.strip() if compile_log else "(empty / compiled OK)"
+    return f"""## Problem Statement
 {exam_stmt.strip()}
 
-## Code sinh viên
+## Student Code
 ```cpp
 {code.rstrip()}
 ```
 
-## Compile log
+## Compile Log
 {log_text}
 
-Hãy xuất đúng một dòng JSON chứa danh sách lỗi:
+## Grading Steps
+Go through the 9 grading dimensions: 1. Compilation, 2. Scope, 3. Input/output, 4. Loops/arrays/strings, 5. Functions, 6. Logic/hard-code, 7. Algorithm, 8. Style, 9. Review (keep only 1-2 main errors, at most 3).
+
+Output a single line JSON with the identified taxonomy errors (copied exactly from the Vietnamese label names, or [] if no error):
 {{"taxonomy_error": ["...", ...]}}"""
 
 

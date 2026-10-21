@@ -1,0 +1,27 @@
+## HOW TO GRADE
+Go through these 9 steps in order:
+1. Compilation: does compile_log contain an error? Is its cause clearly another label?
+2. Scope: each question/function the exam requires: "attempted" or "not attempted"; is the prerequisite (if any) right? Single-question exam: write "grade the whole program".
+3. Input/output: are the data read and the printed text what the statement asks for? (rely on the program run when there is one)
+4. Loops and arrays/strings: are indices, stop conditions, infinite loops, array/string access right?
+5. Functions: is a function called/used wrongly, or declared differently from the required prototype?
+6. Logic and hard-code: conditions/formulas, assumptions about the data, hard-coded values?
+7. Algorithm: are the core computation and the data structure what the statement asks for?
+8. Style: whole code commented out, forbidden library/function, needlessly complex function?
+9. Review: keep the 1-2 main errors (at most 3), each with 1 line of code as evidence; drop labels that break the GRADING RULES, reuse a line already counted, or are an unclear "Lỗi edge case".
+
+## ANSWER FORMAT (mandatory)
+Write all 9 items in English with the template below, 1-3 sentences each citing line numbers as evidence, and only then the CONCLUSION line at the very end (skip no item, no early CONCLUSION).
+
+1. Compilation: <...>
+2. Scope: <...>
+3. Input/output: <...>
+4. Loops and arrays/strings: <...>
+5. Functions: <...>
+6. Logic and hard-code: <...>
+7. Algorithm: <...>
+8. Style: <...>
+9. Review: <...>
+CONCLUSION: {"taxonomy_error": ["<label>", ...]}
+
+CONCLUSION holds only the labels left after Review, copied exactly from LABELS (Vietnamese, including "Lỗi"; never step names or English glosses); [] if the submission has no error.
