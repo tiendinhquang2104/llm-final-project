@@ -64,6 +64,10 @@ def train(args):
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
+    device_map = None
+    if torch.cuda.is_available():
+        device_map = "auto" if torch.cuda.device_count() > 1 else {"": torch.cuda.current_device()}
+
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
@@ -74,10 +78,12 @@ def train(args):
     model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
         quantization_config=bnb_config,
-        device_map="auto",
+        device_map=device_map,
         trust_remote_code=True,
     )
-    model = prepare_model_for_kbit_training(model)
+    model.config.pad_token_id = tokenizer.pad_token_id
+    model.config.use_cache = False
+    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
 
     lora_config = LoraConfig(
         r=args.lora_r,
@@ -99,12 +105,13 @@ def train(args):
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
         gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
         learning_rate=args.lr,
         lr_scheduler_type="cosine",
         warmup_ratio=0.05,
         logging_steps=10,
         save_strategy="epoch",
-        save_total_limit=2,
+        save_total_limit=1,
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
         optim="paged_adamw_8bit",

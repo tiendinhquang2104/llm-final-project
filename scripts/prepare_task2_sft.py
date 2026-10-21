@@ -44,37 +44,43 @@ Hãy xuất đúng một dòng JSON chứa danh sách lỗi:
 
 
 def main():
-    records = []
-    
-    # 1. Load synthetic dataset (477 samples)
+    out_file = ROOT / "data" / "processed" / "task2_sft_train.jsonl"
     synth_dir = ROOT.parent / "generate-dataset_v2" / "generate-dataset"
     if not synth_dir.exists():
         synth_dir = ROOT / "data" / "synth" / "v1" / "generate-dataset"
+
+    if not synth_dir.exists():
+        if out_file.exists() and out_file.stat().st_size > 10000:
+            print(f"[INFO] Existing dataset found at {out_file} ({out_file.stat().st_size} bytes). Skipping regeneration.")
+            return
+        raise FileNotFoundError(f"Synthetic dataset directory not found at {synth_dir}")
+
+    records = []
     
-    if synth_dir.exists():
-        synth_tax = json.loads((synth_dir / "task2_error_taxonomy.json").read_text(encoding="utf-8"))
-        synth_exams = {e["exam_id"]: e for e in json.loads((synth_dir / "exams.json").read_text(encoding="utf-8"))["exams"]}
-        for s in synth_tax["samples"]:
-            inp = s["input"]
-            code_file = synth_dir / inp["code_file"]
-            if not code_file.exists():
-                continue
-            code = code_file.read_text(encoding="utf-8", errors="replace")
-            exam = synth_exams.get(inp["exam_id"], {})
-            stmt = exam.get("statement", "")
-            labels = s.get("output", {}).get("taxonomy_error", [])
-            target = json.dumps({"taxonomy_error": labels}, ensure_ascii=False)
-            
-            records.append({
-                "sample_id": s["sample_id"],
-                "exam_id": inp["exam_id"],
-                "is_gold": False,
-                "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": format_user_prompt(stmt, code, inp.get("compile_log"))},
-                    {"role": "assistant", "content": target},
-                ]
-            })
+    # 1. Load synthetic dataset (477 samples)
+    synth_tax = json.loads((synth_dir / "task2_error_taxonomy.json").read_text(encoding="utf-8"))
+    synth_exams = {e["exam_id"]: e for e in json.loads((synth_dir / "exams.json").read_text(encoding="utf-8"))["exams"]}
+    for s in synth_tax["samples"]:
+        inp = s["input"]
+        code_file = synth_dir / inp["code_file"]
+        if not code_file.exists():
+            continue
+        code = code_file.read_text(encoding="utf-8", errors="replace")
+        exam = synth_exams.get(inp["exam_id"], {})
+        stmt = exam.get("statement", "")
+        labels = s.get("output", {}).get("taxonomy_error", [])
+        target = json.dumps({"taxonomy_error": labels}, ensure_ascii=False)
+        
+        records.append({
+            "sample_id": s["sample_id"],
+            "exam_id": inp["exam_id"],
+            "is_gold": False,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": format_user_prompt(stmt, code, inp.get("compile_log"))},
+                {"role": "assistant", "content": target},
+            ]
+        })
 
     # 2. Load Gold dataset (32 samples)
     gold_dir = ROOT / "data" / "sample_dataset"
@@ -104,13 +110,6 @@ def main():
                         {"role": "assistant", "content": target},
                     ]
                 })
-
-    out_file = ROOT / "data" / "processed" / "task2_sft_train.jsonl"
-    if not synth_dir.exists():
-        print(f"[WARN] Synthetic directory not found at {synth_dir}")
-        if out_file.exists() and out_file.stat().st_size > 10000:
-            print(f"[INFO] Existing dataset found at {out_file} ({out_file.stat().st_size} bytes). Skipping overwrite.")
-            return
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
     with out_file.open("w", encoding="utf-8") as f:
