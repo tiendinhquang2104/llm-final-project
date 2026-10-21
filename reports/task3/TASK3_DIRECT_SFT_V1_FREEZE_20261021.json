@@ -1,0 +1,206 @@
+{
+  "development": {
+    "levels": {
+      "1": 19,
+      "2": 27,
+      "3": 8,
+      "4": 6
+    },
+    "primary": 60
+  },
+  "evaluation_status": "Evaluationv2 is development with prior exposure; shared family names allowed by this NEW source-level protocol; historical seals/gates unchanged.",
+  "examples": {
+    "train": 168,
+    "validation": 42
+  },
+  "family_disjoint": false,
+  "guard": {
+    "checked": 70,
+    "eligible": true,
+    "identity_only": true,
+    "near_threshold": 0.85,
+    "stage": "before_targets",
+    "unique_sources": 70
+  },
+  "head_before": "709e5a2d02f8293690b7475b9dc293d8ba8d97fb",
+  "implementation_sha256": {
+    "scripts/task3_direct_sft_infer.py": "19791d0e1880de8a1a815804aa11420a6e45fa57ea4b55d81ecf15450bad087c",
+    "scripts/task3_direct_sft_inventory.py": "3de0248a2136bdb9dc01b96da74ef8964e5070f6ec2f26a677059ef7300d1e00",
+    "scripts/task3_direct_sft_prepare.py": "701a74cd0948fcf79dad9f2e29d78d6615c4c69909802e863944401bc122089b",
+    "scripts/task3_direct_sft_train.py": "945b883fdfd12c055239b8d879b42c8ed972c5d71b5a66fd7e7508c1d8c2f76d",
+    "scripts/task3_pilot_infer.py": "b2ec8d527b47d47d64f5534de72f233dc66ae43c5ad38c1b833cdda93f24ce0f",
+    "src/synth/__init__.py": "56fa03f3a5d99fa7923e44877ed57368754d0455c33e4c25156a4954d1618bb0",
+    "src/synth/bases.py": "1a2fb768540ee5005617c44b1fffe05697322ce93ee22c2d64d807988bf55f79",
+    "src/synth/compliance.py": "99873ab3eb6367b1c911e559411ac32b617779ed94a3647e43cc8c5fda954f9c",
+    "src/synth/dedup.py": "96b48be0473b40b268e5d923ff858932d03efd6996180ff9621c55c43cb0f355",
+    "src/synth/feedback.py": "57e7533770e1fc585e5e9e0589b93b522abf9853812af0d94bbb426d5a7f0948",
+    "src/synth/labeler.py": "564f18c7b73efae838787020d49b47d2be33c020271510de7436dd9e353fecae",
+    "src/synth/multi.py": "3c86ad1cc478a987200e15dafb78afbd29ec98e7853527c2fa6f5c5ef5631996",
+    "src/synth/mutators.py": "e1ff7a612426d9a2933054f077af6b89c420b3e17d27ee95f5691e973462fa1e",
+    "src/synth/oracle.py": "626d29be2bd6bab994678ae49506975e2bb0794cde2a70595d0014b9302d414d",
+    "src/synth/problems.py": "7ec3c20c5e53bae930ca3be151d3def4e3be62a0e208b7095d568a31ce2f93b0",
+    "src/synth/quota.py": "c326825d4827ebe8c2b6ce37af33ed44a2c326eee49189d2be3cf633464f9e02",
+    "src/synth/style_stats.py": "ae28010a1610cb41a1adaf03a0fd8af7da237eea4dbba57a950ed1397c8fc050",
+    "src/synth/taxonomy.py": "c6f4a3cece36e70e94d1f9abd38d0f3c8abfe77140690b4dbe8ac0058a585288",
+    "src/synth/verify.py": "d94071d55b94331acf0ceb278c74e9c2f38a16976a2785c070b80f2d0238a28c",
+    "src/task3/__init__.py": "f1bd57baca3d01f04a5f240de94a0b502a76c25749984b34d4796b6c10edd06c",
+    "src/task3/adequacy.py": "37f59428226cad3b62d6af1f9c4efb4f6378b7340cd76cfb72cee43434a23fe9",
+    "src/task3/cli.py": "3c0e6e24fed47898a71e25337de29e38ca9fa415eb54b02073df11fb898fa526",
+    "src/task3/compiler.py": "6e3c8baf92c01b6e20cbee20de7554bdd061513590676dc720ee6ec656868dd4",
+    "src/task3/compliance.py": "7a2671a6d5b84778cdb417aceae9d82292185c709a50f90108f68a9338d274d7",
+    "src/task3/cpp_checks.py": "90e9d3cad2baa75f3c147b0b5b25a616b496fe454c2a1606f789e8aa979d8304",
+    "src/task3/dataset.py": "25610f40d9c26ef836650e258a8b91e39a835491717184a78db68e6791d229d1",
+    "src/task3/diagnosis.py": "412aa8cfe0c107a3d8846066d48a54d0af027a1e22670e77ab9a679d4d9f8b8e",
+    "src/task3/diagnosis_contract_v1.py": "bb06d9ecfbf58c253db8a1543cfe4390e9a41df0234e55ecfe17f6350564d8ca",
+    "src/task3/direct_baseline.py": "fca742e79695c5ccae440ef5ee849e47b3228a91b857f841a36d8167003dd573",
+    "src/task3/direct_sft_data.py": "555c8dbdf72d8531b02b17e8496635a6e5bfce85dead89c22407441a07f7616a",
+    "src/task3/direct_sft_training.py": "1f9ab86c06e0cc15597258a2cffc4f59601f90b5d4a2f75ba9f7250fd76158ed",
+    "src/task3/discovery.py": "00f2e168d8b61ddb9c843463d8b15a8ca70c23764f3586b4c1a120c0eac40db3",
+    "src/task3/discovery_eval.py": "73b62fc81fab7d6cafcc8c568d2c321e883e23a17ec404c6913be5a460f84c92",
+    "src/task3/discovery_render.py": "e1345cf272594bff3184114db7e80bb1bb166bb00f73c737cc7583bbc5437e58",
+    "src/task3/eval_history.py": "dec609ad422e962040b85ed072cb41345028ff52e9125805cfe555e64825079e",
+    "src/task3/eval_snapshot.py": "c11f13dcf2ca0343e21b0183af017f98095b1bdf6fb518ff8478cb0dd437d1a1",
+    "src/task3/eval_v2.py": "33e64a21537ae65f08758b803252f1693bf25a515ce561b6bb26b7eba8d4851c",
+    "src/task3/evaluator.py": "d4ce499bba924d9f795cccf3c2fefd4e930967d8d7e39b13e777fddeb0202800",
+    "src/task3/frozen_eval.py": "e0a65c1aa2482f7e2975acf0132468e68697b93e28850cda553c0f96dc4a2a3c",
+    "src/task3/generation_audit.py": "b2997b59f8ba23a4d5bec429604421217214ee50e0a68dbdd87aeb77b90b01e4",
+    "src/task3/gpu_preflight.py": "b80a0a3130450772b6a292afd754d6703bed1e3a82af33064bc1200674aa7176",
+    "src/task3/inference.py": "84c4b0166dfcadc1d79aba365ed9dba84058e55954c459f6f4eb3724c452eea2",
+    "src/task3/oracle_findings.py": "80645076d9f6c3e28585f348c300b486d5b064bc2e61afcb769dea573cadf17e",
+    "src/task3/pilot_protocol.py": "86c97a04a54660155a3110208ce9d141f0f11a2b7a0cdccafe8774287c34ace6",
+    "src/task3/pilot_training.py": "4ee68393d650e75ebba91e4c65f2e56831f862e6ab0cbbb123b46639008a3147",
+    "src/task3/pipeline.py": "ca3f438abb8dfad13f7f3fa07c7267adbbceb6fe469f0a905a3e6f5a4c28be07",
+    "src/task3/prompts.py": "9288d082c380ece724324954888369fedb0dab1eb9bce9d3981d1ef7679c12ac",
+    "src/task3/public_contract.py": "14c95708c7d30a162bfd2e06dd0ef338bcf9414d2cac2f2f5cf0874bd4d3347b",
+    "src/task3/quality_review.py": "762665371ebabe7401d5d51f4f6a2b88d8555d143ccfbcdc0b86c7d5b8663a8d",
+    "src/task3/renderer.py": "d147d1ba8cee15e14a10844b0142712a29582a7687f1f09bbcbb5de486c81809",
+    "src/task3/round14.py": "011517072e140818541020734cd13bdb32c407f157843535ed78a4029492d653",
+    "src/task3/round14_eval.py": "80cbeb0aa5f5e5c2d20f901174bd93f575cd44eaccf8ec36ea1e45092f67443a",
+    "src/task3/round14_recovery.py": "5a6fbda3524827ad825373fa6baf233cf0aefaa6069a31b993c8c58d208f1c6e",
+    "src/task3/round14_runner.py": "aba9c09da7bc6a34de0837f8698dff7f9c614faf35ad40931de309cd028414e0",
+    "src/task3/round15.py": "9f367db21ee0bffba82a56950734e830606b52fafa32b70f4f8312e6492c3f9c",
+    "src/task3/round15_disclosure.py": "3b8a7009c491e4def66ee63f849c15580842b88fcdc74315324e81798496e941",
+    "src/task3/round15_runner.py": "d59530f8fff1feffe26e62cb89d47fa240de4a6442c94c5cf9df3546429c5807",
+    "src/task3/round15_selection.py": "42dcbd9c80204587afa3e0448418d2521a72c98c1186ac0fcf4aeae0a90f2ff9",
+    "src/task3/round16.py": "5b0a2386ade481d8220dfd1beb3b205169e51669587643e1bff67ce6aec37787",
+    "src/task3/round16_bank.py": "6539c36bbcdcbf74f24c9bd337c2b16db38580ca3d81e56937bc103f05c9e446",
+    "src/task3/round16_runner.py": "482eb7a2a48cd3aec6f5dd296ae41bb98f22ee6c88213082e259e40bd95b2abb",
+    "src/task3/round17.py": "182ada6ad98e6520a0afc5a5d3a71b7a716555e53beabfd9b34cebaf482e6ecf",
+    "src/task3/round17_bank.py": "f8460967d6511f07c31e129e58c61310fd82a0f47b8bf227ccae318cfa3a15d7",
+    "src/task3/runtime.py": "883b857a6c104bf3f50494b864b01242a93126c53af8f3d6d500c1537e338b22",
+    "src/task3/schema.py": "0b00e448051ef33848c81291f13849c777d7d5d9f54d13632b9e2f0a09d1bac8",
+    "src/task3/strategy.py": "11ef146a63f7df233e145daf9c21367de1ffe01f1e8a847a405af395c64b31bf",
+    "src/task3/submission.py": "ea92b410e6d60ca88f84aa1caebaeba0ace3a70eff8b54c5a360b99f1461cd93",
+    "src/task3/train.py": "81526f507362424d81e2dad5566e33f4da574ea9c593dfcc0b700fe9741feb2b",
+    "src/task3/train_supplement.py": "dd1d0a835f2b2b1ab4725e24a80300512e8f8e9a961c873c9f7393ff6095a5e5",
+    "src/task3/two_stage.py": "e31e7035c467c932111746c469723c7cdf1585900c846d6b20aa5fdaa658a4b4",
+    "src/task3/two_stage_data.py": "870df750bd14b2ed017ca2ac7e6cd30059d529ad94667ab11303cf3095aea77d",
+    "src/task3/two_stage_eval.py": "d9655b0647ad63543b082116eba44d4b5318d5a08cc8b0f7d5f8479cf7b0952c",
+    "src/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/utils/config.py": "8f4bf2fd8b4a6d4401d556549ec00c08020f3c8d713d48195d2474c8968dd591",
+    "src/utils/env.py": "b9eb398a6f80b81a76cd86faa7de810085b523fc979f98566506fca5e12e8f90",
+    "src/utils/json_extractor.py": "c770a250b9b96b79e21dce539ef5bee4023939a9321790fc75f7faa29f2c2161",
+    "src/utils/seed.py": "2a50efda5ac957c1264e5dd2c0f4364161cef24321fca035c05dd71c1e1548bc"
+  },
+  "levels": {
+    "train": {
+      "1": 56,
+      "2": 56,
+      "3": 56
+    },
+    "validation": {
+      "1": 14,
+      "2": 14,
+      "3": 14
+    }
+  },
+  "library_versions": {
+    "accelerate": "1.11.0",
+    "bitsandbytes": "0.48.1",
+    "datasets": "4.3.0",
+    "peft": "0.17.1",
+    "torch": "2.8.0",
+    "transformers": "4.57.1"
+  },
+  "split_policy": "seed42source/group/nearconnected components80/20; allLevels same source remain together",
+  "token_audit": {
+    "train": {
+      "by_kind": {
+        "direct": {
+          "examples": 168,
+          "max_tokens": 3705,
+          "supervised_tokens": 10970,
+          "tokens": 162233
+        }
+      },
+      "encoded_sha256": "843bdc7e05f00870a14f0dbc1aa3b06fba6041f794cd8d5876d2a630ef3b642e",
+      "examples": 168,
+      "max_tokens": 3705,
+      "sources": 56,
+      "supervised_tokens": 10970,
+      "tokens": 162233,
+      "truncated": false
+    },
+    "validation": {
+      "by_kind": {
+        "direct": {
+          "examples": 42,
+          "max_tokens": 2499,
+          "supervised_tokens": 2706,
+          "tokens": 44271
+        }
+      },
+      "encoded_sha256": "ae82cd35ca22e9cb9e3fa76fd89da67e3aa85dff98269cc48f7f248db04c1313",
+      "examples": 42,
+      "max_tokens": 2499,
+      "sources": 14,
+      "supervised_tokens": 2706,
+      "tokens": 44271,
+      "truncated": false
+    }
+  },
+  "train": {
+    "clean_defect": {
+      "defect": 52,
+      "scoped_clean": 4
+    },
+    "labels": {
+      "Lỗi biên dịch": 15,
+      "Lỗi edge case": 7,
+      "Lỗi hard-code": 4,
+      "Lỗi hàm": 10,
+      "Lỗi logic": 13,
+      "Lỗi mảng/chuỗi": 6,
+      "Lỗi nhập/xuất": 3,
+      "Lỗi thuật toán": 1,
+      "Lỗi vòng lặp": 8
+    },
+    "origin": {
+      "real-train": 11,
+      "synth-supplement": 3,
+      "synthetic-train": 42
+    },
+    "sources": 56
+  },
+  "training_signal": "assistant direct final JSON only; no diagnosis/CoT/public predictions/score/public prompts",
+  "validation": {
+    "clean_defect": {
+      "defect": 11,
+      "scoped_clean": 3
+    },
+    "labels": {
+      "Lỗi biên dịch": 3,
+      "Lỗi hard-code": 2,
+      "Lỗi hàm": 5,
+      "Lỗi nhập/xuất": 2,
+      "Lỗi vòng lặp": 1
+    },
+    "origin": {
+      "real-train": 3,
+      "synth-supplement": 3,
+      "synthetic-train": 8
+    },
+    "sources": 14
+  },
+  "version": "direct-sft-v1-20261021"
+}
