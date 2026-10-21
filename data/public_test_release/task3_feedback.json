@@ -1,0 +1,3957 @@
+{
+  "task": "task3_pedagogical_feedback",
+  "description": "Sinh phản hồi tiếng Việt cho sinh viên, ĐÚNG mức độ được yêu cầu ở target_feedback_level.",
+  "level_definition_ref": "label_space.json -> feedback_level",
+  "input_fields": [
+    "exam_id",
+    "exam_type",
+    "language",
+    "code_file (đường dẫn tương đối tới file .cpp)",
+    "compile_log (optional)",
+    "target_feedback_level"
+  ],
+  "output_fields": [
+    "taxonomy_error: list[str] (0..10 nhãn, xem label_space.json -> taxonomy_error)",
+    "feedback: str (tiếng Việt)"
+  ],
+  "metric": "một điểm: Level 1-2 mà đưa code sửa / lời giải thì mẫu đó 0 điểm, còn lại là độ chính xác chẩn đoán của feedback (0..1), đối chiếu với nhãn lỗi đúng và nhận xét của giảng viên",
+  "n_samples": 328,
+  "samples": [
+    {
+      "sample_id": "Class03-Final-1-S01",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S01.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S02",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S02.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S03",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S03.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S04",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S04.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S05",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S05.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S06",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S06.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S07",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S07.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S08",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S08.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S09",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S09.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S10",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S10.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S11",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S11.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S12",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S12.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S13",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S13.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S14",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S14.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S15",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S15.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S16",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S16.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S17",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S17.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S18",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S18.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S19",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S19.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S20",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S20.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S21",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S21.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S22",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S22.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S23",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S23.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S24",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S24.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S25",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S25.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S26",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S26.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S27",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S27.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S28",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S28.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S29",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S29.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S30",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S30.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S31",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S31.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S32",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S32.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S33",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S33.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S34",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S34.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S35",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S35.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S36",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S36.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S37",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S37.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S38",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S38.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S39",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S39.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S40",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S40.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S41",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S41.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S42",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S42.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S43",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S43.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S44",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S44.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S45",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S45.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S46",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S46.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S47",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S47.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S48",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S48.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S49",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S49.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S50",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S50.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S51",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S51.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S52",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S52.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S53",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S53.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S54",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S54.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S55",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S55.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S56",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S56.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S57",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S57.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S58",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S58.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S59",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S59.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S60",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S60.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S61",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S61.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S62",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S62.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S63",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S63.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S64",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S64.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S65",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S65.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S66",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S66.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S67",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S67.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S68",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S68.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S69",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S69.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S70",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S70.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S71",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S71.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S72",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S72.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Final-1-S73",
+      "input": {
+        "exam_id": "Class03-Final-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Final-1/Class03-Final-1-S73.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S03",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S03.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S04",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S04.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S05",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S05.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S06",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S06.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S07",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S07.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S09",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S09.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S10",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S10.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S11",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S11.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S13",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S13.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S14",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S14.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S15",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S15.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S17",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S17.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S18",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S18.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S19",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S19.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S20",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S20.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S21",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S21.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S23",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S23.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S25",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S25.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S26",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S26.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S27",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S27.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S28",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S28.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S29",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S29.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S30",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S30.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S32",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S32.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S34",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S34.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S35",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S35.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S36",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S36.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S38",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S38.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S39",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S39.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S40",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S40.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S41",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S41.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S43",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S43.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S45",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S45.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S46",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S46.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S47",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S47.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S48",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S48.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S49",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S49.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S50",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S50.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S51",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S51.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S52",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S52.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S53",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S53.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S54",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S54.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S55",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S55.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S56",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S56.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S58",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S58.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S60",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S60.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S61",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S61.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S62",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S62.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S63",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S63.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S64",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S64.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S66",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S66.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S67",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S67.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S69",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S69.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S70",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S70.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S71",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S71.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S72",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S72.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S73",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S73.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-1-S74",
+      "input": {
+        "exam_id": "Class03-Midterm-1",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-1/Class03-Midterm-1-S74.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S01",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S01.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S02",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S02.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S03",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S03.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S04",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S04.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S05",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S05.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S06",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S06.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S07",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S07.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S08",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S08.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S09",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S09.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S10",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S10.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S11",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S11.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S12",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S12.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S13",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S13.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S14",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S14.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S15",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S15.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S16",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S16.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S17",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S17.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S18",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S18.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S19",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S19.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S20",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S20.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S21",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S21.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S22",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S22.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S23",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S23.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S24",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S24.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S25",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S25.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S26",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S26.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S27",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S27.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S28",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S28.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S29",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S29.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S30",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S30.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S31",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S31.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S32",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S32.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S33",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S33.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S34",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S34.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S35",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S35.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S36",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S36.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S37",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S37.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S38",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S38.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S39",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S39.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S40",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S40.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S41",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S41.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S42",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S42.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S43",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S43.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S44",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S44.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S45",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S45.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S46",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S46.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S47",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S47.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S48",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S48.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S49",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S49.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S50",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S50.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S51",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S51.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S52",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S52.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S53",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S53.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S54",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S54.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S55",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S55.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S56",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S56.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S57",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S57.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S58",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S58.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S59",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S59.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S60",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S60.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S61",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S61.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S62",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S62.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S63",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S63.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S64",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S64.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S65",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S65.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S66",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S66.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S67",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S67.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S68",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S68.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S69",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S69.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S70",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S70.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 3 - Gợi ý sửa"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S71",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S71.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S72",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S72.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 1 - Gợi ý nhẹ"
+      }
+    },
+    {
+      "sample_id": "Class03-Midterm-2-S73",
+      "input": {
+        "exam_id": "Class03-Midterm-2",
+        "exam_type": "single_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class03-Midterm-2/Class03-Midterm-2-S73.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S01",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S01.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S05",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S05.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S06",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S06.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S08",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S08.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S09",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S09.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S10",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S10.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S15",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S15.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S16",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S16.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S17",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S17.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S18",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S18.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S19",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S19.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S20",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S20.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S24",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S24.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S25",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S25.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S26",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S26.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S27",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S27.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S28",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S28.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S29",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S29.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S30",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S30.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S31",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S31.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S32",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S32.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S33",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S33.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S35",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S35.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S36",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S36.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S37",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S37.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S38",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S38.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S41",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S41.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S42",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S42.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S43",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S43.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S45",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S45.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test1-S46",
+      "input": {
+        "exam_id": "Class01-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test1/Class01-Test1-S46.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S01",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S01.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S02",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S02.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S03",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S03.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S04",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S04.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S05",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S05.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S06",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S06.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S07",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S07.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S08",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S08.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S09",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S09.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S10",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S10.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S11",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S11.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S12",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S12.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S13",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S13.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S14",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S14.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S15",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S15.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S16",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S16.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S17",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S17.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S18",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S18.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S19",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S19.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S20",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S20.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S21",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S21.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S22",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S22.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S23",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S23.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S24",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S24.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S25",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S25.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S26",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S26.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S27",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S27.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S28",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S28.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S29",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S29.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S30",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S30.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S31",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S31.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S32",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S32.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S33",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S33.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S34",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S34.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S35",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S35.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S36",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S36.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S37",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S37.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S38",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S38.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S39",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S39.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S40",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S40.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S41",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S41.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S42",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S42.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class01-Test2-S43",
+      "input": {
+        "exam_id": "Class01-Test2",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class01-Test2/Class01-Test2-S43.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S01",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S01.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S02",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S02.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S03",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S03.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S04",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S04.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S05",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S05.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S06",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S06.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S07",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S07.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S08",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S08.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S09",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S09.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S10",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S10.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S11",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S11.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S12",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S12.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S13",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S13.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S14",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S14.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S15",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S15.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S16",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S16.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S17",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S17.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S18",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S18.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S19",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S19.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S20",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S20.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S21",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S21.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S22",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S22.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S23",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S23.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S24",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S24.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S25",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S25.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S26",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S26.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S27",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S27.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S28",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S28.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S29",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S29.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S30",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S30.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S31",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S31.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S32",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S32.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S33",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S33.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S34",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S34.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S35",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S35.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S36",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S36.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S37",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S37.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S38",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S38.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S39",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S39.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S40",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S40.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S41",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S41.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S42",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S42.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S43",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S43.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S44",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S44.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S45",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S45.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S46",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S46.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S47",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S47.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S48",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S48.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S49",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S49.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    },
+    {
+      "sample_id": "Class02-Test1-S50",
+      "input": {
+        "exam_id": "Class02-Test1",
+        "exam_type": "multi_problem",
+        "language": "cpp11",
+        "code_file": "submissions/Class02-Test1/Class02-Test1-S50.cpp",
+        "compile_log": "",
+        "test_report": null,
+        "target_feedback_level": "Level 2 - Chẩn đoán"
+      }
+    }
+  ]
+}

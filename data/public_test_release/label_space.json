@@ -1,0 +1,92 @@
+{
+  "rubric": {
+    "dimensions": [
+      {
+        "name": "compilable",
+        "range": [
+          0,
+          1
+        ],
+        "vi": "Biên dịch được"
+      },
+      {
+        "name": "io_format",
+        "range": [
+          0,
+          1
+        ],
+        "vi": "Đúng định dạng input/output"
+      },
+      {
+        "name": "logic",
+        "range": [
+          0,
+          4
+        ],
+        "vi": "Đúng logic"
+      },
+      {
+        "name": "edge_case",
+        "range": [
+          0,
+          2
+        ],
+        "vi": "Đúng edge case"
+      },
+      {
+        "name": "complexity",
+        "range": [
+          0,
+          1
+        ],
+        "vi": "Độ phức tạp / hiệu năng"
+      },
+      {
+        "name": "code_quality",
+        "range": [
+          0,
+          1
+        ],
+        "vi": "Code quality"
+      }
+    ],
+    "total_range": [
+      0,
+      10
+    ]
+  },
+  "taxonomy_error": [
+    "Lỗi biên dịch",
+    "Lỗi nhập/xuất",
+    "Lỗi logic",
+    "Lỗi vòng lặp",
+    "Lỗi mảng/chuỗi",
+    "Lỗi hàm",
+    "Lỗi edge case",
+    "Lỗi thuật toán",
+    "Lỗi hard-code",
+    "Lỗi style"
+  ],
+  "feedback_level": [
+    {
+      "level": "Level 1 - Gợi ý nhẹ",
+      "định nghĩa": "Chỉ báo có vấn đề / khen ngợi, không chỉ ra vị trí lỗi.",
+      "cấm": "không nêu nguyên nhân cụ thể, không đưa code sửa."
+    },
+    {
+      "level": "Level 2 - Chẩn đoán",
+      "định nghĩa": "Chỉ ra lỗi ở đâu và nguyên nhân là gì.",
+      "cấm": "không đưa cách sửa cụ thể, không đưa code."
+    },
+    {
+      "level": "Level 3 - Gợi ý sửa",
+      "định nghĩa": "Chẩn đoán + gợi ý hướng sửa.",
+      "cấm": "không đưa lời giải hoàn chỉnh."
+    },
+    {
+      "level": "Level 4 - Lời giải mẫu",
+      "định nghĩa": "Được phép đưa code sửa / lời giải mẫu.",
+      "cấm": "—"
+    }
+  ]
+}

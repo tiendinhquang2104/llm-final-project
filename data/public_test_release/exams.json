@@ -1,0 +1,290 @@
+{
+  "exams": [
+    {
+      "exam_id": "Class03-Midterm-1",
+      "exam_type": "single_problem",
+      "language": "cpp11",
+      "course": "Cơ sở lập trình",
+      "week": 5,
+      "topic": [
+        "Hàm"
+      ],
+      "learning_outcome": "Sinh viên vận dụng hàm và vòng lặp để kiểm tra số Armstrong.",
+      "bloom_level": [
+        "Analyze"
+      ],
+      "programming_skill": [
+        "Hàm"
+      ],
+      "problem_type": "Lập trình",
+      "difficulty_teacher": "D3 - Trung bình",
+      "estimated_time_min": 30,
+      "statement": "# Class03 — Midterm_1\n**Thời gian: 30 phút — Ngôn ngữ: C++ (chuẩn C++11)**\n\n## Exercise 1: Armstrong Number\n\nAn **Armstrong number** (also known as a narcissistic number) is a number \\( n \\) with \\( d \\) digits that satisfies the condition:\n\n\\[\nn = \\sum_{i=1}^{d} a_i^d\n\\]\n\nwhere \\( a_i \\) is the \\( i \\)-th digit of the number \\( n \\). For example, \\( 153 \\) (where $d = 3$) is an Armstrong number because:\n\n$${153} = 1^3 + 5^3 + 3^3 = 1 + 125 + 27 = 153$$\n\n**Constraints:**\n\n    - $1  n  10^9$.\n\n**Input:**\n\n    - The input contains a single integer \\(n\\), which is the number to be checked.\n\n**Output:**\n\n    - Print `True` if \\(n\\) is an Armstrong number, otherwise print `False`.\n\n**Example:**\n\n| Input | Output |\n|---|---|\n| 1634 | True |\n| 123 | False |\n\n**Explaining:**\n\nFor \\(1634\\), $1^4 + 6^4 + 3^4 + 4^4 = 1634 { where } d = 4$, hence the output is **True**.\n\nFor \\(123\\), $1^3 + 2^3 + 3^3 = 36 { where } d = 3$, which is not equal to \\(123\\), hence the output is **False**.\n\n*Notes: Do not use* `pow`.",
+      "data_file": null,
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 10,
+          "io_mode": "stdin/stdout",
+          "constraints": "1 <= n <= 10^9."
+        }
+      ],
+      "grading_policy": "Chấm trên một bài duy nhất; điểm rubric là điểm của cả bài.",
+      "has_hidden_testcases": true,
+      "note": "compile_log sinh bằng `g++ -std=c++11`."
+    },
+    {
+      "exam_id": "Class03-Midterm-2",
+      "exam_type": "single_problem",
+      "language": "cpp11",
+      "course": "Cơ sở lập trình",
+      "week": 5,
+      "topic": [
+        "Mảng"
+      ],
+      "learning_outcome": "Sinh viên vận dụng mảng và vòng lặp để loại bỏ phần tử trùng lặp, bảo toàn thứ tự.",
+      "bloom_level": [
+        "Analyze"
+      ],
+      "programming_skill": [
+        "Mảng"
+      ],
+      "problem_type": "Lập trình",
+      "difficulty_teacher": "D3 - Trung bình",
+      "estimated_time_min": 30,
+      "statement": "# Class03 — Midterm_2\n**Thời gian: 30 phút — Ngôn ngữ: C++ (chuẩn C++11)**\n\n## Exercise 2: Remove Duplicates from Array\n\nGiven an array of integers, implement a program to remove all duplicate elements from the array, so that each element appears only once.\n\n**Constraints:**\n\n    - $1  n  10000$.\n    - $-10^9  a_i  10^9$, with $ i  [1, , n]$.\n\n**Input:**\n\nThe input is read from the console with:\n\n    - The first line contains $n$ which is the size of the array.\n    - The second line contains $n$ integers $a_1, a_2, , a_n$.\n\n**Output:**\n\nWrite to the console:\n\n    - The number of **unique elements** remaining in the array after duplicates are removed.\n    - The array with duplicates removed, keep only the first element that appears in the array.\n\n**Example:**\n\n| Input | Output |\n|---|---|\n| 16 | 6 |\n| 1 5 3 7 2 3 2 5 2 6 5 6 5 7 2 3 | 1 5 3 7 2 6 |\n| 5 | 1 |\n| 5 5 5 5 5 | 5 |\n\n**Explanation:**\n\n    - In the first example, there are 6 unique elements after removing duplicates. The output array is `1 5 3 7 2 6`.\n    - In the second example, since all elements are 5, so keep only a single element.\n\n    The end.",
+      "data_file": null,
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 10,
+          "io_mode": "stdin/stdout",
+          "constraints": "1 <= n <= 10000. ; -10^9 <= a_i <= 10^9, with i [1, , n]."
+        }
+      ],
+      "grading_policy": "Chấm trên một bài duy nhất; điểm rubric là điểm của cả bài.",
+      "has_hidden_testcases": true,
+      "note": "compile_log sinh bằng `g++ -std=c++11`."
+    },
+    {
+      "exam_id": "Class03-Final-1",
+      "exam_type": "single_problem",
+      "language": "cpp11",
+      "course": "Cơ sở lập trình",
+      "week": 10,
+      "topic": [
+        "Chuỗi"
+      ],
+      "learning_outcome": "Sinh viên ứng dụng các kiến thức đã học trong toàn bộ môn học, kết hợp kĩ năng làm việc với xâu.",
+      "bloom_level": [
+        "Analyze"
+      ],
+      "programming_skill": [
+        "Chuỗi"
+      ],
+      "problem_type": "Lập trình",
+      "difficulty_teacher": "D3 - Trung bình",
+      "estimated_time_min": 30,
+      "statement": "# Class03 — Final_1\n**Thời gian: 30 phút — Ngôn ngữ: C++ (chuẩn C++11)**\n\n## Exercise 1\n\nGiven the first name and the last name of a user, generate a login by concatenating a prefix of the first name and a prefix of the last name, in that order.\nEach prefix must be **non-empty**, and any of the prefixes may be the **full name**.\nTypically, there are multiple possible logins for each person.\n\nYou are given the first and the last name of a user. Return the **alphabetically earliest** login they can get.\n\nAs a reminder, a prefix of a string $s$ is its substring which occurs at the beginning of $s$:\n`\"a\"`, `\"ab\"`, `\"abc\"` etc.\\ are prefixes of string `\"abcdef\"` but `\"b\"` and `\"bc\"` are not.\nA string $a$ is alphabetically earlier than a string $b$, if $a$ is a prefix of $b$, or $a$ and $b$ coincide up to some position, and then $a$ has a letter that is alphabetically earlier than the corresponding letter in $b$:\n`\"a\"` and `\"ab\"` are alphabetically earlier than `\"ac\"` but `\"b\"` and `\"ba\"` are alphabetically later than `\"ac\"`.\n\n**Constraints:**\n\n    - The length of each name is between $1$ and $10$, inclusive.\n    - Each character of each string is a lowercase English letter.\n\n**Input:**\n\nThe input consists of:\n\n    - A single line containing two space-separated strings: the first and the last names.\n\n**Output:**\n\nOutput a single string --- the alphabetically earliest possible login formed from these names.\n\n**Example:**\n\n| Input | Output |\n|---|---|\n| harry potter | hap |\n| tom riddle | tomr |",
+      "data_file": null,
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 10,
+          "io_mode": "stdin/stdout",
+          "constraints": "The length of each name is between 1 and 10, inclusive. ; Each character of each string is a lowercase English letter."
+        }
+      ],
+      "grading_policy": "Chấm trên một bài duy nhất; điểm rubric là điểm của cả bài.",
+      "has_hidden_testcases": true,
+      "note": "compile_log sinh bằng `g++ -std=c++11`."
+    },
+    {
+      "exam_id": "Class01-Test1",
+      "exam_type": "multi_problem",
+      "language": "cpp11",
+      "course": "Cấu trúc dữ liệu & Giải thuật",
+      "week": 3,
+      "topic": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng",
+        "Hàm",
+        "Rẽ nhánh",
+        "Chuỗi",
+        "Linked Lists"
+      ],
+      "learning_outcome": "Sinh viên ôn tập lại các kĩ năng đã học ở  Cơ sở lập trình: File, Linked List, kết hợp xử lý chuỗi.",
+      "bloom_level": [
+        "Apply",
+        "Analyze"
+      ],
+      "programming_skill": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng",
+        "Hàm",
+        "Rẽ nhánh",
+        "Chuỗi"
+      ],
+      "problem_type": "Hoàn thiện hàm, thiết kế thuật toán giải quyết dựa trên dữ liệu cho trước",
+      "difficulty_teacher": "D2 - Dễ",
+      "estimated_time_min": 60,
+      "statement": "# Class01 — Test1\n**Thời gian: 60 phút — Ngôn ngữ: C++ (chuẩn C++11)**\n\n**{test 1 - Class01**}\n\n    Time: 60 minutes\n\n## Submission regulations\n\n    - Students must attend in-class when doing and submitting the assignment,\n    - Students must submit a unique file named `ID.cpp`, containing only the required functions. A main function can be included for testing purposes, but it should be removed before submitting the final version.\n\n*Note: Replace ID by your identification number.*\n\n## Scoring rules\n\n    - Your submission will be compiled using the following terminal statements\n```cpp\n>> g++ id.cpp --std=c++11 -o id(.exe)\n>> id(.exe)\n```\n    - If there are any functions without solutions, their bodies should be left empty,\n    - DO NOT change the prototypes of functions/structs given in the test,\n    - There are NO scores for ideas, only executable programs will be evaluated,\n    - The following submissions will be marked with a 0 score:\n\n        - violating the regulations,\n        - SIMILAR to others,\n        - UNCOMPILABLE submission,\n        - creating an INFINITE LOOP infinite loop.\n\n {  (Go to the next pages to see the test content.) }\n\n     **Content** \\\\\n    * Note: only `iostream, fstream, sstream, string, cstring,` and `cmath` library is allowed.*\n\n Given the following structures that store information about a General, based on the provided `generals.csv` file. Note that you will not use all the fields from the file in this test.\n\n```cpp\n    struct Date {\n        int day, month, year;\n        string era;     // AD or BC\n    };\n    struct General {\n        string name, nationality;\n        Date born, death;\n        int total_known_battles;\n        string* known_battles;\n    };\n```\n\n**Problem 1 (1 điểm).** Write a function to read **all** records from the file `filename` into a dynamically allocated array of `General`. The order of generals in the array must match their order in the file.\n\n    *Note: If you fail to read the file, the remaining problems will **not** be graded.*\n\n    - [] **Prototype:**\n    ```cpp\n        General* prob1(string filename, int& n);\n    ```\n\n    For the following problems, use the structure below for a `Node` in a Singly Linked List:\n\n    ```cpp\n    struct Node {\n        General general;\n        Node* next;\n    };\n    ```\n\n**Problem 2 (4 điểm).** Create a linked list from a given array of `General`. The order of generals in the list must match their order in the array.\n\n    - [] **Prototype:**\n    ```cpp\n        Node* prob2(General* generals, int n);\n    ```\n\n**Problem 3 (2 điểm).** For this problem, a general's age is calculated as `death.year - born.year`. However, note that some generals were born Before Christ (BC), so you must adjust the formula to handle this case.\n\n    Find the oldest general in the list created in Problem 2. If there are multiple generals with the same highest age, return the **first** one encountered. You must operate in-place (i.e., without using extra lists, arrays, etc.).\n\n    - [] **Prototype:**\n    ```cpp\n        General prob3(Node* head);\n    ```\n\n**Problem 4 (3 điểm).** Remove **all** generals with a given `nationality` from the list created in Problem 2. You must remove nodes in-place (i.e., without using extra lists, arrays, etc.).\n    - [] **Prototype:**\n    ```cpp\n        void prob4(Node*& head, string nationality);\n    ```",
+      "data_file": "50-best-european-generals-cleaned-first-20.csv",
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 1,
+          "prototype": "General* prob1(string filename, int& n);",
+          "is_prerequisite_for": [
+            "P2",
+            "P3",
+            "P4"
+          ]
+        },
+        {
+          "pid": "P2",
+          "max_score": 4,
+          "prototype": "Node* prob2(General* generals, int n);"
+        },
+        {
+          "pid": "P3",
+          "max_score": 2,
+          "prototype": "General prob3(Node* head);"
+        },
+        {
+          "pid": "P4",
+          "max_score": 3,
+          "prototype": "void prob4(Node*& head, string nationality);"
+        }
+      ],
+      "grading_policy": "Nếu P1 (đọc file) sai thì các câu P2–P4 không được chấm.",
+      "has_hidden_testcases": false,
+      "note": "Bài nộp chỉ chứa hàm, không có main; compile_log được sinh bằng `g++ -std=c++11 -fsyntax-only`."
+    },
+    {
+      "exam_id": "Class01-Test2",
+      "exam_type": "multi_problem",
+      "language": "cpp11",
+      "course": "Cấu trúc dữ liệu & Giải thuật",
+      "week": 5,
+      "topic": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng",
+        "Hàm",
+        "BST"
+      ],
+      "learning_outcome": "Sinh viên có khả năng dựng cây BST & thao tác cơ bản trên cây BST với dữ liệu cho trước",
+      "bloom_level": [
+        "Apply",
+        "Analyze"
+      ],
+      "programming_skill": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng"
+      ],
+      "problem_type": "Hoàn thiện hàm, cài đặt cấu trúc dữ liệu",
+      "difficulty_teacher": "D3 - Trung bình",
+      "estimated_time_min": 60,
+      "statement": "# Class01 — Test2\n**Thời gian: 60 phút — Ngôn ngữ: C++ (chuẩn C++11)**\n\n**{test 2 - Class01**}\n\n    Time: 60 minutes\n\n## Submission regulations\n\n    - Students must attend in-class when doing and submitting the assignment,\n    - Students are NOT permitted to use the internet or any extra materials during the test,\n    - Students must submit a unique file named `ID.cpp`, containing only the required functions. A main function can be included for testing purposes, but it should be removed before submitting the final version.\n\n*Note: Replace ID by your identification number.*\n\n## Scoring rules\n\n    - Your submission will be compiled using the following terminal statements\n```cpp\n>> g++ id.cpp --std=c++11 -o id(.exe)\n>> id(.exe)\n```\n    - If there are any functions without solutions, their bodies should be left empty,\n    - DO NOT change the prototypes of functions/structs given in the test,\n    - There are NO scores for ideas; only executable programs will be evaluated,\n    - The following submissions will be marked with a 0 score:\n\n        - violating the regulations,\n        - SIMILAR to others,\n        - UNCOMPILABLE submission,\n        - creating an INFINITE LOOP infinite loop.\n\n {  (Go to the next pages to see the test content.) }\n\n     **Content** \\\\\n    * Note: only `iostream, fstream, vector, sstream, string, cstring,` and `cmath` library is allowed.*\n\n Given the following structures that store information about a General, based on the provided `generals.csv` file. Note that you will not use all the fields from the file in this test.\n\n```cpp\n    struct Date {\n        int day, month, year;\n        string era;     // AD or BC\n    };\n    struct General {\n        string name, nationality;\n        Date born, death;\n        vector<string> known_battles;\n    };\n```\n\n**Problem 1 (1 điểm).** Write a function to read **all** records from the file `filename` into a `vector` of `General`. The order of generals must match their order in the file.\n\n    *Note: If you fail to read the file, the remaining problems will **not** be graded.*\n\n    - [] **Prototype:**\n    ```cpp\n        vector<General> prob1(string filename);\n    ```\n\n    For the following problems, use the structure below for a `Node` in a Binary Search Tree (BST):\n\n    ```cpp\n    struct Node {\n        General general;\n        Node* left;\n        Node* right;\n    };\n    ```\n\n**Problem 2 (4 điểm).** Create a Binary Search Tree (BST) from a given `vector` of `General` such that:\n\n        - Generals in the left subtree were `born` *before* the general in the current node.\n        - Generals in the right subtree were `born` *after* the general in the current node.\n        - If multiple generals were born on the same date, the same rule applies to their date of `death`.\n\n    The generals must be inserted into the tree in the exact order they appear in the vector.\n\n    - [] **Prototype:**\n    ```cpp\n        Node* prob2(vector<General> generals); // return the root node of the tree.\n    ```\n\n**Problem 3 (2 điểm).** From the BST in Problem 2, count the number of generals who were born in a given `born_year` (e.g., \"12 AD\" or \"126 BC\"). You must traverse the tree in-place (i.e., without using extra lists, arrays, or trees).\n\n    - [] **Prototype:**\n    ```cpp\n        int prob3(Node* root, string born_year);\n    ```\n\n**Problem 4 (3 điểm).** Remove **all** generals that are  *not* participated in a given `battle` from the BST in Problem 2. In case a node has two children, the replacement node will be the leftmost node in the right subtree. You must remove nodes in-place (i.e., without using extra lists, arrays, or trees).\n    - [] **Prototype:**\n    ```cpp\n        void prob4(Node*& root, string battle);\n    ```\n\n **Note:** For your reference, here is an example of how to convert an array into a vector:\n\n```cpp\n#include<vector> // MUST!\n\n// Example: A is an array of 10 integers\nint A[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};\nint n = 10; // Total elements of A\n\n// Declare a new vector of int named testVector\nvector<int> testVector;\nfor (int i = 0; i < n; ++i) {\n    testVector.push_back(A[i]); // Call the .push_back method of vector.\n}\n\n// From here, testVector behaves the same as an array.\n// You can use .size() to know the vector's size.\nfor (int i = 0; i < testVector.size(); ++i) {\n    cout << testVector[i] << \" \";\n}\n```",
+      "data_file": "50-best-european-generals-cleaned-first-20.csv",
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 1,
+          "prototype": "vector<General> prob1(string filename);",
+          "is_prerequisite_for": [
+            "P2",
+            "P3",
+            "P4"
+          ]
+        },
+        {
+          "pid": "P2",
+          "max_score": 4,
+          "prototype": "Node* prob2(vector<General> generals); // return the root node of the tree."
+        },
+        {
+          "pid": "P3",
+          "max_score": 2,
+          "prototype": "int prob3(Node* root, string born_year);"
+        },
+        {
+          "pid": "P4",
+          "max_score": 3,
+          "prototype": "void prob4(Node*& root, string battle);"
+        }
+      ],
+      "grading_policy": "Nếu P1 (đọc file) sai thì các câu P2–P4 không được chấm.",
+      "has_hidden_testcases": false,
+      "note": "Bài nộp chỉ chứa hàm, không có main; compile_log được sinh bằng `g++ -std=c++11 -fsyntax-only`."
+    },
+    {
+      "exam_id": "Class02-Test1",
+      "exam_type": "multi_problem",
+      "language": "cpp11",
+      "course": "Cấu trúc dữ liệu & Giải thuật",
+      "week": 3,
+      "topic": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng",
+        "Hàm",
+        "Rẽ nhánh",
+        "Chuỗi",
+        "Linked Lists"
+      ],
+      "learning_outcome": "Sinh viên ôn tập lại các kĩ năng đã học ở  Cơ sở lập trình: File, Linked List, kết hợp xử lý chuỗi.",
+      "bloom_level": [
+        "Apply",
+        "Analyze"
+      ],
+      "programming_skill": [
+        "File",
+        "Con trỏ / struct",
+        "Mảng",
+        "Hàm",
+        "Rẽ nhánh",
+        "Chuỗi"
+      ],
+      "problem_type": "Hoàn thiện hàm, thiết kế thuật toán giải quyết dựa trên dữ liệu cho trước",
+      "difficulty_teacher": "D2 - Dễ",
+      "estimated_time_min": 60,
+      "statement": "# Class02 — Test1\n**Thời gian: 60 phút — Ngôn ngữ: C++ (chuẩn C++11)**\n\n**{test 1 - Class02**}\n\n    Time: 60 minutes\n\n## Submission regulations\n\n    - Students must attend in-class when doing and submitting the assignment,\n    - Students must submit a unique file named `ID.cpp`, containing only the required functions. A main function can be included for testing purposes, but it should be removed before submitting the final version.\n\n*Note: Replace ID by your identification number.*\n\n## Scoring rules\n\n    - Your submission will be compiled using the following terminal statements\n```cpp\n>> g++ id.cpp --std=c++11 -o id(.exe)\n>> id(.exe)\n```\n    - If there are any functions without solutions, their bodies should be left empty,\n    - DO NOT change the prototypes of functions/structs given in the test,\n    - There are NO scores for ideas, only executable programs will be evaluated,\n    - The following submissions will be marked with a 0 score:\n\n        - violating the regulations,\n        - SIMILAR to others,\n        - UNCOMPILABLE submission,\n        - creating an INFINITE LOOP infinite loop.\n\n {  (Go to the next pages to see the test content.) }\n\n     **Content** \\\\\n    * Note: only `iostream, fstream, sstream, string, cstring,` and `cmath` library is allowed.*\n\n Given the following structure that stores information about a Battle, based on the provided `battles.csv` file. Note that you will not use all the fields from the file in this test.\n\n```cpp\n    struct Battle {\n        string name, location;\n        string from_date, to_date;\n        int total_famous_generals;\n        string* list_famous_generals;\n    };\n```\n\n**Problem 1 (1 điểm).** Write a function to read **all** records from the file `filename` into a dynamically allocated array of `Battle`. The order of battles in the array must match their order in the file.\n\n    *Note: If you fail to read the file, the remaining problems will **not** be graded.*\n\n    - [] **Prototype:**\n    ```cpp\n        Battle* prob1(string filename, int& n);\n    ```\n\n    For the following problems, use the structure below for a `Node` in a Singly Linked List:\n\n    ```cpp\n    struct Node {\n        Battle battle;\n        Node* next;\n    };\n    ```\n\n**Problem 2 (4 điểm).** Create a linked list from a given array of `Battle`. The order of battles in the list must match their order in the array.\n\n    - [] **Prototype:**\n    ```cpp\n        Node* prob2(Battle* battles, int n);\n    ```\n\n**Problem 3 (2 điểm).** Count the total number of battles that occurred within the year range `[start_year, end_year]` (inclusive) using the list created in Problem 2. You must operate in-place (i.e., without using extra lists, arrays, etc.).\n\n    - [] **Prototype:**\n    ```cpp\n        int prob3(Node* head, string start_year, string end_year);\n    ```\n\n**Problem 4 (3 điểm).** Remove **all** battles in which a specific `general` did **not** participate from the list created in Problem 2. You must remove nodes in-place (i.e., without using extra lists, arrays, etc.).\n    - [] **Prototype:**\n    ```cpp\n        void prob4(Node*& head, string general);\n    ```",
+      "data_file": "50-european-battles-first-20.csv",
+      "problems": [
+        {
+          "pid": "P1",
+          "max_score": 1,
+          "prototype": "Battle* prob1(string filename, int& n);",
+          "is_prerequisite_for": [
+            "P2",
+            "P3",
+            "P4"
+          ]
+        },
+        {
+          "pid": "P2",
+          "max_score": 4,
+          "prototype": "Node* prob2(Battle* battles, int n);"
+        },
+        {
+          "pid": "P3",
+          "max_score": 2,
+          "prototype": "int prob3(Node* head, string start_year, string end_year);"
+        },
+        {
+          "pid": "P4",
+          "max_score": 3,
+          "prototype": "void prob4(Node*& head, string general);"
+        }
+      ],
+      "grading_policy": "Nếu P1 (đọc file) sai thì các câu P2–P4 không được chấm.",
+      "has_hidden_testcases": false,
+      "note": "Bài nộp chỉ chứa hàm, không có main; compile_log được sinh bằng `g++ -std=c++11 -fsyntax-only`."
+    }
+  ]
+}

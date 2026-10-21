@@ -1,0 +1,21 @@
+BattleName,Location,FromDate,ToDate,CountriesInvolved,Casualties,ListFamousGenerals
+Battle of the Marne (First),France,06-09-1914,12-09-1914,France;United Kingdom;German Empire,500,Joseph Joffre;Michel-Joseph Maunoury;Helmuth von Moltke;Alexander von Kluck;Karl von Buelow
+Battle of Bautzen,Germany,20-05-1813,21-05-1813,France;Russia;Prussia,35,Napoleon Bonaparte;Michel Ney;Gebhard Leberecht von Bluecher;Peter Wittgenstein
+Battle of Breitenfeld,Germany,17-09-1631,17-09-1631,Sweden;Saxony;Holy Roman Empire,20,Gustavus Adolphus;Count of Tilly;Gottfried Heinrich zu Pappenheim;Johan Baner
+Battle of Luetzen,Germany,02-05-1813,02-05-1813,France;Prussia;Russia,35,Napoleon Bonaparte;Peter Wittgenstein;Gebhard Leberecht von Bluecher;Michel Ney
+Battle of Normandy,France,06-06-1944,30-08-1944,United States;United Kingdom;Canada;France;Poland;Nazi Germany,425,Dwight D. Eisenhower;Bernard Montgomery;Erwin Rommel;Gerd von Rundstedt;Omar Bradley
+Battle of Monte Cassino,Italy,17-01-1944,18-05-1944,United Kingdom;United States;Poland;New Zealand;France;Nazi Germany,75,Harold Alexander;Mark Clark;Wladyslaw Anders;Albert Kesselring
+Battle of Kursk,Russia,05-07-1943,23-08-1943,Soviet Union;Nazi Germany,350,Georgy Zhukov;Konstantin Rokossovsky;Erich von Manstein;Walter Model;Hermann Hoth
+Battle of France,France,10-05-1940,25-06-1940,France;United Kingdom;Belgium;Netherlands;Nazi Germany;Italy,360,Gerd von Rundstedt;Maurice Gamelin;Maxime Weygand;Heinz Guderian;Erwin Rommel
+Battle of Kiev,Ukraine,23-08-1941,26-09-1941,Soviet Union;Nazi Germany,700,Gerd von Rundstedt;Semyon Budyonny;Mikhail Kirponos;Heinz Guderian;Ewald von Kleist
+Siege of Leningrad,Russia,08-09-1941,27-01-1944,Soviet Union;Nazi Germany;Finland,1500,Georgy Zhukov;Kliment Voroshilov;Wilhelm Ritter von Leeb;Carl Gustaf Emil Mannerheim
+Battle of Lepanto,Greece,07-10-1571,07-10-1571,Spain;Venice;Papal States;Genoa;Ottoman Empire,40,Don John of Austria;Ali Pasha;Sebastiano Venier;Uluc Ali
+Battle of Caporetto,Slovenia,24-10-1917,19-11-1917,Italy;Austria-Hungary;German Empire,300,Luigi Cadorna;Armando Diaz;Otto von Below;Svetozar Boroevic
+Battle of Landen,Belgium,29-07-1693,29-07-1693,France;England;United Provinces,30,Duke of Luxembourg;William III of England
+Battle of the Dnieper,Ukraine,24-08-1943,23-12-1943,Soviet Union;Nazi Germany;Romania,2000,Konstantin Rokossovsky;Erich von Manstein;Nikolai Vatutin;Ivan Konev
+Battle of the Bulge,Belgium,16-12-1944,25-01-1945,United States;United Kingdom;Nazi Germany,180,Dwight D. Eisenhower;George S. Patton;Walter Model;Gerd von Rundstedt;Hasso von Manteuffel
+Battle of Borodino,Russia,07-09-1812,07-09-1812,France;Russian Empire,75,Napoleon Bonaparte;Mikhail Kutuzov;Michel Ney;Pyotr Bagration
+Battle of Galicia,Ukraine,23-08-1914,11-09-1914,Russian Empire;Austria-Hungary,1000,Nikolai Ivanov;Aleksei Brusilov;Franz Conrad von Hoetzendorf;Viktor Dankl
+Operation Bagration,Belarus,22-06-1944,19-08-1944,Soviet Union;Nazi Germany,2300,Konstantin Rokossovsky;Georgy Zhukov;Walter Model;Ernst Busch
+Battle of Jena-Auerstedt,Germany,14-10-1806,14-10-1806,France;Prussia;Saxony,35,Napoleon Bonaparte;Louis-Nicolas Davout;Duke of Brunswick;Prince Hohenlohe
+Battle of Solferino,Italy,24-06-1859,24-06-1859,France;Sardinia;Austrian Empire,40,Napoleon III;Franz Joseph I;Patrice de MacMahon;Victor Emmanuel II
