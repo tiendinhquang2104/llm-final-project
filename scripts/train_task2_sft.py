@@ -108,7 +108,7 @@ def train(args):
         gradient_checkpointing_kwargs={"use_reentrant": False},
         learning_rate=args.lr,
         lr_scheduler_type="cosine",
-        warmup_ratio=0.05,
+        warmup_steps=10,
         logging_steps=10,
         save_strategy="epoch",
         save_total_limit=1,
