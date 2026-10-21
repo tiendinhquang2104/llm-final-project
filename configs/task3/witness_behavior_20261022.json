@@ -1,0 +1,17 @@
+{
+  "version": "concrete-witness-diagnosis-v1",
+  "baseline_config": "configs/task3/r15_selected.yaml",
+  "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "candidate_max_new_tokens": 1536,
+  "candidate_attempts": 2,
+  "few_shot": 0,
+  "compiler_evidence": "actual_same_submission_only",
+  "student_execution_in_prompt": false,
+  "hidden_oracle_in_prompt": false,
+  "renderer_before_gate": false,
+  "public_inference": false,
+  "training": false,
+  "gate": {"evaluation_pairs":18,"minimum_pair_successes":12,"minimum_gain_over_R15":4,"additional_mutant_false_clean_allowed":0},
+  "review_authority": "author-agent review, not human-verified"
+}
