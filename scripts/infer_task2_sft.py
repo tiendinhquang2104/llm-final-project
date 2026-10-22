@@ -71,10 +71,22 @@ def main():
         args.model_id,
         quantization_config=bnb_config,
         device_map=device_map,
+        attn_implementation="sdpa",
         trust_remote_code=True,
     )
-    print(f"==> Loading LoRA adapter from {args.adapter_dir}...")
-    model = PeftModel.from_pretrained(base_model, args.adapter_dir)
+
+    adapter_path = Path(args.adapter_dir)
+    if not (adapter_path / "adapter_config.json").exists():
+        checkpoints = sorted(
+            adapter_path.glob("checkpoint-*"),
+            key=lambda p: int(p.name.split("-")[-1]) if p.name.split("-")[-1].isdigit() else 0,
+        )
+        if checkpoints and (checkpoints[-1] / "adapter_config.json").exists():
+            adapter_path = checkpoints[-1]
+            print(f"==> Auto-detected latest checkpoint adapter at: {adapter_path}")
+
+    print(f"==> Loading LoRA adapter from {adapter_path}...")
+    model = PeftModel.from_pretrained(base_model, str(adapter_path))
     model.eval()
 
     data_path = Path(args.data_dir)
