@@ -1,0 +1,16 @@
+{
+  "experiment": "paired-review-20261022",
+  "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "seed": 42,
+  "baseline": "configs/task3/r15_selected.yaml",
+  "near_threshold": 0.85,
+  "development": ["EX01-S106", "EX01-S111", "EX01-S112", "SYN-ARM-0008", "SYN-COUNTGT-0004", "SYN-DIGITSUM-0016", "SYN-FACT-0001", "SYN-GCDARR-0009", "SYN-MINA-0004", "SYN-PRIME-0008", "SYN-BASE2-0000", "SYN-SUMB-0005"],
+  "validation": ["EX02-S201", "EX02-S211", "EX02-S212", "SYN-COUNTUPPER-0001", "SYN-DISTINCT-0010", "SYN-FIB-0000", "SYN-MAXDIFF-0008", "SYN-PERFECT-0018", "SYN-PROD-0015", "SYN-REVSTR-0001", "SYN-SECONDMAX-0006", "SYN-SUMEVEN-0000"],
+  "selection_rule": "All six fixed real validation IDs; one metadata-selected synthetic ID per 18 evaluation-v2 families to cover annotation labels and clean sources. Remove exact/token/renamed/near>=0.85 against BOTH SFT optimizer and internal validation and other selected sources. Never replace failed IDs post-inference. Families disjoint between development and validation. Assign cyclic L1,L2,L3 by within-partition index; final synthetic clean source per partition gets L4. Keep original Level/annotation separately.",
+  "annotation_version": "original prepared real + sealed evaluation-v2 annotation; independent source review overlay separately",
+  "selection_gate": "Joint source-backed taxonomy and independent feedback improvement; no increased serious Level violations; full completion/schema; unresolved material disputes cannot establish a winner. Prior research exposure limits validation independence.",
+  "training": false,
+  "public_inference": false,
+  "max_prompt_changes": 3
+}

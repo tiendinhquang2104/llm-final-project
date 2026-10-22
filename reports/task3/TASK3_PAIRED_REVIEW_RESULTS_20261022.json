@@ -1,0 +1,4386 @@
+{
+  "selection_sha256": "d1530df2ff7746d5b4516bed9efb68b98a851ac26663f6138759b538b16d4cdd",
+  "source_findings_sha256": "d470354825afea26599572b4ddc1939b7234669e32b48d0f1480b9d1aaed63cd",
+  "review_hashes": {
+    "development-baseline": {
+      "packet": "0840fbf83b09caec22564235739a4090212a0a87340510c1977883cbf94a772c",
+      "review": "e669699d3b24c4a509f828909c83082fd553c7c5ede6a2d76152814ba07f4126"
+    },
+    "development-candidate1": {
+      "packet": "a49d06967ebcc6c021fc3fb936940bfb273b565065a3d9c883d5a19c0ec7d184",
+      "review": "e747a4540c065b8b7ea43c82f47f27e22067134011001a7bfcf061702d344a38"
+    },
+    "development-candidate2": {
+      "packet": "dffd8254b89dd9a2d1843b49f45c8ea4df22986acee5bf7a12b19588f1d6f614",
+      "review": "b657423e186f2bbbeeb832d3fb3ecc5d5801f138dea24eff20f0f05f9804ec1b"
+    },
+    "validation-validation1": {
+      "packet": "c847b863a04ee76143ad4ee4bec64f2f2452f19af230e7a27496b8f4dec5e203",
+      "review": "59f26b0595f3a8095b6f4c6ecc409d30dfebe2566c82bcebde8c4345fda2b5ed"
+    },
+    "validation-candidate2": {
+      "packet": "75a0e1a7062ee66db0ec295834a9b4d0ca0a6afe2f425acf544af5d448db42d7",
+      "review": "47f95f14ffc19af2f8e531cdc67c09746c8b2ed9dc10ced08b4cbdee6aa475d3"
+    }
+  },
+  "private_artifact_hashes": {
+    "review-input-attestation.private.json": "c5cc2647ac2b5ec8a9cab795c4393057a2e2f74e1db6e8ac5a7e6768a870f110",
+    "domain-review-overlay.private.json": "06c1212b7da717671a23018688651de92e74421ddeacc1ddb15b53c2e2fc95dc",
+    "sources.private.json": "7dc870db20e00f4d965b78d85ce3e9c34556f9eb7c7ecded42cdab5a6d0a1ff8",
+    "development-candidate1-key.private.json": "4a1711daf6a3a29689220c7f2bafdc22322637b5432c3132066def9d6acb924e",
+    "development-candidate2-key.private.json": "eaed15a1378c22321dc2fdb811fb68756954044e616823bf01e091ed75c1b0a3",
+    "claim-status-overlay.private.json": "f51eed03e2b4745a586ecb0b6e32cd6e1234cfce16dc3f9f10c1ea2ec7f2432a",
+    "development-baseline-key.private.json": "23d306f343165d75c17d1c6de447fdd130508c96f1296253a989404e4e36a21a",
+    "claim-evidence-overlay.private.json": "1e9bcaa3b75feef4e860b5fd86b2dec50661c353d77bb8ca50b8d299c3b2e39b",
+    "review-input-attestation-supplement.private.json": "660ae287e7ae47f9a5b7d0da543a9501123caa491681bd3ce7e6873429af9c9d",
+    "source-adjudication-overlay.private.json": "542151aff4c65207b187f7608c695baada3ad1a3d76cf4eb38af945b350ab1d9",
+    "source-findings.private.json": "d470354825afea26599572b4ddc1939b7234669e32b48d0f1480b9d1aaed63cd",
+    "validation-candidate2-key.private.json": "eaed15a1378c22321dc2fdb811fb68756954044e616823bf01e091ed75c1b0a3",
+    "validation-validation1-key.private.json": "fee18b2d8a4dd2e1173efc66814abf355ee25bad4303de35d5bf3a08abf64703",
+    "claim-status-attestation-supplement.private.json": "20ca0e84108ec36e0fb53b625f400dd351cadf151b18b70ea07c5218851a3672",
+    "annotations.private.json": "0583a2aacfc4d70ca4ea98057a0f8dcf46ab0df5ec354054695e281a863430e8",
+    "domain-adjudication.private.json": "3797c348bae40db0a36a9039b61b614efd6a2fab090ee7fa358b03383192fc21",
+    "SFT2/validation/predictions.json": "e32e0f132dbcec545d2b536051e6c386289789290178545f7f6892dea1db5e9e",
+    "SFT2/validation/started.json": "bf42dd2ab41a30488722c72d0f671e0046bfa53e0cd23c05c9eba2d6f335d9b6",
+    "SFT2/validation/completed.predictions.json": "e32e0f132dbcec545d2b536051e6c386289789290178545f7f6892dea1db5e9e",
+    "SFT2/validation/traces.json": "b01d5d269976993673ba19221981491b0633986ee8503616a4b3c09567670f3c",
+    "SFT2/validation/run.json": "786344ee25fd297209b210a6c8490458ac740e13dddf0849c466d3b7144af3f0",
+    "SFT2/validation/attempts.jsonl": "426c085b356e78e93b0983b9b8077eacd7c9d2f84714a192e59d8601ebd838cc",
+    "SFT2/validation/decisions.jsonl": "f99e2d939cef59b072039314ef24f36702b7b73f7b0846709d4d7ce8d8b0a376",
+    "SFT2/validation/generations.jsonl": "95db9ac405a9fff00b726333fd3c623bc64430e5743be79d0e215d3bdaabe174",
+    "SFT2/development/predictions.json": "58b2db131b3edddca1cfe92d417e2c1788c348c12c09dfc723cb7ded4b29890e",
+    "SFT2/development/started.json": "7cd2f58935209babf457bd0a1a095d84e208490e43d959487093301822a4c892",
+    "SFT2/development/completed.predictions.json": "58b2db131b3edddca1cfe92d417e2c1788c348c12c09dfc723cb7ded4b29890e",
+    "SFT2/development/traces.json": "e00c0c436e9074ed1a971335e8fc35f8f89c734c74060444b645447cce888c5e",
+    "SFT2/development/run.json": "fde460ea16e203d8408d43b99b8e9090a7da8d6d9012f500bd3b71fdfd86656d",
+    "SFT2/development/attempts.jsonl": "e381e30f67078278c7de28df4e3f70398d611cfd121500320bfd9d267ea48b14",
+    "SFT2/development/decisions.jsonl": "14e4d1f816fd95bd632700644e321f342697563be67376768ebe56f9dc90d89a",
+    "SFT2/development/generations.jsonl": "33931d8e2c40189de5b2ff1c928f742fbf7f8da623a0c47d5447d62511ff97e8",
+    "SFT1/validation/predictions.json": "a9c74e925eac1c711340fd43b4c2c776c4f3b2795512c8eb1c2d1aaf5f5a65cf",
+    "SFT1/validation/started.json": "d457132b23cd741554571b4d5714746548d0447d9edf888500faceff0f6ddd0c",
+    "SFT1/validation/completed.predictions.json": "a9c74e925eac1c711340fd43b4c2c776c4f3b2795512c8eb1c2d1aaf5f5a65cf",
+    "SFT1/validation/traces.json": "bd160ddbfe8188e96178d9bd8e5c407f743b27b5cfad8640e3079eef66e2c5f9",
+    "SFT1/validation/run.json": "1dc89fef425d79a05402c6af8513866c4c2f4910c93016b178f74b4d3cedb30f",
+    "SFT1/validation/attempts.jsonl": "d967083e40718eebd4ff7b6717f789a6c6612b7f7e07bf56ba738e6a52f2161f",
+    "SFT1/validation/decisions.jsonl": "f99e2d939cef59b072039314ef24f36702b7b73f7b0846709d4d7ce8d8b0a376",
+    "SFT1/validation/generations.jsonl": "11199074b195dec1a6eed4ade3e983c27397f2a79f3eda587df7065b53e0c7f1",
+    "SFT1/development/predictions.json": "187a69561da1e82ca2649113b56869f10c418e6a6c3392b0c55ecaf3ad5e30df",
+    "SFT1/development/started.json": "8db43fd9f41070c54e6db49c6930694d6c0544f451b4c3815c9977825c6c3ed6",
+    "SFT1/development/completed.predictions.json": "187a69561da1e82ca2649113b56869f10c418e6a6c3392b0c55ecaf3ad5e30df",
+    "SFT1/development/traces.json": "934c2c5f7a7da2b961c45529b30285c6137c5e14c3592edcfce7fc1e80c88e74",
+    "SFT1/development/run.json": "11b096708afaa1db29e65cf8c4b4b093dd369622b26a10e3ddcf4dd627eb6f96",
+    "SFT1/development/attempts.jsonl": "2bdd5028f6f8e33688709206ef531d27ac95d75585f5d7951bbb14a8a766873a",
+    "SFT1/development/decisions.jsonl": "14e4d1f816fd95bd632700644e321f342697563be67376768ebe56f9dc90d89a",
+    "SFT1/development/generations.jsonl": "5dcc593f2d6cd4fcdeb41c89d8839bb7dee7b3b346de96b2f9ad5c57b6f3d209",
+    "C2/validation/predictions.json": "579a7c4f5372d0cba65a709f53b4de133b1b05fb513c84aad217ffba3afb1454",
+    "C2/validation/started.json": "07971d4f13bd48aae47649e3def839c0552603ef9c70b656fde1a01ab46f258a",
+    "C2/validation/completed.predictions.json": "579a7c4f5372d0cba65a709f53b4de133b1b05fb513c84aad217ffba3afb1454",
+    "C2/validation/traces.json": "acacab39318e5b2e97066f51df581bc35228760778b0d9344a8a28858dc614d3",
+    "C2/validation/run.json": "6fc13eb1b2f9ff2d797de9a3d4067b8d20f6ea997ff4f675d27104eea01394b7",
+    "C2/validation/attempts.jsonl": "99e9d2c6454c8fed9e6c2e4c12eabda05082e1cb1e960042f04f479773462b53",
+    "C2/validation/decisions.jsonl": "b45d635129e843af88152057a3825f7acbb1cbf95ab3e05728a65f967c3f2562",
+    "C2/validation/generations.jsonl": "e91dee798d8c5f5a0c88767e97384b53f49d7c95e7cc3331ccec161ed3373fcd",
+    "C2/development/predictions.json": "e2a4c13a6ea3ed5d7cb492bf07c9e08e74a97c371ea3f1876b2a73d5ef2c6438",
+    "C2/development/started.json": "f982109325798986ff836a81b0f008e34680cabcef6c02b904058ce6bb88dd5c",
+    "C2/development/completed.predictions.json": "e2a4c13a6ea3ed5d7cb492bf07c9e08e74a97c371ea3f1876b2a73d5ef2c6438",
+    "C2/development/traces.json": "9465a6a09023a640cf8df922d975522b67da5b8d84d03e07ca56fc956436c823",
+    "C2/development/run.json": "753438e37d685d33a12ec593dddd44b06cf8c9480d53220d64d6c361021439f2",
+    "C2/development/attempts.jsonl": "c0e17dd3cebd2eae652496dce12ed978a770f6f7a1b8c832d2bb3dd683412644",
+    "C2/development/decisions.jsonl": "db6383c32f8e43a2832e81e63d5614d10bb68294685fd40adba081a2df0080dd",
+    "C2/development/generations.jsonl": "cd78571ea10896757c7655ac4d058bcaec813b0d3331233ce957add91ff6f2a9",
+    "C1/validation/predictions.json": "cb1ce48d085a4de2cb742a98d17a98f52d5f6ff9654d52bb1325b04e09dc640c",
+    "C1/validation/started.json": "27fd871bbd23b64e57da452f17efc787b56841e955e51b1d28bc5a108db77484",
+    "C1/validation/completed.predictions.json": "cb1ce48d085a4de2cb742a98d17a98f52d5f6ff9654d52bb1325b04e09dc640c",
+    "C1/validation/traces.json": "9839d5594ce1b0352edadb3b4a78d35a7b781d4fa41b2c663f9a92d922e30332",
+    "C1/validation/run.json": "a8e5dcd5a5c9729db77d531d4b0e8eec49f4b5367f8323a8c12176cb3a7da387",
+    "C1/validation/attempts.jsonl": "b838d93899cdb860f50369a73708a077c1f343bf62f28911f832cb32633cbab1",
+    "C1/validation/decisions.jsonl": "c2285913d2b441592a8429e9e97d805724efc02a9e3457a5be7e5418cae42e75",
+    "C1/validation/generations.jsonl": "6976553deacffdd949c704d39596a2bd3ab2b145792e5aa9d568c323c45301b4",
+    "C1/development/predictions.json": "080b0a98f73966ba6586607e7d2cfe796571c5782314edb9aac231dbdd7c4c53",
+    "C1/development/started.json": "181bff2369b231fd1f1e2a6ca1ebdf8ffc7dd78d4051e7c8048c79eb4ac750ec",
+    "C1/development/completed.predictions.json": "080b0a98f73966ba6586607e7d2cfe796571c5782314edb9aac231dbdd7c4c53",
+    "C1/development/traces.json": "2d3d8957a597e4e9a60dcc947a1a309731a2928b79ea4042fd97f2d95a90f66d",
+    "C1/development/run.json": "85e96b5b4e3b855a0414f40dee1c0978eaedbed6a086842f4a8b865566fec1fe",
+    "C1/development/attempts.jsonl": "1e4687ffd97d79f4b271329e6476134882b16373c59f44c8800e57c6a1003354",
+    "C1/development/decisions.jsonl": "de7fa5ce87390a8c51e4e5c8f08b5c141f5d8695e14cd29718a07d2699f0c23c",
+    "C1/development/generations.jsonl": "3043a4b569d4e57dc78dce2bea5dbea334ca87085fac86bdfb009dc939ee405a",
+    "R15/validation/predictions.json": "4e56d069a6f7e0d53fc7e81ae96e3da5aaea5cf21be5e39419888197b6de0b42",
+    "R15/validation/started.json": "88d8df15931ebd6409dff7eeb5d77e195f7124485fc8befed17a69a2b0570f74",
+    "R15/validation/completed.predictions.json": "4e56d069a6f7e0d53fc7e81ae96e3da5aaea5cf21be5e39419888197b6de0b42",
+    "R15/validation/traces.json": "45700e8ec93f2b3c53b2f4fb625180f448ea441912d968f119537afd96749b4c",
+    "R15/validation/run.json": "625823a45f23c0a47d854ed8a786783536a2e28c5d42e3d27747ccce5cbfc639",
+    "R15/validation/attempts.jsonl": "9ecd509283fb6fb1659cfe9e358fe4f313319a5c0a0fd8d8f30b26051eaab339",
+    "R15/validation/decisions.jsonl": "ace0452a6b8bc418a326423543d82b2ec79770be91e4ef8491da61ca5ac9658d",
+    "R15/validation/generations.jsonl": "23e3089196ec4dacb2afd61d1d630f73c1bcd76a92cd7243d3624e5b0fadb3e0",
+    "R15/development/predictions.json": "b0695cf5ff78f713d557f22b0c1037b4e1acacd285996831031dd103c7d71bb4",
+    "R15/development/started.json": "bac9278e7675f4b8a7a8a2bd56dc044caa06214ab6edeffb0e0697470c165fb6",
+    "R15/development/completed.predictions.json": "b0695cf5ff78f713d557f22b0c1037b4e1acacd285996831031dd103c7d71bb4",
+    "R15/development/traces.json": "df26d32a9f62bf0d281bc0c8ce2ec0625ad9c1f7a88b0b20b592b054fd1706dc",
+    "R15/development/run.json": "77b0f1d97a9523a0398acdc86ba7538c51721788dc7f3e6abb476c0aa78ca808",
+    "R15/development/attempts.jsonl": "364ec1054deadfdbc26b08c3a7b7f7c6687161f5aef6c41ea85269e46c444045",
+    "R15/development/decisions.jsonl": "61278eccf38ce6a9cd814eb21655cdba14f7384ae3b725969debed89a4bd9905",
+    "R15/development/generations.jsonl": "3f74962dd603b2ce4431497fb7f18e1d15904936f8f06e6dc9625dcc5fb05816"
+  },
+  "repeated_output_checks": [
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-SUMB-0005",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-FACT-0001",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-DIGITSUM-0016",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-GCDARR-0009",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-PRIME-0008",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "EX01-S111",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-BASE2-0000",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-ARM-0008",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "EX01-S112",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-COUNTGT-0004",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "EX01-S106",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-MINA-0004",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-SUMB-0005",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-FACT-0001",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-DIGITSUM-0016",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-GCDARR-0009",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-PRIME-0008",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "EX01-S111",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-BASE2-0000",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-ARM-0008",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "EX01-S112",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-COUNTGT-0004",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "EX01-S106",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "development",
+      "arm": "R15",
+      "sample_id": "SYN-MINA-0004",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-SUMEVEN-0000",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-MAXDIFF-0008",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-FIB-0000",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-PERFECT-0018",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-REVSTR-0001",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "EX02-S211",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-SECONDMAX-0006",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-COUNTUPPER-0001",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "EX02-S212",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-DISTINCT-0010",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "EX02-S201",
+      "same_proxy": true,
+      "same_level": true
+    },
+    {
+      "split": "validation",
+      "arm": "R15",
+      "sample_id": "SYN-PROD-0015",
+      "same_proxy": true,
+      "same_level": true
+    }
+  ],
+  "metrics": {
+    "development": {
+      "R15": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 4,
+          "exact_rate": 0.3333333333333333,
+          "micro_precision": 0.25,
+          "micro_recall": 0.14285714285714285,
+          "micro_f1": 0.18181818181818182,
+          "macro_f1_all": 0.075,
+          "macro_f1_supported": 0.08333333333333333,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 4,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 11,
+          "exact": 4,
+          "exact_rate": 0.3333333333333333,
+          "micro_precision": 0.2857142857142857,
+          "micro_recall": 0.14285714285714285,
+          "micro_f1": 0.19047619047619047,
+          "macro_f1_all": 0.07857142857142857,
+          "macro_f1_supported": 0.0873015873015873,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 3,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.20833333333333334,
+          "raw_reviewer_mean_proxy": 0.20833333333333334,
+          "score_zero": 8,
+          "material_unknown": 0,
+          "false_or_unsupported_rows": 8,
+          "false_or_unsupported_claims": 10,
+          "level_violation_rows": 3,
+          "repair_leak_rows": 1,
+          "generic_rows": 5,
+          "feasible_L3_repair": 1,
+          "main_error_covered_rows_L2_L3": 4,
+          "missed_important_rows": 10,
+          "contradiction_rows": 3
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 4,
+            "mean_proxy": 0.25,
+            "raw_reviewer_mean_proxy": 0.25,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 3,
+            "contradiction_rows": 1
+          },
+          "2": {
+            "n": 3,
+            "mean_proxy": 0.16666666666666666,
+            "raw_reviewer_mean_proxy": 0.16666666666666666,
+            "score_zero": 2,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 1,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.25,
+            "raw_reviewer_mean_proxy": 0.25,
+            "score_zero": 2,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 5,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 3,
+            "contradiction_rows": 2
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 1.0,
+            "raw_reviewer_mean_proxy": 1.0,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 11,
+            "mean_proxy": 0.13636363636363635,
+            "raw_reviewer_mean_proxy": 0.13636363636363635,
+            "score_zero": 8,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 8,
+            "false_or_unsupported_claims": 10,
+            "level_violation_rows": 3,
+            "repair_leak_rows": 1,
+            "generic_rows": 4,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 4,
+            "missed_important_rows": 10,
+            "contradiction_rows": 3
+          },
+          "unknown": {
+            "n": 0,
+            "mean_proxy": null,
+            "raw_reviewer_mean_proxy": null,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 11,
+          "unknown_denominator": 0,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 3,
+          "supported_label_assignments": 3,
+          "unsupported_label_assignments": 3,
+          "missed_label_assignments": 20,
+          "disputed_label_assignments": 2
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 2,
+          "fallback_ids": 1,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 15
+          },
+          "calls": 15,
+          "input_tokens": 16012,
+          "output_tokens": 940,
+          "generation_latency_s": 27.52982298657298,
+          "elapsed_s": 27.692251909524202
+        },
+        "agent_undisputed_subset": {
+          "n": 9,
+          "complete": 9,
+          "eligible": 9,
+          "exact": 2,
+          "exact_rate": 0.2222222222222222,
+          "micro_precision": 0.5,
+          "micro_recall": 0.1875,
+          "micro_f1": 0.2727272727272727,
+          "macro_f1_all": 0.11666666666666665,
+          "macro_f1_supported": 0.14583333333333331,
+          "zero_support_labels": [
+            "Lỗi edge case",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi nhập/xuất": {
+              "support": 3,
+              "TP": 0,
+              "FP": 0,
+              "FN": 3
+            },
+            "Lỗi logic": {
+              "support": 5,
+              "TP": 2,
+              "FP": 1,
+              "FN": 3
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 2,
+              "TP": 0,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "SFT1": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 3,
+          "exact_rate": 0.25,
+          "micro_precision": 0.3333333333333333,
+          "micro_recall": 0.21428571428571427,
+          "micro_f1": 0.2608695652173913,
+          "macro_f1_all": 0.19,
+          "macro_f1_supported": 0.2111111111111111,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 0,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 3,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 11,
+          "exact": 3,
+          "exact_rate": 0.25,
+          "micro_precision": 0.375,
+          "micro_recall": 0.21428571428571427,
+          "micro_f1": 0.2727272727272727,
+          "macro_f1_all": 0.19,
+          "macro_f1_supported": 0.2111111111111111,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 0,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 2,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.2916666666666667,
+          "raw_reviewer_mean_proxy": 0.2916666666666667,
+          "score_zero": 7,
+          "material_unknown": 0,
+          "false_or_unsupported_rows": 5,
+          "false_or_unsupported_claims": 5,
+          "level_violation_rows": 4,
+          "repair_leak_rows": 0,
+          "generic_rows": 5,
+          "feasible_L3_repair": 1,
+          "main_error_covered_rows_L2_L3": 5,
+          "missed_important_rows": 8,
+          "contradiction_rows": 4
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 4,
+            "mean_proxy": 0.5,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 2
+          },
+          "2": {
+            "n": 3,
+            "mean_proxy": 0.3333333333333333,
+            "raw_reviewer_mean_proxy": 0.3333333333333333,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.125,
+            "raw_reviewer_mean_proxy": 0.125,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 3,
+            "level_violation_rows": 3,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 3,
+            "missed_important_rows": 3,
+            "contradiction_rows": 1
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 1
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 1
+          },
+          "defective": {
+            "n": 11,
+            "mean_proxy": 0.3181818181818182,
+            "raw_reviewer_mean_proxy": 0.3181818181818182,
+            "score_zero": 6,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 4,
+            "false_or_unsupported_claims": 4,
+            "level_violation_rows": 4,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 5,
+            "missed_important_rows": 8,
+            "contradiction_rows": 3
+          },
+          "unknown": {
+            "n": 0,
+            "mean_proxy": null,
+            "raw_reviewer_mean_proxy": null,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 11,
+          "unknown_denominator": 0,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 2,
+          "supported_label_assignments": 4,
+          "unsupported_label_assignments": 1,
+          "missed_label_assignments": 19,
+          "disputed_label_assignments": 4
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 1,
+          "fallback_ids": 1,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 14
+          },
+          "calls": 14,
+          "input_tokens": 18425,
+          "output_tokens": 729,
+          "generation_latency_s": 29.690160354599357,
+          "elapsed_s": 29.851534266024828
+        },
+        "agent_undisputed_subset": {
+          "n": 9,
+          "complete": 9,
+          "eligible": 9,
+          "exact": 2,
+          "exact_rate": 0.2222222222222222,
+          "micro_precision": 0.3333333333333333,
+          "micro_recall": 0.125,
+          "micro_f1": 0.18181818181818182,
+          "macro_f1_all": 0.07857142857142857,
+          "macro_f1_supported": 0.09821428571428571,
+          "zero_support_labels": [
+            "Lỗi edge case",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 3,
+              "TP": 0,
+              "FP": 0,
+              "FN": 3
+            },
+            "Lỗi logic": {
+              "support": 5,
+              "TP": 1,
+              "FP": 1,
+              "FN": 4
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "SFT2": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 3,
+          "exact_rate": 0.25,
+          "micro_precision": 0.42857142857142855,
+          "micro_recall": 0.42857142857142855,
+          "micro_f1": 0.42857142857142855,
+          "macro_f1_all": 0.2952380952380952,
+          "macro_f1_supported": 0.328042328042328,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 2,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 1,
+              "FP": 5,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 1,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 11,
+          "exact": 3,
+          "exact_rate": 0.25,
+          "micro_precision": 0.4166666666666667,
+          "micro_recall": 0.35714285714285715,
+          "micro_f1": 0.38461538461538464,
+          "macro_f1_all": 0.2733333333333333,
+          "macro_f1_supported": 0.3037037037037037,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 1,
+              "FP": 4,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 1,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.25,
+          "raw_reviewer_mean_proxy": 0.2916666666666667,
+          "score_zero": 8,
+          "material_unknown": 1,
+          "false_or_unsupported_rows": 6,
+          "false_or_unsupported_claims": 8,
+          "level_violation_rows": 1,
+          "repair_leak_rows": 0,
+          "generic_rows": 6,
+          "feasible_L3_repair": 3,
+          "main_error_covered_rows_L2_L3": 6,
+          "missed_important_rows": 7,
+          "contradiction_rows": 0
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 4,
+            "mean_proxy": 0.5,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          },
+          "2": {
+            "n": 3,
+            "mean_proxy": 0.3333333333333333,
+            "raw_reviewer_mean_proxy": 0.3333333333333333,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.125,
+            "score_zero": 4,
+            "material_unknown": 1,
+            "false_or_unsupported_rows": 4,
+            "false_or_unsupported_claims": 5,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 3,
+            "main_error_covered_rows_L2_L3": 4,
+            "missed_important_rows": 2,
+            "contradiction_rows": 0
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 11,
+            "mean_proxy": 0.2727272727272727,
+            "raw_reviewer_mean_proxy": 0.3181818181818182,
+            "score_zero": 7,
+            "material_unknown": 1,
+            "false_or_unsupported_rows": 5,
+            "false_or_unsupported_claims": 7,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 5,
+            "feasible_L3_repair": 3,
+            "main_error_covered_rows_L2_L3": 6,
+            "missed_important_rows": 7,
+            "contradiction_rows": 0
+          },
+          "unknown": {
+            "n": 0,
+            "mean_proxy": null,
+            "raw_reviewer_mean_proxy": null,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 11,
+          "unknown_denominator": 0,
+          "false_accusation": 1,
+          "false_accusation_rate": 1.0,
+          "false_clean": 0,
+          "supported_label_assignments": 5,
+          "unsupported_label_assignments": 3,
+          "missed_label_assignments": 18,
+          "disputed_label_assignments": 6
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 1,
+          "fallback_ids": 1,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 14
+          },
+          "calls": 14,
+          "input_tokens": 18425,
+          "output_tokens": 930,
+          "generation_latency_s": 36.70985235646367,
+          "elapsed_s": 36.899730674922466
+        },
+        "agent_undisputed_subset": {
+          "n": 9,
+          "complete": 9,
+          "eligible": 9,
+          "exact": 1,
+          "exact_rate": 0.1111111111111111,
+          "micro_precision": 0.3333333333333333,
+          "micro_recall": 0.1875,
+          "micro_f1": 0.24,
+          "macro_f1_all": 0.18333333333333332,
+          "macro_f1_supported": 0.22916666666666666,
+          "zero_support_labels": [
+            "Lỗi edge case",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 3,
+              "TP": 0,
+              "FP": 0,
+              "FN": 3
+            },
+            "Lỗi logic": {
+              "support": 5,
+              "TP": 1,
+              "FP": 0,
+              "FN": 4
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 2,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 3,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "C1": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 4,
+          "exact_rate": 0.3333333333333333,
+          "micro_precision": 0.25,
+          "micro_recall": 0.14285714285714285,
+          "micro_f1": 0.18181818181818182,
+          "macro_f1_all": 0.065,
+          "macro_f1_supported": 0.07222222222222223,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 1,
+              "FP": 2,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 4,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 11,
+          "exact": 3,
+          "exact_rate": 0.25,
+          "micro_precision": 0.25,
+          "micro_recall": 0.14285714285714285,
+          "micro_f1": 0.18181818181818182,
+          "macro_f1_all": 0.065,
+          "macro_f1_supported": 0.07222222222222223,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 1,
+              "FP": 2,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 4,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.16666666666666666,
+          "raw_reviewer_mean_proxy": 0.20833333333333334,
+          "score_zero": 9,
+          "material_unknown": 0,
+          "false_or_unsupported_rows": 7,
+          "false_or_unsupported_claims": 10,
+          "level_violation_rows": 3,
+          "repair_leak_rows": 0,
+          "generic_rows": 4,
+          "feasible_L3_repair": 2,
+          "main_error_covered_rows_L2_L3": 5,
+          "missed_important_rows": 9,
+          "contradiction_rows": 2
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 4,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.125,
+            "score_zero": 4,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 3,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 3,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "2": {
+            "n": 3,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 4,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 2,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.5,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 2,
+            "main_error_covered_rows_L2_L3": 3,
+            "missed_important_rows": 3,
+            "contradiction_rows": 2
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 11,
+            "mean_proxy": 0.18181818181818182,
+            "raw_reviewer_mean_proxy": 0.18181818181818182,
+            "score_zero": 8,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 7,
+            "false_or_unsupported_claims": 10,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 3,
+            "feasible_L3_repair": 2,
+            "main_error_covered_rows_L2_L3": 5,
+            "missed_important_rows": 8,
+            "contradiction_rows": 2
+          },
+          "unknown": {
+            "n": 0,
+            "mean_proxy": null,
+            "raw_reviewer_mean_proxy": null,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 11,
+          "unknown_denominator": 0,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 3,
+          "supported_label_assignments": 3,
+          "unsupported_label_assignments": 3,
+          "missed_label_assignments": 20,
+          "disputed_label_assignments": 2
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 3,
+          "fallback_ids": 1,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 16
+          },
+          "calls": 16,
+          "input_tokens": 18081,
+          "output_tokens": 1217,
+          "generation_latency_s": 36.00511364080012,
+          "elapsed_s": 36.1762977167964
+        },
+        "agent_undisputed_subset": {
+          "n": 9,
+          "complete": 9,
+          "eligible": 9,
+          "exact": 2,
+          "exact_rate": 0.2222222222222222,
+          "micro_precision": 0.5,
+          "micro_recall": 0.1875,
+          "micro_f1": 0.2727272727272727,
+          "macro_f1_all": 0.1,
+          "macro_f1_supported": 0.125,
+          "zero_support_labels": [
+            "Lỗi edge case",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 1,
+              "FP": 2,
+              "FN": 0
+            },
+            "Lỗi nhập/xuất": {
+              "support": 3,
+              "TP": 0,
+              "FP": 0,
+              "FN": 3
+            },
+            "Lỗi logic": {
+              "support": 5,
+              "TP": 2,
+              "FP": 1,
+              "FN": 3
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "C2": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 4,
+          "exact_rate": 0.3333333333333333,
+          "micro_precision": 0.2857142857142857,
+          "micro_recall": 0.14285714285714285,
+          "micro_f1": 0.19047619047619047,
+          "macro_f1_all": 0.07857142857142857,
+          "macro_f1_supported": 0.0873015873015873,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 3,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 4,
+          "exact_rate": 0.3333333333333333,
+          "micro_precision": 0.2857142857142857,
+          "micro_recall": 0.14285714285714285,
+          "micro_f1": 0.19047619047619047,
+          "macro_f1_all": 0.07857142857142857,
+          "macro_f1_supported": 0.0873015873015873,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 2,
+              "TP": 1,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 3,
+              "TP": 1,
+              "FP": 3,
+              "FN": 2
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.25,
+          "raw_reviewer_mean_proxy": 0.25,
+          "score_zero": 8,
+          "material_unknown": 0,
+          "false_or_unsupported_rows": 8,
+          "false_or_unsupported_claims": 9,
+          "level_violation_rows": 3,
+          "repair_leak_rows": 0,
+          "generic_rows": 5,
+          "feasible_L3_repair": 0,
+          "main_error_covered_rows_L2_L3": 3,
+          "missed_important_rows": 8,
+          "contradiction_rows": 3
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 4,
+            "mean_proxy": 0.5,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 3
+          },
+          "2": {
+            "n": 3,
+            "mean_proxy": 0.16666666666666666,
+            "raw_reviewer_mean_proxy": 0.16666666666666666,
+            "score_zero": 2,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 2,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.125,
+            "raw_reviewer_mean_proxy": 0.125,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 4,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 1,
+            "missed_important_rows": 4,
+            "contradiction_rows": 0
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 1
+          },
+          "defective": {
+            "n": 11,
+            "mean_proxy": 0.2727272727272727,
+            "raw_reviewer_mean_proxy": 0.2727272727272727,
+            "score_zero": 7,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 7,
+            "false_or_unsupported_claims": 8,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 3,
+            "missed_important_rows": 8,
+            "contradiction_rows": 2
+          },
+          "unknown": {
+            "n": 0,
+            "mean_proxy": null,
+            "raw_reviewer_mean_proxy": null,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 11,
+          "unknown_denominator": 0,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 4,
+          "supported_label_assignments": 2,
+          "unsupported_label_assignments": 3,
+          "missed_label_assignments": 21,
+          "disputed_label_assignments": 2
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 0,
+          "fallback_ids": 0,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 12
+          },
+          "calls": 12,
+          "input_tokens": 14359,
+          "output_tokens": 633,
+          "generation_latency_s": 19.95962298475206,
+          "elapsed_s": 20.118741961196065
+        },
+        "agent_undisputed_subset": {
+          "n": 9,
+          "complete": 9,
+          "eligible": 9,
+          "exact": 1,
+          "exact_rate": 0.1111111111111111,
+          "micro_precision": 0.4,
+          "micro_recall": 0.125,
+          "micro_f1": 0.19047619047619047,
+          "macro_f1_all": 0.09523809523809523,
+          "macro_f1_supported": 0.11904761904761904,
+          "zero_support_labels": [
+            "Lỗi edge case",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi nhập/xuất": {
+              "support": 3,
+              "TP": 0,
+              "FP": 0,
+              "FN": 3
+            },
+            "Lỗi logic": {
+              "support": 5,
+              "TP": 1,
+              "FP": 1,
+              "FN": 4
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 2,
+              "TP": 0,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hard-code": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      }
+    },
+    "validation": {
+      "R15": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 5,
+          "exact_rate": 0.4166666666666667,
+          "micro_precision": 0.16666666666666666,
+          "micro_recall": 0.1,
+          "micro_f1": 0.125,
+          "macro_f1_all": 0.02857142857142857,
+          "macro_f1_supported": 0.047619047619047616,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 5,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 0,
+              "FP": 0,
+              "FN": 4
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 11,
+          "exact": 5,
+          "exact_rate": 0.4166666666666667,
+          "micro_precision": 0.2,
+          "micro_recall": 0.1,
+          "micro_f1": 0.13333333333333333,
+          "macro_f1_all": 0.03333333333333333,
+          "macro_f1_supported": 0.05555555555555555,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 4,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 0,
+              "FP": 0,
+              "FN": 4
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.25,
+          "raw_reviewer_mean_proxy": 0.3333333333333333,
+          "score_zero": 9,
+          "material_unknown": 2,
+          "false_or_unsupported_rows": 6,
+          "false_or_unsupported_claims": 7,
+          "level_violation_rows": 2,
+          "repair_leak_rows": 0,
+          "generic_rows": 7,
+          "feasible_L3_repair": 1,
+          "main_error_covered_rows_L2_L3": 2,
+          "missed_important_rows": 7,
+          "contradiction_rows": 1
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 3,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.3333333333333333,
+            "score_zero": 3,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 3,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 2,
+            "contradiction_rows": 0
+          },
+          "2": {
+            "n": 4,
+            "mean_proxy": 0.25,
+            "raw_reviewer_mean_proxy": 0.25,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 1,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.25,
+            "raw_reviewer_mean_proxy": 0.25,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 4,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 1,
+            "missed_important_rows": 2,
+            "contradiction_rows": 1
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 1.0,
+            "raw_reviewer_mean_proxy": 1.0,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 1.0,
+            "raw_reviewer_mean_proxy": 1.0,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 9,
+            "mean_proxy": 0.2222222222222222,
+            "raw_reviewer_mean_proxy": 0.2222222222222222,
+            "score_zero": 7,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 6,
+            "false_or_unsupported_claims": 7,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 6,
+            "contradiction_rows": 1
+          },
+          "unknown": {
+            "n": 2,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 9,
+          "unknown_denominator": 2,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 3,
+          "supported_label_assignments": 1,
+          "unsupported_label_assignments": 2,
+          "missed_label_assignments": 10,
+          "disputed_label_assignments": 3
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 2,
+          "fallback_ids": 1,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 15
+          },
+          "calls": 15,
+          "input_tokens": 11655,
+          "output_tokens": 804,
+          "generation_latency_s": 23.47164772823453,
+          "elapsed_s": 23.655235083773732
+        },
+        "agent_undisputed_subset": {
+          "n": 5,
+          "complete": 5,
+          "eligible": 5,
+          "exact": 1,
+          "exact_rate": 0.2,
+          "micro_precision": 0.3333333333333333,
+          "micro_recall": 0.16666666666666666,
+          "micro_f1": 0.2222222222222222,
+          "macro_f1_all": 0.05,
+          "macro_f1_supported": 0.1,
+          "zero_support_labels": [
+            "Lỗi hàm",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi hard-code",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 2,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "SFT1": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 6,
+          "exact_rate": 0.5,
+          "micro_precision": 0.6,
+          "micro_recall": 0.3,
+          "micro_f1": 0.4,
+          "macro_f1_all": 0.15714285714285714,
+          "macro_f1_supported": 0.2619047619047619,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 2,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 6,
+          "exact_rate": 0.5,
+          "micro_precision": 0.6,
+          "micro_recall": 0.3,
+          "micro_f1": 0.4,
+          "macro_f1_all": 0.15714285714285714,
+          "macro_f1_supported": 0.2619047619047619,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 2,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.25,
+          "raw_reviewer_mean_proxy": 0.3333333333333333,
+          "score_zero": 8,
+          "material_unknown": 2,
+          "false_or_unsupported_rows": 3,
+          "false_or_unsupported_claims": 3,
+          "level_violation_rows": 5,
+          "repair_leak_rows": 0,
+          "generic_rows": 7,
+          "feasible_L3_repair": 0,
+          "main_error_covered_rows_L2_L3": 4,
+          "missed_important_rows": 6,
+          "contradiction_rows": 2
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 3,
+            "mean_proxy": 0.3333333333333333,
+            "raw_reviewer_mean_proxy": 0.6666666666666666,
+            "score_zero": 2,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 3,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 2
+          },
+          "2": {
+            "n": 4,
+            "mean_proxy": 0.375,
+            "raw_reviewer_mean_proxy": 0.375,
+            "score_zero": 2,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.125,
+            "raw_reviewer_mean_proxy": 0.125,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 3,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 9,
+            "mean_proxy": 0.3333333333333333,
+            "raw_reviewer_mean_proxy": 0.3333333333333333,
+            "score_zero": 5,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 5,
+            "repair_leak_rows": 0,
+            "generic_rows": 4,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 4,
+            "missed_important_rows": 6,
+            "contradiction_rows": 1
+          },
+          "unknown": {
+            "n": 2,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 1
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 9,
+          "unknown_denominator": 2,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 4,
+          "supported_label_assignments": 2,
+          "unsupported_label_assignments": 1,
+          "missed_label_assignments": 9,
+          "disputed_label_assignments": 2
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 0,
+          "fallback_ids": 0,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 12
+          },
+          "calls": 12,
+          "input_tokens": 9587,
+          "output_tokens": 586,
+          "generation_latency_s": 22.89743598178029,
+          "elapsed_s": 23.016811223700643
+        },
+        "agent_undisputed_subset": {
+          "n": 5,
+          "complete": 5,
+          "eligible": 5,
+          "exact": 1,
+          "exact_rate": 0.2,
+          "micro_precision": 0.5,
+          "micro_recall": 0.16666666666666666,
+          "micro_f1": 0.25,
+          "macro_f1_all": 0.1,
+          "macro_f1_supported": 0.2,
+          "zero_support_labels": [
+            "Lỗi hàm",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi hard-code",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 1,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "SFT2": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 1,
+          "exact_rate": 0.08333333333333333,
+          "micro_precision": 0.25,
+          "micro_recall": 0.3,
+          "micro_f1": 0.2727272727272727,
+          "macro_f1_all": 0.17333333333333334,
+          "macro_f1_supported": 0.2888888888888889,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 1,
+              "FP": 0,
+              "FN": 3
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 6,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 1,
+          "exact_rate": 0.08333333333333333,
+          "micro_precision": 0.25,
+          "micro_recall": 0.3,
+          "micro_f1": 0.2727272727272727,
+          "macro_f1_all": 0.17333333333333334,
+          "macro_f1_supported": 0.2888888888888889,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 0,
+              "FP": 1,
+              "FN": 1
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 1,
+              "FP": 0,
+              "FN": 3
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 1,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 6,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.16666666666666666,
+          "raw_reviewer_mean_proxy": 0.25,
+          "score_zero": 10,
+          "material_unknown": 2,
+          "false_or_unsupported_rows": 7,
+          "false_or_unsupported_claims": 11,
+          "level_violation_rows": 2,
+          "repair_leak_rows": 0,
+          "generic_rows": 6,
+          "feasible_L3_repair": 2,
+          "main_error_covered_rows_L2_L3": 2,
+          "missed_important_rows": 5,
+          "contradiction_rows": 0
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 3,
+            "mean_proxy": 0.3333333333333333,
+            "raw_reviewer_mean_proxy": 0.6666666666666666,
+            "score_zero": 2,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 3,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "2": {
+            "n": 4,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 4,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 4,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 1,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.25,
+            "raw_reviewer_mean_proxy": 0.25,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 6,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 2,
+            "main_error_covered_rows_L2_L3": 1,
+            "missed_important_rows": 2,
+            "contradiction_rows": 0
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.0,
+            "score_zero": 1,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 9,
+            "mean_proxy": 0.2222222222222222,
+            "raw_reviewer_mean_proxy": 0.2222222222222222,
+            "score_zero": 7,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 6,
+            "false_or_unsupported_claims": 10,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 3,
+            "feasible_L3_repair": 2,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 5,
+            "contradiction_rows": 0
+          },
+          "unknown": {
+            "n": 2,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 9,
+          "unknown_denominator": 2,
+          "false_accusation": 1,
+          "false_accusation_rate": 1.0,
+          "false_clean": 0,
+          "supported_label_assignments": 3,
+          "unsupported_label_assignments": 6,
+          "missed_label_assignments": 8,
+          "disputed_label_assignments": 1
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 0,
+          "fallback_ids": 0,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 12
+          },
+          "calls": 12,
+          "input_tokens": 9587,
+          "output_tokens": 690,
+          "generation_latency_s": 26.32512423209846,
+          "elapsed_s": 26.43770051933825
+        },
+        "agent_undisputed_subset": {
+          "n": 5,
+          "complete": 5,
+          "eligible": 5,
+          "exact": 1,
+          "exact_rate": 0.2,
+          "micro_precision": 0.4,
+          "micro_recall": 0.3333333333333333,
+          "micro_f1": 0.36363636363636365,
+          "macro_f1_all": 0.2,
+          "macro_f1_supported": 0.4,
+          "zero_support_labels": [
+            "Lỗi hàm",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi hard-code",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi nhập/xuất": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 1,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hàm": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 3,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "C1": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 5,
+          "exact_rate": 0.4166666666666667,
+          "micro_precision": 0.16666666666666666,
+          "micro_recall": 0.1,
+          "micro_f1": 0.125,
+          "macro_f1_all": 0.02857142857142857,
+          "macro_f1_supported": 0.047619047619047616,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 5,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 0,
+              "FP": 0,
+              "FN": 4
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 11,
+          "exact": 5,
+          "exact_rate": 0.4166666666666667,
+          "micro_precision": 0.2,
+          "micro_recall": 0.1,
+          "micro_f1": 0.13333333333333333,
+          "macro_f1_all": 0.03333333333333333,
+          "macro_f1_supported": 0.05555555555555555,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 4,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 0,
+              "FP": 0,
+              "FN": 4
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.16666666666666666,
+          "raw_reviewer_mean_proxy": 0.25,
+          "score_zero": 9,
+          "material_unknown": 2,
+          "false_or_unsupported_rows": 5,
+          "false_or_unsupported_claims": 6,
+          "level_violation_rows": 5,
+          "repair_leak_rows": 0,
+          "generic_rows": 5,
+          "feasible_L3_repair": 0,
+          "main_error_covered_rows_L2_L3": 2,
+          "missed_important_rows": 6,
+          "contradiction_rows": 1
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 3,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.3333333333333333,
+            "score_zero": 3,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          },
+          "2": {
+            "n": 4,
+            "mean_proxy": 0.125,
+            "raw_reviewer_mean_proxy": 0.125,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 1,
+            "missed_important_rows": 3,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.125,
+            "raw_reviewer_mean_proxy": 0.125,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 4,
+            "false_or_unsupported_claims": 5,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 1,
+            "missed_important_rows": 2,
+            "contradiction_rows": 1
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 1.0,
+            "raw_reviewer_mean_proxy": 1.0,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 1.0,
+            "raw_reviewer_mean_proxy": 1.0,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 9,
+            "mean_proxy": 0.1111111111111111,
+            "raw_reviewer_mean_proxy": 0.1111111111111111,
+            "score_zero": 7,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 5,
+            "false_or_unsupported_claims": 6,
+            "level_violation_rows": 5,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 5,
+            "contradiction_rows": 1
+          },
+          "unknown": {
+            "n": 2,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 2,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 0
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 9,
+          "unknown_denominator": 2,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 3,
+          "supported_label_assignments": 1,
+          "unsupported_label_assignments": 2,
+          "missed_label_assignments": 10,
+          "disputed_label_assignments": 3
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 2,
+          "fallback_ids": 1,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 15
+          },
+          "calls": 15,
+          "input_tokens": 13051,
+          "output_tokens": 1011,
+          "generation_latency_s": 29.50062874518335,
+          "elapsed_s": 29.698689576238394
+        },
+        "agent_undisputed_subset": {
+          "n": 5,
+          "complete": 5,
+          "eligible": 5,
+          "exact": 1,
+          "exact_rate": 0.2,
+          "micro_precision": 0.3333333333333333,
+          "micro_recall": 0.16666666666666666,
+          "micro_f1": 0.2222222222222222,
+          "macro_f1_all": 0.05,
+          "macro_f1_supported": 0.1,
+          "zero_support_labels": [
+            "Lỗi hàm",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi hard-code",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 2,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      },
+      "C2": {
+        "taxonomy_delivered": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 5,
+          "exact_rate": 0.4166666666666667,
+          "micro_precision": 0.16666666666666666,
+          "micro_recall": 0.1,
+          "micro_f1": 0.125,
+          "macro_f1_all": 0.02857142857142857,
+          "macro_f1_supported": 0.047619047619047616,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 5,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 0,
+              "FP": 0,
+              "FN": 4
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "taxonomy_no_fallback_credit": {
+          "n": 12,
+          "complete": 12,
+          "eligible": 12,
+          "exact": 5,
+          "exact_rate": 0.4166666666666667,
+          "micro_precision": 0.16666666666666666,
+          "micro_recall": 0.1,
+          "micro_f1": 0.125,
+          "macro_f1_all": 0.02857142857142857,
+          "macro_f1_supported": 0.047619047619047616,
+          "zero_support_labels": [
+            "Lỗi nhập/xuất",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 5,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 4,
+              "TP": 0,
+              "FP": 0,
+              "FN": 4
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        },
+        "feedback": {
+          "n": 12,
+          "mean_proxy": 0.25,
+          "raw_reviewer_mean_proxy": 0.3333333333333333,
+          "score_zero": 9,
+          "material_unknown": 1,
+          "false_or_unsupported_rows": 6,
+          "false_or_unsupported_claims": 7,
+          "level_violation_rows": 3,
+          "repair_leak_rows": 1,
+          "generic_rows": 5,
+          "feasible_L3_repair": 1,
+          "main_error_covered_rows_L2_L3": 4,
+          "missed_important_rows": 5,
+          "contradiction_rows": 3
+        },
+        "feedback_by_level": {
+          "1": {
+            "n": 3,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.3333333333333333,
+            "score_zero": 3,
+            "material_unknown": 1,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 3,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 1,
+            "contradiction_rows": 2
+          },
+          "2": {
+            "n": 4,
+            "mean_proxy": 0.25,
+            "raw_reviewer_mean_proxy": 0.25,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 2,
+            "false_or_unsupported_claims": 2,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 1,
+            "generic_rows": 0,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 2,
+            "contradiction_rows": 0
+          },
+          "3": {
+            "n": 4,
+            "mean_proxy": 0.25,
+            "raw_reviewer_mean_proxy": 0.25,
+            "score_zero": 3,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 3,
+            "false_or_unsupported_claims": 4,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 2,
+            "missed_important_rows": 2,
+            "contradiction_rows": 1
+          },
+          "4": {
+            "n": 1,
+            "mean_proxy": 1.0,
+            "raw_reviewer_mean_proxy": 1.0,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          }
+        },
+        "feedback_by_source_status": {
+          "clean": {
+            "n": 1,
+            "mean_proxy": 1.0,
+            "raw_reviewer_mean_proxy": 1.0,
+            "score_zero": 0,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 0,
+            "false_or_unsupported_claims": 0,
+            "level_violation_rows": 0,
+            "repair_leak_rows": 0,
+            "generic_rows": 1,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 0
+          },
+          "defective": {
+            "n": 9,
+            "mean_proxy": 0.2222222222222222,
+            "raw_reviewer_mean_proxy": 0.2222222222222222,
+            "score_zero": 7,
+            "material_unknown": 0,
+            "false_or_unsupported_rows": 5,
+            "false_or_unsupported_claims": 6,
+            "level_violation_rows": 2,
+            "repair_leak_rows": 1,
+            "generic_rows": 2,
+            "feasible_L3_repair": 1,
+            "main_error_covered_rows_L2_L3": 4,
+            "missed_important_rows": 5,
+            "contradiction_rows": 1
+          },
+          "unknown": {
+            "n": 2,
+            "mean_proxy": 0.0,
+            "raw_reviewer_mean_proxy": 0.5,
+            "score_zero": 2,
+            "material_unknown": 1,
+            "false_or_unsupported_rows": 1,
+            "false_or_unsupported_claims": 1,
+            "level_violation_rows": 1,
+            "repair_leak_rows": 0,
+            "generic_rows": 2,
+            "feasible_L3_repair": 0,
+            "main_error_covered_rows_L2_L3": 0,
+            "missed_important_rows": 0,
+            "contradiction_rows": 2
+          }
+        },
+        "source_review": {
+          "clean_denominator": 1,
+          "defective_denominator": 9,
+          "unknown_denominator": 2,
+          "false_accusation": 0,
+          "false_accusation_rate": 0.0,
+          "false_clean": 3,
+          "supported_label_assignments": 1,
+          "unsupported_label_assignments": 2,
+          "missed_label_assignments": 10,
+          "disputed_label_assignments": 3
+        },
+        "operations": {
+          "complete": 12,
+          "requested": 12,
+          "schema_valid_final": true,
+          "retry_ids": 0,
+          "fallback_ids": 0,
+          "invalid_schema_attempts": 0,
+          "runtime_errors": 0,
+          "finish_reasons": {
+            "eos": 12
+          },
+          "calls": 12,
+          "input_tokens": 10219,
+          "output_tokens": 696,
+          "generation_latency_s": 20.830663822591305,
+          "elapsed_s": 20.943416316062212
+        },
+        "agent_undisputed_subset": {
+          "n": 5,
+          "complete": 5,
+          "eligible": 5,
+          "exact": 1,
+          "exact_rate": 0.2,
+          "micro_precision": 0.3333333333333333,
+          "micro_recall": 0.16666666666666666,
+          "micro_f1": 0.2222222222222222,
+          "macro_f1_all": 0.05,
+          "macro_f1_supported": 0.1,
+          "zero_support_labels": [
+            "Lỗi hàm",
+            "Lỗi edge case",
+            "Lỗi thuật toán",
+            "Lỗi hard-code",
+            "Lỗi style"
+          ],
+          "per_label": {
+            "Lỗi biên dịch": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi nhập/xuất": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi logic": {
+              "support": 1,
+              "TP": 1,
+              "FP": 2,
+              "FN": 0
+            },
+            "Lỗi vòng lặp": {
+              "support": 2,
+              "TP": 0,
+              "FP": 0,
+              "FN": 2
+            },
+            "Lỗi mảng/chuỗi": {
+              "support": 1,
+              "TP": 0,
+              "FP": 0,
+              "FN": 1
+            },
+            "Lỗi hàm": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi edge case": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi thuật toán": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi hard-code": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            },
+            "Lỗi style": {
+              "support": 0,
+              "TP": 0,
+              "FP": 0,
+              "FN": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "source_status": {
+    "defective": 20,
+    "clean": 2,
+    "unknown": 2
+  },
+  "human_verified_sources": 0,
+  "proxy_is_official_score": false
+}
