@@ -1,0 +1,25 @@
+{
+  "version": "short-witness-and-own-execution-v1",
+  "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "baseline_config": "configs/task3/r15_selected.yaml",
+  "candidate_max_new_tokens": 768,
+  "minimum_free_gpu_mib": 8192,
+  "shared_initial_calls_per_id": 1,
+  "maximum_execution_continuations_per_id": 1,
+  "semantic_or_schema_retries": 0,
+  "development_pairs": 24,
+  "evaluation_pairs": 16,
+  "few_shot": 0,
+  "training": false,
+  "public_inference": false,
+  "renderer_before_gate": false,
+  "gate": {
+    "minimum_strict_pair_successes": 8,
+    "minimum_gain_over_R15_exact_taxonomy_pairs": 2,
+    "minimum_trustworthy_mutant_witnesses": 12,
+    "additional_mutant_false_clean_allowed": 0
+  },
+  "taxonomy_policy": "Exact canonical set fixed by independent source review before inference; ambiguity notes and label-compatible/core-only secondary metrics never rescue the gate.",
+  "review_authority": "agent source review, not human-verified"
+}
