@@ -1,0 +1,369 @@
+{
+  "splits": {
+    "all": {
+      "R15": {
+        "IDs": 80,
+        "content_pairs": {
+          "pairs": 40,
+          "successes": 5,
+          "accuracy": 0.125
+        },
+        "strict_pairs": {
+          "pairs": 40,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "completed": 80
+        },
+        "taxonomy_exact": 37,
+        "mechanism_correct": 34,
+        "false_clean_mutants": 5,
+        "false_accusation_bases": 25
+      },
+      "self": {
+        "IDs": 80,
+        "content_pairs": {
+          "pairs": 40,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "strict_pairs": {
+          "pairs": 40,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "schema_error": 72,
+          "defect": 4,
+          "uncertain": 4
+        },
+        "taxonomy_exact": 1,
+        "mechanism_correct": 4,
+        "false_clean_mutants": 0,
+        "false_accusation_bases": 0,
+        "witness": {
+          "input_valid": 2,
+          "distinguishes": 1,
+          "actual_correct": 2,
+          "expected_correct": 1,
+          "trustworthy_mutants": 1,
+          "actual_is_supplied_observation": false
+        }
+      },
+      "execution": {
+        "IDs": 80,
+        "content_pairs": {
+          "pairs": 40,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "strict_pairs": {
+          "pairs": 40,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "schema_error": 72,
+          "invalid_input": 2,
+          "uncertain": 4,
+          "defect": 2
+        },
+        "taxonomy_exact": 0,
+        "mechanism_correct": 2,
+        "false_clean_mutants": 0,
+        "false_accusation_bases": 0,
+        "witness": {
+          "input_valid": 2,
+          "distinguishes": 1,
+          "actual_correct": 2,
+          "expected_correct": 1,
+          "trustworthy_mutants": 1,
+          "actual_is_supplied_observation": true
+        }
+      }
+    },
+    "development": {
+      "R15": {
+        "IDs": 48,
+        "content_pairs": {
+          "pairs": 24,
+          "successes": 3,
+          "accuracy": 0.125
+        },
+        "strict_pairs": {
+          "pairs": 24,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "completed": 48
+        },
+        "taxonomy_exact": 21,
+        "mechanism_correct": 24,
+        "false_clean_mutants": 5,
+        "false_accusation_bases": 12
+      },
+      "self": {
+        "IDs": 48,
+        "content_pairs": {
+          "pairs": 24,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "strict_pairs": {
+          "pairs": 24,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "schema_error": 44,
+          "defect": 3,
+          "uncertain": 1
+        },
+        "taxonomy_exact": 1,
+        "mechanism_correct": 3,
+        "false_clean_mutants": 0,
+        "false_accusation_bases": 0,
+        "witness": {
+          "input_valid": 1,
+          "distinguishes": 0,
+          "actual_correct": 1,
+          "expected_correct": 0,
+          "trustworthy_mutants": 0,
+          "actual_is_supplied_observation": false
+        }
+      },
+      "execution": {
+        "IDs": 48,
+        "content_pairs": {
+          "pairs": 24,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "strict_pairs": {
+          "pairs": 24,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "schema_error": 44,
+          "invalid_input": 2,
+          "uncertain": 1,
+          "defect": 1
+        },
+        "taxonomy_exact": 0,
+        "mechanism_correct": 1,
+        "false_clean_mutants": 0,
+        "false_accusation_bases": 0,
+        "witness": {
+          "input_valid": 1,
+          "distinguishes": 0,
+          "actual_correct": 1,
+          "expected_correct": 0,
+          "trustworthy_mutants": 0,
+          "actual_is_supplied_observation": true
+        }
+      }
+    },
+    "evaluation": {
+      "R15": {
+        "IDs": 32,
+        "content_pairs": {
+          "pairs": 16,
+          "successes": 2,
+          "accuracy": 0.125
+        },
+        "strict_pairs": {
+          "pairs": 16,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "completed": 32
+        },
+        "taxonomy_exact": 16,
+        "mechanism_correct": 10,
+        "false_clean_mutants": 0,
+        "false_accusation_bases": 13
+      },
+      "self": {
+        "IDs": 32,
+        "content_pairs": {
+          "pairs": 16,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "strict_pairs": {
+          "pairs": 16,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "schema_error": 28,
+          "defect": 1,
+          "uncertain": 3
+        },
+        "taxonomy_exact": 0,
+        "mechanism_correct": 1,
+        "false_clean_mutants": 0,
+        "false_accusation_bases": 0,
+        "witness": {
+          "input_valid": 1,
+          "distinguishes": 1,
+          "actual_correct": 1,
+          "expected_correct": 1,
+          "trustworthy_mutants": 1,
+          "actual_is_supplied_observation": false
+        }
+      },
+      "execution": {
+        "IDs": 32,
+        "content_pairs": {
+          "pairs": 16,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "strict_pairs": {
+          "pairs": 16,
+          "successes": 0,
+          "accuracy": 0.0
+        },
+        "status_counts": {
+          "schema_error": 28,
+          "defect": 1,
+          "uncertain": 3
+        },
+        "taxonomy_exact": 0,
+        "mechanism_correct": 1,
+        "false_clean_mutants": 0,
+        "false_accusation_bases": 0,
+        "witness": {
+          "input_valid": 1,
+          "distinguishes": 1,
+          "actual_correct": 1,
+          "expected_correct": 1,
+          "trustworthy_mutants": 1,
+          "actual_is_supplied_observation": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "self": {
+      "passed": false,
+      "checks": {
+        "minimum_pairs": false,
+        "gain_over_control": false,
+        "trustworthy_mutants": false,
+        "no_additional_false_clean": true
+      },
+      "baseline_pairs": 2,
+      "strict_pairs": 0,
+      "trustworthy_mutants": 1,
+      "false_clean": 0,
+      "baseline_false_clean": 0
+    },
+    "execution": {
+      "passed": false,
+      "checks": {
+        "minimum_pairs": false,
+        "gain_over_control": false,
+        "trustworthy_mutants": false,
+        "no_additional_false_clean": true
+      },
+      "baseline_pairs": 2,
+      "strict_pairs": 0,
+      "trustworthy_mutants": 1,
+      "false_clean": 0,
+      "baseline_false_clean": 0
+    }
+  },
+  "renderer_permitted": false,
+  "authority": "agent source review, not human-verified",
+  "execution_caveat": "Continuation actual is supplied evidence; shared first-call actual is the independent prediction. Extra-call benefit is not separately isolated.",
+  "calls": {
+    "R15": {
+      "calls": 87,
+      "journal_rows": 87,
+      "preflight_failures": 0,
+      "output_tokens": 5968,
+      "latency_s": 95.61268826946616,
+      "runtime_errors": 0
+    },
+    "shared_self": {
+      "calls": 80,
+      "journal_rows": 80,
+      "preflight_failures": 0,
+      "output_tokens": 5947,
+      "latency_s": 102.97111826203763,
+      "runtime_errors": 0
+    },
+    "execution_marginal": {
+      "calls": 2,
+      "journal_rows": 2,
+      "preflight_failures": 0,
+      "output_tokens": 179,
+      "latency_s": 2.829621968790889,
+      "runtime_errors": 0
+    }
+  },
+  "freeze_sha256": "2f2ed935da3fdd35d66ada15b861e036acd3909b478ea79d3bc57609cb7ebeb5",
+  "review_sha256": "d522e14f8eded023ce246c99728e74eebaa45c20b731a9f430bb04a8a0d35dc2",
+  "R22_audit": {
+    "IDs": 48,
+    "attempts": 96,
+    "model_calls": 0,
+    "R22_operational_unchanged": true,
+    "categories_overlap_not_exclusive": true,
+    "dimensions": {
+      "input_unavailable": 1,
+      "out_of_domain": 41,
+      "valid_but_nondistinguishing": 6,
+      "actual_wrong": 18,
+      "expected_wrong": 21
+    },
+    "schema_views": {
+      "original": 2,
+      "files_only": 26,
+      "quote_only": 14,
+      "both": 43
+    },
+    "mechanical_schema_recovered": 41,
+    "mechanism": {
+      "False": 58,
+      "True": 37,
+      "None": 1
+    },
+    "taxonomy_exact": {
+      "None": 47,
+      "False": 38,
+      "True": 11
+    },
+    "per_attempt": {
+      "1": {
+        "dimensions": {
+          "input_unavailable": 0,
+          "out_of_domain": 18,
+          "valid_but_nondistinguishing": 3,
+          "actual_wrong": 8,
+          "expected_wrong": 9
+        },
+        "mechanical_schema_recovered": 9
+      },
+      "2": {
+        "dimensions": {
+          "input_unavailable": 1,
+          "out_of_domain": 23,
+          "valid_but_nondistinguishing": 3,
+          "actual_wrong": 10,
+          "expected_wrong": 12
+        },
+        "mechanical_schema_recovered": 32
+      }
+    },
+    "authority": "independent agent source review and author confined execution, not human-verified",
+    "no_best_of": true
+  },
+  "renderer_run": false
+}
