@@ -7,7 +7,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.prepare_task2_sft import truncate_middle
 
 # Prevent multi-GPU pipeline memory imbalance on T4 x2 & eliminate fragmentation
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
@@ -28,10 +32,10 @@ def encode_row(tokenizer, messages, max_length=2048):
     prompt = messages[:-1]
     prefix = tokenizer.apply_chat_template(prompt, tokenize=True, add_generation_prompt=True)
     full = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=False)
-    labels = [-100] * len(prefix) + full[len(prefix) :]
-    if len(full) > max_length:
-        full = full[-max_length:]
-        labels = labels[-max_length:]
+    answer = full[len(prefix) :]
+    prefix = truncate_middle(prefix, max_length - len(answer))
+    full = prefix + answer
+    labels = [-100] * len(prefix) + answer
     return {"input_ids": full, "attention_mask": [1] * len(full), "labels": labels}
 
 
@@ -87,11 +91,10 @@ def train(args):
     model.config.use_cache = False
     model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
 
-    # Focus LoRA on attention projections: eliminates 87.5% of adapter MLP overhead and speeds up T4 training ~3-4x
     lora_config = LoraConfig(
         r=args.lora_r,
         lora_alpha=args.lora_alpha,
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
         lora_dropout=0.05,
         bias="none",
         task_type="CAUSAL_LM",
@@ -144,12 +147,12 @@ if __name__ == "__main__":
     parser.add_argument("--model_id", default="Qwen/Qwen2.5-Coder-7B-Instruct")
     parser.add_argument("--data_path", default="data/processed/task2_sft_train.jsonl")
     parser.add_argument("--output_dir", default="outputs/task2/qlora_adapter")
-    parser.add_argument("--epochs", type=float, default=1.0)
+    parser.add_argument("--epochs", type=float, default=2.0)
     parser.add_argument("--batch_size", type=int, default=1)
-    parser.add_argument("--grad_accum", type=int, default=4)
+    parser.add_argument("--grad_accum", type=int, default=8)
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--lora_r", type=int, default=16)
     parser.add_argument("--lora_alpha", type=int, default=32)
-    parser.add_argument("--max_seq_len", type=int, default=1536)
+    parser.add_argument("--max_seq_len", type=int, default=2048)
     args = parser.parse_args()
     train(args)

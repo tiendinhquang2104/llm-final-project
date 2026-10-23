@@ -59,6 +59,14 @@ Output a single line JSON with the identified taxonomy errors (copied exactly fr
 {{"taxonomy_error": ["...", ...]}}"""
 
 
+def truncate_middle(ids: list[int], max_len: int, keep_head: int = 1024) -> list[int]:
+    """Cut the middle of a too-long prompt, keeping the head (system prompt ~910 tokens + statement start)
+    and the tail (end of code, compile log, output instruction). Cutting from the left drops the system prompt."""
+    if len(ids) <= max_len:
+        return ids
+    return ids[:keep_head] + ids[-(max_len - keep_head):]
+
+
 def main():
     out_file = ROOT / "data" / "processed" / "task2_sft_train.jsonl"
     synth_dir = ROOT.parent / "generate-dataset_v2" / "generate-dataset"

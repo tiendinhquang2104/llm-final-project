@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.task2.data import load_task2
 from src.task2.labels import normalize_labels
 from src.task2.evaluator import validate_predictions, write_submission, f1_scores
-from scripts.prepare_task2_sft import SYSTEM_PROMPT, format_user_prompt
+from scripts.prepare_task2_sft import SYSTEM_PROMPT, format_user_prompt, truncate_middle
 
 
 def extract_taxonomy_labels(gen: str) -> list[str]:
@@ -48,6 +48,7 @@ def main():
     parser.add_argument("--adapter_dir", default="outputs/task2/qlora_adapter")
     parser.add_argument("--data_dir", default="data/public_test_release")
     parser.add_argument("--output_file", default="outputs/task2/task2_predictions_lora.json")
+    parser.add_argument("--max_input_len", type=int, default=3072)
     args = parser.parse_args()
 
     import os
@@ -110,17 +111,10 @@ def main():
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": format_user_prompt(stmt, s.code, s.compile_log)},
         ]
-        inputs = tokenizer.apply_chat_template(
-            prompt,
-            tokenize=True,
-            add_generation_prompt=True,
-            return_tensors="pt",
-            return_dict=True,
-        )
-        if inputs["input_ids"].shape[-1] > 2048:
-            inputs["input_ids"] = inputs["input_ids"][:, -2048:]
-            inputs["attention_mask"] = inputs["attention_mask"][:, -2048:]
-        inputs = {k: v.to(model.device) for k, v in inputs.items()}
+        ids = tokenizer.apply_chat_template(prompt, tokenize=True, add_generation_prompt=True)
+        ids = truncate_middle(ids, args.max_input_len)
+        input_ids = torch.tensor([ids], device=model.device)
+        inputs = {"input_ids": input_ids, "attention_mask": torch.ones_like(input_ids)}
 
         with torch.inference_mode():
             out_ids = model.generate(
