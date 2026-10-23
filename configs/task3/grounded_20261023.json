@@ -1,0 +1,26 @@
+{
+  "version": "grounded-v2-20261023",
+  "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "seed": 42,
+  "load_in_4bit": true,
+  "do_sample": false,
+  "few_shot_k": 0,
+  "context_limit": 16384,
+  "max_new_tokens": 1536,
+  "generation_max_time_s": 60,
+  "diagnosis_max_attempts": 2,
+  "feedback_max_attempts": 2,
+  "minimum_free_gpu_mib": 8192,
+  "compiler_policy": "reuse supplied evidence only; no host C++ compilation or execution",
+  "winner_gate": {
+    "complete_60_of_60_each_candidate": true,
+    "serious_L1_L2_leaks": 0,
+    "minimum_joint_gain_samples": 3,
+    "maximum_micro_f1_drop": 0.02,
+    "maximum_false_claim_increase": 0,
+    "maximum_false_clean_increase": 0,
+    "rare_label_tp_must_not_decrease": true,
+    "independent_review_required": true
+  }
+}
