@@ -1,0 +1,18 @@
+{
+  "version": "C-feedback-v3-20261023",
+  "runtime_config": "configs/task3/two_pass_20261023.json",
+  "stage1": "exact two_pass-v1 messages, parser, labels and outputs; no D or E",
+  "format": "feedback-only JSON, content preserved verbatim",
+  "development": "12 prior-exposed internal IDs, family-disjoint from old16",
+  "model_loads": 1,
+  "sample_concurrency": 1,
+  "production_maximum_calls_per_ID": 2,
+  "retry": false,
+  "semantic_gate": false,
+  "continue_criteria": {
+    "feedback_pass_gain_over_R15_and_C_old": true,
+    "false_claims_not_above_R15": true,
+    "L1_detail_leaks_not_above_R15": true,
+    "L2_repair_leaks_not_above_R15": true
+  }
+}
