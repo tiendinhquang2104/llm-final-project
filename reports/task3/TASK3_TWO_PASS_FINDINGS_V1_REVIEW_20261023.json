@@ -1,0 +1,83 @@
+{
+  "reference_findings_by_label": {
+    "Lỗi biên dịch": {
+      "support": 5,
+      "detected": 0,
+      "missed": 5
+    },
+    "Lỗi nhập/xuất": {
+      "support": 1,
+      "detected": 1,
+      "missed": 0
+    },
+    "Lỗi logic": {
+      "support": 0,
+      "detected": 0,
+      "missed": 0
+    },
+    "Lỗi vòng lặp": {
+      "support": 11,
+      "detected": 8,
+      "missed": 3
+    },
+    "Lỗi mảng/chuỗi": {
+      "support": 9,
+      "detected": 8,
+      "missed": 1
+    },
+    "Lỗi hàm": {
+      "support": 1,
+      "detected": 1,
+      "missed": 0
+    },
+    "Lỗi edge case": {
+      "support": 0,
+      "detected": 0,
+      "missed": 0
+    },
+    "Lỗi thuật toán": {
+      "support": 0,
+      "detected": 0,
+      "missed": 0
+    },
+    "Lỗi hard-code": {
+      "support": 6,
+      "detected": 6,
+      "missed": 0
+    },
+    "Lỗi style": {
+      "support": 0,
+      "detected": 0,
+      "missed": 0
+    }
+  },
+  "secondary_review": {
+    "IDs": 12,
+    "findings": 32,
+    "A_verdicts": {
+      "insufficient": 12,
+      "false": 13,
+      "correct": 7
+    },
+    "B_verdicts": {
+      "insufficient": 11,
+      "false": 14,
+      "correct": 7
+    },
+    "any_finding_field_disagreements": 9,
+    "verdict_disagreements": 1,
+    "label_disagreements": 1
+  },
+  "added_stage2_diagnoses": 5,
+  "IDs_with_added_stage2_diagnoses": 5,
+  "attribution_false_claim_ID_union": 13,
+  "attribution_false_claim_ID_overlap": 2,
+  "paired_false_claims_outside_material_false_attribution": [
+    "SYN-RANGE-0013-L4",
+    "SYN-COUNTEVEN-0012"
+  ],
+  "provenance": {
+    "attribution_a": "117051ee89540a1d73ff1e94e78e459e4aca096aec988fba018526236219ccce",
+    "attribution_b": "d2b2ad7b8576c28826d413001b7bd007a3a002efa58fbcc9b38cd7bcb812c0f0"
+  }
+}
