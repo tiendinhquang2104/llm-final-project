@@ -1,0 +1,26 @@
+{
+  "version": "two-pass-v2-20261023",
+  "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "load_in_4bit": true,
+  "seed": 42,
+  "do_sample": false,
+  "few_shot_k": 0,
+  "context_limit": 16384,
+  "max_new_tokens": 1024,
+  "generation_max_time_s": 45,
+  "maximum_calls_per_sample": 2,
+  "sample_concurrency": 1,
+  "semantic_gate": false,
+  "retry": false,
+  "minimum_free_gpu_mib": 8192,
+  "data_role": "exact old16 prior-exposed development only",
+  "E_gate": {
+    "C_no_meta": true,
+    "C_direct_em_for_all_completed": true,
+    "C_no_source_confirmed_clean_false_error": true,
+    "C_no_unresolved_clean_false_error_disagreement": true,
+    "D_micro_and_macro10_improve_over_B": true,
+    "D_new_TP_outside_compile_logic": true
+  }
+}

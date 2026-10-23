@@ -1,0 +1,3627 @@
+{
+  "IDs": 16,
+  "exposure": "same prior-exposed16 synthetic development; not new evaluation",
+  "arms": {
+    "A": {
+      "status": "run",
+      "completed": 16,
+      "unresolved": 0,
+      "fallback": 0,
+      "taxonomy_original": {
+        "samples": 16,
+        "valid": 16,
+        "invalid": 0,
+        "exact_count": 5,
+        "exact_match": 0.3125,
+        "TP": 4,
+        "FP": 5,
+        "FN": 12,
+        "micro_f1": 0.32,
+        "macro_f1": 0.13999999999999999,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 0,
+            "FN": 0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "support": 3,
+            "TP": 2,
+            "FP": 5,
+            "FN": 1,
+            "f1": 0.4
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 7,
+        "empty_rate": 0.4375,
+        "false_clean": 4
+      },
+      "taxonomy_source_A_sensitivity": {
+        "samples": 16,
+        "valid": 16,
+        "invalid": 0,
+        "exact_count": 6,
+        "exact_match": 0.375,
+        "TP": 5,
+        "FP": 4,
+        "FN": 11,
+        "micro_f1": 0.4,
+        "macro_f1": 0.15454545454545454,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 0,
+            "FN": 0,
+            "f1": 1.0
+          },
+          "Lỗi nhập/xuất": {
+            "support": 3,
+            "TP": 0,
+            "FP": 0,
+            "FN": 3,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "support": 4,
+            "TP": 3,
+            "FP": 4,
+            "FN": 1,
+            "f1": 0.5454545454545454
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 7,
+        "empty_rate": 0.4375,
+        "false_clean": 4
+      },
+      "finding_supported": 5,
+      "main_covered": 7,
+      "consistent": 15,
+      "level_ok": 5,
+      "natural": 15,
+      "direct_em": 0,
+      "false_claim": 11,
+      "meta": 1,
+      "clean_false_error": 1,
+      "generic_only": 1,
+      "disputed": 11,
+      "l1_detail_leak": 0,
+      "l2_repair_leak": 1,
+      "l3_actionable": 1,
+      "strict_joint": 0,
+      "feedback_pass": 0,
+      "content_level_pass_without_role": 0,
+      "clean_false_error_confirmed": 1,
+      "l2_repair_leak_confirmed": 1,
+      "per_level": {
+        "1": {
+          "n": 5,
+          "finding_supported": 2,
+          "main_covered": 2,
+          "consistent": 4,
+          "level_ok": 2,
+          "natural": 5,
+          "direct_em": 0,
+          "false_claim": 3,
+          "meta": 1,
+          "clean_false_error": 0,
+          "generic_only": 1,
+          "disputed": 3,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 0,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "2": {
+          "n": 5,
+          "finding_supported": 2,
+          "main_covered": 3,
+          "consistent": 5,
+          "level_ok": 2,
+          "natural": 4,
+          "direct_em": 0,
+          "false_claim": 3,
+          "meta": 0,
+          "clean_false_error": 0,
+          "generic_only": 0,
+          "disputed": 3,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 1,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "3": {
+          "n": 6,
+          "finding_supported": 1,
+          "main_covered": 2,
+          "consistent": 6,
+          "level_ok": 1,
+          "natural": 6,
+          "direct_em": 0,
+          "false_claim": 5,
+          "meta": 0,
+          "clean_false_error": 1,
+          "generic_only": 0,
+          "disputed": 5,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 0,
+          "l3_actionable": 1,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 4
+        }
+      },
+      "strict_joint_rate": 0.0,
+      "original_clean_n": 4,
+      "original_clean_false_error": 1,
+      "cost": {
+        "calls": 16,
+        "fresh_calls": 0,
+        "input_tokens": 11002,
+        "output_tokens": 896,
+        "latency_s": 11.923706842586398,
+        "reused_stage1_calls": 0
+      }
+    },
+    "B": {
+      "status": "run",
+      "completed": 16,
+      "unresolved": 0,
+      "fallback": 0,
+      "taxonomy_original": {
+        "samples": 16,
+        "valid": 16,
+        "invalid": 0,
+        "exact_count": 5,
+        "exact_match": 0.3125,
+        "TP": 4,
+        "FP": 8,
+        "FN": 12,
+        "micro_f1": 0.2857142857142857,
+        "macro_f1": 0.11333333333333333,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 1,
+            "FN": 0,
+            "f1": 0.8
+          },
+          "Lỗi nhập/xuất": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "support": 3,
+            "TP": 2,
+            "FP": 7,
+            "FN": 1,
+            "f1": 0.3333333333333333
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 4,
+        "empty_rate": 0.25,
+        "false_clean": 1
+      },
+      "taxonomy_source_A_sensitivity": {
+        "samples": 16,
+        "valid": 16,
+        "invalid": 0,
+        "exact_count": 6,
+        "exact_match": 0.375,
+        "TP": 5,
+        "FP": 7,
+        "FN": 11,
+        "micro_f1": 0.35714285714285715,
+        "macro_f1": 0.12615384615384614,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 1,
+            "FN": 0,
+            "f1": 0.8
+          },
+          "Lỗi nhập/xuất": {
+            "support": 3,
+            "TP": 0,
+            "FP": 0,
+            "FN": 3,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "support": 4,
+            "TP": 3,
+            "FP": 6,
+            "FN": 1,
+            "f1": 0.46153846153846156
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 4,
+        "empty_rate": 0.25,
+        "false_clean": 1
+      },
+      "finding_supported": 6,
+      "main_covered": 8,
+      "consistent": 12,
+      "level_ok": 5,
+      "natural": 16,
+      "direct_em": 0,
+      "false_claim": 10,
+      "meta": 1,
+      "clean_false_error": 3,
+      "generic_only": 2,
+      "disputed": 10,
+      "l1_detail_leak": 4,
+      "l2_repair_leak": 1,
+      "l3_actionable": 2,
+      "strict_joint": 0,
+      "feedback_pass": 0,
+      "content_level_pass_without_role": 0,
+      "clean_false_error_confirmed": 3,
+      "l2_repair_leak_confirmed": 0,
+      "per_level": {
+        "1": {
+          "n": 5,
+          "finding_supported": 2,
+          "main_covered": 2,
+          "consistent": 3,
+          "level_ok": 1,
+          "natural": 5,
+          "direct_em": 0,
+          "false_claim": 3,
+          "meta": 0,
+          "clean_false_error": 1,
+          "generic_only": 1,
+          "disputed": 3,
+          "l1_detail_leak": 4,
+          "l2_repair_leak": 0,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "2": {
+          "n": 5,
+          "finding_supported": 1,
+          "main_covered": 2,
+          "consistent": 3,
+          "level_ok": 1,
+          "natural": 5,
+          "direct_em": 0,
+          "false_claim": 4,
+          "meta": 1,
+          "clean_false_error": 1,
+          "generic_only": 1,
+          "disputed": 3,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 1,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "3": {
+          "n": 6,
+          "finding_supported": 3,
+          "main_covered": 4,
+          "consistent": 6,
+          "level_ok": 3,
+          "natural": 6,
+          "direct_em": 0,
+          "false_claim": 3,
+          "meta": 0,
+          "clean_false_error": 1,
+          "generic_only": 0,
+          "disputed": 4,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 0,
+          "l3_actionable": 2,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 4
+        }
+      },
+      "strict_joint_rate": 0.0,
+      "original_clean_n": 4,
+      "original_clean_false_error": 3,
+      "cost": {
+        "calls": 32,
+        "fresh_calls": 0,
+        "input_tokens": 21229,
+        "output_tokens": 1864,
+        "latency_s": 39.89382406882942,
+        "reused_stage1_calls": 0
+      }
+    },
+    "C": {
+      "status": "run",
+      "completed": 15,
+      "unresolved": 1,
+      "fallback": 0,
+      "taxonomy_original": {
+        "samples": 16,
+        "valid": 15,
+        "invalid": 1,
+        "exact_count": 5,
+        "exact_match": 0.3125,
+        "TP": 4,
+        "FP": 8,
+        "FN": 12,
+        "micro_f1": 0.2857142857142857,
+        "macro_f1": 0.11333333333333333,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 1,
+            "FN": 0,
+            "f1": 0.8
+          },
+          "Lỗi nhập/xuất": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "support": 3,
+            "TP": 2,
+            "FP": 7,
+            "FN": 1,
+            "f1": 0.3333333333333333
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 3,
+        "empty_rate": 0.1875,
+        "false_clean": 0
+      },
+      "taxonomy_source_A_sensitivity": {
+        "samples": 16,
+        "valid": 15,
+        "invalid": 1,
+        "exact_count": 6,
+        "exact_match": 0.375,
+        "TP": 5,
+        "FP": 7,
+        "FN": 11,
+        "micro_f1": 0.35714285714285715,
+        "macro_f1": 0.12615384615384614,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 1,
+            "FN": 0,
+            "f1": 0.8
+          },
+          "Lỗi nhập/xuất": {
+            "support": 3,
+            "TP": 0,
+            "FP": 0,
+            "FN": 3,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "support": 4,
+            "TP": 3,
+            "FP": 6,
+            "FN": 1,
+            "f1": 0.46153846153846156
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 3,
+        "empty_rate": 0.1875,
+        "false_clean": 0
+      },
+      "finding_supported": 7,
+      "main_covered": 7,
+      "consistent": 14,
+      "level_ok": 3,
+      "natural": 15,
+      "direct_em": 3,
+      "false_claim": 8,
+      "meta": 0,
+      "clean_false_error": 2,
+      "generic_only": 2,
+      "disputed": 10,
+      "l1_detail_leak": 4,
+      "l2_repair_leak": 3,
+      "l3_actionable": 0,
+      "strict_joint": 0,
+      "feedback_pass": 0,
+      "content_level_pass_without_role": 0,
+      "clean_false_error_confirmed": 2,
+      "l2_repair_leak_confirmed": 2,
+      "per_level": {
+        "1": {
+          "n": 5,
+          "finding_supported": 2,
+          "main_covered": 2,
+          "consistent": 4,
+          "level_ok": 1,
+          "natural": 5,
+          "direct_em": 0,
+          "false_claim": 3,
+          "meta": 0,
+          "clean_false_error": 1,
+          "generic_only": 1,
+          "disputed": 3,
+          "l1_detail_leak": 4,
+          "l2_repair_leak": 0,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "2": {
+          "n": 5,
+          "finding_supported": 2,
+          "main_covered": 3,
+          "consistent": 4,
+          "level_ok": 1,
+          "natural": 4,
+          "direct_em": 0,
+          "false_claim": 2,
+          "meta": 0,
+          "clean_false_error": 0,
+          "generic_only": 0,
+          "disputed": 3,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 3,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "3": {
+          "n": 6,
+          "finding_supported": 3,
+          "main_covered": 2,
+          "consistent": 6,
+          "level_ok": 1,
+          "natural": 6,
+          "direct_em": 3,
+          "false_claim": 3,
+          "meta": 0,
+          "clean_false_error": 1,
+          "generic_only": 1,
+          "disputed": 4,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 0,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 4
+        }
+      },
+      "strict_joint_rate": 0.0,
+      "original_clean_n": 4,
+      "original_clean_false_error": 2,
+      "cost": {
+        "calls": 15,
+        "fresh_calls": 15,
+        "input_tokens": 13084,
+        "output_tokens": 915,
+        "latency_s": 17.719496492296457,
+        "reused_stage1_calls": 16
+      },
+      "inconsistency": 1
+    },
+    "D": {
+      "status": "run",
+      "completed": 16,
+      "unresolved": 0,
+      "fallback": 0,
+      "taxonomy_original": {
+        "samples": 16,
+        "valid": 16,
+        "invalid": 0,
+        "exact_count": 3,
+        "exact_match": 0.1875,
+        "TP": 3,
+        "FP": 12,
+        "FN": 13,
+        "micro_f1": 0.1935483870967742,
+        "macro_f1": 0.06493506493506493,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 7,
+            "FN": 0,
+            "f1": 0.36363636363636365
+          },
+          "Lỗi nhập/xuất": {
+            "support": 2,
+            "TP": 0,
+            "FP": 1,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi logic": {
+            "support": 3,
+            "TP": 1,
+            "FP": 3,
+            "FN": 2,
+            "f1": 0.2857142857142857
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 1,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 1,
+        "empty_rate": 0.0625,
+        "false_clean": 0
+      },
+      "taxonomy_source_A_sensitivity": {
+        "samples": 16,
+        "valid": 16,
+        "invalid": 0,
+        "exact_count": 4,
+        "exact_match": 0.25,
+        "TP": 5,
+        "FP": 10,
+        "FN": 11,
+        "micro_f1": 0.3225806451612903,
+        "macro_f1": 0.13636363636363638,
+        "per_label": {
+          "Lỗi biên dịch": {
+            "support": 2,
+            "TP": 2,
+            "FP": 7,
+            "FN": 0,
+            "f1": 0.36363636363636365
+          },
+          "Lỗi nhập/xuất": {
+            "support": 3,
+            "TP": 1,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.5
+          },
+          "Lỗi logic": {
+            "support": 4,
+            "TP": 2,
+            "FP": 2,
+            "FN": 2,
+            "f1": 0.5
+          },
+          "Lỗi vòng lặp": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi mảng/chuỗi": {
+            "support": 2,
+            "TP": 0,
+            "FP": 0,
+            "FN": 2,
+            "f1": 0.0
+          },
+          "Lỗi hàm": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          },
+          "Lỗi edge case": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi thuật toán": {
+            "support": 1,
+            "TP": 0,
+            "FP": 1,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi hard-code": {
+            "support": 1,
+            "TP": 0,
+            "FP": 0,
+            "FN": 1,
+            "f1": 0.0
+          },
+          "Lỗi style": {
+            "support": 0,
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "f1": 0.0
+          }
+        },
+        "empty_predictions": 1,
+        "empty_rate": 0.0625,
+        "false_clean": 0
+      },
+      "finding_supported": 2,
+      "main_covered": 3,
+      "consistent": 9,
+      "level_ok": 1,
+      "natural": 16,
+      "direct_em": 0,
+      "false_claim": 14,
+      "meta": 4,
+      "clean_false_error": 4,
+      "generic_only": 2,
+      "disputed": 10,
+      "l1_detail_leak": 4,
+      "l2_repair_leak": 0,
+      "l3_actionable": 1,
+      "strict_joint": 0,
+      "feedback_pass": 0,
+      "content_level_pass_without_role": 0,
+      "clean_false_error_confirmed": 4,
+      "l2_repair_leak_confirmed": 0,
+      "per_level": {
+        "1": {
+          "n": 5,
+          "finding_supported": 2,
+          "main_covered": 2,
+          "consistent": 3,
+          "level_ok": 1,
+          "natural": 5,
+          "direct_em": 0,
+          "false_claim": 3,
+          "meta": 0,
+          "clean_false_error": 1,
+          "generic_only": 1,
+          "disputed": 3,
+          "l1_detail_leak": 4,
+          "l2_repair_leak": 0,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "2": {
+          "n": 5,
+          "finding_supported": 0,
+          "main_covered": 1,
+          "consistent": 2,
+          "level_ok": 0,
+          "natural": 5,
+          "direct_em": 0,
+          "false_claim": 5,
+          "meta": 3,
+          "clean_false_error": 1,
+          "generic_only": 1,
+          "disputed": 3,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 0,
+          "l3_actionable": 0,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 0
+        },
+        "3": {
+          "n": 6,
+          "finding_supported": 0,
+          "main_covered": 0,
+          "consistent": 4,
+          "level_ok": 0,
+          "natural": 6,
+          "direct_em": 0,
+          "false_claim": 6,
+          "meta": 1,
+          "clean_false_error": 2,
+          "generic_only": 0,
+          "disputed": 4,
+          "l1_detail_leak": 0,
+          "l2_repair_leak": 0,
+          "l3_actionable": 1,
+          "strict_joint": 0,
+          "feedback_pass": 0,
+          "actionable_eligible": 4
+        }
+      },
+      "strict_joint_rate": 0.0,
+      "original_clean_n": 4,
+      "original_clean_false_error": 4,
+      "cost": {
+        "calls": 32,
+        "fresh_calls": 32,
+        "input_tokens": 25520,
+        "output_tokens": 1889,
+        "latency_s": 34.363764787092805,
+        "reused_stage1_calls": 0
+      },
+      "inconsistency": 0
+    },
+    "E": {
+      "status": "not_run",
+      "planned_IDs": 16,
+      "taxonomy_original": null,
+      "reason": "C/D eligibility gate failed"
+    }
+  },
+  "per_ID": [
+    {
+      "sample_id": "SYN-COUNTVOWEL-0010",
+      "level": 3,
+      "original_gold": [
+        "Lỗi biên dịch"
+      ],
+      "source_A": [
+        "Lỗi biên dịch"
+      ],
+      "source_B": [
+        "Lỗi biên dịch"
+      ],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "B": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": true,
+          "l3_actionable_confirmed": true,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "C": {
+          "finding_supported": true,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": true,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-PALIN-0017",
+      "level": 3,
+      "original_gold": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "source_A": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "source_B": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "source_disputed": false,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "main_covered",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-UPPER-0005",
+      "level": 1,
+      "original_gold": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_A": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_B": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_disputed": false,
+      "arms": {
+        "A": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": false,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": true,
+          "disputed": false,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": true,
+          "disputed": false,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": true,
+          "disputed": false,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-BASE2-0007",
+      "level": 1,
+      "original_gold": [
+        "Lỗi hard-code"
+      ],
+      "source_A": [
+        "Lỗi hard-code",
+        "Lỗi nhập/xuất"
+      ],
+      "source_B": [
+        "Lỗi nhập/xuất",
+        "Lỗi hard-code"
+      ],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "level_ok",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "finding_supported",
+            "main_covered",
+            "false_claim",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "main_covered",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi nhập/xuất"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-DIGITSUM-0007",
+      "level": 2,
+      "original_gold": [
+        "Lỗi hàm"
+      ],
+      "source_A": [
+        "Lỗi logic"
+      ],
+      "source_B": [
+        "Lỗi hàm"
+      ],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": true,
+          "l2_repair_leak_confirmed": true,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": true,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "level_ok",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-REVSTR-0007",
+      "level": 2,
+      "original_gold": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_A": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_B": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "source_disputed": false,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": true,
+          "l2_repair_leak_confirmed": true,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": true,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "l2_repair_leak"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": true,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "l2_repair_leak"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "main_covered"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-DISTINCT-0010",
+      "level": 1,
+      "original_gold": [
+        "Lỗi vòng lặp"
+      ],
+      "source_A": [
+        "Lỗi vòng lặp"
+      ],
+      "source_B": [
+        "Lỗi vòng lặp"
+      ],
+      "source_disputed": false,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "level_ok"
+          ],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-FACT-0008",
+      "level": 2,
+      "original_gold": [
+        "Lỗi biên dịch"
+      ],
+      "source_A": [
+        "Lỗi biên dịch"
+      ],
+      "source_B": [
+        "Lỗi biên dịch"
+      ],
+      "source_disputed": false,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": true,
+          "l2_repair_leak_confirmed": true,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": false,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": true
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-DISTINCT-0017",
+      "level": 2,
+      "original_gold": [
+        "Lỗi thuật toán"
+      ],
+      "source_A": [
+        "Lỗi thuật toán"
+      ],
+      "source_B": [
+        "Lỗi thuật toán"
+      ],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": false,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": false,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "unresolved",
+          "taxonomy": null,
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": true,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "finding_supported",
+            "level_ok",
+            "false_claim"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-MINA-0004",
+      "level": 3,
+      "original_gold": [
+        "Lỗi vòng lặp",
+        "Lỗi edge case"
+      ],
+      "source_A": [
+        "Lỗi vòng lặp",
+        "Lỗi edge case"
+      ],
+      "source_B": [
+        "Lỗi vòng lặp",
+        "Lỗi edge case"
+      ],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": true,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-SUMB-0005",
+      "level": 1,
+      "original_gold": [
+        "Lỗi logic",
+        "Lỗi style"
+      ],
+      "source_A": [
+        "Lỗi logic"
+      ],
+      "source_B": [
+        "Lỗi logic"
+      ],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": true,
+          "clean_false_error": false,
+          "generic_only": true,
+          "disputed": true,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "level_ok",
+            "meta",
+            "generic_only"
+          ],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-PRIME-0010",
+      "level": 3,
+      "original_gold": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "source_A": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "source_B": [
+        "Lỗi logic",
+        "Lỗi nhập/xuất"
+      ],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": true,
+          "l3_actionable_confirmed": true,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "level_ok",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": true,
+          "l3_actionable_confirmed": true,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": true,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": true,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": false,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "main_covered",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": true,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": true,
+          "l3_actionable_confirmed": true,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [
+            "level_ok",
+            "disputed"
+          ],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-COUNTUPPER-0001",
+      "level": 3,
+      "original_gold": [],
+      "source_A": [],
+      "source_B": [],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "B": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "C": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-DIGITSUM-0001",
+      "level": 2,
+      "original_gold": [],
+      "source_A": [],
+      "source_B": [],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": true,
+          "clean_false_error": true,
+          "generic_only": true,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "C": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": true,
+          "clean_false_error": true,
+          "generic_only": true,
+          "disputed": true,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": false,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-DISTINCT-0001",
+      "level": 1,
+      "original_gold": [],
+      "source_A": [],
+      "source_B": [],
+      "source_disputed": true,
+      "arms": {
+        "A": {
+          "finding_supported": true,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": true,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": false,
+          "meta": false,
+          "clean_false_error": false,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": false,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": false,
+          "source_disputed": true,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": false,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": true,
+          "l1_detail_leak": true,
+          "l1_detail_leak_confirmed": true,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": true,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi thuật toán"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    },
+    {
+      "sample_id": "SYN-FACT-0001",
+      "level": 3,
+      "original_gold": [],
+      "source_A": [],
+      "source_B": [],
+      "source_disputed": false,
+      "arms": {
+        "A": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi logic"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "B": {
+          "finding_supported": false,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": false,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "C": {
+          "finding_supported": false,
+          "main_covered": true,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": true,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": false,
+          "taxonomy_exact_source": true,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [],
+          "taxonomy_exact_original": true
+        },
+        "D": {
+          "finding_supported": false,
+          "main_covered": false,
+          "consistent": true,
+          "level_ok": false,
+          "natural": true,
+          "direct_em": false,
+          "false_claim": true,
+          "meta": false,
+          "clean_false_error": true,
+          "generic_only": false,
+          "disputed": false,
+          "l1_detail_leak": null,
+          "l1_detail_leak_confirmed": false,
+          "l2_repair_leak": null,
+          "l2_repair_leak_confirmed": false,
+          "l3_actionable": null,
+          "l3_actionable_confirmed": false,
+          "clean_false_error_confirmed": true,
+          "source_disputed": false,
+          "taxonomy_exact_source": false,
+          "feedback_pass": false,
+          "content_level_pass_without_role": false,
+          "strict_joint": false,
+          "reviewer_disagreements": [],
+          "status": "resolved",
+          "taxonomy": [
+            "Lỗi biên dịch"
+          ],
+          "taxonomy_exact_original": false
+        },
+        "E": {
+          "status": "not_run"
+        }
+      }
+    }
+  ],
+  "E_gate": {
+    "allow_E": false,
+    "checks": {
+      "C_no_meta": true,
+      "C_no_confirmed_clean_false_error": false,
+      "C_no_unresolved_clean_false_error_disagreement": false,
+      "C_direct_em_for_all_completed": false,
+      "D_micro_improves": false,
+      "D_macro10_improves": false,
+      "D_new_TP_outside_compile_logic": false
+    },
+    "freeze_sha256": "8a9b40a7cf7829b7682019fbfe1470f9db283526d15a9ad696ea35daa88fceaf",
+    "review_sha256": {
+      "review/packet-seal-CD.json": "09945a285da335b846f741a554ebd76f2773ace41574c5f58e5253e4d4b7cde1",
+      "review/paired-seal-CD.json": "8c447600d1b1441862817303e5ee4dadd0f42023a6299e1852ccaaea03bd819b",
+      "review/paired-CD-a.private.json": "def6d344bedb4592e157dceba9ac397e9bfa58629e93f639f0d7873048a25a2d",
+      "review/paired-CD-b.private.json": "ee8785f48bc8c6d47c4805097bc08482b7a4fdf44bfc550eaa72f5db30a4d58b"
+    }
+  },
+  "provenance": {
+    "initial_HEAD": "26a9d9b10c32e8daf95d8ef29dc76af61332bda0",
+    "freeze_sha256": "8a9b40a7cf7829b7682019fbfe1470f9db283526d15a9ad696ea35daa88fceaf",
+    "trace_sha256": "c6349495451dbdeaa5739a50531177d2127263512acf6d114586d92b287599d7",
+    "source_seal_sha256": "f9b2dbc1b8e5eda2b05371b9438d72a7799c01ca854ae1c713233dbf18968070",
+    "paired_seals": {
+      "CD": "8c447600d1b1441862817303e5ee4dadd0f42023a6299e1852ccaaea03bd819b"
+    },
+    "original_gold_unchanged": true,
+    "no_public_inference": true,
+    "selection": {
+      "policy": "16 IDs fixed by Level, original label support and clean/error mix before prompts/inference; no output-based filtering",
+      "initial_head": "21400d0c936d2af62ff404a0b526d4b600d3278c",
+      "IDs": [
+        {
+          "sample_id": "SYN-COUNTVOWEL-0010",
+          "old_request_id": "SYN-COUNTVOWEL-0010@development",
+          "old_split": "development",
+          "units_path": "outputs/task3/grounded-20261023/development/units.private.json",
+          "units_sha256": "0be1d906812193388ff53da761cca73e720427c702c950bbcb67cc2585c7a301",
+          "predictions_path": "outputs/task3/grounded-20261023/development/C0/completed.predictions.json",
+          "predictions_sha256": "91a1e6e8da97ce5c15e9bce29d565cb32377200f1820e01ffda507d96c499350",
+          "source_sha256": "6e6ac68d81ccde62353dcdc6795d235e24e54d1c341e5253382b41e6be3a738b",
+          "exposure": "Prior-exposed development: grounded development;compact P1+oracle"
+        },
+        {
+          "sample_id": "SYN-PALIN-0017",
+          "old_request_id": "SYN-PALIN-0017@development",
+          "old_split": "development",
+          "units_path": "outputs/task3/grounded-20261023/development/units.private.json",
+          "units_sha256": "0be1d906812193388ff53da761cca73e720427c702c950bbcb67cc2585c7a301",
+          "predictions_path": "outputs/task3/grounded-20261023/development/C0/completed.predictions.json",
+          "predictions_sha256": "91a1e6e8da97ce5c15e9bce29d565cb32377200f1820e01ffda507d96c499350",
+          "source_sha256": "050127e8d26fcb239ebd85a53eeb761de1c8af21ad62f7222b6a333af3245da9",
+          "exposure": "Prior-exposed development: grounded development;compact P1+oracle"
+        },
+        {
+          "sample_id": "SYN-UPPER-0005",
+          "old_request_id": "SYN-UPPER-0005@development",
+          "old_split": "development",
+          "units_path": "outputs/task3/grounded-20261023/development/units.private.json",
+          "units_sha256": "0be1d906812193388ff53da761cca73e720427c702c950bbcb67cc2585c7a301",
+          "predictions_path": "outputs/task3/grounded-20261023/development/C0/completed.predictions.json",
+          "predictions_sha256": "91a1e6e8da97ce5c15e9bce29d565cb32377200f1820e01ffda507d96c499350",
+          "source_sha256": "38dc3c4e126878fb3503fcc58abc7e03ff41d272a09291a9b2463142ca59c498",
+          "exposure": "Prior-exposed development: grounded development;compact P1+oracle"
+        },
+        {
+          "sample_id": "SYN-BASE2-0007",
+          "old_request_id": "v2:SYN-BASE2-0007@primary-L1",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "9582f397cbf522a9e14a30be61289421935519e5008984b85619cab37a1cc958",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-DIGITSUM-0007",
+          "old_request_id": "v2:SYN-DIGITSUM-0007@primary-L2",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "18ecdab857da4e736c94b842af785cadbe198c63f185e74a12fd377e659424a2",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-REVSTR-0007",
+          "old_request_id": "v2:SYN-REVSTR-0007@primary-L2",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "0d2bfa0f5735ac54ddfff4f57de55eb4e6e3c3ccde05a79e592616c2f1baf3ee",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-DISTINCT-0010",
+          "old_request_id": "v2:SYN-DISTINCT-0010@primary-L1",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "e7eeb8b41fbe91fc6b23362c15287bfdad9f8b0d91fff8d5fb903d966bb3ffc4",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-FACT-0008",
+          "old_request_id": "v2:SYN-FACT-0008@primary-L2",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "4a15963bb65eac0bcd50ad8de4f883bc2dd820d508a00d9fc336f236f3bc0ee4",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-DISTINCT-0017",
+          "old_request_id": "v2:SYN-DISTINCT-0017@primary-L2",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "111724d280b682063bde7ffdf81ccf2a77b11b376b867cb7360b72281866efa6",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-MINA-0004",
+          "old_request_id": "v2:SYN-MINA-0004@primary-L3",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "5b91d487a1b3f574a105d8a47391094e647f013075cbb325eb06dd9216620f51",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-SUMB-0005",
+          "old_request_id": "v2:SYN-SUMB-0005@primary-L1",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "e7d09953c34fd94ec1cf22c68b20687afe4ff13b07f1de74889ff4a6d411f17a",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-PRIME-0010",
+          "old_request_id": "v2:SYN-PRIME-0010@primary-L3",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "b62e443b28be7b52aa2106abc5b1206b3ce9d1a9499178f1fdb88d5ed9f8a16d",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-COUNTUPPER-0001",
+          "old_request_id": "v2:SYN-COUNTUPPER-0001@primary-L3",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "420513e1b6076d7fb9bd92df3ae8db35548c08f74955af9e9d75736d65520bec",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-DIGITSUM-0001",
+          "old_request_id": "v2:SYN-DIGITSUM-0001@primary-L2",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "86044603e4beaeef81a14b43e4758e78980c8a4d1a7918e76b78f93e69180892",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-DISTINCT-0001",
+          "old_request_id": "v2:SYN-DISTINCT-0001@primary-L1",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "6ad461ef0b8e0095e0b45b89aa2a84082ee63c8bf9672294fe9cad307301fec3",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        },
+        {
+          "sample_id": "SYN-FACT-0001",
+          "old_request_id": "v2:SYN-FACT-0001@primary-L3",
+          "old_split": "evaluation",
+          "units_path": "outputs/task3/grounded-20261023/evaluation/units.private.json",
+          "units_sha256": "e48dd55a383395bbed384f17c16fd32e8d956d69efd3276a050af4476ff5a78d",
+          "predictions_path": "outputs/task3/grounded-20261023/evaluation/C0/completed.predictions.json",
+          "predictions_sha256": "499bcaa7bb2289e16f6f7323a82a567cd8999d6c32db0c10403c5e8acda1084a",
+          "source_sha256": "5e2871829de9c91115f92d413dcdb8da3b25110c24621559db124e467004e877",
+          "exposure": "Prior-exposed development: grounded evaluation;old60 reviewed evaluation, now development"
+        }
+      ],
+      "train_style_reference_ids": [
+        "EX02-S202",
+        "EX01-S101",
+        "EX02-S203"
+      ],
+      "train_style_policy": "Only lengths/concise teacher tone reviewed; no verbatim examples inserted; Level definitions take priority over noncompliant references."
+    }
+  },
+  "decision": "retain_R15_E_not_run"
+}
