@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -24,8 +25,22 @@ from transformers import (
     AutoTokenizer,
     BitsAndBytesConfig,
     Trainer,
+    TrainerCallback,
     TrainingArguments,
 )
+
+
+class TimeBudget(TrainerCallback):
+    """Stop training once the time budget is used up, so the adapter is still saved and inference
+    fits inside Kaggle's 12-hour session limit."""
+
+    def __init__(self, hours):
+        self.deadline = time.time() + hours * 3600
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if time.time() > self.deadline:
+            print(f"==> Time budget reached at step {state.global_step}/{state.max_steps}, stopping early.")
+            control.should_training_stop = True
 
 
 def encode_row(tokenizer, messages, max_length=2048):
@@ -131,6 +146,7 @@ def train(args):
         args=training_args,
         train_dataset=dataset,
         data_collator=collator,
+        callbacks=[TimeBudget(args.max_train_hours)],
     )
 
     print("==> Starting QLoRA training on Task 2...")
@@ -147,7 +163,8 @@ if __name__ == "__main__":
     parser.add_argument("--model_id", default="Qwen/Qwen2.5-Coder-7B-Instruct")
     parser.add_argument("--data_path", default="data/processed/task2_sft_train.jsonl")
     parser.add_argument("--output_dir", default="outputs/task2/qlora_adapter")
-    parser.add_argument("--epochs", type=float, default=2.0)
+    parser.add_argument("--epochs", type=float, default=1.0)
+    parser.add_argument("--max_train_hours", type=float, default=7.0)
     parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--grad_accum", type=int, default=8)
     parser.add_argument("--lr", type=float, default=2e-4)
