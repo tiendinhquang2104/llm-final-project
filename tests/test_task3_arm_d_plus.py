@@ -323,3 +323,34 @@ def test_native_extended_context_preserves_long_evidence_and_full_source():
     assert result['max_detector_input']+1536<=32768
     payload=json.loads(plus.messages_findings(u,LABELS)[1]['content'])
     assert payload['compile_log']==log and payload['code']==u['task']['code']
+
+
+def test_genuinely_empty_source_accepts_absence_of_quote_without_rewriting_finding(tmp_path):
+    u=unit();u['task']['code']=''
+    f={**finding('Lỗi biên dịch'),'location':'submission entry point','evidence':'',
+       'error':'The required program entry point is absent from the empty submission.'}
+    b=Backend([json.dumps({'findings':[f]}),'{"feedback":"Bài nộp chưa có phần chương trình được yêu cầu."}'])
+    rows=plus.run_units([u],b,config(),tmp_path,SPACE)
+    assert rows[0]['status']=='resolved'
+    assert rows[0]['stage1']['findings'][0]['evidence']==''
+    assert rows[0]['stage1']['findings'][0]['error']==f['error']
+    attempts=[json.loads(x) for x in (tmp_path/'attempts.jsonl').read_text().splitlines()]
+    assert [x['kind'] for x in attempts]==['normal','normal']
+
+
+def test_nonempty_source_still_requires_a_nonempty_evidence_locator(tmp_path):
+    f={**finding(),'evidence':''}
+    b=Backend([json.dumps({'findings':[f]}),json.dumps({'findings':[f]})])
+    rows=plus.run_units([unit()],b,config(),tmp_path,SPACE)
+    assert rows[0]['status']=='unresolved'
+    assert rows[0]['failure']['category']=='schema'
+    assert len(b.calls)==2
+
+
+def test_empty_source_exception_does_not_allow_missing_diagnosis_fields(tmp_path):
+    u=unit();u['task']['code']=' \n\t'
+    f={**finding(),'evidence':'','error':''}
+    b=Backend([json.dumps({'findings':[f]}),json.dumps({'findings':[f]})])
+    rows=plus.run_units([u],b,config(),tmp_path,SPACE)
+    assert rows[0]['status']=='unresolved'
+    assert rows[0]['output'] is None
