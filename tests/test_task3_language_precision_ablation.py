@@ -79,3 +79,25 @@ def test_full_denominator_and_null_prediction_policy(tmp_path):
     assert metrics['completed']==0 and metrics['taxonomy']['exact_count']==0
     assert metrics['stage1_taxonomy']['exact_count']==1
     assert metrics['taxonomy']['macro_f1']==0
+
+
+def test_arm_peak_memory_reset_before_measurement():
+    from scripts.task3_language_precision_ablation import start_arm_runtime
+    events=[]
+    class Cuda:
+        def synchronize(self):events.append('sync')
+        def reset_peak_memory_stats(self):events.append('reset')
+    class Torch:cuda=Cuda()
+    class B:
+        torch=Torch()
+        def runtime_metadata(self):events.append('measure');return {'peak_scope':'arm'}
+    assert start_arm_runtime(B())=={'peak_scope':'arm'}
+    assert events==['sync','reset','measure']
+
+
+def test_runtime_snapshots_preserve_original_on_resume(tmp_path):
+    from scripts.task3_language_precision_ablation import save_runtime
+    save_runtime(tmp_path,'runtime-after.json',{'peak':123},'first')
+    save_runtime(tmp_path,'runtime-after.json',{'peak':10},'resume')
+    assert json.loads((tmp_path/'runtime-after.json').read_text())=={'peak':123}
+    assert json.loads((tmp_path/'measurements/resume/runtime-after.json').read_text())=={'peak':10}

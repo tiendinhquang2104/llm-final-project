@@ -22,7 +22,7 @@ Interrupted reservations cannot generate again; per-arm identity binds entire ma
 
 ### Task 2: provenance, freeze, execution
 - [ ] Implement `scripts/task3_language_precision_ablation.py`: prepare/freeze/run/packets/report. Verify historical selection/source seals and original/nested ZIP hashes, source code/semantic/evidence/Level/gold. Produce translation alignment and freeze code/deps/tokenizer/config before inference.
-- [ ] Preflight GPU; run fixed sample-major A,B then C,D sequence with two model loads, separate journals, full raw/rendered/runtime artifacts, no repair/retry. Audit original BF16 storage. Expected: all30 IDs accounted per arm even unresolved.
+- [ ] Preflight GPU; run fixed arm-major A30,B30 then C30,D30 sequence with two model loads, separate journals, full raw/rendered/runtime artifacts, no repair/retry. Audit original BF16 storage. Expected: all30 IDs accounted per arm even unresolved.
 
 ### Task 3: review, reporting, handoff
 - [ ] Generate opaque shuffled review packets using old source-only references and preselected balanced second-review subset; review full120 outputs against one rubric, preserving disputes and main finding inventory. Record independence limits honestly.
@@ -32,3 +32,5 @@ Interrupted reservations cannot generate again; per-arm identity binds entire ma
 ## Ledger
 
 Baseline HEAD35c2915 exactly matches reference; only user prompt untracked in original checkout. Isolated sibling worktree shares old artifacts/cache by symlink; no model/data copy. Baseline66 findings tests passed. Initial test command named nonexistent inference glob; corrected to discovered precision test file, no test failure hidden. Design already fixed/authorized in user's spec; execute without another approval gate.
+
+Prefreeze independent review: two runtime issues fixed with RED→GREEN fixtures: reset arm peaks while retaining load/group peaks; preserve first runtime snapshots plus per-invocation measurements and append-only load events. Core prompt/provenance/inference review passed.

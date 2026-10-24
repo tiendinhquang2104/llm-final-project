@@ -132,12 +132,24 @@ def verify(out):
     return m
 
 
+def save_runtime(path,name,value,invocation):
+    write_json(path/'measurements'/invocation/name,value)
+    if not(path/name).exists():write_json(path/name,value)
+
+
+def start_arm_runtime(backend):
+    backend.torch.cuda.synchronize()
+    backend.torch.cuda.reset_peak_memory_stats()
+    return backend.runtime_metadata()
+
+
 def run(out):
     m=verify(out);require(not(out/'run.json').exists(),'completed run cannot resample')
     offline();tok=load_tokenizer(lp.arm_config('A'))
     require(tokenizer_metadata(tok)==m['tokenizer'] and hashlib.sha256(tok.backend_tokenizer.to_str().encode()).hexdigest()==m['tokenizer_full_sha256'],'tokenizer drift')
     units=read(out/'units.private.json');space=read(out/'label-space.private.json');started=time.perf_counter()
-    runinfo={'loads':[],'extra_model_calls':0,'warmup_calls':0,'freeze_sha256':sha(out/'freeze.json')}
+    invocation=str(time.time_ns())
+    runinfo={'invocation':invocation,'loads':[],'extra_model_calls':0,'warmup_calls':0,'freeze_sha256':sha(out/'freeze.json')}
     for group in ['AB','CD']:
         cfg=lp.arm_config(group[0]);before=environment()
         frozen=read(out/'environment-freeze.json')
@@ -147,24 +159,30 @@ def run(out):
         write_json(load_dir/'preflight.json',before)
         if not cfg['load_in_4bit'] and before['free_gpu_bytes']<20*1024**3:
             write_json(out/'blocked.json',{'reason':'BF16 chưa chạy được trên tài nguyên hiện tại','free_bytes':before['free_gpu_bytes']});break
-        append(out/'model-loads.jsonl',{'group':group,'time_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'kind':'original checkpoint','precision':'nf4'if cfg['load_in_4bit']else'bf16'})
+        append(out/'model-loads.jsonl',{'invocation':invocation,'event':'load_started','group':group,'time_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'kind':'original checkpoint','precision':'nf4'if cfg['load_in_4bit']else'bf16'})
         try:backend=lp.AuditedBackend(cfg,tok,load_dir)
         except RuntimeError as exc:
             write_json(out/'blocked.json',{'reason':'BF16 chưa chạy được trên tài nguyên hiện tại'if group=='CD'else'NF4 load failed','error':str(exc)});break
-        write_json(load_dir/'runtime-before.json',backend.runtime_metadata())
+        load_runtime=backend.runtime_metadata();group_peaks={k:load_runtime[k]for k in ['peak_gpu_memory_allocated_bytes','peak_gpu_memory_reserved_bytes']}
+        save_runtime(load_dir,'runtime-before.json',load_runtime,invocation)
         for a in group:
             armout=out/a;armout.mkdir(exist_ok=True);cfg=lp.arm_config(a)
             cfg['freeze_sha256']=sha(out/'freeze.json');write_json(armout/'config.json',cfg)
             for stage in ['taxonomy','feedback']:shutil.copyfile(load_dir/f'generation-{stage}.json',armout/f'generation-{stage}.json')
-            write_json(armout/'runtime-before.json',backend.runtime_metadata())
+            save_runtime(armout,'runtime-before.json',start_arm_runtime(backend),invocation)
             lp.run_arm(units,backend,cfg,armout,space)
-            write_json(armout/'runtime-after.json',backend.runtime_metadata())
-        runinfo['loads'].append({'group':group,**backend.runtime_metadata()})
-        write_json(load_dir/'runtime-after.json',backend.runtime_metadata())
+            arm_runtime=backend.runtime_metadata();arm_runtime['peak_scope']='this arm, reset before first ID'
+            save_runtime(armout,'runtime-after.json',arm_runtime,invocation)
+            group_peaks={k:max(v,arm_runtime[k])for k,v in group_peaks.items()}
+        runinfo['loads'].append({'group':group,**backend.runtime_metadata(),**group_peaks,'peak_scope':'load and both arms'})
+        save_runtime(load_dir,'runtime-after.json',{**backend.runtime_metadata(),**group_peaks,'peak_scope':'load and both arms'},invocation)
+        append(out/'model-loads.jsonl',{'invocation':invocation,'event':'load_completed','group':group,**runinfo['loads'][-1]})
         del backend;gc.collect()
         import torch
         torch.cuda.empty_cache();torch.cuda.synchronize()
     verify(out);runinfo['wall_time_s']=time.perf_counter()-started
+    write_json(out/'invocations'/f'{invocation}.json',runinfo)
+    runinfo['all_load_events']=[json.loads(s)for s in(out/'model-loads.jsonl').read_text().splitlines()]
     write_json(out/'run.json',runinfo)
 
 
