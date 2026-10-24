@@ -222,7 +222,9 @@ def summarize(out, results, expected, runtime, wall_time, phase, history):
     failures = [dict(sample_id=r['sample_id'], **r['failure']) for r in results if r['failure']]
     summary = {'method': plus.VERSION, 'phase': phase, 'expected': expected,
                'completed': sum(r['status']=='resolved' for r in results), 'unresolved': len(failures),
-               'failures': failures, 'mapping_counts': dict(Counter(a['mapping_method'] for a in mappings)),
+               'failures': failures,
+               'findings_without_quote_locator': sum(not f['evidence'].strip() for r in results if r['stage1'] is not None for f in r['stage1']['findings']),
+               'mapping_counts': dict(Counter(a['mapping_method'] for a in mappings)),
                'normal_calls': sum(r['kind']=='normal' for r in rows),
                'repair_calls': sum(r['kind']=='repair' for r in rows),
                'resolver_calls': sum(r['kind']=='resolver' for r in rows),

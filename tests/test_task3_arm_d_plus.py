@@ -338,16 +338,25 @@ def test_genuinely_empty_source_accepts_absence_of_quote_without_rewriting_findi
     assert [x['kind'] for x in attempts]==['normal','normal']
 
 
-def test_nonempty_source_still_requires_a_nonempty_evidence_locator(tmp_path):
-    f={**finding(),'evidence':''}
-    b=Backend([json.dumps({'findings':[f]}),json.dumps({'findings':[f]})])
-    rows=plus.run_units([unit()],b,config(),tmp_path,SPACE)
-    assert rows[0]['status']=='unresolved'
-    assert rows[0]['failure']['category']=='schema'
+def test_omission_without_a_direct_quote_is_retained_for_nonempty_source(tmp_path):
+    u=unit();u['task']['code']='int required_function() {}'
+    f={**finding('Lỗi hàm'),'location':'required_function','evidence':'',
+       'error':'The required function has no return statement.'}
+    b=Backend([json.dumps({'findings':[f]}),'{"feedback":"Hàm được yêu cầu chưa có giá trị trả về."}'])
+    rows=plus.run_units([u],b,config(),tmp_path,SPACE)
+    assert rows[0]['status']=='resolved'
+    assert rows[0]['stage1']['findings'][0]['evidence']==''
+    assert rows[0]['stage1']['findings'][0]['error']==f['error']
     assert len(b.calls)==2
 
 
-def test_empty_source_exception_does_not_allow_missing_diagnosis_fields(tmp_path):
+@pytest.mark.parametrize('evidence',[None,17,{'quote':'x'}])
+def test_evidence_locator_must_still_be_a_string(evidence):
+    with pytest.raises(ValueError):
+        plus.parse_findings(json.dumps({'findings':[{**finding(),'evidence':evidence}]}))
+
+
+def test_missing_quote_does_not_allow_missing_diagnosis_fields(tmp_path):
     u=unit();u['task']['code']=' \n\t'
     f={**finding(),'evidence':'','error':''}
     b=Backend([json.dumps({'findings':[f]}),json.dumps({'findings':[f]})])

@@ -20,8 +20,8 @@ from src.task3.inference import tokenizer_metadata
 from src.task3.input_fields import METADATA_FIELDS, PROBLEM_FIELDS, input_value, policy_value, project
 from src.task3.level_blind import digest
 
-VERSION = 'arm-d-plus-v1.2'
-SCHEMA_VERSION = 'findings-labels-v3-empty-source-evidence'
+VERSION = 'arm-d-plus-v1.3'
+SCHEMA_VERSION = 'findings-labels-v4-string-quote-locator'
 MAPPING_VERSION = 'nfc-whitespace-explicit-alias-constrained-aj-v1'
 RESOLVER_VERSION = 'same-bf16-last-logits-aj-v1'
 
@@ -135,7 +135,7 @@ def messages_resolver(unit, finding, original_label, labels):
         'choices': {chr(65+i): {'label': label, 'definition': DEFINITIONS[label]} for i, label in enumerate(labels)}}, ensure_ascii=False)}]
 
 
-def parse_findings(raw, *, allow_empty_evidence=False):
+def parse_findings(raw):
     """Validate structure independently of category spelling; keep old label adapter."""
     value = strict_object(raw)
     if set(value) != {'findings'} or not isinstance(value['findings'], list):
@@ -145,7 +145,9 @@ def parse_findings(raw, *, allow_empty_evidence=False):
     for f in value['findings']:
         if not isinstance(f, dict) or set(f) not in (fields | {'label'}, fields | {'labels'}):
             raise ValueError('finding required fields mismatch; use labels array')
-        if any(not isinstance(f[k], str) or (not f[k].strip() and not (allow_empty_evidence and k == 'evidence')) for k in fields):
+        # Evidence is a locator, not a semantic certificate: omissions may
+        # have no direct quote. Keep an empty string without inventing evidence.
+        if any(not isinstance(f[k], str) or (k != 'evidence' and not f[k].strip()) for k in fields):
             raise ValueError('finding fields must be nonempty text')
         names = [f['label']] if 'label' in f else f['labels']
         if not isinstance(names, list) or not names or any(not isinstance(s, str) or not s.strip() for s in names):
@@ -358,10 +360,7 @@ def run_units(units, backend, config, out, label_space):
         results.append(result)
         stage = 'taxonomy'
         try:
-            # An empty source cannot supply a verbatim source quote. Preserve an
-            # empty evidence string only in that context; never invent a locator.
-            findings = schema_stage(journal, sid, stage, messages_findings(unit, labels),
-                                    lambda raw: parse_findings(raw, allow_empty_evidence=not unit['task']['code'].strip()))
+            findings = schema_stage(journal, sid, stage, messages_findings(unit, labels), parse_findings)
             stage = 'resolver'
             def resolve(finding, original, fi, li):
                 row = journal.call(sid, 'resolver', messages_resolver(unit, finding, original, labels), resolver_id=[fi, li, original])
