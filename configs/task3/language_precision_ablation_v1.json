@@ -1,0 +1,43 @@
+{
+  "common": {
+    "version": "language-precision-ablation-v1",
+    "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "seed": 42,
+    "do_sample": false,
+    "few_shot_k": 0,
+    "context_limit": 16384,
+    "max_new_tokens": 1024,
+    "findings_max_new_tokens": 1536,
+    "generation_max_time_s": 45,
+    "minimum_free_gpu_mib": 8192,
+    "maximum_calls_per_sample": 2,
+    "sample_concurrency": 1,
+    "retry": false,
+    "fallback": false,
+    "semantic_gate": false,
+    "data_role": "seen internal development: same30 IDs/27 code hashes",
+    "review_seed": 2026102401
+  },
+  "arms": {
+    "A": {
+      "language": "vi",
+      "load_in_4bit": true
+    },
+    "B": {
+      "language": "en",
+      "load_in_4bit": true
+    },
+    "C": {
+      "language": "vi",
+      "load_in_4bit": false
+    },
+    "D": {
+      "language": "en",
+      "load_in_4bit": false
+    }
+  },
+  "order": "arm-major A30 then B30; release NF4; C30 then D30",
+  "model_loads_planned": 2,
+  "no_extra_model_calls": true
+}
