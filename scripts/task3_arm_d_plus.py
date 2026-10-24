@@ -155,6 +155,8 @@ def prepare_inputs(args, out):
 
 
 def preflight(units, tok, config, space):
+    require(config['context_limit'] <= getattr(tok, 'model_max_length', config['context_limit']),
+            'configured context exceeds tokenizer native context')
     lengths = []
     for u in units:
         messages = plus.messages_findings(u, space['taxonomy_error'])

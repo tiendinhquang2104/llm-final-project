@@ -300,3 +300,26 @@ def test_generation_timeout_is_infrastructure_without_json_retry(tmp_path):
     assert 'timeout' in rows[0]['failure']['reason']
     attempts=(tmp_path/'attempts.jsonl').read_text().splitlines()
     assert len(attempts)==1 and json.loads(attempts[0])['finish_reason']=='timeout'
+
+
+def test_full_compile_log_has_one_lossless_payload_location():
+    u=unit();log='compiler.cpp:7: error: invalid operands\n'*400
+    u['task']['compile_log']=log
+    u['task']['compiler']={'status':'provided_log','diagnostic':log}
+    body=plus.task_payload(u)
+    assert body['compile_log']==log
+    assert body['compiler']=={'status':'provided_log','diagnostic_source':'compile_log'}
+    assert u['task']['compiler']['diagnostic']==log
+
+
+def test_native_extended_context_preserves_long_evidence_and_full_source():
+    from scripts.task3_arm_d_plus import preflight
+    u=unit();log='compiler error detail\n'*800
+    u['task']['compile_log']=log
+    u['task']['compiler']={'status':'provided_log','diagnostic':log}
+    cfg={**config(),'context_limit':32768}
+    result=preflight([u],MockTokenizer(),cfg,SPACE)
+    assert result['records']==1
+    assert result['max_detector_input']+1536<=32768
+    payload=json.loads(plus.messages_findings(u,LABELS)[1]['content'])
+    assert payload['compile_log']==log and payload['code']==u['task']['code']

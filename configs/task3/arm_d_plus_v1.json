@@ -1,5 +1,5 @@
 {
-  "version": "arm-d-plus-v1",
+  "version": "arm-d-plus-v1.1",
   "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
   "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
   "language": "en",
@@ -8,7 +8,7 @@
   "seed": 42,
   "do_sample": false,
   "few_shot_k": 0,
-  "context_limit": 16384,
+  "context_limit": 32768,
   "max_new_tokens": 1024,
   "findings_max_new_tokens": 1536,
   "generation_max_time_s": 45,
@@ -19,5 +19,6 @@
   "corrective_schema_retries_per_stage": 1,
   "fallback": false,
   "semantic_gate": false,
-  "method_scope": "combined input/prompt/multilabel/mapping/recovery change; not an enum-only ablation"
+  "method_scope": "combined input/prompt/multilabel/mapping/recovery change; not an enum-only ablation",
+  "context_limit_reason": "Measured public full evidence exceeds 16384 even after duplicate-log removal; use pinned model native32768 without changing output budgets or truncating code/logs."
 }

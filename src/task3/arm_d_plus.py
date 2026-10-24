@@ -20,7 +20,7 @@ from src.task3.inference import tokenizer_metadata
 from src.task3.input_fields import METADATA_FIELDS, PROBLEM_FIELDS, input_value, policy_value, project
 from src.task3.level_blind import digest
 
-VERSION = 'arm-d-plus-v1'
+VERSION = 'arm-d-plus-v1.1'
 SCHEMA_VERSION = 'findings-labels-v2'
 MAPPING_VERSION = 'nfc-whitespace-explicit-alias-constrained-aj-v1'
 RESOLVER_VERSION = 'same-bf16-last-logits-aj-v1'
@@ -69,7 +69,7 @@ def record_unit(record):
     """Keep dataset facts; never project gold/teacher fields into a model unit."""
     compiler = {'status': 'unavailable', 'diagnostic': ''}
     if record.compile_log and record.compile_log.strip():
-        compiler = {'status': 'provided_log', 'diagnostic': record.compile_log}
+        compiler = {'status': 'provided_log', 'diagnostic_source': 'compile_log'}
     tests = {'status': 'not_run', 'cases': []} if record.test_report is None else {'status': 'provided_report'}
     task = dict(statement=record.statement, exam_type=record.exam_type,
                 problems=record.problems, grading_policy=record.grading_policy, code=record.code,
@@ -91,12 +91,16 @@ def task_payload(unit):
                    problem_ids=[p['pid'] for p in problems if p.get('pid')] or ['SINGLE'],
                    grading_policy=policy_value(t.get('grading_policy')),
                    compiler=project(t.get('compiler') or {'status': 'unavailable', 'diagnostic': ''},
-                                    ('status', 'diagnostic', 'program_executed', 'returncode', 'stdout', 'stderr')),
+                                    ('status', 'diagnostic', 'diagnostic_source', 'program_executed', 'returncode', 'stdout', 'stderr')),
                    tests=project(t.get('tests') or {'status': 'not_run', 'cases': []},
                                  ('status', 'passed', 'total', 'cases'), allow_output=True))
     for name in ('compile_log', 'test_report'):
         if name in t:
             payload[name] = input_value(t[name], allow_output=(name == 'test_report'))
+    # Keep the full supplied log once, even for legacy units that duplicate it.
+    if t.get('compile_log') and payload['compiler'].get('diagnostic') == t['compile_log']:
+        del payload['compiler']['diagnostic']
+        payload['compiler']['diagnostic_source'] = 'compile_log'
     if t.get('language') is not None:
         payload['language'] = t['language']
     for name in ('exam_metadata', 'input_metadata'):
