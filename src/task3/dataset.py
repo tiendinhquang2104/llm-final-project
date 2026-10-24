@@ -16,6 +16,7 @@ from pathlib import Path, PureWindowsPath
 from src.synth.feedback import FEEDBACK_LEVELS
 from src.synth.taxonomy import LABEL_SPACE
 from src.task3.schema import Task3Record, code_hash, validate_taxonomy
+from src.task3.input_fields import METADATA_FIELDS, project
 
 
 def read_json(path):
@@ -144,7 +145,10 @@ def load_task3(root, source, requested_levels_path=None):
                 problems=e.get("problems", []),
                 code_path=str(path),
                 code=decode_code(path),
-                compile_log=i.get("compile_log") or None,
+                compile_log=i.get("compile_log"),
+                language=i.get("language", e.get("language")),
+                exam_metadata=project(e, METADATA_FIELDS),
+                input_metadata=project(i, METADATA_FIELDS),
                 test_report=i.get("test_report"),
                 target_feedback_level=level,
                 gold_taxonomy=tax,

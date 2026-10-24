@@ -65,6 +65,9 @@ class Task3Record:
     level_definitions: list[dict] = field(default_factory=list)
     provenance: dict = field(default_factory=dict)
     group_key: str = ""
+    language: str | None = None
+    exam_metadata: dict = field(default_factory=dict)
+    input_metadata: dict = field(default_factory=dict)
 
     def __post_init__(self):
         for name in ("sample_id", "original_submission_id", "exam_id", "statement", "code_path", "code"):
