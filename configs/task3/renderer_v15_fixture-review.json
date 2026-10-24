@@ -1,0 +1,147 @@
+{
+  "fixtures_sha256": "66ad8a0117af685304f0ed124343c6d195b18948f81459108f12cf72651b24c5",
+  "all_supported": true,
+  "reviewer": "v15_preflight_review independent automated code-review agent",
+  "method": "Independent static source and requirement reasoning, exact SHA256/source-reference validation, and C++11 syntax-only compilation of all eight original sources; no model inference and no student programs executed.",
+  "independent_human": false,
+  "common_projection": "Both prompt variants receive the same requested Level2, official rule and only problem_id/location/error for every finding; all eight projections are distinct.",
+  "cases": [
+    {
+      "case_id": "semicolon",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "return 1 has no terminating semicolon before the closing brace; genuine C++11 syntax error."
+      ],
+      "source_sha256": "c23257a134d64ec27ffc57a62530adf489bd64a3eeab42a61b5f82eab360e42f",
+      "projection_sha256": "156597b3d1474f58144ee2ed7cfaedf0a7a4c704b6890eb1b43cd45d6eecd143",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 1,
+        "diagnostic": "<stdin>: In function ‘int value()’:\n<stdin>:1:22: error: expected ‘;’ before ‘}’ token\n",
+        "program_executed": false
+      }
+    },
+    {
+      "case_id": "no_progress",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "For every valid n in [1,10], i starts at zero and i += 0 preserves zero, so i < n remains true."
+      ],
+      "source_sha256": "1aadc5080f0fab053d3bec746b7d2c2b7e12efa7393df7923f0d4f81f83efff2",
+      "projection_sha256": "8c9937161e77b2e63812c89d0b3cc8cf409fee00b12927a966468a6bec04f5a1",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 0,
+        "diagnostic": "",
+        "program_executed": false
+      }
+    },
+    {
+      "case_id": "bounds",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "The array allocation has exactly 3 int elements, indexed 0..2; reading a[3] is one past the allocation."
+      ],
+      "source_sha256": "ee38eed6c9173deff9d1553084d654809081020341bf1d4e17bbc60e03051102",
+      "projection_sha256": "0b5d3fc5bb5463d9d0ba92027ef56190ea3d8dca7bff6c42e1c792bc0f5dc76b",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 0,
+        "diagnostic": "",
+        "program_executed": false
+      }
+    },
+    {
+      "case_id": "omitted_output",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "Empty submission supplies neither the required print_result function nor output; omission with empty references is honest."
+      ],
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "projection_sha256": "f7ffe645ac59dc90f43cd1fcdc0ffcb1b68ca5c1617228f02abb3a9fe7e2e8e1",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 0,
+        "diagnostic": "",
+        "program_executed": false
+      }
+    },
+    {
+      "case_id": "strict_format",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "Requirement explicitly demands the three bytes YES, with no whitespace; the string literal emits four bytes ending in a space."
+      ],
+      "source_sha256": "9b309c7408bb607c47672ad08bfc5e4feb9d4e74552895962d4e71e05fa1251e",
+      "projection_sha256": "ce5e0704f945fc005162cd7eef6e382cd7c80f2ad3f8ed64b7af9d18396241f5",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 0,
+        "diagnostic": "",
+        "program_executed": false
+      }
+    },
+    {
+      "case_id": "clean",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "identity returns its input unchanged for every int, with no arithmetic or extra precondition; empty findings are supported."
+      ],
+      "source_sha256": "468360bf73e4a382bdb2362ec4b37628ddb3e4a811211834366f6b26959fb9c1",
+      "projection_sha256": "9d0f2143c61cfbb6c0cf0425ce8b447811a32d48ec37333ba8b3700218631b36",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 0,
+        "diagnostic": "",
+        "program_executed": false
+      }
+    },
+    {
+      "case_id": "conditional",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "For -10 <= x < 0, returning x differs from its nonnegative magnitude; x in [0,10] is correct. No INT_MIN overflow assumption is involved."
+      ],
+      "source_sha256": "648f0d2aa50a69dcd1b155199e165a6b19414312869353701e77f0c2d27ade7f",
+      "projection_sha256": "351bfacdac726f7d6dbe0819459243ac44fcc8b99ebdf0bd470a6831cb84d8c9",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 0,
+        "diagnostic": "",
+        "program_executed": false
+      }
+    },
+    {
+      "case_id": "two_functions",
+      "verdict": "supported",
+      "supported": true,
+      "reasons": [
+        "first returns 0 for all valid x in [1,10], always differing from required x.",
+        "second returns x+1; equality with 2*x holds only at x=1, so the stated exception and valid failing domain [2,10] are correct. Arithmetic is safe in this domain."
+      ],
+      "source_sha256": "f4e65a6a70269bfd2c1ce6e998532e45f5f6d66037ac6f85147147f55e6a1c96",
+      "projection_sha256": "daeca1b11ed42bc8564fad40d3fc62162eefdad653420c2c16b989432ffc55ea",
+      "syntax_only": {
+        "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "standard": "c++11",
+        "returncode": 0,
+        "diagnostic": "",
+        "program_executed": false
+      }
+    }
+  ]
+}

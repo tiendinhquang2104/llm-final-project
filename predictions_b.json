@@ -1,0 +1,2751 @@
+[
+  {
+    "sample_id": "Class03-Final-1-S01",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Trong hàm exercise_1, khi so sánh ten[i] và ho[j], nếu ten[i] nhỏ hơn hoặc bằng ho[j], ta thêm ten[i] vào tenDangNhap và tăng i. Nếu ho[j] nhỏ hơn, ta thêm ho[j] vào tenDangNhap và kết thúc hàm ngay lập tức. Điều này không đảm bảo rằng chúng ta sẽ tìm được login sớm nhất. Thay vào đó, chúng ta nên tiếp tục duyệt cả hai chuỗi và chọn login sớm nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S02",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "login_name cắt chuỗi đầu vào thành s1 và s2 nhưng không sử dụng s1 và s2. Thay vì vậy, hãy sử dụng s1 và s2 để tìm tất cả các tiền tố và so sánh chúng để tìm ra login nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S03",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ xử lý trường hợp đầu tiên của tên và họ, nhưng không tìm tất cả các kết hợp có thể tạo ra login. Cần thêm logic để tìm tất cả các kết hợp và chọn ra login nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S04",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần cải thiện để đảm bảo luôn tìm ra login nhỏ nhất theo yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S05",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần thêm xử lý để đảm bảo kết quả luôn là login nhỏ nhất theo thứ tự từ điển."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S06",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài vẫn chưa hoàn thiện, cần tiếp tục cải tiến để đảm bảo tính chất tìm kiếm login tối ưu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S07",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài chưa thực hiện đúng yêu cầu của đề, thiếu phần tìm kiếm prefix nhỏ nhất của mỗi tên."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S08",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Biến a và b chỉ lưu ký tự đầu tiên của mỗi chuỗi, nhưng cần lưu tất cả các tiền tố từ đầu đến từng ký tự. Cần sử dụng vòng lặp để duyệt qua từng ký tự và ghép chuỗi. Nếu a==b thì in ra False, còn lại ghép a+b và in ra. Cần sắp xếp lại để tìm ra chuỗi nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S09",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất",
+        "Lỗi mảng/chuỗi"
+      ],
+      "feedback": "Có hai lỗi cần sửa: 1) Lỗi multi-character character constant ở dòng 20, do sử dụng ký tự đa ký tự 'a[i]' và 'a[j]'. Thay vì đó, hãy sử dụng a[i] và a[j]. 2) Lỗi 'strlen' was not declared in this scope ở dòng 37, do thiếu thư viện #include <cstring>. Cần thêm dòng này vào đầu file để sử dụng hàm strlen()."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S10",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại không xử lý đúng yêu cầu đề bài. Đề yêu cầu tạo ra login từ đầu tiên và cuối cùng của tên, nhưng mã nguồn này đang xử lý không đúng. Cần cải tiến để phù hợp với yêu cầu đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S11",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S12",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại đang cố gắng tạo ra một kết quả login từ đầu tiên và cuối cùng của chuỗi đầu vào, nhưng không đảm bảo rằng nó sẽ là login nhỏ nhất. Cần cải tiến để tìm ra login nhỏ nhất theo yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S13",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S14",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S15",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại đọc tất cả dòng đầu vào và tạo chuỗi kết quả bằng cách nối các ký tự không phải khoảng trắng. Điều này không phù hợp với yêu cầu đề bài, mà đề bài yêu cầu tạo login từ tên và họ người dùng. Cần sửa lại để xử lý đầu vào đúng yêu cầu đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S16",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn này đọc đầu vào, tách tên và họ, sau đó tạo tiền tố từ mỗi tên và họ. Tuy nhiên, nó không đảm bảo rằng tiền tố được chọn sẽ tạo ra chuỗi kết quả là chuỗi nhỏ nhất theo thứ tự lexicographical. Cần thêm logic để tìm ra tiền tố sao cho chuỗi kết quả là nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S17",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài vẫn còn điểm cần xem lại để đảm bảo đáp ứng yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S18",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S19",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S20",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn hiện tại chưa gặp lỗi rõ ràng liên quan đến yêu cầu đề bài. Cần tiếp tục kiểm tra và đảm bảo rằng mã tuân thủ đầy đủ các yêu cầu về độ dài chuỗi và tính chất của chuỗi đầu vào."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S21",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài chưa thực hiện đúng yêu cầu của đề, thiếu phần xử lý tên và họ để tạo login."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S22",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ người dùng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S23",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn này đọc đầu vào, tách tên và họ, tìm vị trí cuối cùng của chữ cái lớn hơn trong tên, và in kết quả. Tuy nhiên, nó không đảm bảo rằng kết quả sẽ là login nhỏ nhất. Cần thêm logic để tìm login nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S24",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn này đọc đầu vào, xử lý và in kết quả nhưng không đảm bảo rằng nó sẽ tạo ra login nhỏ nhất theo yêu cầu. Cần thêm logic để tìm ra login nhỏ nhất từ tất cả các khả năng."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S25",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài tìm login nhỏ nhất có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S26",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn hiện tại chỉ khởi tạo chương trình nhưng không thực hiện bất kỳ công việc nào liên quan đến bài toán. Cần thêm xử lý để đọc đầu vào, tìm ra login nhỏ nhất và in kết quả."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S27",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài vẫn chưa hoàn thiện, cần tiếp tục cải tiến để đảm bảo tính hiệu quả và độ chính xác."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S28",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S29",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ xử lý trường hợp đầu tiên và cuối cùng của chuỗi, không tìm ra login nhỏ nhất theo yêu cầu. Cần cải tiến để tìm ra login nhỏ nhất từ tất cả các khả năng."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S30",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hàm"
+      ],
+      "feedback": "Hàm getToken không hoạt động đúng như mong đợi, nó luôn trả về chuỗi rỗng. Hàm getWord cũng gặp vấn đề khi cố gắng lấy token từ chuỗi đầu vào. Cần sửa lại cả hai hàm để đảm bảo chúng hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S31",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S32",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn này chứa nhiều hàm nhưng không liên quan đến bài tập yêu cầu. Bài tập yêu cầu xử lý đầu vào đầu tiên và tạo ra login từ tên và họ người dùng, chứ không liên quan đến ma trận vuông như mã nguồn hiện tại."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S33",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ xử lý trường hợp đầu tiên của tên và họ, không tạo ra tất cả các kết hợp có thể và chọn ra kết hợp nhỏ nhất. Cần thêm logic để tìm tất cả các kết hợp và chọn ra kết hợp nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S34",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần thêm kiểm tra về việc tìm ra login nhỏ nhất lexicographically."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S35",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ đọc đầu vào và tách tên thành hai chuỗi riêng biệt, nhưng không thực hiện việc tạo login như yêu cầu. Cần thêm xử lý để tìm ra login nhỏ nhất theo thứ tự lexicographical."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S36",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài tìm login nhỏ nhất có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S37",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S38",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S39",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài vẫn còn điểm cần xem lại để đảm bảo đáp ứng yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S40",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S41",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn đã cố gắng tìm ra login nhỏ nhất từ tên và họ, nhưng có một lỗi logic. Khi so sánh ký tự từ tên và họ, nếu ký tự từ tên lớn hơn hoặc bằng ký tự từ họ, đoạn mã sẽ dừng lại và không tiếp tục so sánh với ký tự tiếp theo của họ. Điều này có thể dẫn đến việc kết quả không phải là login nhỏ nhất. Cần sửa lại để đảm bảo rằng tất cả các ký tự của họ đều được so sánh."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S42",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần tiếp tục cải thiện để đảm bảo tìm ra login nhỏ nhất theo yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S43",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần cải thiện để đảm bảo rằng nó tạo ra login theo yêu cầu của đề bài, tức là tìm login nhỏ nhất theo thứ tự từ điển."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S44",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S45",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Mảng ds chứa tất cả các kết hợp của tiền tố từ tên và họ, nhưng không cần sắp xếp vì chỉ cần lấy phần tử đầu tiên của mảng sau khi điền đầy. Sắp xếp không cần thiết và gây lãng phí thời gian. Thay vì sắp xếp, hãy tìm phần tử nhỏ nhất trong mảng trước khi in."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S46",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài tìm login nhỏ nhất có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S47",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài vẫn còn nhiều điều cần xem xét để đảm bảo hoạt động đúng như mong muốn."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S48",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hàm"
+      ],
+      "feedback": "Bài cần viết chương trình để tạo login từ tên và họ người dùng, đảm bảo rằng login được sắp xếp theo thứ tự từ điển nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S49",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S50",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Biến Min được khởi tạo với giá trị lớn nhất là \"zzzzzz\", nhưng không cần thiết vì chúng ta chỉ quan tâm đến chuỗi nhỏ nhất. Thay vì đó, chúng ta có thể sử dụng một biến khác để lưu trữ chuỗi nhỏ nhất mà không cần so sánh với \"zzzzzz\"."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S51",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ xử lý trường hợp đầu tiên của tên và không xem xét tất cả các trường hợp khác. Cần thêm logic để tìm ra login nhỏ nhất từ cả hai tên."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S52",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi vòng lặp"
+      ],
+      "feedback": "Biến i và j được khởi tạo nhưng không được sử dụng trong vòng lặp while, điều này khiến vòng lặp chạy vô hạn. Cần sửa lại để đảm bảo vòng lặp hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S53",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần tiếp tục phát triển để đáp ứng yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S54",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S55",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần cải thiện để tìm ra login nhỏ nhất theo yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S56",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài tìm login nhỏ nhất có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S57",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Vòng lặp ngoài cùng chạy từ 1 đến độ dài họ, vòng lặp bên trong chạy từ 1 đến độ dài tên. Mỗi lần lặp, nó tạo ra một chuỗi đăng nhập mới bằng cách nối tiền tố họ và tên. Nếu chuỗi đăng nhập mới nhỏ hơn chuỗi đăng nhập hiện tại, nó sẽ cập nhật chuỗi đăng nhập. Cuối cùng, nó in ra chuỗi đăng nhập nhỏ nhất. Đảm bảo rằng bạn đã thử với các trường hợp đầu vào khác nhau để đảm bảo rằng nó hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S58",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn này cố gắng tìm ra một login nhỏ nhất bằng cách so sánh từng ký tự của hai chuỗi đầu vào. Tuy nhiên, nó chỉ lấy một phần của chuỗi đầu tiên và ký tự đầu tiên của chuỗi thứ hai, điều này không đảm bảo rằng kết quả sẽ là login nhỏ nhất. Cần cải tiến để tìm ra tất cả các khả năng login và chọn ra cái nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S59",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài tìm ra login nhỏ nhất có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S60",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn này đang cố gắng so sánh và nối các ký tự từ hai chuỗi đầu vào để tạo ra chuỗi kết quả nhỏ nhất theo thứ tự lexicographical. Tuy nhiên, mã nguồn hiện tại không đảm bảo rằng nó sẽ tìm ra chuỗi kết quả nhỏ nhất. Cần thêm logic để đảm bảo rằng chúng ta luôn chọn ký tự nhỏ hơn giữa hai chuỗi đầu vào."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S61",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần tiếp tục phát triển để đáp ứng yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S62",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Hàm createAbbreviation tạo ra một viết tắt từ tên đầy đủ, nhưng không đảm bảo rằng nó sẽ tạo ra viết tắt nhỏ nhất theo thứ tự chữ cái. Cần thêm logic để tìm ra viết tắt nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S63",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Hàm xuli chưa được định nghĩa đầy đủ, thiếu kiểu trả về và khai báo string. Cần thêm khai báo string và định nghĩa nội dung hàm."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S64",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn này cố gắng tìm ra một login nhỏ nhất bằng cách so sánh từng ký tự của hai chuỗi đầu vào. Tuy nhiên, nó chỉ lấy một phần của chuỗi đầu tiên và ký tự đầu tiên của chuỗi thứ hai, điều này không đảm bảo rằng kết quả sẽ là login nhỏ nhất theo nghĩa đen. Cần cải tiến để tìm ra tất cả các khả năng login và chọn ra cái nhỏ nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S65",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S66",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S67",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần cải thiện để tìm ra login nhỏ nhất theo yêu cầu đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S68",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Mảng ds chứa tất cả các kết hợp có thể từ tên và họ, nhưng không cần sắp xếp vì chỉ cần lấy ds[0]. Sắp xếp không cần thiết, chỉ cần tìm ra kết hợp nhỏ nhất từ tên và họ."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S69",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Biến name chưa được khai báo trong hàm main, nên trình biên dịch không biết nó là gì."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S70",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài tìm login nhỏ nhất có hướng xử lý phù hợp với yêu cầu của đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S71",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn chạy đúng theo yêu cầu đề bài, tìm ra login nhỏ nhất từ đầu tiên và cuối cùng của tên và họ."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S72",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi edge case"
+      ],
+      "feedback": "Bài chưa kiểm tra tất cả trường hợp và có thể thiếu một số trường hợp đặc biệt."
+    }
+  },
+  {
+    "sample_id": "Class03-Final-1-S73",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc tạo login từ tên và họ có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S03",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S04",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S05",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S06",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S07",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S09",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hàm"
+      ],
+      "feedback": "Em hãy tự đối chiếu bài làm với yêu cầu đề."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S10",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Biến i tăng lên mỗi lần lặp, nhưng không được sử dụng trong tính toán pow. Thay vì vậy, hãy tính độ dài của n trước khi bắt đầu vòng lặp tính tổng, sau đó sử dụng biến này trong hàm gt()."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S11",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Mỗi chữ số cần được lũy thừa lên độ dài của số, nhưng đoạn mã lặp lồng quá nhiều và không đúng. Thay vì lặp m*m*m lần, hãy sử dụng pow(arr[i], m) trong vòng lặp ngoài cùng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S13",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S14",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S15",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Hàm Ammstrong thiếu tính tổng lũy thừa của từng chữ số với độ dài của số. Cần tính tổng lũy thừa của từng chữ số với độ dài của số, chứ không chỉ tính riêng mỗi chữ số. Ví dụ, 1634 cần tính 1^4 + 6^4 + 3^4 + 4^4."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S17",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "tong() đọc n từ cin mỗi lần gọi, nên tính tổng không liên quan đến m. Cần bỏ cin trong tong(). Đặt n=m trước khi gọi tong(), cộng dồn kết quả vào tong() và so sánh với m."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S18",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S19",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hard-code"
+      ],
+      "feedback": "Hàm pow được sử dụng trong tổng hợp, nhưng đề yêu cầu không sử dụng pow. Thay vì pow, hãy tính bình phương bằng cách nhân số với chính nó."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S20",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S21",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Mang[i] bị ghi đè bởi tich mỗi lần lặp, nên mang[i] cuối cùng chứa tich^n thay vì mang[i]^n. Thay đổi mang[i] *= tich thành mang[i] = pow(mang[i], n);"
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S23",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S25",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S26",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S27",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, dòng đầu tiên của hàm main thiếu dấu ngoặc đóng. Thứ hai, biến a chưa được khai báo. Thứ ba, câu lệnh if thiếu điều kiện. Cuối cùng, câu lệnh else thiếu dấu ngoặc đóng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S28",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S29",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S30",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S32",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S34",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S35",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hard-code"
+      ],
+      "feedback": "Có một cảnh báo về việc khai báo 'main' mà không có kiểu dữ liệu, nhưng không ảnh hưởng đến tính chất của bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S36",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hàm"
+      ],
+      "feedback": "Có lỗi về kiểu trả về của hàm main. Trong C++, hàm main cần trả về kiểu int."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S38",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Biến n bị sử dụng để tính số chữ số và sau đó bị gán lại bằng n ban đầu, gây hiểu lầm về giá trị thực tế của n. Thay vì gán lại n=n/10, hãy tăng biến đếm count mỗi lần lặp. Khi tính tổng, cần lưu trữ n ban đầu vào một biến tạm thời temp, sau đó tính pow(temp, count) và cộng vào sum."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S39",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S40",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S41",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S43",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S45",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S46",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S47",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S48",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S49",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S50",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S51",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S52",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S53",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Số lượng chữ số cần tính bằng hàm demso, nhưng hàm này không được gọi đúng cách trong hàm arms. Thay vì gọi demso(n) trong vòng lặp, hãy gọi demso(count) để tính số lượng chữ số của phần còn lại của n. Ngoài ra, biến Sum nên được reset mỗi lần bắt đầu kiểm tra một số mới."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S54",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S55",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S56",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S58",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài cần viết chương trình kiểm tra số Armstrong nhưng hiện tại chưa có mã nguồn."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S60",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S61",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S62",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S63",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi style"
+      ],
+      "feedback": "Bài chưa trả về kết quả đúng định dạng yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S64",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Số lượng chữ số cần tính bằng cách chia cho 10 trong vòng lặp đầu tiên, nhưng quên tăng biến đếm dem. Trong vòng lặp thứ hai, sử dụng biến q để lưu trữ i^dem, nhưng cố định dem bằng 4. Điều này khiến tổng không chính xác. Cần sửa đổi để tính đúng số lượng chữ số và áp dụng công thức đúng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S66",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S67",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S69",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S70",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hàm"
+      ],
+      "feedback": "check thiếu return value khi sum!=x; cần thêm return false;"
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S71",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu và constraints đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S72",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S73",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong giới hạn đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-1-S74",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra số Armstrong có hướng xử lý phù hợp với yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S01",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S02",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mỗi phần tử mới xuất hiện sẽ được in ra và đánh dấu trong checkArr. Nếu phần tử đã xuất hiện trước đó, bỏ qua. Chương trình hoạt động đúng theo yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S03",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "feedback": "Mỗi phần tử mới cần được so sánh với tất cả phần tử trước đó để xác định nó có trùng lặp hay không. Nếu không trùng lặp, hãy thêm vào cuối mảng. Đếm số lượng phần tử duy nhất và in ra mảng kết quả. Cần lưu ý rằng mảng ban đầu có thể chứa nhiều hơn 100 phần tử, nên cần sử dụng vector thay vì mảng cố định để tránh overflow."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S04",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S05",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi phần tử mới cần kiểm tra với tất cả phần tử trước đó, nhưng chỉ cần lưu lại phần tử đầu tiên xuất hiện. Thay vì tăng index sau mỗi lần tìm kiếm, hãy tăng chỉ mục khi tìm thấy phần tử mới."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S06",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S07",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S08",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "CheckUnique không hoạt động đúng vì nó cố gắng so sánh a[i+1] với a[i] nhưng không đảm bảo rằng a[i+1] tồn tại. Điều này gây ra lỗi biên dịch khi n=1. Cần kiểm tra i<n-1 trước khi so sánh a[i+1]. Ngoài ra, cần thiết lập k=0 ở đầu hàm CheckUnique."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S09",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài cần cải thiện phần logic để loại bỏ trùng lặp hiệu quả hơn và giảm thiểu việc viết mã trùng lặp."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S10",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi lần tìm thấy trùng lặp, bạn di chuyển phần tử cuối cùng lên trước và giảm kích thước mảng. Điều này không đảm bảo rằng mỗi phần tử duy nhất sẽ ở vị trí đầu tiên. Thay vì đó, hãy sử dụng một cấu trúc dữ liệu như unordered_set để lưu trữ các phần tử đã gặp, sau đó duyệt mảng ban đầu và in ra các phần tử chưa từng xuất hiện."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S11",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S12",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S13",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi hàm",
+        "Lỗi logic",
+        "Lỗi mảng/chuỗi"
+      ],
+      "feedback": "Một số lỗi cần sửa: 1) Hàm msin thiếu return type; 2) Khi tìm trùng lặp, tăng k nhưng không thực hiện gì; 3) Không xử lý trường hợp k==0; 4) Không viết số lượng phần tử riêng biệt; 5) Không loại bỏ phần tử trùng lặp; 6) Không viết kết quả theo yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S14",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi lần tìm kiếm trùng lặp, chỉ cần so sánh với phần tử kế tiếp, nhưng bỏ qua phần tử cuối cùng. Thêm điều kiện i<n-1 để tránh vượt quá giới hạn mảng. Chưa thấy lỗi khác."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S15",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ đọc kích thước của mảng và các phần tử của mảng, nhưng không thực hiện việc loại bỏ các phần tử trùng lặp. Cần thêm đoạn mã để xử lý việc loại bỏ các phần tử trùng lặp và in kết quả."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S16",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S17",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn đúng, sử dụng unordered_set để loại bỏ trùng lặp và duy trì thứ tự xuất hiện đầu tiên. Đảm bảo rằng mỗi phần tử chỉ xuất hiện một lần và duy trì thứ tự ban đầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S18",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S19",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S20",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất"
+      ],
+      "feedback": "Mã nguồn đã sử dụng set để loại bỏ trùng lặp, nhưng không đọc dữ liệu từ stdin và không viết kết quả ra stdout. Cần thêm đoạn mã đọc dữ liệu từ stdin, xử lý và viết kết quả ra stdout."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S21",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài viết chương trình loại bỏ trùng lặp trong mảng nhưng không đảm bảo rằng mỗi phần tử chỉ xuất hiện một lần và giữ nguyên thứ tự xuất hiện ban đầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S22",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Mảng mang1 được khởi tạo với tất cả các giá trị bằng 0, nhưng mang[i] có thể vượt quá giới hạn của mảng mang1 (từ -10^9 đến 10^9). Điều này gây ra lỗi biên dịch khi mang[i] là số âm. Cần sử dụng một cấu trúc dữ liệu khác như unordered_set để lưu trữ các giá trị duy nhất mà không phụ thuộc vào giới hạn của mảng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S23",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S24",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm Bosotrung, thiếu ngoặc đóng cho điều kiện if và thiếu khởi tạo giá trị cho biến j. Cần thêm ngoặc đơn xung quanh a[i] != a[i + 1]."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S25",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Mảng InputNumber và OutputNumber cần kích thước cố định tại thời điểm compile time, nhưng bạn đang sử dụng biến n như kích thước, gây lỗi biên dịch. Ngoài ra, bạn chưa khai báo std::cin, std::endl và std::cout, và hàm Count_And_Delete không có kiểu trả về."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S26",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S27",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S28",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi phần tử a[j] được so sánh với temp, nhưng temp luôn được cập nhật bằng a[j+1]. Điều này khiến vòng lặp bên trong không hoạt động đúng. Cần thiết lập temp bằng a[i] trước khi bắt đầu vòng lặp bên trong và cập nhật temp bằng a[j] trong vòng lặp bên trong."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S29",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "UniqueElements thiếu việc thực sự loại bỏ phần tử trùng lặp. Thay vì chỉ kiểm tra nhưng không làm gì, hãy di chuyển phần tử kế tiếp lên vị trí bị trùng lặp và giảm kích thước mảng. Cần đảm bảo rằng mỗi phần tử duy nhất xuất hiện đúng một lần."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S30",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S31",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn hiện tại chỉ bao gồm việc include thư viện iostream, nhưng không có phần xử lý input/output hay nội dung chính của bài tập. Cần thêm đoạn mã để đọc input, xử lý và in kết quả."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S32",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm main, đoạn mã bị thiếu dấu chấm phẩy trước dấu ngoặc đóng } của vòng lặp for, gây lỗi biên dịch."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S33",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Vòng lặp bên ngoài duyệt từng phần tử, vòng lặp bên trong kiểm tra trùng lặp với tất cả phần tử trước đó. Nếu tìm thấy trùng lặp, bỏ qua phần tử hiện tại. Nếu không tìm thấy, lưu phần tử vào mảng kết quả. Đảm bảo mỗi phần tử chỉ xuất hiện một lần. Cần đảm bảo rằng mảng kết quả không chứa phần tử trùng lặp."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S34",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Không khai báo kích thước mảng b, thiếu ngoặc đóng } ở cuối hàm main, thiếu biểu thức gán cho mảng b, thiếu điều kiện dừng cho vòng lồng. Cần viết rõ hơn để tránh hiểu lầm."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S35",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mảng b cần khởi tạo m=0 trước khi bắt đầu tìm kiếm phần tử trùng lặp. Nếu không, b[0]=a[0] luôn, và m=1 luôn, bỏ qua phần tử đầu tiên của a[]."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S36",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "remove() chứa lỗi logic khi so sánh a[i] với a[i+1]. Thay bằng a[i] == a[i+1] để kiểm tra trùng lặp. Vòng lặp bên trong không cần thiết, chỉ cần tăng count và in a[i] mỗi lần tìm thấy phần tử mới. Cần xử lý trường hợp cuối cùng của mảng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S37",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "sub1 sử dụng mảng f để đánh dấu các giá trị đã xuất hiện, nhưng chỉ duyệt từ 1 đến n mà không cần giới hạn bởi max_val. Điều này gây lãng phí không cần thiết vì chỉ cần duyệt từ 1 đến n. Thay đổi điều kiện for sang for (int i = 1; i <= n; i++) sẽ tối ưu hóa hiệu suất."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S38",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mảng luu chứa các phần tử đã gặp, nhưng không đảm bảo mỗi phần tử chỉ xuất hiện một lần. Mảng tam được sử dụng để kiểm tra phạm vi giá trị, nhưng không cần thiết vì giới hạn a_i từ -10^9 đến 10^9. Cần loại bỏ phần tử trùng lặp từ luu trước khi in kết quả."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S39",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S40",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu và ràng buộc đã nêu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S41",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S42",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S43",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "feedback": "Mảng b cần khởi tạo m=0 trước khi bắt đầu lưu giá trị. Nếu không, b[0] sẽ chứa giá trị ngẫu nhiên từ vùng nhớ. Điều này gây ra lỗi khi in b[] sau cùng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S44",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Bài chưa thực hiện đầy đủ yêu cầu đề bài về việc loại bỏ các phần tử trùng lặp và hiển thị số lượng phần tử duy nhất."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S45",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "feedback": "Mảng b cần khởi tạo trước khi sử dụng, vì vậy hãy đặt b[0]=0 hoặc b[1]=0 để tránh việc in ra giá trị ngẫu nhiên. Ngoài ra, cần đảm bảo rằng mảng b chứa đúng số lượng phần tử không trùng lặp. Nếu không, hãy tăng kích thước của mảng b hoặc sử dụng vector để lưu trữ các phần tử không trùng lặp."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S46",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S47",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mảng b cần khởi tạo id=0 trước khi bắt đầu duyệt mảng tmp. Nếu không, b[0]=tmp[0] sẽ gây lỗi vì b[0] chưa được khai báo. Ngoài ra, cần đảm bảo rằng mảng b đủ lớn để chứa tất cả các phần tử duy nhất từ mảng tmp."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S48",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi lần phát hiện trùng lặp, bạn ghi đè lên res[k++] bằng arr[i+1]. Điều này sẽ bỏ qua phần tử đầu tiên của mỗi chuỗi trùng lặp. Thay vì vậy, hãy sử dụng một cấu trúc dữ liệu khác như unordered_set để lưu trữ các phần tử đã gặp phải và tránh việc ghi đè lên res[]."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S49",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S50",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S51",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại không hoạt động đúng như mong đợi. Vòng lặp trong hàm remove cố gắng xóa các phần tử trùng lặp bằng cách chuyển phần tử kế tiếp lên, nhưng điều này không đảm bảo rằng tất cả các phần tử trùng lặp đều bị loại bỏ. Ngoài ra, việc giảm n sau mỗi lần xóa không đúng. Cần cải tiến thuật toán để loại bỏ tất cả các phần tử trùng lặp hiệu quả."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S52",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn đã được biên dịch thành công, nhưng cần kiểm tra lại logic của chương trình để đảm bảo nó hoạt động đúng như mong đợi."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S53",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Mỗi phần tử mới cần kiểm tra với tất cả phần tử trước đó, nhưng phần tử đầu tiên không cần kiểm tra. Điều này dẫn đến thời gian chạy O(n^2). Thay vì vậy, hãy sử dụng cấu trúc dữ liệu hash set để lưu trữ các phần tử đã gặp, giúp giảm thời gian tìm kiếm xuống O(1)."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S54",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi phần tử bị duyệt sẽ tìm kiếm trùng lặp từ vị trí kế tiếp, nhưng việc giảm kích thước mảng trong quá trình duyệt gây hiểu lầm về vị trí tương đối của các phần tử còn lại. Điều này dẫn đến việc bỏ qua phần tử cần xóa. Thay vì giảm kích thước mảng, hãy sử dụng một biến đếm riêng để lưu trữ số lượng phần tử thực sự, và chỉ in ra phần tử trước khi giảm kích thước mảng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S55",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Hàm xuat cần đếm số lượng phần tử duy nhất và hiển thị mảng kết quả. Hiện tại chỉ đếm số lần xuất hiện của phần tử liền kề, không xử lý phần tử trùng lặp."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S56",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Không thấy mã nguồn nào được cung cấp. Vui lòng cung cấp mã nguồn để tôi có thể đánh giá."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S57",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Mỗi lần tìm thấy trùng lặp, bạn di chuyển phần tử cuối cùng lên trước và giảm kích thước mảng. Điều này làm tăng độ phức tạp của thuật toán. Thay vì vậy, hãy sử dụng một cấu trúc dữ liệu như unordered_set để loại bỏ các phần tử trùng lặp một cách hiệu quả hơn."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S58",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S59",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S60",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi phần tử bị đếm mỗi lần gặp, nhưng không loại bỏ phần tử trùng lặp. Cần thêm đoạn mã để loại bỏ phần tử trùng lặp, ví dụ: sau khi phát hiện trùng lặp, di chuyển phần tử cuối cùng về vị trí hiện tại và giảm kích thước mảng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S61",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mảng a được khởi tạo với kích thước tối đa nmax nhưng chỉ sử dụng id phần tử. Khi tìm kiếm x trong mảng a, chỉ cần duyệt đến id vì chỉ có id phần tử thực sự được sử dụng. Nếu x không tồn tại trong mảng a, hãy thêm x vào cuối mảng a và tăng id lên 1. Cuối cùng, in ra id - 1 và mảng a từ 1 đến id."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S62",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ in ra các phần tử khác nhau so với phần tử đầu tiên, nhưng không loại bỏ chúng khỏi mảng ban đầu. Để thực hiện yêu cầu, cần thêm một cấu trúc dữ liệu như vector<bool> để lưu trữ các phần tử đã gặp phải và chỉ in ra những phần tử chưa được gặp."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S63",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mảng frequency chứa số lượng lần xuất hiện của mỗi số từ -10^9 đến 10^9, nhưng không đảm bảo rằng chỉ số của mảng b sẽ chứa các số duy nhất từ đầu vào. Cần kiểm tra xem số đã tồn tại trong mảng b trước khi thêm vào."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S64",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S65",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi vòng lặp"
+      ],
+      "feedback": "Vòng lặp bên trong bị thiếu điều kiện dừng đúng, nên sẽ chạy vô hạn nếu gặp số trùng lặp đầu tiên. Cần thêm điều kiện j>=0 && a[i]!=b[j] để tránh trường hợp này."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S66",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mỗi phần tử được đếm 1 lần nhưng vẫn giữ giá trị ban đầu, nên mỗi phần tử xuất hiện nhiều lần hơn 1 lần. Cần đặt cnt[arr_1[i]] = 0 sau khi ghi vào arr_2 để tránh đếm lại."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S67",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "remove(i,j) không cần vì mỗi phần tử chỉ duyệt riêng, nên bỏ đi. Nếu a[i]==b[j], bỏ qua; còn a[i]!=b[j], gán b[j]=a[i] và tăng count. Đặt b[j] trước để tránh trùng lặp. Chưa kiểm tra n>10000."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S68",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra việc loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S69",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi thuật toán"
+      ],
+      "feedback": "Số lượng phần tử khác nhau cần tính trước khi sắp xếp, vì sắp xếp sẽ làm mất thứ tự ban đầu. Sắp xếp trước rồi đếm số lượng phần tử khác nhau, sau đó lọc phần tử trùng lặp. Cần lưu ý trường hợp đầu vào rỗng."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S70",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi mảng/chuỗi"
+      ],
+      "feedback": "Mảng b không được khởi tạo kích thước phù hợp, dẫn đến undefined behavior khi viết vào b[i]. Thêm b[i] = a[i]; trước return 0; để đảm bảo mỗi phần tử của b được gán đúng giá trị. Cần thêm điều kiện kiểm tra cuối cùng để tránh in phần tử cuối cùng bị trùng lặp."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S71",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài kiểm tra loại bỏ trùng lặp trong mảng có hướng xử lý phù hợp với yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S72",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Bài viết chương trình loại bỏ trùng lặp trong mảng và hiển thị kết quả đúng yêu cầu đề bài."
+    }
+  },
+  {
+    "sample_id": "Class03-Midterm-2-S73",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Phần mã RemoveDuplicate chưa hoàn thiện, thiếu xử lý phần tử mới và cập nhật Newn. Cần thêm logic để loại bỏ trùng lặp và cập nhật Newn."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S01",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi về việc sử dụng stringstream và getline. Cần đảm bảo rằng bạn đang gọi đúng phương thức và truyền đối số đúng. Ngoài ra, cần xử lý trường hợp đọc file không thành công."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S05",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có hai lỗi cần sửa: Trong định nghĩa cấu trúc General, thiếu dấu chấm phẩy sau }; và trong định nghĩa cấu trúc Node, thiếu dấu chấm phẩy sau }. "
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S06",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều thiếu câu lệnh return. Trong prob4, có lỗi chuyển đổi kiểu dữ liệu từ General sang Node*. Cần đảm bảo rằng tất cả các hàm đều trả về giá trị phù hợp với kiểu dữ liệu được khai báo."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S08",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch trong đoạn mã. Đầu tiên, bạn cố gắng đọc từ file nhưng không sử dụng đúng phương thức. Thứ hai, bạn cố gắng in ra một lambda function mà không hiểu nó. Cuối cùng, bạn cố gắng cộng tổng nhưng không hiểu công thức. Cần sửa lại tất cả những lỗi này."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S09",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, bạn cố gắng đọc từ file nhưng gặp lỗi về việc sử dụng getline không đúng. Ngoài ra, hàm prob3 còn thiếu phần tính tuổi và tìm người già nhất. Cần sửa lại phần đọc file và bổ sung phần tính tuổi."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S10",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất"
+      ],
+      "feedback": "Có nhiều lỗi liên quan đến việc sử dụng hàm getline với đối tượng ifstream. Cần sửa lại phần đọc file để phù hợp với chuẩn C++11."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S15",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều được định nghĩa đầy đủ và không có lỗi rõ ràng. Các hàm này tuân thủ yêu cầu đề bài và thực hiện đúng chức năng mong muốn."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S16",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều được định nghĩa đầy đủ và không có lỗi rõ ràng. Các hàm này tuân thủ yêu cầu đề bài và thực hiện đúng chức năng mong muốn."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S17",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có lỗi về việc đọc file và khởi tạo mảng General[]. Cần đảm bảo rằng mảng General[] được cấp phát động và kích thước phù hợp với số lượng dòng trong file. Ngoài ra, cần xử lý trường hợp file không mở được."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S18",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch trong đoạn mã này. Đầu tiên, lỗi về 'empty character constant' xuất hiện tại dòng 45, có thể do việc thiếu dấu ngoặc đơn. Thứ hai, lỗi 'string does not name a type' xuất hiện tại dòng 13, vì 'string' không được định nghĩa. Thứ ba, lỗi 'expected ';' after struct definition' xuất hiện tại dòng 14, vì thiếu dấu chấm phẩy sau định nghĩa struct. Cuối cùng, lỗi 'no match for operator=' xuất hiện tại dòng 135, vì bạn cố gắng gán một con trỏ Node vào một đối tượng General. Cần sửa lại cấu trúc Node và cách sử dụng nó."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S19",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob2, dòng `Node* head = new General{generals[0], NULL};` và `Node* p = new General{generals[i], NULL};` cố gắng tạo một Node mới nhưng truyền vào một General thay vì một Node. Cần tạo một Node mới từ General đó thay vì sử dụng General như một Node. Trong prob4, biến `curr` chưa được khai báo. Cần khai báo và khởi tạo nó trước khi sử dụng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S20",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, câu lệnh return thiếu giá trị, nên bị lỗi biên dịch. Ngoài ra, còn thiếu đóng ngoặc cuối cùng của hàm."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S24",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S25",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều vấn đề cần sửa chữa trong đoạn mã này. Đầu tiên, hàm prob1 không đọc đúng thông tin từ file CSV và lưu trữ nó vào mảng General. Thứ hai, hàm prob1 không trả về con trỏ General đúng. Thứ ba, hàm prob1 không cập nhật biến n đúng. Thứ tư, hàm prob1 thiếu xử lý trường hợp không thể mở file. Thêm nữa, hàm prob1 không trả về con trỏ General đúng. Cuối cùng, hàm main không gọi hàm prob1 đúng và không xử lý kết quả trả về."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S26",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S27",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic",
+        "Lỗi mảng/chuỗi",
+        "Lỗi hàm"
+      ],
+      "feedback": "Có nhiều lỗi trong mã, nhưng tôi sẽ chỉ ra một vài lỗi chính để bạn dễ dàng tìm kiếm và sửa chữa. Đầu tiên, trong hàm prob1(), bạn đọc dòng đầu tiên của file nhưng không sử dụng nó. Thứ hai, trong hàm creatnode(), bạn tạo một node mới nhưng không liên kết nó với danh sách liên kết hiện tại. Cuối cùng, hàm main() không thực hiện bất kỳ công việc nào. Bạn cần sửa chữa tất cả những lỗi này để chương trình hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S28",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều thiếu câu lệnh return. Trong C++, tất cả các hàm cần phải trả về một giá trị nếu chúng không trả về kiểu void."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S29",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn hiện tại chỉ khai báo cấu trúc dữ liệu và các hàm cần thiết, nhưng không triển khai bất kỳ chức năng nào. Các hàm cần được triển khai để đáp ứng yêu cầu của bài tập."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S30",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm getDay, sau khi tìm được ngày, bạn đã tăng biến i nhưng quên cập nhật lại giá trị của info. Điều này dẫn đến việc lấy thông tin không đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S31",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch liên quan đến việc sử dụng cấu trúc dữ liệu và kiểu dữ liệu không đúng. Ví dụ, 'General' không được định nghĩa, 'tachTran' không đúng, 'fin()' không đúng, v.v."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S32",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch do sử dụng các biến và hàm không xác định, như cntline(), general, spllline[], pushBack(), Node, và nhiều hơn nữa. Cần kiểm tra kỹ danh sách các biến và hàm đã định nghĩa và sử dụng đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S33",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều chưa được triển khai đầy đủ. Các hàm này cần đọc dữ liệu từ file, tạo liên kết danh sách và thực hiện các tác vụ yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S35",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob3, câu lệnh return không có giá trị trả về, nhưng hàm này cần trả về một giá trị General. Cần thêm giá trị trả về hoặc điều kiện để tránh lỗi."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S36",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic",
+        "Lỗi mảng/chuỗi",
+        "Lỗi hàm"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, cấu trúc Date có trường mounth thay vì month. Thứ hai, trong hàm prob1, khi đọc dòng từ file, bạn đang cố gắng gán địa chỉ của biến tạm thời temptKnow_battles cho con trỏ known_battles của General, điều này sẽ gây ra lỗi bởi vì temptKnow_battles sẽ bị hủy sau khi hàm parseDate kết thúc. Thứ ba, trong hàm prob3, hàm Age không hoạt động đúng. Nó không tính tuổi chính xác cho những người sinh trước Công nguyên. Cuối cùng, trong hàm prob4, việc xóa các node có quốc tịch giống nhau không đúng cách. Bạn đang cố gắng xóa node hiện tại nhưng không cập nhật con trỏ head. Cần thêm một con trỏ prev để xử lý trường hợp xóa node đầu tiên."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S37",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch trong đoạn mã. Đầu tiên, biến infile_isopen chưa được khai báo. Thứ hai, phương thức empty() không tồn tại cho fstream. Thứ ba, cấu trúc ds chưa được khai báo. Thứ tư, biến file chưa được khai báo. Thứ năm, biến generals bị trùng tên với tham số của hàm. Cuối cùng, hàm prob2 thiếu câu lệnh return."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S38",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có một vài lỗi nhỏ nhưng không ảnh hưởng đến tính chất của bài làm. Ví dụ, trong CreateNewNode, bạn quên khởi tạo p. Trong prob1, bạn đọc dòng đầu tiên rồi đếm số dòng, nhưng không sử dụng số dòng đó. Trong prob4, bạn xóa node đầu tiên mà không kiểm tra null pointer."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S41",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Mã nguồn đã được biên dịch thành công, nhưng cần cải thiện cấu trúc đọc file CSV và xử lý dữ liệu. Cần chú ý đến việc đọc từng dòng và tách các trường thông tin theo dấu phẩy. Đồng thời, cần đảm bảo rằng các trường dữ liệu được chuyển đổi đúng định dạng và loại dữ liệu."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S42",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, câu lệnh return thiếu giá trị, nên bị lỗi biên dịch. Ngoài ra, biến n bị trùng tên với tham số truyền vào nên gây hiểu lầm."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S43",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm prob1 đọc file nhưng không lưu trữ thông tin vào mảng gen. Thứ hai, hàm prob2 chưa thực hiện việc tạo liên kết danh sách. Cần thêm xử lý chi tiết hơn để đảm bảo tính chính xác của chương trình."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S45",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều thiếu câu lệnh return. Trong C++, tất cả các hàm cần phải trả về một giá trị nếu chúng không trả về kiểu void."
+    }
+  },
+  {
+    "sample_id": "Class01-Test1-S46",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất"
+      ],
+      "feedback": "Mã nguồn của bạn đã được biên dịch thành công. Tuy nhiên, cần lưu ý rằng bạn đã sử dụng nhiều thư viện không được phép như `<fstream>`, `<sstream>`, `<cstring>` và `<cmath>`. Bạn chỉ được sử dụng `<iostream>`, `<string>`, `<fstream>`, `<sstream>`, `<cstring>` và `<cmath>`. Hãy đảm bảo rằng bạn tuân thủ quy tắc này trong các bài tập tiếp theo."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S01",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm prob1 không trả về giá trị nào khi gặp lỗi đọc file. Thứ hai, hàm prob1 cố gắng gọi getline trên stringstream nhưng không đúng cách. Thứ ba, hàm insertNode không đúng cách sử dụng. Cuối cùng, hàm prob3 và prob4 thiếu return statement."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S02",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Các hàm prob1, prob2, và prob3 đều được định nghĩa và hoạt động đúng theo yêu cầu. Tuy nhiên, hàm prob4 chưa được triển khai đầy đủ. Cần thêm logic để loại bỏ các chiến binh không tham gia trong một cuộc chiến cụ thể."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S03",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Có vẻ như bạn đã viết đầy đủ các hàm cần thiết cho bài tập này. Tuy nhiên, bạn cần đảm bảo rằng tất cả các hàm đều hoạt động đúng và tuân thủ yêu cầu của đề bài. Bạn cũng cần chắc chắn rằng bạn đã xử lý tất cả các trường hợp đặc biệt và edge cases. Nếu bạn gặp bất kỳ vấn đề nào, hãy thử chạy chương trình của mình và xem có lỗi gì xảy ra. Nếu có lỗi, hãy cố gắng hiểu nguyên nhân và sửa chữa chúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S04",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi trong đoạn mã, bao gồm việc sử dụng kiểu dữ liệu không đúng, thiếu return statement, và lỗi về phạm vi biến. Cần sửa lại toàn bộ đoạn mã để đảm bảo nó hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S05",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi về việc sử dụng preprocessor directives (#prob1, #prob2, #prob3, #prob4), những dòng này không hợp lệ trong C++. Ngoài ra, hàm prob1 không có return statement, gây ra cảnh báo và lỗi biên dịch. Các hàm prob2, prob3, và prob4 đều thiếu định nghĩa thân hàm."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S06",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Trong prob1, nếu không thể mở file, hàm trả về không có giá trị nào, gây lỗi biên dịch. Trong prob2, hàm không có câu lệnh return, gây cảnh báo biên dịch."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S07",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob2, dòng 155 thiếu dấu chấm phẩy trước 'int', và biến 'n' chưa được khai báo trong phạm vi hiện tại."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S08",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi trong đoạn mã này. Đầu tiên, hàm `prob2` không đúng vì nó chỉ tạo một nút mới mà không thực hiện việc sắp xếp. Thứ hai, hàm `insertBST` không đúng vì nó cố gắng so sánh một con trỏ `Node*` với một `General`, điều không hợp lệ. Cuối cùng, hàm `main` không đọc tất cả các dòng từ tệp CSV và không gọi hàm `prob2` để tạo cây BST."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S09",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi liên quan đến việc sử dụng cấu trúc dữ liệu và các hàm đã định nghĩa. Ví dụ, 'General' không được biết, 'struct Node' không có thành phần 'general', và 'equaldate' không được khai báo. Cần đảm bảo rằng tất cả các cấu trúc và hàm đã được định nghĩa trước khi sử dụng chúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S10",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong CreateNode, thiếu câu lệnh return newnode;"
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S11",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều được định nghĩa đầy đủ và không có lỗi rõ ràng. Các hàm này tuân thủ yêu cầu đề bài và thực hiện đúng chức năng mong muốn."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S12",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob3, câu lệnh return cuối cùng bị thiếu giá trị trả về, gây ra lỗi biên dịch."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S13",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob2, dòng p->general = generals cố gắng gán một vector General cho một General, điều này không hợp lệ. Cần sửa lại để gán đúng thông tin cần thiết."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S14",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Các hàm prob1, prob3 và prob4 đều chưa được triển khai đầy đủ. Hàm prob4 cần xử lý việc xóa các nút khỏi cây tìm kiếm nhị phân. Hàm prob3 cần tính toán số lượng tướng quân sinh vào năm đã cho. Hàm prob1 cần đọc tất cả bản ghi từ tệp và lưu trữ chúng vào một vector."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S15",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch trong đoạn mã. Đầu tiên, câu lệnh if thiếu dấu ngoặc đơn mở và đóng. Thứ hai, câu lệnh return không có giá trị trong hàm prob1. Thứ ba, câu lệnh p->Node = general; không hợp lệ vì Node không phải là một cấu trúc. Thứ tư, biến data không được khai báo trong hàm insert. Cuối cùng, biến root không được khai báo trong hàm createTree. Cần sửa lại tất cả những lỗi này để chương trình chạy được."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S16",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất"
+      ],
+      "feedback": "Mã nguồn của bạn đã được biên dịch thành công. Tuy nhiên, cần lưu ý rằng bạn đã sử dụng nhiều thư viện không được phép như `<fstream>` và `<sstream>`, điều này có thể vi phạm quy tắc của bài tập. Hãy đảm bảo rằng bạn chỉ sử dụng những thư viện được liệt kê trong yêu cầu."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S17",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có lỗi trong việc include thư viện sstring, nó không tồn tại. Thay vì đó, bạn nên sử dụng stringstream."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S18",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, bạn cố gắng đọc từ file nhưng không trả về bất kỳ giá trị nào khi gặp lỗi. Cần thêm một giá trị trả về hoặc xử lý lỗi một cách phù hợp."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S19",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "prob1 thiếu phần trả về vector General, và đọc file không đúng định dạng. prob2, prob3, prob4 chưa triển khai."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S20",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi về việc đọc file và xử lý dữ liệu. Cần kiểm tra lại cấu trúc đọc file và cách xử lý từng trường dữ liệu."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S21",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch và logic trong đoạn mã. Ví dụ, thiếu dấu ngoặc đóng cho hàm prob1, biến i chưa được khai báo, lỗi về việc sử dụng stringstream b, và nhiều hơn nữa. Cần sửa lại toàn bộ đoạn mã để đảm bảo nó hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S22",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, nếu không mở được file, hàm sẽ trả về void thay vì một vector General. Cần sửa lại để trả về một vector rỗng hoặc xử lý lỗi đọc file."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S23",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi trong mã, nhưng tôi sẽ chỉ ra một vài lỗi chính để bạn dễ dàng tìm kiếm và sửa chữa. Đầu tiên, hàm prob1 đọc file không đúng, nó cố gắng đọc file nhưng không lưu trữ thông tin vào vector. Thứ hai, hàm prob2 tạo cây không đúng, nó cố gắng tạo một cây nhưng không thực hiện đúng quy tắc của cây tìm kiếm nhị phân. Cuối cùng, hàm prob3 và prob4 chưa được triển khai. Bạn cần sửa chữa tất cả những lỗi này để chương trình hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S24",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic",
+        "Lỗi hàm"
+      ],
+      "feedback": "Có một vài lỗi cần chú ý:\n1. Trong hàm Insert, bạn đã quên khởi tạo con trỏ pRoot mới khi pRoot == NULL.\n2. Trong hàm prob2, bạn đã gọi Insert nhưng không truyền con trỏ pRoot theo địa chỉ (&), dẫn đến việc pRoot không được cập nhật.\n3. Trong hàm main, bạn đã cố gắng đọc từ một đường dẫn không tồn tại, điều này sẽ gây ra lỗi nếu chạy chương trình."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S25",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi trong đoạn mã này. Đầu tiên, hàm prob1 đọc file nhưng không xử lý trường hợp file không tồn tại hoặc không thể mở được. Thứ hai, hàm prob2 tạo cây tìm kiếm nhị phân nhưng logic so sánh ngày sinh không đúng. Thứ ba, hàm prob3 đếm số tướng sinh vào năm nhất định nhưng không thực hiện DFS hoặc BFS. Cuối cùng, hàm prob4 xóa tướng không tham gia trận đấu nhưng logic tìm kiếm và xóa không đúng. Cần sửa lại tất cả các hàm để đảm bảo chúng hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S26",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều thiếu câu lệnh return. Trong C++, tất cả các hàm cần phải trả về một giá trị nếu chúng không được khai báo như void."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S27",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch liên quan đến việc sử dụng cấu trúc dữ liệu General mà chưa được định nghĩa. Cần đảm bảo rằng tất cả các cấu trúc dữ liệu cần thiết đều được định nghĩa trước khi sử dụng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S28",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, vòng lặp đọc file thiếu điều kiện dừng, nên phần còn lại chưa hợp lệ."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S29",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm prob1 thiếu dòng return g; ở cuối hàm. Thứ hai, hàm createNode thiếu return a; ở cuối hàm. Thứ ba, hàm insert thiếu điều kiện r!=NULL ở đầu hàm. Thứ tư, hàm prob3 chưa thực hiện đếm số lượng tướng sinh vào năm đã cho. Cuối cùng, hàm main cần gọi prob2 và lưu kết quả vào cây nhị phân tìm kiếm."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S30",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có hai hàm trùng tên: saveTree(), buildTree() và balanceTree(). Cần đặt tên riêng biệt cho mỗi hàm để tránh lỗi biên dịch."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S31",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi về kiểu dữ liệu và logic trong mã. Ví dụ, trong struct Date, tên trường mounth bị nhầm lẫn. Trong hàm prob1, việc chuyển đổi chuỗi ngày tháng năm cần được điều chỉnh. Trong hàm prob2, so sánh ngày sinh giữa các tướng cần được điều chỉnh. Cần xem xét lại logic của các hàm Insert và prob2."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S32",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi về định nghĩa cấu trúc, sử dụng biến và lỗi về việc đọc file. Vui lòng kiểm tra lại định nghĩa cấu trúc, sử dụng biến và xử lý đọc file."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S33",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Các hàm prob2, prob3 và prob4 chưa được triển khai. Các hàm này cần được hoàn thiện để đáp ứng yêu cầu của đề bài."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S34",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob1, cấu trúc General chưa được khai báo, nên trình biên dịch không biết nó là gì. Ngoài ra, hàm prob1 thiếu câu lệnh return. Trong main, cần gọi prob1 và xử lý kết quả."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S35",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, bạn đang cố gắng gọi getline với stringstream nhưng gặp lỗi do kiểu dữ liệu không phù hợp. Cần sử dụng phương thức getline của stringstream đúng cách."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S36",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, trong hàm prob2(), bạn tạo một con trỏ mới nhưng không liên kết nó với cây BST. Thứ hai, trong hàm prob4(), bạn cố gắng tìm kiếm xem một chiến đấu có tồn tại trong danh sách known_battles của một将军, nhưng điều này không hoạt động đúng. Cuối cùng, hàm prob3() vẫn chưa được triển khai. Cần sửa chữa tất cả những vấn đề này để chương trình hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S37",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "parseBattle: Trong hàm này, bạn cố gắng thêm một phần tử vào vector battles mà không sử dụng đúng phương thức. Thay vì segment.push_back(battles[i]), bạn cần thêm đoạn mã để xử lý từng phần tử trong chuỗi battle. prob1: Trong hàm này, nếu không mở được file, hàm sẽ trả về một vector rỗng mà không thông báo lỗi. Node: Trong hàm này, bạn cố gắng tạo một đối tượng Node mới nhưng không sử dụng đúng cú pháp. isOlder: Trong hàm này, biến yearA không được khai báo hoặc khởi tạo. prob2: Trong hàm này, bạn chưa triển khai chức năng để tạo cây tìm kiếm nhị phân."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S38",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, câu lệnh return thiếu giá trị trả về, nhưng hàm này cần trả về một vector<General>. Cần thêm giá trị trả về hoặc sửa lại cấu trúc hàm."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S39",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, việc đọc file bị sai. Cần sử dụng getline(mo, line) để đọc từng dòng, chứ không dùng while(!getline(mo, line)). Nếu không mở được file, cần xử lý lỗi và trả về vector rỗng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S40",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong main, gọi prob1 nhưng chưa khai báo nó. Cần khai báo prototype của prob1 trước khi sử dụng."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S41",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn của bạn đã được biên dịch thành công và không có lỗi rõ ràng. Bạn đã triển khai đầy đủ các chức năng yêu cầu trong đề bài."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S42",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Các hàm prob1, prob2, prob3, và prob4 đều chưa được triển khai. Việc đọc file, tạo cây tìm kiếm nhị phân, đếm số lượng tướng và xóa tướng cần được thực hiện."
+    }
+  },
+  {
+    "sample_id": "Class01-Test2-S43",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn của bạn đã được biên dịch thành công. Tuy nhiên, cần lưu ý rằng bạn đã sử dụng nhiều dòng mã không cần thiết và có thể gây hiểu lầm. Bạn nên xem xét việc tối ưu hóa mã của mình để giảm bớt độ phức tạp và tăng hiệu suất. Ngoài ra, hãy chắc chắn rằng bạn đã đọc và hiểu đầy đủ yêu cầu của bài tập trước khi bắt đầu viết mã."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S01",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm prob1 cố gắng đọc từ file nhưng không xử lý trường hợp file không tồn tại. Thứ hai, hàm prob2 tạo liên kết danh sách nhưng không xử lý trường hợp đầu tiên của danh sách. Thứ ba, hàm main cố gắng đọc số lượng dòng từ file nhưng không xử lý trường hợp EOF đúng cách. Cần sửa chữa tất cả những vấn đề này để chương trình hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S02",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S03",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm gan có vấn đề về việc sao chép con trỏ list_famous_generals. Thứ hai, hàm prob1 thiếu việc cấp phát động cho mảng battle. Thứ ba, hàm prob2 có lỗi khi tạo liên kết danh sách liên kết. Cuối cùng, hàm main thiếu việc xử lý danh sách liên kết. Cần sửa tất cả những lỗi này để chương trình hoạt động đúng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S04",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Trong hàm prob2, vòng lặp while (head) sẽ gây ra lỗi vì head ban đầu là null. Cần khởi tạo head trước khi thêm các node mới."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S05",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Có vẻ như bạn đã cố gắng thực hiện nhiều chức năng nhưng gặp phải nhiều vấn đề. Đầu tiên, bạn cần đảm bảo rằng bạn đọc đúng số dòng trong tệp CSV và tạo một mảng động phù hợp. Sau đó, bạn cần chuyển đổi dữ liệu từ tệp CSV sang cấu trúc Battle và lưu trữ nó trong một danh sách liên kết đơn. Cuối cùng, bạn cần triển khai các chức năng để đếm số trận đấu trong phạm vi thời gian nhất định và loại bỏ các trận đấu không chứa một nhà tướng cụ thể. Bạn cần chắc chắn rằng tất cả các hàm đều hoạt động đúng và không gây ra lỗi."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S06",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn đã được biên dịch thành công, không thấy lỗi rõ ràng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S07",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch và cảnh báo. Đầu tiên, 'Battle' không được khai báo. Thứ hai, 't' và 'substr' không được khai báo. Cuối cùng, tất cả các hàm đều thiếu câu lệnh return."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S08",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S09",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất"
+      ],
+      "feedback": "Có vẻ như bạn đã cố gắng đọc file và chuyển nó thành một mảng Battle, sau đó tạo một danh sách liên kết từ mảng đó. Tuy nhiên, bạn cần đảm bảo rằng bạn đã xử lý tất cả các trường trong mỗi dòng của file CSV và bạn cần lưu trữ con trỏ đến danh sách liên kết. Bạn cũng cần đảm bảo rằng bạn đã đóng file sau khi đọc xong. Nếu bạn gặp bất kỳ lỗi nào trong quá trình này, hãy chắc chắn rằng bạn đã xử lý chúng đúng cách."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S10",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "prob2 và prob3 thiếu return statement, nên bị cảnh báo bởi compiler."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S11",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm prob1 không trả về con trỏ Battle*. Thứ hai, hàm prob2 và prob3 không có câu lệnh return. Cuối cùng, trong hàm main, bạn cố gắng truy cập thuộc tính name của một con trỏ Battle, nhưng bạn đang sử dụng toán tử '.' thay vì toán tử '->'."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S12",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, bạn cố gắng đọc file nhưng gặp nhiều lỗi về biến và kiểu dữ liệu. Cần đảm bảo rằng tất cả các biến đều được khai báo và sử dụng đúng. Ngoài ra, cần xử lý trường hợp file không tồn tại."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S13",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, bạn cố gắng trả về một đối tượng Battle nhưng cần trả về một con trỏ Battle*. Ngoài ra, có nhiều lỗi về việc sử dụng biến không khai báo và cấu trúc trả về không đúng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S14",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, bạn cố gắng tạo một mảng Battle nhưng không khởi tạo kích thước mảng đúng. Kích thước mảng cần được lấy từ hàm countLine(), chứ không phải là tham số truyền vào."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S15",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "prob3 thiếu câu lệnh return, và prob4 có lỗi về cú pháp."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S16",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn đã được biên dịch thành công, không thấy lỗi rõ ràng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S17",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi logic"
+      ],
+      "feedback": "Trong hàm prob1, bạn đọc tất cả các dòng từ file nhưng không xử lý đúng thông tin cho mỗi Battle. Bạn cần đọc từng trường dữ liệu từ dòng CSV và gán cho các thuộc tính của Battle. Hiện tại, bạn chỉ đọc tên và bỏ qua các trường khác."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S18",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Mã nguồn không hợp lệ, chỉ chứa ký tự ngẫu nhiên và không phải là ngôn ngữ C++. Cần xem xét lại nội dung và cấu trúc mã."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S19",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch trong đoạn mã này. Đầu tiên, hàm countLine sử dụng getline không đúng cách. Thứ hai, hàm prob1 cố gắng tạo một đối tượng Battle với một tham số int, điều không hợp lệ. Cuối cùng, hàm prob1 cũng gặp lỗi khi gọi close với một đối số string."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S20",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob1, khai báo fstream file_name bị trùng tên với tham số truyền vào nên gây lỗi. Ngoài ra, cần sử dụng phương thức open() để mở file và kiểm tra is_open()."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S21",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob1, bạn cố gắng khởi tạo một mảng string s với kích thước n nhưng không sử dụng nó đúng cách. Trong prob2, bạn cố gắng chuyển đổi Battle sang Node mà không thực hiện điều gì. Cần sửa lại phần đọc file và chuyển đổi dữ liệu."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S22",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "prob2 và prob3 thiếu câu lệnh return. Trong prob2, cần tạo danh sách liên kết từ mảng battles. Trong prob3, cần đếm số trận chiến phù hợp."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S23",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, dòng `*head = readData(line);` cố gắng gán giá trị trả về của readData vào con trỏ head mà không tạo một node mới. Điều này gây ra lỗi bởi vì bạn đang cố gắng gán giá trị vào địa chỉ không hợp lệ. Cần tạo một node mới và gán giá trị vào node đó, sau đó liên kết nó vào danh sách liên kết."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S24",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn đã được biên dịch thành công, không thấy lỗi."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S25",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều vấn đề cần sửa chữa. Đầu tiên, hàm prob1 đọc file nhưng không xử lý trường hợp không thể mở file hoặc đọc file thất bại. Thứ hai, hàm prob1 cố gắng lưu địa chỉ của một chuỗi con vào list_famous_generals, điều này không đúng vì list_famous_generals là một con trỏ tới một mảng chuỗi. Thứ ba, hàm prob2 tạo một danh sách liên kết từ một mảng Battle nhưng không xử lý trường hợp mảng truyền vào là null hoặc có kích thước không hợp lệ. Cuối cùng, hàm main thử gọi prob1 nhưng không xử lý trường hợp không thể đọc file và cố gắng truy cập phần tử đầu tiên của mảng Battle mà không kiểm tra xem mảng có tồn tại hay không."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S26",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi về việc sử dụng thư viện và định nghĩa cấu trúc Battle. Cần đảm bảo tất cả các thư viện cần thiết được include và cấu trúc Battle được định nghĩa đúng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S27",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm prob2 thiếu return statement. Thứ hai, hàm prob3 cũng thiếu return statement. Thứ ba, biến p không được khai báo trong hàm prob4. Cuối cùng, có lỗi về vêxing parse và thiếu dấu ngoặc đóng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S28",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Một số lỗi biên dịch như thiếu dấu chấm phẩy, sử dụng toán tử -> thay vì . khi truy cập thành phần của con trỏ, và nhiều lỗi liên quan đến việc sử dụng các hàm không tồn tại hoặc không phù hợp. Cần sửa lại cấu trúc và logic của các hàm."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S29",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi biên dịch liên quan đến cấu trúc của lớp và hàm, thiếu dấu chấm phẩy, thiếu khai báo, v.v."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S30",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi style"
+      ],
+      "feedback": "Mã nguồn này chứa nhiều hàm và cấu trúc phức tạp hơn cần thiết cho bài toán. Cần xem xét việc loại bỏ những hàm không liên quan và tối ưu hóa mã. Vui lòng đảm bảo rằng bạn chỉ sử dụng các thư viện được yêu cầu và tuân thủ quy tắc nộp bài."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S31",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S32",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob2, hàm addTail không trả về gì nhưng hàm prob2 cần trả về một con trỏ Node*. Ngoài ra, hàm main thiếu giá trị trả về."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S33",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Các hàm prob1, prob2, prob3 và prob4 đều thiếu câu lệnh return. Trong prob1, hàm đọc file nhưng không lưu kết quả vào mảng Battle. Trong prob2, hàm tạo danh sách liên kết nhưng không trả về con trỏ đầu tiên. Trong prob3, hàm đếm số trận đánh nhưng không thực hiện công việc. Trong prob4, hàm xóa trận đánh nhưng không thực hiện công việc."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S34",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có nhiều lỗi về việc sử dụng stringstream và cin mà không include thư viện iostream. Ngoài ra, có lỗi về việc đọc file và chuyển đổi kiểu dữ liệu. Cần đảm bảo tất cả những điều này được xử lý đúng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S35",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi nhập/xuất"
+      ],
+      "feedback": "Có vẻ như bạn đã cố gắng đọc file CSV nhưng gặp lỗi khi chuyển đổi chuỗi sang số. Cần đảm bảo rằng tất cả các trường đều được xử lý đúng và không bỏ qua bất kỳ trường nào."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S36",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong struct Battle, khai báo string* list_famous_generals thiếu dấu chấm phẩy. Trong hàm prob1, khởi tạo mảng Battle thiếu dấu ngoặc vuông. Khai báo Node thiếu dấu chấm phẩy. Trong hàm prob1, khai báo ptr thiếu dấu ngoặc vuông. Trong hàm prob1, khai báo ifs thiếu dấu ngoặc vuông."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S37",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm prob1, dòng `prob1[i].total_famous_generals = &line;` và `prob1[i].list_famous_generals = &line;` cố gắng gán địa chỉ của một con trỏ string (`line`) cho một con trỏ integer (`total_famous_generals` và `list_famous_generals`). Điều này gây ra lỗi biên dịch vì kiểu dữ liệu không khớp."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S38",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Các hàm đều được định nghĩa đầy đủ và tuân thủ prototype đã cho. Không thấy lỗi rõ ràng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S39",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Có lỗi về việc thiếu return statement trong hàm pro1(). Hàm này cần trả về một con trỏ Battle*, nhưng hiện tại nó không trả về bất kỳ thứ gì."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S40",
+    "output": {
+      "taxonomy_error": [],
+      "feedback": "Mã nguồn đã được biên dịch thành công, không thấy lỗi biên dịch hoặc logic rõ ràng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S41",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S42",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong prob2, khởi tạo Node không đúng, thiếu đối số thứ hai. Trong prob3, câu lệnh return nằm trong vòng lặp, nên bị lỗi. Trong prob4, hàm không đầy đủ."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S43",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, 'Battle' không được định nghĩa tại thời điểm nó được sử dụng. Thứ hai, cấu trúc 'Node' không có thành phần 'battle'. Cuối cùng, hàm 'prob3' thiếu câu lệnh return."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S44",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S45",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong hàm main, bạn cố gắng gọi hàm prob1 nhưng không đúng cách. Hàm prob1 cần được định nghĩa bên ngoài hàm main và được gọi đúng cách."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S46",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch",
+        "Lỗi logic"
+      ],
+      "feedback": "Có nhiều lỗi cần sửa chữa. Đầu tiên, hàm fileSize không tính chính xác số dòng trong file. Thứ hai, hàm prob1 không trả về con trỏ cuối cùng của mảng Battle. Thứ ba, hàm prob2 không tạo danh sách liên kết đúng. Thứ tư, hàm prob3 không hoạt động đúng. Cuối cùng, hàm prob4 không hoạt động đúng. Cần sửa tất cả những lỗi này để chương trình chạy đúng."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S47",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S48",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Chưa đủ căn cứ để nêu chính xác vị trí và nguyên nhân trong bài làm này."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S49",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Mã nguồn chứa nhiều lỗi về khai báo và sử dụng biến, cấu trúc dữ liệu và hàm. Cần kiểm tra kỹ hơn về việc khai báo và sử dụng các biến, cấu trúc dữ liệu và hàm."
+    }
+  },
+  {
+    "sample_id": "Class02-Test1-S50",
+    "output": {
+      "taxonomy_error": [
+        "Lỗi biên dịch"
+      ],
+      "feedback": "Trong main, khai báo Battleproblem1 không đúng, nên bị lỗi biên dịch. Cần khai báo đúng prototype của prob1 và sử dụng đúng kiểu dữ liệu Battle."
+    }
+  }
+]

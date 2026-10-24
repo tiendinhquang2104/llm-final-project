@@ -12,8 +12,12 @@ MAX_SOURCE_CHARS = 200_000
 MAX_DIAGNOSTIC_CHARS = 8_000
 
 
-def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float = 5.0, standard: str = "c++17") -> dict:
-    """Run a compiler in syntax-only mode; never execute or emit a binary."""
+def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float = 5.0, standard: str = "c++17", full_diagnostics: bool = False) -> dict:
+    """Run syntax-only, never execute. Keep legacy bounded diagnostic by default.
+
+    Full captured streams are always retained; full_diagnostics selects the
+    complete stderr+stdout view. Timeout captures can be partial and say so.
+    """
     if not isinstance(code, str):
         raise TypeError("C++ source must be text")
     if len(code) > MAX_SOURCE_CHARS:
@@ -42,9 +46,16 @@ def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float
         text = exc.stderr or ""
         if isinstance(text, bytes):
             text = text.decode("utf-8", "replace")
+        stdout = exc.stdout or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode("utf-8", "replace")
+        captured = text + stdout
         return {
             "status": "timeout",
-            "diagnostic": text[:MAX_DIAGNOSTIC_CHARS],
+            "diagnostic": captured if full_diagnostics else captured[:MAX_DIAGNOSTIC_CHARS],
+            "stderr_full": text, "stdout_full": stdout, "capture_complete": False,
+            "diagnostic_truncated": len(captured) > MAX_DIAGNOSTIC_CHARS and not full_diagnostics,
+            "diagnostic_limit_chars": None if full_diagnostics else MAX_DIAGNOSTIC_CHARS,
             "latency_s": time.perf_counter() - started,
             "command": command,
         }
@@ -55,10 +66,14 @@ def check_cpp_syntax(code: str, *, compiler: str | None = None, timeout_s: float
             "latency_s": time.perf_counter() - started,
             "command": command,
         }
-    diagnostic = (result.stderr or result.stdout or "")[:MAX_DIAGNOSTIC_CHARS]
+    captured = (result.stderr or "") + (result.stdout or "")
+    diagnostic = captured if full_diagnostics else captured[:MAX_DIAGNOSTIC_CHARS]
     return {
         "status": "compiled" if result.returncode == 0 else "compile_error",
         "diagnostic": diagnostic,
+        "stderr_full": result.stderr or "", "stdout_full": result.stdout or "",
+        "capture_complete": True, "diagnostic_truncated": len(diagnostic) < len(captured),
+        "diagnostic_limit_chars": None if full_diagnostics else MAX_DIAGNOSTIC_CHARS,
         "returncode": result.returncode,
         "latency_s": time.perf_counter() - started,
         "command": command,

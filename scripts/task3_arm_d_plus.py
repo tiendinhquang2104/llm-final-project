@@ -38,6 +38,10 @@ HISTORY = Path('/workspace/llm-final-project-ablation/outputs/task3/language-pre
 CONFIG = ROOT/'configs/task3/arm_d_plus_v1.json'
 
 
+def config_is_v15():
+    return plus.VERSION == 'arm-d-plus-v1.5-compiler-refs'
+
+
 def require(condition, reason):
     if not condition:
         raise ValueError(reason)
@@ -45,7 +49,10 @@ def require(condition, reason):
 
 def code_hashes():
     paths = sorted((ROOT/'src').rglob('*.py'))
+    paths += sorted((ROOT/'scripts').glob('task3*v15*.py'))
     paths += [Path(__file__), CONFIG]
+    if config_is_v15():
+        paths += [ROOT/'configs/task3/renderer_v15_fixtures.json',ROOT/'configs/task3/renderer_v15_fixture-review.json']
     return {str(p.relative_to(ROOT)): sha(p) for p in paths}
 
 
@@ -68,7 +75,11 @@ def freeze_method(out, config, space, tok, supplied=None):
                   'method_identity': plus.method_identity(config, space['taxonomy_error'], space['feedback_level'], tok),
                   'source_HEAD': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                   'prompts': {'findings': plus.FINDINGS_SYSTEM, 'feedback': plus.FEEDBACK_SYSTEM,
-                              'guidance': plus.GUIDANCE, 'resolver': plus.RESOLVER_SYSTEM},
+                              'guidance': plus.GUIDANCE, 'resolver': plus.RESOLVER_SYSTEM,
+                              'repair': plus.REPAIR_INSTRUCTIONS,
+                              'level1_templates': plus.LEVEL1_FEEDBACK,
+                              'level2': getattr(plus,'LEVEL2_SYSTEM',None),
+                              'schema': getattr(plus,'SCHEMA_VERSION',None)},
                   'mapping': {'version': plus.MAPPING_VERSION, 'resolver': plus.RESOLVER_VERSION,
                               'aliases': plus.ALIASES, 'definitions': plus.DEFINITIONS}}
     path = out/'method-freeze.json'
@@ -163,14 +174,17 @@ def preflight(units, tok, config, space):
         count = len(tok.apply_chat_template(messages, tokenize=True, add_generation_prompt=True))
         require(count+config['findings_max_new_tokens'] <= config['context_limit'],
                 'detector full input plus output exceeds context: '+u['sample_id'])
-        minimal_feedback = plus.messages_feedback(u, [], space['taxonomy_error'], space['feedback_level'])
-        feedback_count = len(tok.apply_chat_template(minimal_feedback, tokenize=True, add_generation_prompt=True))
-        require(feedback_count+config['max_new_tokens'] <= config['context_limit'],
-                'feedback full input plus output exceeds context: '+u['sample_id'])
+        feedback_count = 0
+        if u['level'] != 1:
+            minimal_feedback = plus.messages_feedback(u, [], space['taxonomy_error'], space['feedback_level'])
+            feedback_count = len(tok.apply_chat_template(minimal_feedback, tokenize=True, add_generation_prompt=True))
+            require(feedback_count+config['max_new_tokens'] <= config['context_limit'],
+                    'feedback input plus output exceeds context: '+u['sample_id'])
         lengths.append({'sample_id': u['sample_id'], 'detector_input_tokens': count,
                         'detector_output_allowance': config['findings_max_new_tokens'],
                         'minimum_renderer_input_tokens': feedback_count,
-                        'renderer_output_allowance': config['max_new_tokens']})
+                        'renderer_output_allowance': 0 if u['level'] == 1 else config['max_new_tokens'],
+                        'renderer_mode': 'level1_template' if u['level'] == 1 else 'llm'})
     return {'records': len(lengths), 'context_limit': config['context_limit'],
             'max_detector_input': max(r['detector_input_tokens'] for r in lengths),
             'per_call_full_source_preflight': True, 'cases': lengths,
@@ -191,6 +205,7 @@ class DPlusBackend(AuditedBackend):
 def validate_export(out, requested, labels):
     """The final submission name only becomes visible after all checks pass."""
     out = Path(out)
+    (out/'predictions.json').unlink(missing_ok=True)
     path = out/'partial.predictions.json'
     rows = read_json(path)
     ids = [r.get('sample_id') for r in rows if isinstance(r, dict)]
@@ -223,6 +238,7 @@ def summarize(out, results, expected, runtime, wall_time, phase, history):
     summary = {'method': plus.VERSION, 'phase': phase, 'expected': expected,
                'completed': sum(r['status']=='resolved' for r in results), 'unresolved': len(failures),
                'failures': failures,
+               'renderer_counts': dict(Counter(r.get('renderer_mode', 'not_completed') for r in results)),
                'findings_without_quote_locator': sum(not f['evidence'].strip() for r in results if r['stage1'] is not None for f in r['stage1']['findings']),
                'mapping_counts': dict(Counter(a['mapping_method'] for a in mappings)),
                'normal_calls': sum(r['kind']=='normal' for r in rows),
@@ -245,9 +261,10 @@ def summarize(out, results, expected, runtime, wall_time, phase, history):
                'semantic_review': {'false_diagnosis':'not_evaluated', 'unsupported_diagnosis':'not_evaluated',
                                    'Level_compliance':'not_evaluated', 'placeholder_variants':'not_evaluated',
                                    'reason':'No compatible content review of the new D+ outputs; historical reviews rate different outputs.'},
-               'limitations': ['Enum/schema validity does not verify diagnostic correctness.',
+               'limitations': ['Enum/schema/quote binding does not verify diagnostic correctness.',
                                'Combined method change, not a single-component enum ablation.',
-                               'Original Word binary unavailable; checked-in .docx.md conversion read. Public release contract governs.']}
+                               'Level1 uses bounded templates; free-form Level2-4 still require semantic review.',
+                               'Empty evidence remains allowed for omissions; no automatic proof of omission.']}
     if phase == 'internal':
         gold = read_json(out/'gold.private.json')
         historical = {r['sample_id']:r for r in read_json(history/'D/results.private.json')}
@@ -264,6 +281,10 @@ def write_reproduction(args, out):
     py = Path(sys.executable).absolute()
     flags = ['--phase', args.phase, '--out', str(out), '--public-root', str(args.public_root.resolve()),
              '--internal-root', str(args.internal_root.resolve()), '--history', str(args.history.resolve())]
+    if getattr(args,'public_gate',None):
+        flags += ['--public-gate',str(args.public_gate.resolve())]
+    if hasattr(args,'config'):
+        flags += ['--config',str(args.config.resolve())]
     flags += ['--method-freeze', str((args.method_freeze or out/'method-freeze.json').resolve())]
     base_cmd = [str(py), str(Path(__file__).resolve()), *flags]
     resume = shlex.join([*base_cmd, '--resume'])
@@ -304,9 +325,9 @@ Normal calls {s['normal_calls']}; corrective retries {s['repair_calls']}; resolv
 Input tokens {s['input_tokens']}; output sinh {s['generated_output_tokens']}; resolver input {s['resolver_input_tokens']}; thời gian calls {s['generation_and_resolver_latency_s']:.3f}s, resolver {s['resolver_latency_s']:.3f}s.
 VRAM peak allocated/reserved: {runtime['peak_gpu_memory_allocated_bytes']/2**30:.3f}/{runtime['peak_gpu_memory_reserved_bytes']/2**30:.3f} GiB. Actual precision {runtime['actual_precision']}; không quantization/offload. Seed42, greedy; model/revision và resolved GenerationConfig trong config.resolved.json.
 {metrics}
-D+ tách parse, mapping nhãn và validate; alias chỉ đổi nhãn, unknown dùng logits trên đúng A–J của tokenizer thật, cùng model BF16. Hỗ trợ labels đa nhãn và label cũ; union theo label_space. Bảo toàn constraints/io_mode/ngôn ngữ/đề/code/compile_log/test_report bằng allowlist, giữ nguồn metadata; không coi log rỗng là pass. Prompt chỉ dẫn tiếng Anh, feedback tiếng Việt theo Level chính thức. Mỗi stage tối đa một corrective retry JSON/schema; renderer retry giữ nguyên findings.
+D+ tách parse, mapping nhãn và validate; alias chỉ đổi nhãn, unknown dùng logits trên đúng A–J của tokenizer thật, cùng model BF16. Hỗ trợ labels đa nhãn và label cũ; union theo label_space. Stage1 giữ constraints/io_mode/ngôn ngữ/đề/code/compile_log/test_report bằng allowlist; kiểm tra problem_id, placeholder schema cũ và quote nguyên văn. Evidence rỗng vẫn được phép cho omission. Không coi log rỗng là pass. Prompt chỉ dẫn tiếng Anh, feedback tiếng Việt. Level1 dùng template không gọi renderer; Level2 chỉ nhận findings; Level3/4 giữ source và requirements để gợi ý sửa. Renderer counts: {json.dumps(s['renderer_counts'],ensure_ascii=False)}. Mỗi stage tối đa một corrective retry JSON/schema/content contract; renderer retry giữ nguyên findings.
 
-Tài liệu .docx.md mô tả Task3 nhận nhãn cho sẵn; public thực tế không có nhãn input và yêu cầu taxonomy_error cùng feedback. Đã theo public release. Không có binary Word để đối chiếu trực tiếp. Không sửa gold, không dùng Task2/lịch sử để điền public. Không có đánh giá nội dung tương thích cho D+ mới: false/unsupported diagnosis, Level và placeholder chưa đánh giá. Enum/schema hợp lệ không chứng minh chẩn đoán hay feedback đúng.
+Public không có nhãn input và yêu cầu taxonomy_error cùng feedback. Không sửa gold, không dùng Task2/lịch sử để điền public. Chưa có đánh giá nội dung tương thích cho phiên bản mới: false/unsupported diagnosis, Level2-4 và các biến thể placeholder vẫn cần review. Enum/schema/quote hợp lệ không chứng minh chẩn đoán đúng; template Level1 chỉ bảo đảm giới hạn tiết lộ.
 
 predictions.json chỉ được tạo sau validator pass; validation.json ghi expected/missing/duplicate/extra và SHA256. Raw từng attempt, resolver scores, rendered prompts, findings chuẩn hóa, audit mapping và journal ở cùng thư mục/bundle audit riêng tư. Commands tái lập/resume ở REPRODUCE.md. Không upload leaderboard hoặc push dữ liệu.
 '''
@@ -314,6 +335,7 @@ predictions.json chỉ được tạo sau validator pass; validation.json ghi ex
 
 
 def main():
+    global plus, CONFIG
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--phase',choices=('internal','public'),required=True)
     parser.add_argument('--out',type=Path,required=True)
@@ -321,6 +343,9 @@ def main():
     parser.add_argument('--internal-root',type=Path,default=BASE/'data/synth/generate-dataset')
     parser.add_argument('--history',type=Path,default=HISTORY)
     parser.add_argument('--method-freeze',type=Path)
+    parser.add_argument('--config',type=Path,default=CONFIG)
+    parser.add_argument('--review-pause',action='store_true',help='v1.5: keep the one model loaded while an external qualitative renderer review is written; press Enter afterward')
+    parser.add_argument('--public-gate',type=Path,help='v1.5 public requires the passed internal gate')
     parser.add_argument('--resume',action='store_true')
     parser.add_argument('--verify-only',action='store_true')
     args=parser.parse_args();out=args.out.resolve()
@@ -328,18 +353,75 @@ def main():
     if args.resume: require(out.is_dir(), 'resume directory missing')
     else: require(not out.exists(), 'existing directory requires --resume')
     out.mkdir(parents=True,exist_ok=True);out.chmod(0o700)
+    CONFIG=args.config.resolve()
     config=read_json(CONFIG)
+    if config['version']=='arm-d-plus-v1.5-compiler-refs':
+        from src.task3 import arm_d_plus_v15
+        plus=arm_d_plus_v15
+        from src.task3 import v15_evaluation as evaluation
+        require(subprocess.check_output(['git','branch','--show-current'],cwd=ROOT,text=True).strip()=='fix/task3-strict-feedback','existing requested branch required')
+        if args.phase=='public':
+            require(args.public_gate is not None,'v1.5 public requires measured public gate')
+            gate=read_json(args.public_gate)
+            require(gate['status']=='passed' and gate['public_inference_authorized'] and all(gate['checks'].values()),'public gate blocked')
+            require(sha(args.method_freeze)==gate['method_freeze_sha256'],'public method/gate freeze mismatch')
+    else:
+        require(config['version']==plus.VERSION,'config/method schema mismatch')
     require(not config['load_in_4bit'] and config['seed']==42 and config['do_sample'] is False and not config.get('adapter'), 'fixed BF16 greedy base model required')
     os.environ.update(HF_HOME=str(BASE/'outputs/task3/hf-cache'),HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1')
     units,space,requested=prepare_inputs(args,out)
+    if config_is_v15():
+        from src.task3.compiler_evidence import prepare
+        units,compiler_audit=prepare(units,out)
+        fixtures=evaluation.load_fixtures()
+        fixture_review=read_json(ROOT/'configs/task3/renderer_v15_fixture-review.json')
+        require(fixture_review['fixtures_sha256']==sha(evaluation.FIXTURES) and fixture_review['all_supported'] is True,'reviewed renderer fixtures required')
+        write_json(out/'renderer-fixture-review.json',fixture_review)
+        if args.phase=='internal':
+            baselines={'D':args.history/'D/results.private.json',
+                       'D_plus_v1':ROOT/'outputs/task3/internal-arm-d-plus-20261024/results.private.json',
+                       'v14':ROOT/'outputs/task3/internal-arm-d-plus-v1.4-strict/results.private.json'}
+            policy=evaluation.freeze_policy(out/'gold.private.json',baselines,[u['sample_id'] for u in units])
+            policy_path=out/'public-run-gate-policy.json'
+            if policy_path.exists():require(read_json(policy_path)==policy,'gate policy changed')
+            else:write_json(policy_path,policy)
+            if not (out/'public-run-gate.json').exists():write_json(out/'public-run-gate.json',dict(status='pending',policy=policy,policy_sha256=sha(policy_path)))
+    if config_is_v15():
+        run_binding=dict(enriched_inputs_sha256=digest(units),source_map_version=units[0]['source_map_version'],
+                         compiler_toolchain=compiler_audit['toolchain'],
+                         source_maps={u['sample_id']:{k:d['sha256'] for k,d in u['source_catalog'].items()} for u in units},
+                         prompt_dispatch={'detector':plus.FINDINGS_SYSTEM,'Level2':plus.LEVEL2_SYSTEM,'Level3_4':plus.FEEDBACK_SYSTEM})
+        binding_path=out/'run-input-freeze.json'
+        if binding_path.exists():require(read_json(binding_path)==run_binding,'run evidence freeze drift')
+        else:write_json(binding_path,run_binding)
     tok=load_tokenizer(config)
     frozen=freeze_method(out,config,space,tok,args.method_freeze or (out/'method-freeze.json' if args.resume else None))
-    write_json(out/'preflight.json',preflight(units,tok,config,space))
+    preflight_result=preflight(units,tok,config,space)
+    if config_is_v15():
+        from src.task3 import arm_d_plus as v14
+        counts={name:len(tok.encode(text,add_special_tokens=False)) for name,text in [('v14_detector',v14.FINDINGS_SYSTEM),('v15_detector',plus.FINDINGS_SYSTEM)]}
+        require(counts['v15_detector']<=counts['v14_detector'],'detector system prompt grew')
+        preflight_result['system_prompt_tokens']=counts
+        renderer_freeze=dict(cases=fixtures,fixtures_sha256=sha(evaluation.FIXTURES),prompts={'v14':v14.FEEDBACK_SYSTEM,'v15':plus.LEVEL2_SYSTEM},
+                             projection='only problem_id, location, error; requested Level2 and official rule',
+                             scope='isolated development; same common projection; not historical end-to-end reproduction')
+        renderer_path=out/'renderer-fixtures-freeze.json'
+        if renderer_path.exists():require(read_json(renderer_path)==renderer_freeze,'renderer freeze drift')
+        else:write_json(renderer_path,renderer_freeze)
+        renderer_lengths=[]
+        for version,system in renderer_freeze['prompts'].items():
+            for case in fixtures:
+                msgs=plus.messages_feedback({'level':2},case['findings'],space['taxonomy_error'],space['feedback_level']);msgs[0]['content']=system
+                count=len(tok.apply_chat_template(msgs,tokenize=True,add_generation_prompt=True))
+                require(count+config['max_new_tokens']<=config['context_limit'],'fixed renderer context failure')
+                renderer_lengths.append(dict(prompt_version=version,case_id=case['case_id'],input_tokens=count,output_allowance=config['max_new_tokens']))
+        preflight_result['fixed_renderer_cases']=renderer_lengths
+    write_json(out/'preflight.json',preflight_result)
     write_reproduction(args,out)
     bound_config={**config,'implementation_sha256':frozen['code_sha256']}
     if args.verify_only:
         # Reconstruct the entire journal identity, including projected inputs.
-        identity=digest([plus.method_identity(bound_config,space['taxonomy_error'],space['feedback_level'],tok),
+        identity=plus.run_identity(units,bound_config,space,tok) if config_is_v15() else digest([plus.method_identity(bound_config,space['taxonomy_error'],space['feedback_level'],tok),
                          [{'sample_id':u['sample_id'],'task':plus.task_payload(u),'level':u['level'],'provenance':u.get('provenance')} for u in units]])
         if (out/'identity.json').exists(): require(read_json(out/'identity.json')=={'identity':identity},'resume identity mismatch')
         print(json.dumps({'verified':True,'records':len(units),'method_freeze_sha256':sha(out/'method-freeze.json')}));return
@@ -357,6 +439,18 @@ def main():
               'packages':{p:importlib.metadata.version(p) for p in ('torch','transformers','tokenizers','accelerate')},
               'implementation_sha256':frozen['code_sha256'],'method_freeze_sha256':sha(out/'method-freeze.json')}
     write_json(out/'config.resolved.json',resolved)
+    if config_is_v15() and args.phase=='internal':
+        evaluation.run_renderer_experiment(backend,bound_config,out,space)
+        review_path=out/'renderer-eval/reviews.private.json'
+        if not review_path.exists():
+            require(args.review_pause,'renderer qualitative review missing; resume with --review-pause, no reserved calls will be regenerated')
+            input('RENDERER_REVIEW_READY: write reviews.private.json, then press Enter to continue the same BF16 load.\n')
+        renderer_gate=evaluation.renderer_reviews(out)
+        write_json(out/'renderer-eval/review-summary.json',renderer_gate)
+        if not renderer_gate['new_prompt_all_eight_pass']:
+            write_json(out/'public-run-gate.json',dict(status='blocked',policy=read_json(out/'public-run-gate-policy.json'),reasons=['fixed renderer cases failed; internal30 not started'],renderer_review=renderer_gate,method_freeze_sha256=sha(out/'method-freeze.json'),public_inference_authorized=False))
+            write_json(out/'runtime-after.json',backend.runtime_metadata())
+            print('Stopped before internal30: renderer gate failed. No prompt sweep.');return 1
     results=plus.run_units(units,backend,bound_config,out,space)
     runtime=backend.runtime_metadata();write_json(out/'runtime-after.json',runtime)
     invocation={'wall_time_s':time.perf_counter()-started,'runtime':runtime,'resume':args.resume,'timestamp_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
