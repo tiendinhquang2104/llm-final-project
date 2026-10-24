@@ -16,21 +16,26 @@ Exactly A VI/NF4, B EN/NF4, C VI/BF16, D EN/BF16; Vietnamese feedback throughout
 Interrupted reservations cannot generate again; per-arm identity binds entire manifest/config/prompts. Full denominator must include stage failures; feedback remains exactly JSON-unescaped. Precision audit checks actual CUDA storage and Linear4bit, not a mock flag. Old sealed source references and code/archive metadata must bind exactly. No content metric may be inferred from keyword statistics alone; blind qualitative review required, independence limits disclosed.
 
 ### Task 1: prompts and runner
-- [ ] Write and run failing tests for matrix, VI bytes, EN preserved payload, per-Level messages, malformed/EOS/enum handling, clean union, resume/identity and feedback preservation.
-- [ ] Implement `src/task3/language_precision_ablation.py` and `configs/task3/language_precision_ablation_v1.json`. Reuse v1 Journal/parser. Keep runtime/config instrumentation local to new runner/backend subclass.
-- [ ] Run new and historical tests, including precision regression. Expected: all selected tests pass.
+- [x] Write and run failing tests for matrix, VI bytes, EN preserved payload, per-Level messages, malformed/EOS/enum handling, clean union, resume/identity and feedback preservation.
+- [x] Implement `src/task3/language_precision_ablation.py` and `configs/task3/language_precision_ablation_v1.json`. Reuse v1 Journal/parser. Keep runtime/config instrumentation local to new runner/backend subclass.
+- [x] Run new and historical tests, including precision regression. Expected: all selected tests pass.
 
 ### Task 2: provenance, freeze, execution
-- [ ] Implement `scripts/task3_language_precision_ablation.py`: prepare/freeze/run/packets/report. Verify historical selection/source seals and original/nested ZIP hashes, source code/semantic/evidence/Level/gold. Produce translation alignment and freeze code/deps/tokenizer/config before inference.
-- [ ] Preflight GPU; run fixed arm-major A30,B30 then C30,D30 sequence with two model loads, separate journals, full raw/rendered/runtime artifacts, no repair/retry. Audit original BF16 storage. Expected: all30 IDs accounted per arm even unresolved.
+- [x] Implement `scripts/task3_language_precision_ablation.py`: prepare/freeze/run/packets/report. Verify historical selection/source seals and original/nested ZIP hashes, source code/semantic/evidence/Level/gold. Produce translation alignment and freeze code/deps/tokenizer/config before inference.
+- [x] Preflight GPU; run fixed arm-major A30,B30 then C30,D30 sequence with two model loads, separate journals, full raw/rendered/runtime artifacts, no repair/retry. Audit original BF16 storage. Expected: all30 IDs accounted per arm even unresolved.
 
 ### Task 3: review, reporting, handoff
-- [ ] Generate opaque shuffled review packets using old source-only references and preselected balanced second-review subset; review full120 outputs against one rubric, preserving disputes and main finding inventory. Record independence limits honestly.
-- [ ] Compute final/stage1 ten-label metrics, content/Level/voice/placeholder/joint counts, paired ID deltas and interaction, costs/runtime, source clone limits. Write full per-ID table privately and aggregate report publicly.
-- [ ] Validate completed subsets/full sets correctly; ZIP all private evidence. Final fresh code review and regression verification, preservation hashes, commit only approved public files. No push/PR.
+- [x] Generate opaque shuffled review packets using old source-only references and preselected balanced second-review subset; review full120 outputs against one rubric, preserving disputes and main finding inventory. Record independence limits honestly.
+- [x] Compute final/stage1 ten-label metrics, content/Level/voice/placeholder/joint counts, paired ID deltas and interaction, costs/runtime, source clone limits. Write full per-ID table privately and aggregate report publicly.
+- [x] Validate completed subsets/full sets correctly; ZIP all private evidence. Final fresh code review and regression verification, preservation hashes, commit only approved public files. No push/PR.
 
 ## Ledger
 
 Baseline HEAD35c2915 exactly matches reference; only user prompt untracked in original checkout. Isolated sibling worktree shares old artifacts/cache by symlink; no model/data copy. Baseline66 findings tests passed. Initial test command named nonexistent inference glob; corrected to discovered precision test file, no test failure hidden. Design already fixed/authorized in user's spec; execute without another approval gate.
 
 Prefreeze independent review: two runtime issues fixed with RED→GREEN fixtures: reset arm peaks while retaining load/group peaks; preserve first runtime snapshots plus per-invocation measurements and append-only load events. Core prompt/provenance/inference review passed.
+
+Completion ledger: Task1 complete, Task2 complete (freeze143b78b/2e625172...,238 physical calls,2 loads, no extra calls; A/B29,C/D30). Task3 complete: two blinded agents independently reviewed30×4 each/289 findings; ratings sealed; conservative and dispute-gate sensitivity both joint-gold0 all arms. Main report includes all10 labels, paired contrasts, inventory/Level/voice/attribution and private evidence index.
+Final review fixes: per-arm peak reset and immutable invocation measurements; claim/faithfulness consistency, nonoptional L3 evaluation and all material dispute coverage (RED→GREEN). ZIP receipt excluded on repeat packaging and scored seal checked before mutations. No deferred minors.
+Ruling: source domain notes and any finding dispute require secondary coverage, but standalone source notes do not automatically invalidate every feedback. Conservative published pass additionally excludes output/finding disputes; explicit sensitivity without that gate keeps joint-gold0. This prevents taxonomy-only uncertainty from being mistaken for proof that every feedback sentence is false. Counts per reviewer remain separate; combined inherited/new counts are category maxima, not deduplicated assertions.
+Verification:171 related tests pass. Existing test_task3_eval_v2 baseline failure independently reproduced at original35c2915, only root predictions.json hash drift9ba741...→c30c5c...; baseline untouched. No full-suite green claim, Task1/2 dependency installation, public run, push or PR. Branch/worktree preserved as explicitly requested by user spec.

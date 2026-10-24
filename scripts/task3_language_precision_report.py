@@ -103,6 +103,14 @@ def score(out):
     require(primary['reviewer']!=secondary['reviewer'],'distinct reviewers required')
     rows=[];summary=read(out/'metrics.private.json')
     summary.update(review={'primary_IDs':len(covered['primary']),'secondary_IDs':len(covered['secondary']),'preselected_secondary_IDs':len(subset),'material_dispute_IDs':len(disputes),'independence':'Two separate blinded Codex agent reviews, source references sealed before outputs; not human validated. Secondary covers preselected balanced subset and all material disputes; prose language cannot be fully hidden.','packet_sha256':sha(out/'review/packet.private.json')},content_convention='Conservative reviewed subset combination: good requires both, bad/claims uses either/max; per-reviewer preserved. A false finding faithfully rendered is still factually false. Disputed no joint credit. Main reference inventory from sealed primary source; secondary source conflicts remain disputes.')
+    summary['reviewer_separate_totals']={}
+    for who in ['primary','secondary']:
+        summary['reviewer_separate_totals'][who]={}
+        for a in 'ABCD':
+            rr=[ratings[(sid,a,who)]for sid in covered[who]]
+            fs=[f for r in rr for f in r['findings']]
+            summary['reviewer_separate_totals'][who][a]={'IDs':len(rr),**{k:sum(r[k]or 0 for r in rr)for k in GOOD+BAD+SPECIAL+COUNTS+['main_detected']},'finding_verdicts':dict(Counter(f['verdict']for f in fs)),'finding_label_correct':sum(f['label_correct']for f in fs),'reference_detected':sum(len(r['detected_reference_indices'])for r in rr)}
+    summary['claim_count_convention']='Combined attribution counts are per-ID per-category maxima across reviewers: conservative upper envelopes, not deduplicated assertion totals. A disputed inherited/new attribution can appear in both combined categories; use reviewer_separate_totals for each independent assertion count.'
     for u in units:
         sid=u['sample_id'];refs=source_a[sid]
         source_dispute=refs['source_disputed']or(sid in source_b and(source_b[sid]['source_disputed']or set(source_b[sid]['source_taxonomy'])!=set(refs['source_taxonomy'])))
