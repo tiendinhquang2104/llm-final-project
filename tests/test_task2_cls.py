@@ -157,3 +157,24 @@ def test_tiny_model_pauses_at_deadline_resumes_and_predicts(tmp_path, records):
     assert read_status(run)["state"] == "done"
     out = predict(cfg, [r for r in records if r["source"] == "public"] + train[:2], run / "adapter", batch_size=2)
     assert len(out) == 3 and all(0.0 <= v <= 1.0 for o in out for v in o["probs"].values())
+
+
+def test_head_accepts_half_hidden_states_when_kept_in_fp32():
+    """Prediction has no autocast: fp16 hidden states must not hit the fp32 head (Kaggle EX01 crash)."""
+    import torch
+    from src.training.task2_cls import cast_head_inputs
+
+    class Tiny(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.body = torch.nn.Linear(4, 4).half()
+            self.score = torch.nn.Linear(4, 3)  # fp32 head
+
+        def forward(self, x):
+            return self.score(self.body(x))
+
+    m = Tiny()
+    assert cast_head_inputs(m) == 1
+    out = m(torch.randn(2, 4).half())
+    assert out.dtype == torch.float32 and out.shape == (2, 3)
+    assert cast_head_inputs(m) == 0  # idempotent

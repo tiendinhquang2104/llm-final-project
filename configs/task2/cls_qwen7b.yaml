@@ -35,6 +35,7 @@ train:
   scheduler: cosine
   batch_size: 1
   grad_accum: 16
+  max_length: null          # token khi TRAIN (null = model.max_length). SDPA đã đủ cho 4096 trên T4; đặt 2560 nếu vẫn OOM
   weight_decay: 0.0
   max_grad_norm: 1.0
   pos_weight_cap: 10.0

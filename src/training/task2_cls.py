@@ -225,7 +225,28 @@ def load_model(mcfg: dict, lcfg: dict | None, train: bool, adapter=None, device_
         for n, p in model.named_parameters():
             if "score" in n and p.dtype != torch.float32:
                 p.data = p.data.float()
+    cast_head_inputs(model)
     return model
+
+
+def cast_head_inputs(model) -> int:
+    """Feed the classification head in its own dtype. The head is kept in fp32, but at prediction time there is no
+    autocast and the backbone returns fp16 hidden states ("expected mat1 and mat2 to have the same dtype: Half !=
+    float"). Returns the number of hooked layers."""
+    import torch
+
+    def _cast(module, args):
+        x = args[0]
+        return (x.to(module.weight.dtype), *args[1:]) if x.dtype != module.weight.dtype else None
+
+    n = 0
+    for name, mod in model.named_modules():
+        if isinstance(mod, torch.nn.Linear) and "score" in name.split(".") \
+                and not getattr(mod, "_head_cast_hooked", False):
+            mod.register_forward_pre_hook(_cast)
+            mod._head_cast_hooked = True
+            n += 1
+    return n
 
 
 class _Rows:
@@ -310,7 +331,12 @@ def train_run(cfg: dict, train_rows: list[dict], weights: list[float], pos_weigh
     set_seed(seed)
     tok = load_tokenizer(mcfg["name"], mcfg.get("revision"))
     mcfg["pad_token_id"] = tok.pad_token_id
-    enc = encode(tok, train_rows, int(mcfg.get("max_length", 4096)))
+    # training may use a shorter context than prediction: activation memory grows with the longest record
+    # (gold / gold-mutant reach ~3.5k tokens), the left side (prompt start) is what gets cut
+    max_len = int(tcfg.get("max_length") or mcfg.get("max_length", 4096))
+    enc = encode(tok, train_rows, max_len)
+    n_cut = sum(len(e["input_ids"]) >= max_len for e in enc)
+    print(f"[train] {run_dir.name}: max_length={max_len}, {n_cut}/{len(enc)} rows truncated", flush=True)
     ds = _Rows(enc, [r["y"] for r in train_rows], weights)
     ckpt = find_checkpoint(run_dir, run_dir.name, resume_dirs)
     if ckpt is None and hub is not None:
@@ -319,6 +345,8 @@ def train_run(cfg: dict, train_rows: list[dict], weights: list[float], pos_weigh
     model = load_model(mcfg, cfg["lora"], train=True)
     if hasattr(model, "print_trainable_parameters"):
         model.print_trainable_parameters()
+    attn = getattr(getattr(model, "config", None), "_attn_implementation", None)
+    print(f"[train] {run_dir.name}: attention={attn}", flush=True)
     cuda = torch.cuda.is_available()
     bs, accum = int(tcfg.get("batch_size", 1)), int(tcfg.get("grad_accum", 16))
     total = math.ceil(len(ds) / (bs * accum)) * float(tcfg["epochs"])
