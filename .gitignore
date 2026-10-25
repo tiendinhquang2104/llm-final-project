@@ -67,6 +67,8 @@ data/public-test/
 data/public-test-*.zip
 # Synthetic dataset (generated; keep out of git)
 data/synth/*
+# Fine-tuning records (contain gold + public student code)
+data/sft/
 
 # Model weights & checkpoints
 models/

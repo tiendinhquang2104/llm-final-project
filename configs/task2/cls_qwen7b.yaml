@@ -1,0 +1,54 @@
+extends: base.yaml
+name: task2_cls_qwen7b
+description: F-cls — Qwen2.5-Coder-7B-Instruct + QLoRA + head 10 sigmoid (multi-label), train trên synth v3 + gold + mutant gold (OOF theo đề EX01/EX02), ngưỡng từng nhãn chọn theo OOF gold, luật hậu xử lý gold. Xem docs/task2_finetune_plan.md.
+data:
+  synth_zip: data/synth/v1/generate-dataset_v3.zip   # bộ dữ liệu sinh lại (477 silver + 65 heldout), dùng hết để train
+  synth_dir: data/synth/cls                          # nơi giải nén zip (gitignored)
+  cls_dir: data/sft/task2_cls                        # records.jsonl + summary.json (gitignored)
+  public_guard: 0.5                                  # bỏ mẫu train có MinHash Jaccard >= 0.5 với file public (trừ file trùng gold)
+prompt:                     # cùng phần hiển thị bài nộp như cot_split_run_en (không có luật / các bước CoT)
+  lang: en
+  max_code_chars: 12000
+  use_aux_signals: true     # compile_log tự compile + kết quả chạy ví dụ đề
+  strip_comments: true
+  drop_blank_lines: true
+  max_compile_log_chars: 800
+compile:
+  run_examples: true        # đề stdin/stdout: chạy binary với ví dụ trong đề
+augment:
+  max_per_mutator: null     # mọi mẫu gold áp dụng được
+model:
+  name: Qwen/Qwen2.5-Coder-7B-Instruct
+  revision: null            # null = main; ghi commit hash thực tế vào run_info.json
+  load_in_4bit: true        # nf4 + double quant, compute fp16 (T4 không có bf16)
+  max_length: 4096          # token; dài hơn thì cắt bên trái (giữ code + tín hiệu chạy ở cuối)
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+train:
+  epochs: 4
+  lr: 1.0e-4
+  warmup_ratio: 0.03
+  scheduler: cosine
+  batch_size: 1
+  grad_accum: 16
+  weight_decay: 0.0
+  max_grad_norm: 1.0
+  pos_weight_cap: 10.0
+  oversample_min: 60        # nhãn hiếm được lặp lại tới >= 60 lần xuất hiện (tối đa 4 bản mỗi bài)
+  source_weight: {gold: 2.0, gold_mut: 2.0, synth: 1.0}   # code thật nặng hơn
+  use_gold: true            # fold k: gold + mutant của đề khác vào train; final: tất cả
+  use_mutants: true
+  save_steps: 25            # checkpoint (adapter + optimizer + scheduler) để resume sau khi Kaggle timeout
+  save_total_limit: 2
+  logging_steps: 5
+  eval_batch_size: 4
+postprocess:
+  compile_rule: true        # "Lỗi biên dịch" := compile_log tự compile có lỗi compiler
+  compile_max_extra: 1      # bài lỗi biên dịch: tối đa 1 nhãn nguyên nhân (G4)
+  all_commented_style: true # comment toàn bộ -> chỉ "Lỗi style" (G5)
+  max_labels: 3             # G1
+  default_threshold: 0.5
+  edge_case_threshold: 0.9  # "Lỗi edge case" 0/32 trong gold: chỉ gán khi rất chắc
