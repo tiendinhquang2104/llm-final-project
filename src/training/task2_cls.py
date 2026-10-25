@@ -191,7 +191,10 @@ def load_model(mcfg: dict, lcfg: dict | None, train: bool, adapter=None, device_
     from transformers import AutoModelForSequenceClassification, BitsAndBytesConfig
 
     cuda = torch.cuda.is_available()
-    kw = dict(num_labels=len(LABELS), problem_type="multi_label_classification", revision=mcfg.get("revision"))
+    kw = dict(num_labels=len(LABELS), problem_type="multi_label_classification", revision=mcfg.get("revision"),
+              # SDPA (memory-efficient kernel on T4) instead of eager attention: eager materialises the full
+              # heads x seq x seq score matrix in fp32 (28 x 3.5k^2 x 4 B = 1.3 GiB per layer) and OOMs on long gold
+              attn_implementation=mcfg.get("attn_implementation", "sdpa"))
     dtype_kw = _dtype_kwarg()
     q4 = bool(mcfg.get("load_in_4bit")) and cuda
     if q4:
@@ -346,14 +349,26 @@ def train_run(cfg: dict, train_rows: list[dict], weights: list[float], pos_weigh
     peak = round(torch.cuda.max_memory_allocated() / 2 ** 30, 2) if cuda else None
     info = {"global_step": trainer.state.global_step, "max_steps": trainer.state.max_steps,
             "session_train_s": round(took, 1), "peak_gpu_gb": peak}
-    if cbs[0].paused:
+    paused = cbs[0].paused
+    if not paused:
+        trainer.save_model(str(run_dir / "adapter"))
+    del trainer, model  # free the training model/optimizer before prediction loads a fresh one
+    empty_cuda()
+    if paused:
         write_status(run_dir, state="paused", **info)
         print(f"[train] {run_dir.name}: paused at step {info['global_step']}/{info['max_steps']} (deadline)", flush=True)
         return read_status(run_dir)
-    trainer.save_model(str(run_dir / "adapter"))
     write_status(run_dir, state="done", **info)
     print(f"[train] {run_dir.name}: done ({info['global_step']} steps, {took / 60:.1f} min)", flush=True)
     return read_status(run_dir)
+
+
+def empty_cuda() -> None:
+    import gc
+    import torch
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
 
 def predict(cfg: dict, rows: list[dict], adapter, batch_size: int = 4) -> list[dict]:

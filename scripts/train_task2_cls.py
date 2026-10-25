@@ -20,6 +20,10 @@ import sys
 import time
 from pathlib import Path
 
+# before CUDA is initialised: lets the allocator grow segments instead of fragmenting (the OOM log showed
+# 2.3 GiB reserved but unallocated)
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
