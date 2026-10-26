@@ -399,8 +399,28 @@ def empty_cuda() -> None:
         torch.cuda.empty_cache()
 
 
-def predict(cfg: dict, rows: list[dict], adapter, batch_size: int = 4) -> list[dict]:
-    """[{"id", "probs": {label: p}}] for `rows` with the trained adapter (longest first, fp16 on GPU)."""
+def token_batches(lengths: list[int], max_batch: int, token_budget: int) -> list[list[int]]:
+    """Indices grouped longest first so that each padded batch (n x longest) stays within `token_budget` tokens
+    (a 4k-token record runs alone; short ones share a batch, up to `max_batch`)."""
+    order = sorted(range(len(lengths)), key=lambda i: -lengths[i])
+    out, cur = [], []
+    for i in order:
+        longest = lengths[cur[0]] if cur else lengths[i]
+        if cur and (len(cur) + 1 > max_batch or (len(cur) + 1) * longest > token_budget):
+            out.append(cur)
+            cur = []
+        cur.append(i)
+    if cur:
+        out.append(cur)
+    return out
+
+
+def predict(cfg: dict, rows: list[dict], adapter, batch_size: int = 4, token_budget: int | None = None) -> list[dict]:
+    """[{"id", "probs": {label: p}}] for `rows` with the trained adapter (fp16 on GPU).
+
+    Batches are capped by padded tokens (`token_budget`, default model.max_length) and a batch that still runs
+    out of memory is split in halves and retried, so prediction never dies on the longest public records
+    (OOM seen with 4 x 4096 tokens through the fp32 LoRA path of down_proj)."""
     import torch
     from transformers import DataCollatorWithPadding
 
@@ -409,17 +429,33 @@ def predict(cfg: dict, rows: list[dict], adapter, batch_size: int = 4) -> list[d
     mcfg["pad_token_id"] = tok.pad_token_id
     model = load_model(mcfg, None, train=False, adapter=adapter)
     model.eval()
-    enc = encode(tok, rows, int(mcfg.get("max_length", 4096)))
-    order = sorted(range(len(rows)), key=lambda i: -len(enc[i]["input_ids"]))
+    max_len = int(mcfg.get("max_length", 4096))
+    enc = encode(tok, rows, max_len)
+    budget = int(token_budget or max_len)
     coll = DataCollatorWithPadding(tok)
     dev = next(model.parameters()).device
     probs = [None] * len(rows)
-    with torch.no_grad():
-        for b in range(0, len(order), batch_size):
-            idx = order[b:b + batch_size]
+
+    oom = getattr(torch, "OutOfMemoryError", None) or torch.cuda.OutOfMemoryError
+
+    def run(idx: list[int]) -> None:
+        try:
             batch = {k: v.to(dev) for k, v in coll([enc[i] for i in idx]).items()}
-            p = torch.sigmoid(model(**batch).logits.float()).cpu().tolist()
-            for i, pi in zip(idx, p):
-                probs[i] = pi
+            with torch.no_grad():
+                p = torch.sigmoid(model(**batch).logits.float()).cpu().tolist()
+        except oom:
+            if len(idx) == 1:
+                raise
+            batch = None
+            empty_cuda()
+            half = len(idx) // 2
+            run(idx[:half])
+            run(idx[half:])
+            return
+        for i, pi in zip(idx, p):
+            probs[i] = pi
+
+    for idx in token_batches([len(e["input_ids"]) for e in enc], batch_size, budget):
+        run(idx)
     return [{"id": r["id"], "probs": {lab: round(float(v), 6) for lab, v in zip(LABELS, p)}}
             for r, p in zip(rows, probs)]

@@ -103,7 +103,7 @@ def main() -> None:
             print(f"[predict] no time left for {split}: run again", flush=True)
             sys.exit(3)
         t0 = time.time()
-        write_jsonl(path, predict(cfg, rows, run_dir / "adapter", bs))
+        write_jsonl(path, predict(cfg, rows, run_dir / "adapter", bs, tcfg.get("eval_token_budget")))
         print(f"[predict] {split}: {len(rows)} rows in {time.time() - t0:.0f}s -> {path}", flush=True)
     write_status(run_dir, **{**read_status(run_dir), "predicted": True})
 

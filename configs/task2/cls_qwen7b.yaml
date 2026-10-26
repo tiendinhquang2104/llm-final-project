@@ -47,6 +47,7 @@ train:
   save_total_limit: 2
   logging_steps: 5
   eval_batch_size: 4
+  eval_token_budget: 4096    # token đã pad mỗi batch khi dự đoán (bài 4k token chạy 1 mình); OOM thì tự chia đôi batch
 postprocess:
   compile_rule: true        # "Lỗi biên dịch" := compile_log tự compile có lỗi compiler
   compile_max_extra: 1      # bài lỗi biên dịch: tối đa 1 nhãn nguyên nhân (G4)

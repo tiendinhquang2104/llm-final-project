@@ -178,3 +178,14 @@ def test_head_accepts_half_hidden_states_when_kept_in_fp32():
     out = m(torch.randn(2, 4).half())
     assert out.dtype == torch.float32 and out.shape == (2, 3)
     assert cast_head_inputs(m) == 0  # idempotent
+
+
+def test_token_batches_cap_padded_tokens_and_keep_every_index():
+    from src.training.task2_cls import token_batches
+    lengths = [4096, 3500, 1200, 1000, 900, 300, 200, 100]
+    batches = token_batches(lengths, max_batch=4, token_budget=4096)
+    assert sorted(i for b in batches for i in b) == list(range(len(lengths)))
+    for b in batches:
+        assert len(b) <= 4
+        assert len(b) == 1 or len(b) * max(lengths[i] for i in b) <= 4096
+    assert batches[0] == [0] and batches[1] == [1]   # long records run alone
