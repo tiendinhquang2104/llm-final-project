@@ -189,3 +189,24 @@ def test_token_batches_cap_padded_tokens_and_keep_every_index():
         assert len(b) <= 4
         assert len(b) == 1 or len(b) * max(lengths[i] for i in b) <= 4096
     assert batches[0] == [0] and batches[1] == [1]   # long records run alone
+
+
+def test_drop_full_mask_keeps_padding_masks_and_does_not_change_logits():
+    import torch
+    from transformers import Qwen2Config, Qwen2ForSequenceClassification
+
+    from src.training.task2_cls import drop_full_mask
+
+    torch.manual_seed(0)
+    cfg = Qwen2Config(vocab_size=50, hidden_size=32, intermediate_size=64, num_hidden_layers=2,
+                      num_attention_heads=4, num_key_value_heads=2, num_labels=3, pad_token_id=0)
+    m = Qwen2ForSequenceClassification(cfg).eval()
+    ids = torch.randint(1, 50, (1, 12))
+    full = {"input_ids": ids, "attention_mask": torch.ones_like(ids)}
+    with torch.no_grad():
+        ref = m(**full).logits
+        got = m(**drop_full_mask(dict(full))).logits
+    assert "attention_mask" not in drop_full_mask(dict(full))
+    assert torch.allclose(ref, got, atol=1e-5)
+    padded = {"input_ids": ids, "attention_mask": torch.cat([torch.ones(1, 8), torch.zeros(1, 4)], 1).long()}
+    assert "attention_mask" in drop_full_mask(dict(padded))   # real padding: the mask is kept

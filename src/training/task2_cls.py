@@ -264,6 +264,17 @@ class _Rows:
         return item
 
 
+def drop_full_mask(batch: dict) -> dict:
+    """Remove an all-ones attention_mask (no padding in the batch). With an explicit mask, SDPA on T4 falls back
+    to the "math" kernel, which builds the full heads x seq x seq matrix (28 x 4096^2 x 4 B = 1.75 GiB); without
+    it the causal memory-efficient kernel is used. Qwen2 sequence classification pools the last token from
+    input_ids, so the mask is not needed for pooling."""
+    m = batch.get("attention_mask")
+    if m is not None and bool(m.all()):
+        batch.pop("attention_mask")
+    return batch
+
+
 def make_trainer_cls():
     import torch
     from transformers import Trainer
@@ -276,7 +287,7 @@ def make_trainer_cls():
         def compute_loss(self, model, inputs, return_outputs=False, **kw):
             labels = inputs.pop("labels").float()
             weight = inputs.pop("weight").float()
-            out = model(**inputs)
+            out = model(**drop_full_mask(inputs))
             logits = out.logits.float()
             pw = torch.tensor(self.pos_weight, device=logits.device, dtype=torch.float32)
             loss = torch.nn.functional.binary_cross_entropy_with_logits(logits, labels, pos_weight=pw,
@@ -440,7 +451,7 @@ def predict(cfg: dict, rows: list[dict], adapter, batch_size: int = 4, token_bud
 
     def run(idx: list[int]) -> None:
         try:
-            batch = {k: v.to(dev) for k, v in coll([enc[i] for i in idx]).items()}
+            batch = drop_full_mask({k: v.to(dev) for k, v in coll([enc[i] for i in idx]).items()})
             with torch.no_grad():
                 p = torch.sigmoid(model(**batch).logits.float()).cpu().tolist()
         except oom:

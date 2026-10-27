@@ -87,9 +87,16 @@ def main() -> None:
     hub = None
     if a.hub_repo and os.environ.get("HF_TOKEN"):
         hub = HubSync(a.hub_repo, run_dir.name, os.environ["HF_TOKEN"])
+    was_done = read_status(run_dir).get("state") == "done"
     st = train_run(cfg, train, weights, pw, run_dir, deadline, a.resume_dir, hub)
     if st.get("state") != "done":
         sys.exit(3)
+    if not was_done and os.environ.get("TASK2_CLS_NO_REEXEC") != "1":
+        # Trained in this process: the Trainer/accelerate keep the training model and optimizer referenced, so
+        # GPU memory is not given back. Predict in a fresh process (the run is "done" now, so it only predicts).
+        print("[run] training done: restarting the script for prediction with a clean GPU", flush=True)
+        sys.stdout.flush()
+        os.execv(sys.executable, [sys.executable, *sys.argv])
 
     bs = int(tcfg.get("eval_batch_size", 4))
     todo = [("gold", evals)]
