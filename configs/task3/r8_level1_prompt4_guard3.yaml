@@ -1,4 +1,0 @@
-extends: r8_level1_prompt4_guard2.yaml
-experiment_id: R8-L1-P4-G3
-guard_policy_version: 3
-retry_policy_version: 4

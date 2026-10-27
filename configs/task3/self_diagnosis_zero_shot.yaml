@@ -1,4 +1,0 @@
-extends: r9_p5_json_k0_g2.yaml
-experiment_id: TASK3-SELF-DIAG-P5-K0-G2
-taxonomy_max_new_tokens: 384
-adequacy_retry_policy_version: 1

@@ -1,3 +1,0 @@
-extends: r7_direct_k0.yaml
-experiment_id: R7-D-K2
-few_shot_k: 2

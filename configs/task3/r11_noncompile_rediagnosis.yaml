@@ -1,2 +1,0 @@
-extends: r11_compiler_control.yaml
-noncompile_rediagnosis: true

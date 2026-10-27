@@ -1,3 +1,0 @@
-extends: baseline.yaml
-few_shot_k: 2
-context_limit: 8192

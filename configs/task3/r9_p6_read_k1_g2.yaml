@@ -1,4 +1,0 @@
-extends: r9_p6_read_k0_g2.yaml
-experiment_id: R9-P6-READ-K1-G2
-prompt_strategy: few_shot
-few_shot_k: 1

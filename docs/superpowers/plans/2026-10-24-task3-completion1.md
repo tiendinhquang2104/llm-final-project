@@ -1,0 +1,17 @@
+# Task3 final-case completion implementation plan
+
+Goal: finish the only unresolved public case, preserve327 output objects, produce predictions.json only after exact328 official validation and preservation checks. User request: “xử lý nốt Class01-Test1-S09”; continuing the authorized local Qwen workflow without new approval pauses or commits.
+
+Root cause: prior scope prompt restricted problem_ids but retained all four problems as active requirements and system said inspect each required problem. P2/P3 returned other problem IDs twice; P4 length twice. Source and config integrity are intact. Scope P1/integration completed and can be reused unchanged with explicit provenance; no full-public rerun.
+
+Design: add a small scoped-prompt helper and FocusedRecoverer in src/task3/completion1.py, a focused runner scripts/task3_completion1.py, and tests/test_task3_completion1.py. Keep every previous frozen module and artifact unchanged. Active statement/problems are separated from verbatim full background requirements/prototypes; full sources/compiler catalogs remain identical. No automatic PID remapping/filtering or fabricated finding. Reuse the existing Recoverer/field selectors/reassessment/renderer/journal. New identity/output v1.6-completion1-20261024; only pending P2/P3/P4 get new scope calls.
+
+- [x] Tests RED: conflicting old active requirements reproduced from actual archived P2 raw; scope projection has only the active required problem while retaining exact full original context/source; unknown/multi-PID scope fails closed; reused scopes make no calls; merge rejects any baseline327 edit and absent328 ID.
+- [x] Implement projection + reused-scope Recoverer; no old module changes. Finite kind/ref helpers unchanged, no teacher-authored diagnoses.
+- [x] Runner inventory and freeze: exact1 ID/level/input/source hashes, baseline327 object+file hashes, previous run file hashes, valid reused scopes and pending scopes, prompt/code/config/tokenizer hashes. At most2 generations per pending length scope,1 reassessment per required problem,2 renderer generations; fixed generated-field ceiling leaves failure unresolved, never drops findings. Same pinned BF16 CUDA local Qwen/config. Preflight before load.
+- [x] Run focused and relevant Task3 regressions/diff checks, then actual single-case inference; per-case checkpoint preserves stage1. Resume identical keys only.
+- [x] Official328 validation +327 per-object identity +original312/history preservation; offline replay no model calls. Inspect S09 findings/evidence/feedback for factual/fidelity/Level/Vietnamese flags separately. Write report/casebook/costs/commands/patch and direct artifact links. No tuning to fix nonblocking quality flags.
+
+Alternatives rejected: reissuing identical old resume cannot open exhausted scopes; accepting/filtering prior out-of-scope responses would evade the recorded coverage contract. Projection addresses contradictory input scope, keeps full context available, and requires model-generated six-field valid outputs under the existing parser.
+
+Recorded result: all three pending scopes returned EOS within one call each; renderer one EOS. Four new text calls,66387 input/850 output tokens,18.70s run. Official328 validation passed;327 and312 baseline hashes all unchanged,327 completion16 files and5571 original v1.6 files unchanged; four cached rows replay with zero model calls. Task3 tests1751 passed,15 skipped. S09 still has factual/Level quality flags, documented for all17 findings without changing output.

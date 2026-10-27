@@ -1,3 +1,0 @@
-extends: self_diagnosis_zero_shot_round10.yaml
-cpp_compiler: /usr/bin/g++
-compiler_timeout_s: 5

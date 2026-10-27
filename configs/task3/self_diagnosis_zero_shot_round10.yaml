@@ -1,3 +1,0 @@
-extends: self_diagnosis_zero_shot.yaml
-experiment_id: TASK3-SELF-DIAG-P7-K0-G2
-prompt_policy_version: 7

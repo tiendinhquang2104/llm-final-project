@@ -1,6 +1,0 @@
-extends: r15_common.yaml
-prompt_variant: one_shot
-prompt_policy: round16-paired-prompts-v1
-completion_policy: schema_only_preserve_content
-example_bank: outputs/task3/round17/train-examples.json
-few_shot_k: 2
