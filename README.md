@@ -10,6 +10,38 @@ This repository provides an end-to-end pipeline designed for the LLM Grading Cha
 - **Task 2: Multi-label Error Classification**: Hướng 1 prompts an API LLM (Gemini/OpenAI) for the submission; Hướng 2 fine-tunes the CLM-8B heads (frozen Qwen3-8B, MLX locally / Kaggle GPU) on the 32 labelled samples plus bug-injection augmentation, evaluated by k-fold CV, with a linear-probe ablation. No labels are derived from the test set. See `docs/task2.md`.
 - **Task 3: Controlled Pedagogical Feedback**: Generates Vietnamese C++ feedback at Levels 1–4 using local Qwen2.5-Coder, with independent oracle/public modes, compliance checks and CUDA QLoRA training. See [docs/task3.md](docs/task3.md).
 
+### Task 3: reproduce the fresh flows
+
+After cloning, use the versioned flow names `r15-repro-v1` and
+`sft-v2-repro-v1`. The complete, current runbook is
+[docs/task3_flow_equivalent.md](docs/task3_flow_equivalent.md).
+
+The shortest setup is:
+
+```bash
+cd /path/to/llm-final-project
+
+PY=/path/to/.venv-task3/bin/python
+TASK3_DATA=/path/to/task3-data
+TASK3_ARTIFACTS=/path/to/task3-artifacts
+HF_CACHE=/path/to/hf-cache
+
+test -d "$TASK3_DATA/processed/task3"
+test -d "$TASK3_DATA/raw/public_test_release"
+test -d "$HF_CACHE"
+
+"$PY" scripts/task3_run.py r15-repro-v1 --check \
+  --artifact-root "$TASK3_ARTIFACTS" \
+  --data-root "$TASK3_DATA" \
+  --model-dir "$HF_CACHE" \
+  --out outputs/task3/reproductions/r15-repro-v1-check
+```
+
+`--check` is offline and does not load a tokenizer or model. Actual inference
+omits `--check` and writes only below `outputs/task3/reproductions/`; it does
+not submit or create a submission candidate. The current fresh runner consumes
+the public 328-record contract and has no development-subset flag.
+
 ## Repository Structure
 
 The codebase is organized into modular packages to isolate concerns between data handling, model inference, training, evaluation, and experiment tracking:

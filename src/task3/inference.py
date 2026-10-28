@@ -117,14 +117,19 @@ def inspect_model_precision(model, *, load_in_4bit):
         raise RuntimeError("Loaded model quantization differs from requested precision")
     if not load_in_4bit and set(dtypes) != {str(torch.bfloat16)}:
         raise RuntimeError("Unquantized Task 3 model parameters must all be torch.bfloat16")
+    quantized_compute_dtypes = []
+    if quantized:
+        import bitsandbytes as bnb
+
+        quantized_compute_dtypes = sorted({str(module.compute_dtype) for module in model.modules()
+                                           if isinstance(module, bnb.nn.Linear4bit)})
     return {
         "actual_precision": "nf4" if quantized else "bf16",
         "parameter_storage_elements_by_dtype": dict(dtypes),
         "parameter_storage_elements_by_device": dict(devices),
         "hf_device_map": device_map,
         "is_loaded_in_4bit": quantized,
-        "quantized_compute_dtypes": sorted({str(module.compute_dtype) for module in model.modules()
-                                           if type(module).__name__ == "Linear4bit"}),
+        "quantized_compute_dtypes": quantized_compute_dtypes,
         "resolved_model_revision": getattr(getattr(model, "config", None), "_commit_hash", None),
     }
 
