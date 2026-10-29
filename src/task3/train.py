@@ -547,7 +547,7 @@ def run_training(
             quantization_config=quant,
             device_map={"": torch.cuda.current_device()},
             attn_implementation=config.get("attn_implementation", "sdpa"),
-            torch_dtype=dtype,
+            dtype=dtype,
         )
     except Exception as exc:
         result.update(
@@ -568,6 +568,10 @@ def run_training(
         use_gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
     )
+    if not bf16:
+        for name, module in model.named_modules():
+            if any(target in name for target in ("lm_head", "embed_tokens")):
+                module.to(dtype)
     if config.get("staged_adapter"):
         from peft import PeftModel
 
@@ -699,7 +703,31 @@ def run_training(
         arguments["save_steps"] = config.get("save_steps", arguments["eval_steps"])
     args = TrainingArguments(**arguments)
     callback = Task3TrainingCallback()
-    trainer = Trainer(
+    class Task3Trainer(Trainer):
+        def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+            labels = inputs.pop("labels", None)
+            outputs = model(**inputs)
+            if labels is None:
+                loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
+                return (loss, outputs) if return_outputs else loss
+
+            logits = getattr(outputs, "logits", None)
+            if logits is None:
+                logits = outputs["logits"] if isinstance(outputs, dict) else outputs[1]
+
+            shift_logits = logits[..., :-1, :]
+            shift_labels = labels[..., 1:].to(shift_logits.device)
+            active_mask = shift_labels != -100
+            if active_mask.any():
+                active_logits = shift_logits[active_mask]
+                active_labels = shift_labels[active_mask]
+                loss = torch.nn.functional.cross_entropy(active_logits.float(), active_labels)
+            else:
+                loss = shift_logits.sum() * 0.0
+
+            return (loss, outputs) if return_outputs else loss
+
+    trainer = Task3Trainer(
         model=model,
         args=args,
         train_dataset=Dataset.from_list(train_rows),
