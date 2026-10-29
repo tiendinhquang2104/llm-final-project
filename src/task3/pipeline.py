@@ -742,7 +742,7 @@ def infer(
                 }
         _write_progress_snapshot(progress, retained, records)
         cached = retained
-    for record in records:
+    for idx, record in enumerate(records, start=1):
         item = prepared[record.sample_id]
         taxonomy = item["taxonomy"]
         demos = item["demos"]
@@ -1023,6 +1023,8 @@ def infer(
                 progress,
                 {"status": "complete", "cache_key": key, "prediction": prediction, "trace": trace},
             )
+        if idx % 10 == 0 or idx == len(records):
+            print(f"[{idx}/{len(records)}] {record.sample_id} ({record.target_feedback_level}) -> latency: {plan_latency + feedback_latency:.2f}s, tokens: {feedback_tokens}", flush=True)
     return outputs, traces
 
 

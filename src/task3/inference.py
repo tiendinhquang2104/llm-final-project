@@ -199,7 +199,13 @@ class HFBackend:
         eos_ids = [eos_ids] if isinstance(eos_ids, int) else (eos_ids or [])
         eos = bool(len(ids) and int(ids[-1]) in eos_ids)
         reason = "eos" if eos else "length" if len(ids) >= options["max_new_tokens"] else "unknown"
-        return Generation(self.tokenizer.decode(ids, skip_special_tokens=True), len(ids), time.perf_counter() - start, reason, eos)
+        text = self.tokenizer.decode(ids, skip_special_tokens=True)
+        length = len(ids)
+        latency = time.perf_counter() - start
+        del inputs, outputs
+        if self.torch.cuda.is_available():
+            self.torch.cuda.empty_cache()
+        return Generation(text, length, latency, reason, eos)
 
 
 def tokenizer_metadata(tokenizer):

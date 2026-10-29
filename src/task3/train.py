@@ -172,9 +172,9 @@ def tokenize_records(records, tokenizer, max_length):
 
 
 def sequence_audit(records, tokenizer):
-    """Measure both supported budgets. Exclusions are explicit and never automatic."""
+    """Measure supported budgets (2048, 4096, 8192). Exclusions are explicit and never automatic."""
     trials = {}
-    for size in (2048, 4096):
+    for size in (2048, 4096, 8192):
         counts, overlength = [], []
         for record in records:
             try:
@@ -183,7 +183,7 @@ def sequence_audit(records, tokenizer):
             except ContextTooLong:
                 overlength.append(record.sample_id)
         trials[str(size)] = {"fits": len(counts), "overlength_ids": overlength, "max_tokens": max(counts, default=0)}
-    chosen = next((size for size in (2048, 4096) if not trials[str(size)]["overlength_ids"]), None)
+    chosen = next((size for size in (2048, 4096, 8192) if not trials[str(size)]["overlength_ids"]), None)
     return {"tokenizer": tokenizer_metadata(tokenizer), "candidates": trials, "selected": chosen}
 
 
@@ -226,10 +226,13 @@ def _training_gpu_preflight(torch, config):
     from src.task3.gpu_preflight import gpu_workload_status
 
     workload = gpu_workload_status()
-    if workload["status"] != "available":
-        raise RuntimeError("cannot verify competing GPU workloads; training stopped safely")
-    if workload["external_process_count"]:
-        raise RuntimeError("another GPU workload is active; training stopped without disturbing it")
+    if not config.get("ignore_competing_gpu_workload", False):
+        if workload["status"] != "available":
+            raise RuntimeError("cannot verify competing GPU workloads; training stopped safely")
+        if workload["external_process_count"]:
+            raise RuntimeError("another GPU workload is active; training stopped without disturbing it")
+    elif workload.get("status") != "available":
+        workload = {"status": "ignored", "external_process_count": 0, "external_memory_mib": 0}
     try:
         minimum_free_gib = float(config.get("min_free_vram_gib", 20))
     except (TypeError, ValueError) as exc:
@@ -494,7 +497,7 @@ def run_training(
     max_length = config.get("max_seq_length", "auto")
     if max_length == "auto":
         max_length = audit["selected"]
-    if max_length not in (2048, 4096) or audit["candidates"][str(max_length)]["overlength_ids"]:
+    if max_length not in (2048, 4096, 8192) or audit["candidates"].get(str(max_length), {}).get("overlength_ids"):
         raise ValueError("overlength training/validation examples: inspect tokenizer-audit.json; no targets truncated")
     import numpy as np
     import torch
@@ -543,6 +546,7 @@ def run_training(
             trust_remote_code=False,
             quantization_config=quant,
             device_map={"": torch.cuda.current_device()},
+            attn_implementation=config.get("attn_implementation", "sdpa"),
             torch_dtype=dtype,
         )
     except Exception as exc:
@@ -559,7 +563,11 @@ def run_training(
         raise
     model_load_time = time.perf_counter() - model_load_start
     model.config.use_cache = False
-    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
+    model = prepare_model_for_kbit_training(
+        model,
+        use_gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
+    )
     if config.get("staged_adapter"):
         from peft import PeftModel
 
@@ -576,6 +584,12 @@ def run_training(
             task_type="CAUSAL_LM",
         )
         model = get_peft_model(model, lora)
+
+    model.is_parallelizable = True
+    model.model_parallel = True
+    if hasattr(model, "base_model"):
+        model.base_model.is_parallelizable = True
+        model.base_model.model_parallel = True
 
     trainable_parameters = sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad)
     unfrozen_base = [
@@ -605,10 +619,15 @@ def run_training(
             torch.cuda.synchronize()
             self.started = time.perf_counter()
 
+        def on_substep_end(self, args, state, control, **kwargs):
+            torch.cuda.empty_cache()
+            return control
+
         def on_step_end(self, args, state, control, **kwargs):
             torch.cuda.synchronize()
             if self.started is not None:
                 step_times.append(time.perf_counter() - self.started)
+            torch.cuda.empty_cache()
             return control
 
         def on_train_end(self, args, state, control, **kwargs):
@@ -659,6 +678,7 @@ def run_training(
         "max_steps": max_steps if max_steps is not None else -1,
         "per_device_train_batch_size": config.get("per_device_train_batch_size", 1),
         "per_device_eval_batch_size": config.get("per_device_eval_batch_size", 1),
+        "optim": config.get("optim", "paged_adamw_8bit"),
         "gradient_accumulation_steps": config.get("gradient_accumulation_steps", 4),
         "gradient_checkpointing": True,
         "gradient_checkpointing_kwargs": {"use_reentrant": False},

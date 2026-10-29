@@ -48,6 +48,16 @@ def prepare_main(argv=None):
     p.add_argument("--filter-synthetic", choices=["none", "strict"], default="strict")
     args = p.parse_args(argv)
     roots = {s: getattr(args, s.replace("-", "_")) for s in ("real", "synthetic", "synthetic-heldout", "public")}
+    public_root = Path(roots["public"])
+    req_path = public_root / "task3_requested_levels.json"
+    if not req_path.is_file() and (public_root / "task3_feedback.json").is_file():
+        t3_feedback = read_json(public_root / "task3_feedback.json")
+        req_map = {
+            s["sample_id"]: s["input"]["target_feedback_level"]
+            for s in t3_feedback.get("samples", [])
+            if "sample_id" in s and "input" in s and "target_feedback_level" in s["input"]
+        }
+        write_json(req_path, req_map)
     result = prepare(roots, args.output, Path(__file__).resolve().parents[2], args.seed, args.filter_synthetic)
     print(
         json.dumps(
