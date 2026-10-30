@@ -126,6 +126,7 @@ def run_main(argv=None):
     p.add_argument("--progress-file")
     p.add_argument("--audit-tokenizer", action="store_true")
     p.add_argument("--sample-ids", help="declared ordered subset for a mechanical pilot; never modifies data")
+    p.add_argument("--context-limit", type=int, help="override context_limit in config")
     p.add_argument("--seed", type=int)
     p.add_argument(
         "--prompt-strategy",
@@ -137,6 +138,8 @@ def run_main(argv=None):
         p.error("synthetic-train requires --sample-ids for an explicitly declared train pilot")
     config = load_config(args.config)
     config = resolve_strategy_config(config, args.prompt_strategy)
+    if args.context_limit is not None:
+        config["context_limit"] = args.context_limit
     if args.adapter:
         config["adapter"] = args.adapter
     if args.seed is not None:

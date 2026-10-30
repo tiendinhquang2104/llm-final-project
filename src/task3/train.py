@@ -304,6 +304,19 @@ def _free_vram_or_none(torch):
     return None
 
 
+def _native_bf16_supported(torch, device=None):
+    if not bool(torch.cuda.is_bf16_supported()):
+        return False
+    get_cap = getattr(torch.cuda, "get_device_capability", None)
+    if callable(get_cap):
+        try:
+            major, _ = get_cap(device) if device is not None else get_cap()
+            return int(major) >= 8
+        except Exception:
+            return True
+    return True
+
+
 def run_training(
     config,
     dry_run=False,
@@ -513,7 +526,7 @@ def run_training(
     )
 
     set_seed(config.get("seed", 42))
-    bf16 = torch.cuda.is_bf16_supported()
+    bf16 = _native_bf16_supported(torch)
     dtype = torch.bfloat16 if bf16 else torch.float16
     tokenization_start = time.perf_counter()
     train_rows, train_audit = tokenize_records(train, tokenizer, max_length)
@@ -568,10 +581,11 @@ def run_training(
         use_gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
     )
-    if not bf16:
-        for name, module in model.named_modules():
-            if any(target in name for target in ("lm_head", "embed_tokens")):
-                module.to(dtype)
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad and any(target in name for target in ("lm_head", "embed_tokens")):
+            parameter.data = parameter.data.to(dtype)
+    if hasattr(torch.cuda, "empty_cache"):
+        torch.cuda.empty_cache()
     if config.get("staged_adapter"):
         from peft import PeftModel
 
@@ -696,6 +710,7 @@ def run_training(
         "load_best_model_at_end": config.get("load_best_model_at_end", True),
         "metric_for_best_model": "eval_loss",
         "greater_is_better": False,
+        "prediction_loss_only": True,
         "push_to_hub": False,
     }
     if arguments["eval_strategy"] == "steps" or arguments["save_strategy"] == "steps":
@@ -703,25 +718,46 @@ def run_training(
         arguments["save_steps"] = config.get("save_steps", arguments["eval_steps"])
     args = TrainingArguments(**arguments)
     callback = Task3TrainingCallback()
+
     class Task3Trainer(Trainer):
         def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
             labels = inputs.pop("labels", None)
-            outputs = model(**inputs)
             if labels is None:
+                outputs = model(**inputs)
                 loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
                 return (loss, outputs) if return_outputs else loss
+
+            shift_labels = labels[..., 1:]
+            active_positions = (shift_labels != -100).nonzero(as_tuple=False)
+            if active_positions.numel() > 0:
+                first_pos = int(active_positions[:, -1].min().item())
+                logits_to_keep = int(labels.shape[-1] - first_pos)
+            else:
+                first_pos = int(shift_labels.shape[-1])
+                logits_to_keep = 1
+
+            try:
+                outputs = model(**inputs, logits_to_keep=logits_to_keep)
+            except TypeError:
+                outputs = model(**inputs)
 
             logits = getattr(outputs, "logits", None)
             if logits is None:
                 logits = outputs["logits"] if isinstance(outputs, dict) else outputs[1]
 
-            shift_logits = logits[..., :-1, :]
-            shift_labels = labels[..., 1:].to(shift_logits.device)
-            active_mask = shift_labels != -100
-            if active_mask.any():
-                active_logits = shift_logits[active_mask]
-                active_labels = shift_labels[active_mask]
-                loss = torch.nn.functional.cross_entropy(active_logits.float(), active_labels)
+            if logits.shape[-2] == logits_to_keep:
+                shift_logits = logits[..., :-1, :]
+                shift_labels = shift_labels[..., first_pos:].to(shift_logits.device)
+            else:
+                shift_logits = logits[..., :-1, :]
+                shift_labels = shift_labels.to(shift_logits.device)
+
+            if active_positions.numel() > 0 and shift_logits.shape[-2] > 0:
+                loss = torch.nn.functional.cross_entropy(
+                    shift_logits.reshape(-1, shift_logits.shape[-1]).float(),
+                    shift_labels.reshape(-1),
+                    ignore_index=-100,
+                )
             else:
                 loss = shift_logits.sum() * 0.0
 
@@ -762,6 +798,8 @@ def run_training(
     write_json(output / "run-start.json", result)
     try:
         trained = trainer.train(resume_from_checkpoint=str(resume_from_checkpoint) if resume_from_checkpoint else None)
+        if hasattr(torch.cuda, "empty_cache"):
+            torch.cuda.empty_cache()
         metrics = trainer.evaluate()
         trainer.save_model(str(output / "adapter"))
         tokenizer.save_pretrained(output / "adapter")
