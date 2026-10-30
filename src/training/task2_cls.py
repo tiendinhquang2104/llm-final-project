@@ -229,6 +229,24 @@ def load_model(mcfg: dict, lcfg: dict | None, train: bool, adapter=None, device_
     return model
 
 
+def is_head(name: str) -> bool:
+    return "score" in name.split(".")
+
+
+def zero_head(model) -> int:
+    """Start the trainable classification head at 0 (every logit 0, p = 0.5). The default random head times the
+    large last hidden state of Qwen gives saturated logits at step 0: BCE of 4-15 and grad norms of 50-500 on
+    Kaggle, so the clipped updates were mostly noise. Returns the number of zeroed tensors."""
+    import torch
+    n = 0
+    with torch.no_grad():
+        for name, p in model.named_parameters():
+            if p.requires_grad and is_head(name):
+                p.zero_()
+                n += 1
+    return n
+
+
 def cast_head_inputs(model) -> int:
     """Feed the classification head in its own dtype. The head is kept in fp32, but at prediction time there is no
     autocast and the backbone returns fp16 hidden states ("expected mat1 and mat2 to have the same dtype: Half !=
@@ -283,6 +301,18 @@ def make_trainer_cls():
         """BCE with per-label pos_weight and per-sample weight (source weight)."""
 
         pos_weight = None
+        head_lr = None  # own learning rate for the (zero-initialised) head; None = args.learning_rate
+
+        def create_optimizer(self, *a, **kw):
+            if self.optimizer is None and self.head_lr:
+                params = [(n, p) for n, p in self.model.named_parameters() if p.requires_grad]
+                head = [p for n, p in params if is_head(n)]
+                rest = [p for n, p in params if not is_head(n)]
+                cls, okw = Trainer.get_optimizer_cls_and_kwargs(self.args, self.model)
+                self.optimizer = cls(
+                    [{"params": rest, "lr": self.args.learning_rate, "weight_decay": self.args.weight_decay},
+                     {"params": head, "lr": float(self.head_lr), "weight_decay": 0.0}], **okw)
+            return super().create_optimizer(*a, **kw)
 
         def compute_loss(self, model, inputs, return_outputs=False, **kw):
             labels = inputs.pop("labels").float()
@@ -354,6 +384,8 @@ def train_run(cfg: dict, train_rows: list[dict], weights: list[float], pos_weigh
         ckpt = hub.pull(run_dir)
     print(f"[train] {run_dir.name}: {len(ds)} rows, resume={ckpt}", flush=True)
     model = load_model(mcfg, cfg["lora"], train=True)
+    if tcfg.get("head_init") == "zero":  # a resumed run then loads its trained head from the checkpoint
+        zero_head(model)
     if hasattr(model, "print_trainable_parameters"):
         model.print_trainable_parameters()
     attn = getattr(getattr(model, "config", None), "_attn_implementation", None)
@@ -377,6 +409,9 @@ def train_run(cfg: dict, train_rows: list[dict], weights: list[float], pos_weigh
     )
     trainer_cls = make_trainer_cls()
     trainer_cls.pos_weight = list(pos_weight)
+    trainer_cls.head_lr = tcfg.get("head_lr")
+    print(f"[train] {run_dir.name}: lr={tcfg['lr']} head_lr={tcfg.get('head_lr')} head_init={tcfg.get('head_init')} "
+          f"warmup_steps={warmup}/{int(total)}", flush=True)
     cbs = make_callbacks(run_dir, deadline, hub)
     trainer = trainer_cls(model=model, args=args, train_dataset=ds, data_collator=DataCollatorWithPadding(tok),
                           callbacks=cbs)

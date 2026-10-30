@@ -141,7 +141,7 @@ def test_tiny_model_pauses_at_deadline_resumes_and_predicts(tmp_path, records):
     cfg = {"seed": 42, "model": {"name": str(model_dir), "load_in_4bit": False, "max_length": 64},
            "lora": {"r": 4, "alpha": 8, "dropout": 0.0, "target_modules": ["q_proj", "v_proj"]},
            "train": {"epochs": 2, "lr": 1e-3, "batch_size": 1, "grad_accum": 2, "save_steps": 1,
-                     "save_total_limit": 2, "logging_steps": 1}}
+                     "save_total_limit": 2, "logging_steps": 1, "head_init": "zero", "head_lr": 1e-2}}
     train = train_records(records, "all")
     w, pw = sample_weights(train), pos_weight(train)
     run = tmp_path / "run"
@@ -210,3 +210,29 @@ def test_drop_full_mask_keeps_padding_masks_and_does_not_change_logits():
     assert torch.allclose(ref, got, atol=1e-5)
     padded = {"input_ids": ids, "attention_mask": torch.cat([torch.ones(1, 8), torch.zeros(1, 4)], 1).long()}
     assert "attention_mask" in drop_full_mask(dict(padded))   # real padding: the mask is kept
+
+
+def test_zero_head_and_its_own_learning_rate(tmp_path):
+    pytest.importorskip("peft")
+    import torch
+    from peft import LoraConfig, TaskType, get_peft_model
+    from transformers import Qwen2Config, Qwen2ForSequenceClassification, TrainingArguments
+
+    from src.training.task2_cls import make_trainer_cls, zero_head
+
+    cfg = Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=1,
+                      num_attention_heads=4, num_key_value_heads=2, num_labels=len(LABELS), pad_token_id=0)
+    model = get_peft_model(Qwen2ForSequenceClassification(cfg), LoraConfig(
+        task_type=TaskType.SEQ_CLS, r=4, lora_alpha=8, target_modules=["q_proj"], modules_to_save=["score"]))
+    assert zero_head(model) == 1
+    with torch.no_grad():
+        logits = model(input_ids=torch.tensor([[5, 6, 7]])).logits
+    assert torch.all(logits == 0)
+    trainer_cls = make_trainer_cls()
+    trainer_cls.head_lr = 1e-3
+    args = TrainingArguments(output_dir=str(tmp_path), learning_rate=5e-5, report_to="none", use_cpu=True)
+    opt = trainer_cls(model=model, args=args).create_optimizer()
+    lrs = sorted(g["lr"] for g in opt.param_groups)
+    assert lrs == [5e-5, 1e-3]
+    head_group = next(g for g in opt.param_groups if g["lr"] == 1e-3)
+    assert sum(p.numel() for p in head_group["params"]) == 32 * len(LABELS)
