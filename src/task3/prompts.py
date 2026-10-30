@@ -126,6 +126,8 @@ def retry_hint(violations, level, version=1):
         if level == 1:
             if "level1_praise_review_candidate" in violations:
                 return "Bài làm đang có lỗi nên tuyệt đối KHÔNG khen đúng, tốt hay hoàn thiện. Viết lại 1 câu ngắn báo nhẹ rằng bài làm còn vấn đề cần rà soát lại theo đề bài; không nêu tên lỗi, vị trí hay cách sửa."
+            if "level1_clean_false_criticism" in violations:
+                return "Bài làm đã đạt kiểm thử (taxonomy_error rỗng), không có lỗi. Hãy viết 1 câu ngắn ghi nhận bài làm đáp ứng yêu cầu của đề bài (ví dụ: 'Bài làm đáp ứng yêu cầu của đề.'); không nhắc cần rà soát hay xem lại."
             return "Viết lại chỉ 1–2 câu động viên trung tính, tự nhiên. Không đánh giá đúng/sai, không nêu lỗi, định danh, vị trí, hướng sửa hay mã."
         if "incomplete_response" in violations:
             return "Phản hồi trước có dấu hiệu bị cắt. Viết ngắn hơn, chỉ giải thích và sửa phần cần thiết; hoàn tất câu, dấu ngoặc và khối mã trong giới hạn."
@@ -134,7 +136,7 @@ def retry_hint(violations, level, version=1):
         if "faulty_AllCorrect_contradiction" in violations:
             return "Bài làm đang có lỗi theo taxonomy_error nên KHÔNG được kết luận 'P1 đúng; P2 đúng; P3 đúng; P4 đúng'. Hãy chỉ rõ hàm nào (prob1/prob2/prob3/prob4) có lỗi hoặc chưa làm và nêu nguyên nhân cụ thể."
         if "cjk_or_foreign_script" in violations:
-            return "Viết lại hoàn toàn bằng tiếng Việt chuẩn, bỏ mọi ký tự tiếng Nga/Trung/ngoại ngữ."
+            return "Viết lại hoàn toàn bằng tiếng Việt chuẩn, không lặp lại mệnh đề và bỏ mọi ký tự ngoại ngữ."
         return retry_hint(violations, level, 2)
     if version != 2:
         raise ValueError("retry_policy_version must be 1, 2, 3 or 4")
@@ -247,6 +249,23 @@ def user_context(record: Task3Record, taxonomy, log_chars=8000, report_chars=800
     )
 
 
+def _cpp_structural_features(code: str) -> set[str]:
+    feats = set()
+    for name, pat in (
+        ("file_io", r"\b(?:ifstream|ofstream|fstream|getline|freopen)\b"),
+        ("pointer_list", r"\b(?:Node\s*\*|->\s*(?:next|left|right)|nullptr|NULL)\b"),
+        ("struct", r"\bstruct\s+[A-Za-z_]\w*"),
+        ("prob14", r"\bprob[1-4]\s*\("),
+        ("dynamic_alloc", r"\bnew\s+[A-Za-z_]\w*"),
+        ("string_ops", r"\b(?:substr|stringstream|stoi|length|size)\b"),
+        ("nested_loop", r"\bfor\s*\([^)]*\)[\s\S]{0,160}?\b(?:for|while)\s*\("),
+        ("math_pow", r"\bpow\s*\("),
+    ):
+        if re.search(pat, code or ""):
+            feats.add(name)
+    return feats
+
+
 def select_exemplars(
     pool,
     target,
@@ -256,6 +275,7 @@ def select_exemplars(
     source_allowlist=None,
     excluded_ids=(),
     same_level_only=False,
+    target_taxonomy=None,
 ):
     if k < 0:
         raise ValueError("few_shot_k must be nonnegative")
@@ -284,7 +304,32 @@ def select_exemplars(
         and not ({r.code_hash, code_hash(r.code, renamed=True)} & blocked_hashes)
         and (not r.group_key or r.group_key not in blocked_groups)
     ]
-    eligible.sort(key=lambda r: (r.target_feedback_level != target.target_feedback_level, r.source, r.sample_id))
+    if target_taxonomy is None:
+        eligible.sort(key=lambda r: (r.target_feedback_level != target.target_feedback_level, r.source, r.sample_id))
+    else:
+        t_labels = set(target_taxonomy)
+        t_clean = not t_labels
+        t_feats = _cpp_structural_features(target.code)
+
+        def _rag_rank(r):
+            r_labels = set(r.gold_taxonomy or ())
+            r_clean = not r_labels
+            union_tax = len(t_labels | r_labels)
+            jaccard_tax = (len(t_labels & r_labels) / union_tax) if union_tax else (1.0 if t_clean == r_clean else 0.0)
+            r_feats = _cpp_structural_features(r.code)
+            union_ast = len(t_feats | r_feats)
+            jaccard_ast = (len(t_feats & r_feats) / union_ast) if union_ast else 0.0
+            return (
+                r.target_feedback_level != target.target_feedback_level,
+                r_clean != t_clean,
+                r.exam_type != target.exam_type,
+                -round(jaccard_tax, 4),
+                r.source != "real",
+                -round(jaccard_ast, 4),
+                r.sample_id,
+            )
+
+        eligible.sort(key=_rag_rank)
     selected, seen = [], set()
     for r in eligible:
         key = r.group_key or r.code_hash
@@ -325,7 +370,13 @@ def build_messages(
         system_addendum = ""
     if level1_modern:
         if prompt_policy_version == 7:
-            system_content = SYSTEM_LEVEL1_V5 + "\n" + LEVEL_POLICY_R10[1]
+            if not taxonomy and not additional_messages:
+                system_content = (
+                    SYSTEM_LEVEL1_V5
+                    + "\nLevel 1: Bài làm không có lỗi trong taxonomy_error (đã qua kiểm thử); chỉ viết 1 câu ngắn ghi nhận bài làm đáp ứng yêu cầu của đề bài (ví dụ: 'Bài làm đáp ứng yêu cầu của đề.'). Không nhắc rà soát hay xem lại, không nêu tên hàm/biến hay mã."
+                )
+            else:
+                system_content = SYSTEM_LEVEL1_V5 + "\n" + LEVEL_POLICY_R10[1]
         else:
             system_content = SYSTEM_LEVEL1_V5 + "\n" + LEVEL1_POLICY_V5 if prompt_policy_version in (5, 6) else SYSTEM_LEVEL1_V4 + LEVEL1_POLICY_V4
     else:

@@ -152,6 +152,7 @@ def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=
                 source_allowlist=config.get("few_shot_source_allowlist"),
                 excluded_ids=config.get("few_shot_excluded_ids", ()),
                 same_level_only=config.get("few_shot_same_level_only", False),
+                target_taxonomy=taxonomy,
             )
             plan_prompts = []
             if structured:
@@ -660,6 +661,7 @@ def infer(
             source_allowlist=config.get("few_shot_source_allowlist"),
             excluded_ids=config.get("few_shot_excluded_ids", ()),
             same_level_only=config.get("few_shot_same_level_only", False),
+            target_taxonomy=taxonomy,
         )
         plan_prompts = []
         if structured:
@@ -861,22 +863,45 @@ def infer(
             try:
                 generated = backend.generate(prompt.messages, config)
             except (RuntimeError, ValueError) as exc:
-                failed_latency = time.perf_counter() - call_started
-                feedback_latency += failed_latency
-                retain_feedback({
-                    "stage": "final_feedback", "violations": ["feedback_generation_failed"],
-                    "model_generated": False, "severe": False, "heuristic_compliance": None,
-                    "failure_type": type(exc).__name__,
-                    "latency_s": failed_latency,
-                    "input_tokens": prompt.input_tokens,
-                    "output_tokens": 0,
-                    "raw_text": None,
-                    "text_available": False,
-                    "error_message": str(exc)[:500],
-                    "effective_exemplar_ids": [d.sample_id for d in demos[:prompt.examples_used]],
-                })
-                feedback_generation_failed = True
-                break
+                if config.get("compact_retry_on_oom", False) and (prompt.log_budget > 500 or prompt.examples_used > 0):
+                    if hasattr(getattr(backend, "torch", None), "cuda"):
+                        backend.torch.cuda.empty_cache()
+                    try:
+                        compact_msgs = build_messages(
+                            record,
+                            taxonomy,
+                            (),
+                            log_chars=400,
+                            report_chars=400,
+                            additional_messages=item["additional_messages"],
+                            system_addendum=item["system_addendum"],
+                            prompt_policy_version=level_policy,
+                        )
+                        if active_retry_instruction:
+                            compact_msgs[0]["content"] += "\n" + active_retry_instruction
+                        generated = backend.generate(compact_msgs, config)
+                    except (RuntimeError, ValueError) as compact_exc:
+                        exc = compact_exc
+                        generated = None
+                else:
+                    generated = None
+                if generated is None:
+                    failed_latency = time.perf_counter() - call_started
+                    feedback_latency += failed_latency
+                    retain_feedback({
+                        "stage": "final_feedback", "violations": ["feedback_generation_failed"],
+                        "model_generated": False, "severe": False, "heuristic_compliance": None,
+                        "failure_type": type(exc).__name__,
+                        "latency_s": failed_latency,
+                        "input_tokens": prompt.input_tokens,
+                        "output_tokens": 0,
+                        "raw_text": None,
+                        "text_available": False,
+                        "error_message": str(exc)[:500],
+                        "effective_exemplar_ids": [d.sample_id for d in demos[:prompt.examples_used]],
+                    })
+                    feedback_generation_failed = True
+                    break
             result = check(generated.text, record.target_feedback_level, version=guard_policy)
             generation_audit = inspect_generation(generated.text, output_tokens=generated.output_tokens, max_new_tokens=config.get("max_new_tokens", 512), finish_reason=generated.finish_reason, eos_reached=generated.eos_reached)
             completion_incomplete = bool(completion_policy and not generation_audit["mechanically_complete"])
@@ -902,9 +927,15 @@ def infer(
             }:
                 retry_reasons.append("level1_praise_review_candidate")
             if config.get("reject_faulty_level1_praise", False):
+                if level_of(record.target_feedback_level) == 1 and not taxonomy and not oracle_context:
+                    if re.search(r"rà soát|xem lại|vấn đề|chưa đúng|cần chú ý", generated.text, re.I):
+                        retry_reasons.append("level1_clean_false_criticism")
                 if bool(taxonomy) and re.search(r"P1\s+đúng;\s*P2\s+đúng;\s*P3\s+đúng;\s*P4\s+đúng", generated.text):
                     retry_reasons.append("faulty_AllCorrect_contradiction")
-                if re.search(r"[\u0400-\u04ff\u3400-\u4dbf\u4e00-\u9fff]|P5\s+không\s+làm", generated.text):
+                if re.search(r"[\u0400-\u04ff\u3400-\u4dbf\u4e00-\u9fff]|P5\s+không\s+làm|câu\s+5:", generated.text, re.I):
+                    retry_reasons.append("cjk_or_foreign_script")
+                clauses = [c.strip() for c in generated.text.split(";") if len(c.strip()) > 25]
+                if len(clauses) != len(set(clauses)):
                     retry_reasons.append("cjk_or_foreign_script")
             retain_feedback(
                 {
@@ -933,7 +964,12 @@ def infer(
         source_review_retry_exhausted = "source_claim_candidate" in retry_reasons
         praise_retry_exhausted = bool(
             config.get("reject_faulty_level1_praise", False)
-            and set(retry_reasons) & {"level1_praise_review_candidate", "faulty_AllCorrect_contradiction", "cjk_or_foreign_script"}
+            and set(retry_reasons) & {
+                "level1_praise_review_candidate",
+                "level1_clean_false_criticism",
+                "faulty_AllCorrect_contradiction",
+                "cjk_or_foreign_script",
+            }
         )
         used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete or adequacy_retry_exhausted or source_review_retry_exhausted or praise_retry_exhausted
         feedback = (

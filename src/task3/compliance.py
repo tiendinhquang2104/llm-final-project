@@ -152,7 +152,7 @@ def fallback(level, taxonomy=None):
             return (
                 "Bài làm cần được rà soát và kiểm tra thêm theo yêu cầu của đề nhé."
                 if taxonomy
-                else "Em hãy tự đối chiếu kỹ kết quả bài làm với các yêu cầu của đề nhé."
+                else "Bài làm đáp ứng yêu cầu của đề."
             )
         if lvl == 2:
             if "Lỗi biên dịch" in taxonomy:
@@ -167,5 +167,7 @@ def fallback(level, taxonomy=None):
                 return "Cách định nghĩa tham số hoặc giá trị trả về của hàm trong bài làm chưa khớp với yêu cầu của đề."
             if taxonomy:
                 return "Logic xử lý và tính toán kết quả trong bài làm hiện chưa đáp ứng đúng yêu cầu của đề bài."
-            return "Hiện chưa phát hiện lỗi cú pháp rõ ràng; em nên kiểm tra thêm các trường hợp biên của đề bài."
+            return "Bài làm xử lý đúng yêu cầu của đề bài."
+        if lvl == 3 and not taxonomy:
+            return "Bài làm chạy đúng yêu cầu của đề."
     return "Chưa đủ cơ sở để đưa ra nhận xét cụ thể đáng tin cậy. Cảm ơn em đã chia sẻ bài làm."

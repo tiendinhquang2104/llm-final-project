@@ -206,6 +206,8 @@ class HFBackend:
         }
         if config.get("repetition_penalty") is not None:
             options["repetition_penalty"] = float(config["repetition_penalty"])
+        if config.get("no_repeat_ngram_size") is not None:
+            options["no_repeat_ngram_size"] = int(config["no_repeat_ngram_size"])
         if config.get("bad_words_ids"):
             options["bad_words_ids"] = config["bad_words_ids"]
         if options["do_sample"]:

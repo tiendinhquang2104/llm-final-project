@@ -415,12 +415,25 @@ def attach_compiler_evidence(records, config):
     compiler = config.get("cpp_compiler")
     timeout = config.get("compiler_timeout_s", 5.0)
     standard = config.get("cpp_standard", "c++11")
+    max_log = config.get("max_compile_log_chars")
+    witness_map = {}
+    witness_path = config.get("runtime_witness_json")
+    if witness_path and Path(witness_path).is_file():
+        try:
+            witness_map = json.loads(Path(witness_path).read_text(encoding="utf-8"))
+        except Exception:
+            witness_map = {}
     enriched = []
     for record in records:
         result = check_cpp_syntax(record.code, compiler=compiler, timeout_s=timeout, standard=standard)
         provenance = {**record.provenance, "_task3_compile_check": result}
         compile_log = result["diagnostic"] if result["status"] == "compile_error" else record.compile_log
-        enriched.append(replace(record, compile_log=compile_log, provenance=provenance))
+        if compile_log and isinstance(max_log, int) and max_log > 0 and len(compile_log) > max_log:
+            compile_log = compile_log[:max_log] + "\n[log trimmed]"
+        test_report = record.test_report
+        if test_report is None and record.sample_id in witness_map:
+            test_report = witness_map[record.sample_id]
+        enriched.append(replace(record, compile_log=compile_log, test_report=test_report, provenance=provenance))
     return enriched
 
 
