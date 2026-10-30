@@ -334,6 +334,8 @@ def audit(records):
                 reasons.append("signal_contradiction_false_praise_l1")
             if re.search(r"P1\s+đúng;\s*P2\s+đúng;\s*P3\s+đúng;\s*P4\s+đúng", feedback):
                 reasons.append("signal_contradiction_robotic_p1_p4_template")
+            if not r.gold_taxonomy and re.search(r"không\s+làm|chưa\s+hoàn\s+thiện|còn\s+lỗ|sai\s+format", feedback, re.I):
+                reasons.append("signal_contradiction_clean_says_incomplete")
         if reasons:
             flags.append({"source": r.source, "sample_id": r.sample_id, "reasons": reasons})
     lengths.sort()
