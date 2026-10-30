@@ -75,6 +75,19 @@ def load_tokenizer(config):
     return tokenizer
 
 
+def _native_bf16_supported(torch, device=None):
+    if not bool(torch.cuda.is_bf16_supported()):
+        return False
+    get_cap = getattr(torch.cuda, "get_device_capability", None)
+    if callable(get_cap):
+        try:
+            major, _ = get_cap(device) if device is not None else get_cap()
+            return int(major) >= 8
+        except Exception:
+            return True
+    return True
+
+
 def model_load_options(config, *, device_index, bf16_supported=None):
     """Keep NF4 unchanged; unquantized inference explicitly requests BF16 on CUDA."""
     import torch
@@ -86,7 +99,7 @@ def model_load_options(config, *, device_index, bf16_supported=None):
         "device_map": {"": device_index},
     }
     if config.get("load_in_4bit", True):
-        supported = torch.cuda.is_bf16_supported() if bf16_supported is None else bf16_supported
+        supported = _native_bf16_supported(torch, device_index) if bf16_supported is None else bf16_supported
         options["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
@@ -152,6 +165,12 @@ class HFBackend:
         started = time.perf_counter()
         options = model_load_options(config, device_index=torch.cuda.current_device())
         self.model = AutoModelForCausalLM.from_pretrained(config["model_id"], **options)
+        if config.get("load_in_4bit", True) and not _native_bf16_supported(torch):
+            for name, parameter in self.model.named_parameters():
+                if not parameter.requires_grad and any(target in name for target in ("lm_head", "embed_tokens")):
+                    parameter.data = parameter.data.to(torch.float16)
+            if hasattr(torch.cuda, "empty_cache"):
+                torch.cuda.empty_cache()
         if config.get("adapter"):
             from peft import PeftModel
 

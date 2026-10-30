@@ -919,7 +919,14 @@ def infer(
         adequacy_retry_exhausted = bool(adequacy_policy and "level3_direction_candidate" in retry_reasons)
         source_review_retry_exhausted = "source_claim_candidate" in retry_reasons
         used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete or adequacy_retry_exhausted or source_review_retry_exhausted
-        feedback = fallback(record.target_feedback_level) if used_fallback else generated.text.strip()
+        feedback = (
+            fallback(
+                record.target_feedback_level,
+                taxonomy if config.get("fallback_text_policy_version", 1) >= 2 else None,
+            )
+            if used_fallback
+            else generated.text.strip()
+        )
         final = check(feedback, record.target_feedback_level, version=guard_policy)
         if not final.ok and not used_fallback:
             raise RuntimeError("internal fallback failed guard")

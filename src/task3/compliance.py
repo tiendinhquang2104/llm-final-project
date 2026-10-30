@@ -145,6 +145,27 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
     return ComplianceResult(not violations, lvl, violations, severe, semantic_status)
 
 
-def fallback(level):
-    level_of(level)
+def fallback(level, taxonomy=None):
+    lvl = level_of(level)
+    if taxonomy is not None:
+        if lvl == 1:
+            return (
+                "Bài làm cần được rà soát và kiểm tra thêm theo yêu cầu của đề nhé."
+                if taxonomy
+                else "Em hãy tự đối chiếu kỹ kết quả bài làm với các yêu cầu của đề nhé."
+            )
+        if lvl == 2:
+            if "Lỗi biên dịch" in taxonomy:
+                return "Bài làm đang có lỗi cú pháp khiến chương trình chưa biên dịch được theo chuẩn C++11."
+            if "Lỗi nhập/xuất" in taxonomy:
+                return "Phần đọc dữ liệu đầu vào hoặc định dạng xuất kết quả trong bài làm chưa khớp với đặc tả của đề."
+            if "Lỗi vòng lặp" in taxonomy:
+                return "Điều kiện dừng hoặc bước cập nhật của vòng lặp trong bài làm chưa xử lý đúng các trường hợp đầu vào."
+            if "Lỗi mảng/chuỗi" in taxonomy:
+                return "Cách truy cập chỉ số hoặc xử lý phần tử trên mảng/chuỗi trong bài làm đang phát sinh sai lệch."
+            if "Lỗi hàm" in taxonomy:
+                return "Cách định nghĩa tham số hoặc giá trị trả về của hàm trong bài làm chưa khớp với yêu cầu của đề."
+            if taxonomy:
+                return "Logic xử lý và tính toán kết quả trong bài làm hiện chưa đáp ứng đúng yêu cầu của đề bài."
+            return "Hiện chưa phát hiện lỗi cú pháp rõ ràng; em nên kiểm tra thêm các trường hợp biên của đề bài."
     return "Chưa đủ cơ sở để đưa ra nhận xét cụ thể đáng tin cậy. Cảm ơn em đã chia sẻ bài làm."

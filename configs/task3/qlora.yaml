@@ -13,8 +13,14 @@ learning_rate: 0.00002
 lr_scheduler_type: cosine
 warmup_ratio: 0.03
 max_grad_norm: 1.0
-epochs: 1
+epochs: 2
 gradient_accumulation_steps: 4
+source_weights:
+  real: 0.65
+  synthetic: 0.35
+prompt_policy_version: 3
+attach_compiler_evidence: true
+cpp_standard: c++11
 ignore_competing_gpu_workload: true
 device_map: auto
 

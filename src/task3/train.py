@@ -150,14 +150,21 @@ def validate_resume_checkpoint(path, metadata):
     return trainer_state["global_step"]
 
 
-def tokenize_records(records, tokenizer, max_length):
+def tokenize_records(records, tokenizer, max_length, *, prompt_policy_version=1):
     rows, audit = [], []
     for r in records:
         # Reserve the full target (including template ending), measured before trimming logs.
         target_budget = len(tokenizer.encode(r.gold_feedback, add_special_tokens=False)) + 32
         if target_budget >= max_length:
             raise ContextTooLong(f"{r.sample_id}: complete target alone exceeds sequence budget")
-        prompt = budget_prompt(r, r.gold_taxonomy, tokenizer, max_length, target_budget)
+        prompt = budget_prompt(
+            r,
+            r.gold_taxonomy,
+            tokenizer,
+            max_length,
+            target_budget,
+            prompt_policy_version=prompt_policy_version,
+        )
         row = encode_completion(tokenizer, prompt.messages, r.gold_feedback, max_length)
         rows.append(row)
         audit.append(
@@ -171,14 +178,14 @@ def tokenize_records(records, tokenizer, max_length):
     return rows, audit
 
 
-def sequence_audit(records, tokenizer):
+def sequence_audit(records, tokenizer, *, prompt_policy_version=1):
     """Measure supported budgets (2048, 4096, 8192). Exclusions are explicit and never automatic."""
     trials = {}
     for size in (2048, 4096, 8192):
         counts, overlength = [], []
         for record in records:
             try:
-                _, audit = tokenize_records([record], tokenizer, size)
+                _, audit = tokenize_records([record], tokenizer, size, prompt_policy_version=prompt_policy_version)
                 counts.append(audit[0]["tokens"])
             except ContextTooLong:
                 overlength.append(record.sample_id)
@@ -502,8 +509,14 @@ def run_training(
             )
             write_json(output / "run.json", result)
             raise
+    if config.get("attach_compiler_evidence", False):
+        from src.task3.diagnosis import attach_compiler_evidence
+
+        train = attach_compiler_evidence(train, config)
+        val = attach_compiler_evidence(val, config)
+    prompt_policy = config.get("prompt_policy_version", 1)
     tokenizer = load_tokenizer(config)
-    audit = sequence_audit(train + val, tokenizer)
+    audit = sequence_audit(train + val, tokenizer, prompt_policy_version=prompt_policy)
     write_json(output / "tokenizer-audit.json", audit)
     if audit_only:
         return {**result, "audit": audit, "gpu_training": "NOT RUN"}
@@ -529,8 +542,8 @@ def run_training(
     bf16 = _native_bf16_supported(torch)
     dtype = torch.bfloat16 if bf16 else torch.float16
     tokenization_start = time.perf_counter()
-    train_rows, train_audit = tokenize_records(train, tokenizer, max_length)
-    val_rows, val_audit = tokenize_records(val, tokenizer, max_length)
+    train_rows, train_audit = tokenize_records(train, tokenizer, max_length, prompt_policy_version=prompt_policy)
+    val_rows, val_audit = tokenize_records(val, tokenizer, max_length, prompt_policy_version=prompt_policy)
     tokenization_time = time.perf_counter() - tokenization_start
     sampled_exposures = dict(Counter(record.source for record in train))
     sampled_records = train
