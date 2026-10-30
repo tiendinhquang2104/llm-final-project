@@ -204,6 +204,8 @@ class HFBackend:
             "do_sample": config.get("do_sample", False),
             "pad_token_id": self.tokenizer.pad_token_id,
         }
+        if config.get("repetition_penalty") is not None:
+            options["repetition_penalty"] = float(config["repetition_penalty"])
         if config.get("bad_words_ids"):
             options["bad_words_ids"] = config["bad_words_ids"]
         if options["do_sample"]:

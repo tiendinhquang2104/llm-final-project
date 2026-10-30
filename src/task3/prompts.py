@@ -124,11 +124,17 @@ def retry_hint(violations, level, version=1):
         return " ".join(details + ["Chỉ 1–2 câu động viên tự nhiên, không phân tích bài và không lặp câu mẫu."])
     if version == 3:
         if level == 1:
+            if "level1_praise_review_candidate" in violations:
+                return "Bài làm đang có lỗi nên tuyệt đối KHÔNG khen đúng, tốt hay hoàn thiện. Viết lại 1 câu ngắn báo nhẹ rằng bài làm còn vấn đề cần rà soát lại theo đề bài; không nêu tên lỗi, vị trí hay cách sửa."
             return "Viết lại chỉ 1–2 câu động viên trung tính, tự nhiên. Không đánh giá đúng/sai, không nêu lỗi, định danh, vị trí, hướng sửa hay mã."
         if "incomplete_response" in violations:
             return "Phản hồi trước có dấu hiệu bị cắt. Viết ngắn hơn, chỉ giải thích và sửa phần cần thiết; hoàn tất câu, dấu ngoặc và khối mã trong giới hạn."
         if "level3_direction_candidate" in violations:
             return "Phản hồi trước chưa thể hiện rõ hướng sửa. Giữ chẩn đoán có căn cứ và thêm một việc cụ thể cần làm theo mã gốc; không viết lời giải đầy đủ."
+        if "faulty_AllCorrect_contradiction" in violations:
+            return "Bài làm đang có lỗi theo taxonomy_error nên KHÔNG được kết luận 'P1 đúng; P2 đúng; P3 đúng; P4 đúng'. Hãy chỉ rõ hàm nào (prob1/prob2/prob3/prob4) có lỗi hoặc chưa làm và nêu nguyên nhân cụ thể."
+        if "cjk_or_foreign_script" in violations:
+            return "Viết lại hoàn toàn bằng tiếng Việt chuẩn, bỏ mọi ký tự tiếng Nga/Trung/ngoại ngữ."
         return retry_hint(violations, level, 2)
     if version != 2:
         raise ValueError("retry_policy_version must be 1, 2, 3 or 4")

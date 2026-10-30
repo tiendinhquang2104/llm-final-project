@@ -325,6 +325,15 @@ def audit(records):
             failed_probe |= bool(re.search(r"\b(?:timeout|crash)\s+[1-9]\d*", report, re.I))
             if not r.gold_taxonomy and (failed_probe or re.search(r"(?:FAIL|TIMEOUT|crash\([^)]+\))", report, re.I)):
                 reasons.append("signal_contradiction_clean")
+            if (
+                r.target_feedback_level.startswith("Level 1")
+                and r.gold_taxonomy
+                and re.search(r"\b(?:đúng|tốt|chính xác|hoàn thiện)\b", feedback, re.I)
+                and not re.search(r"\b(?:chưa|không|nhưng|còn|tuy nhiên)\b", feedback, re.I)
+            ):
+                reasons.append("signal_contradiction_false_praise_l1")
+            if re.search(r"P1\s+đúng;\s*P2\s+đúng;\s*P3\s+đúng;\s*P4\s+đúng", feedback):
+                reasons.append("signal_contradiction_robotic_p1_p4_template")
         if reasons:
             flags.append({"source": r.source, "sample_id": r.sample_id, "reasons": reasons})
     lengths.sort()

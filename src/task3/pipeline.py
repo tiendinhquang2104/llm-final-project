@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import tempfile
 import time
 from dataclasses import asdict
@@ -891,8 +892,20 @@ def infer(
                 retry_reasons.append("level3_direction_candidate")
             if result.ok and "SOURCE_CONTRADICTION_REVIEW_CANDIDATE" in quality_flags["flags"]:
                 retry_reasons.append("source_claim_candidate")
-            if config.get("retry_policy_version") == 4 and guard_policy == 3 and "LEVEL1_PRAISE_EVIDENCE_REVIEW_CANDIDATE" in quality_flags["flags"]:
+            if (
+                (config.get("retry_policy_version") == 4 and guard_policy == 3)
+                or (config.get("reject_faulty_level1_praise", False) and bool(taxonomy))
+            ) and set(quality_flags["flags"]) & {
+                "LEVEL1_PRAISE_EVIDENCE_REVIEW_CANDIDATE",
+                "LEVEL1_UNSUPPORTED_PRAISE_REVIEW_CANDIDATE",
+                "LEVEL1_FALSE_PRAISE_REVIEW_CANDIDATE",
+            }:
                 retry_reasons.append("level1_praise_review_candidate")
+            if config.get("reject_faulty_level1_praise", False):
+                if bool(taxonomy) and re.search(r"P1\s+đúng;\s*P2\s+đúng;\s*P3\s+đúng;\s*P4\s+đúng", generated.text):
+                    retry_reasons.append("faulty_AllCorrect_contradiction")
+                if re.search(r"[\u0400-\u04ff\u3400-\u4dbf\u4e00-\u9fff]|P5\s+không\s+làm", generated.text):
+                    retry_reasons.append("cjk_or_foreign_script")
             retain_feedback(
                 {
                     "stage": "final_feedback",
@@ -918,7 +931,11 @@ def infer(
                 break
         adequacy_retry_exhausted = bool(adequacy_policy and "level3_direction_candidate" in retry_reasons)
         source_review_retry_exhausted = "source_claim_candidate" in retry_reasons
-        used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete or adequacy_retry_exhausted or source_review_retry_exhausted
+        praise_retry_exhausted = bool(
+            config.get("reject_faulty_level1_praise", False)
+            and set(retry_reasons) & {"level1_praise_review_candidate", "faulty_AllCorrect_contradiction", "cjk_or_foreign_script"}
+        )
+        used_fallback = plan_failure or retry_context_blocked or result is None or not result.ok or feedback_generation_failed or completion_incomplete or adequacy_retry_exhausted or source_review_retry_exhausted or praise_retry_exhausted
         feedback = (
             fallback(
                 record.target_feedback_level,
