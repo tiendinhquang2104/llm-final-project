@@ -302,6 +302,14 @@ def make_trainer_cls():
 
         pos_weight = None
         head_lr = None  # own learning rate for the (zero-initialised) head; None = args.learning_rate
+        # compute_loss returns a per-batch mean: the Trainer must divide it by grad_accum. Qwen's forward takes
+        # **kwargs, so without this the Trainer assumed the loss was already normalised by num_items_in_batch and
+        # logged (and back-propagated) 16x the loss: "loss 14" at step 1 of a zero head was 0.88.
+        loss_is_scaled_for_ga = False
+
+        def __init__(self, *a, **kw):
+            super().__init__(*a, **kw)
+            self.model_accepts_loss_kwargs = False  # same fix on transformers versions without loss_is_scaled_for_ga
 
         def create_optimizer(self, *a, **kw):
             if self.optimizer is None and self.head_lr:

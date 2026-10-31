@@ -236,3 +236,30 @@ def test_zero_head_and_its_own_learning_rate(tmp_path):
     assert lrs == [5e-5, 1e-3]
     head_group = next(g for g in opt.param_groups if g["lr"] == 1e-3)
     assert sum(p.numel() for p in head_group["params"]) == 32 * len(LABELS)
+
+
+def test_logged_loss_is_the_mean_bce_under_grad_accumulation(tmp_path):
+    pytest.importorskip("peft")
+    import torch
+    from transformers import Qwen2Config, Qwen2ForSequenceClassification, TrainingArguments
+
+    from src.training.task2_cls import _Rows, make_trainer_cls, zero_head
+
+    cfg = Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=1,
+                      num_attention_heads=4, num_key_value_heads=2, num_labels=len(LABELS), pad_token_id=0)
+    model = Qwen2ForSequenceClassification(cfg)
+    zero_head(model)  # logits 0: BCE = ln 2 per label whatever the labels (pos_weight 1)
+    for p in model.parameters():
+        p.requires_grad_(False)
+    model.score.weight.requires_grad_(True)
+    enc = [{"input_ids": [5, 6, 7, 8]} for _ in range(8)]
+    ds = _Rows(enc, [[1] + [0] * (len(LABELS) - 1)] * 8, [1.0] * 8)
+    args = TrainingArguments(output_dir=str(tmp_path), per_device_train_batch_size=1, gradient_accumulation_steps=4,
+                             max_steps=1, learning_rate=0.0, logging_steps=1, report_to="none", use_cpu=True,
+                             remove_unused_columns=False)
+    trainer_cls = make_trainer_cls()
+    trainer_cls.pos_weight = [1.0] * len(LABELS)
+    trainer = trainer_cls(model=model, args=args, train_dataset=ds)
+    trainer.train()
+    loss = next(h["loss"] for h in trainer.state.log_history if "loss" in h)
+    assert abs(loss - float(torch.log(torch.tensor(2.0)))) < 1e-3
