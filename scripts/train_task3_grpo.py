@@ -28,13 +28,43 @@ from src.task3.grpo_trainer import GRPOTrainingConfig, StandaloneGRPOTrainer
 def load_training_samples(data_path: str) -> list[dict]:
     """Load training samples from specified file or search canonical paths."""
     p = Path(data_path)
+    if p.is_dir():
+        samples = []
+        for name in ["real-train.json", "synthetic-train.json", "train.json"]:
+            sp = p / name
+            if sp.exists():
+                with open(sp, "r", encoding="utf-8-sig") as f:
+                    part_data = json.load(f)
+                items = part_data.get("samples", part_data) if isinstance(part_data, dict) else part_data
+                samples.extend(items)
+        if samples:
+            print(f"[DATA] Loaded {len(samples)} training samples from directory: {p}")
+            return samples
+
     if not p.exists():
         candidates = [
+            repo_root / "data" / "processed" / "task3" / "real-train.json",
+            repo_root / "data" / "processed" / "task3" / "synthetic-train.json",
             repo_root / "data" / "processed" / "task3_train.json",
             repo_root / "data" / "processed" / "task3_synthetic_curated.json",
             repo_root / "data" / "processed" / "task3_requested_levels.json",
             repo_root / "data" / "raw" / "task3_feedback.json",
         ]
+        # Also check if data/processed/task3 directory exists
+        proc_t3 = repo_root / "data" / "processed" / "task3"
+        if proc_t3.is_dir():
+            samples = []
+            for name in ["real-train.json", "synthetic-train.json"]:
+                sp = proc_t3 / name
+                if sp.exists():
+                    with open(sp, "r", encoding="utf-8-sig") as f:
+                        part_data = json.load(f)
+                    items = part_data.get("samples", part_data) if isinstance(part_data, dict) else part_data
+                    samples.extend(items)
+            if samples:
+                print(f"[DATA] Loaded {len(samples)} training samples from {proc_t3}")
+                return samples
+
         for c in candidates:
             if c.exists():
                 p = c
