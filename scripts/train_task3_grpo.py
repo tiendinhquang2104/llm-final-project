@@ -25,60 +25,93 @@ sys.path.insert(0, str(repo_root))
 from src.task3.grpo_trainer import GRPOTrainingConfig, StandaloneGRPOTrainer
 
 
+def _load_records_from_file(file_path: Path) -> list[dict]:
+    if not file_path.is_file():
+        return []
+    records = []
+    if file_path.suffix == ".jsonl":
+        with open(file_path, "r", encoding="utf-8-sig") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        row = json.loads(line)
+                        records.append(row.get("record", row))
+                    except Exception:
+                        pass
+    else:
+        with open(file_path, "r", encoding="utf-8-sig") as f:
+            data = json.load(f)
+        if isinstance(data, list):
+            records = [r.get("record", r) if isinstance(r, dict) else r for r in data]
+        elif isinstance(data, dict):
+            items = data.get("samples", [data])
+            records = [r.get("record", r) if isinstance(r, dict) else r for r in items]
+    return records
+
+
 def load_training_samples(data_path: str) -> list[dict]:
-    """Load training samples from specified file or search canonical paths."""
+    """Load training samples from specified file or directory, with full .jsonl and .json support."""
     p = Path(data_path)
+    if not p.is_absolute():
+        p = repo_root / p
+
+    # 1. If path is a directory (e.g. data/processed/task3)
     if p.is_dir():
         samples = []
-        for name in ["real-train.json", "synthetic-train.json", "train.json"]:
+        for name in [
+            "real-train.jsonl",
+            "synthetic-train.jsonl",
+            "real-train.json",
+            "synthetic-train.json",
+            "train.jsonl",
+            "train.json",
+        ]:
             sp = p / name
-            if sp.exists():
-                with open(sp, "r", encoding="utf-8-sig") as f:
-                    part_data = json.load(f)
-                items = part_data.get("samples", part_data) if isinstance(part_data, dict) else part_data
-                samples.extend(items)
+            samples.extend(_load_records_from_file(sp))
         if samples:
             print(f"[DATA] Loaded {len(samples)} training samples from directory: {p}")
             return samples
 
-    if not p.exists():
-        candidates = [
-            repo_root / "data" / "processed" / "task3" / "real-train.json",
-            repo_root / "data" / "processed" / "task3" / "synthetic-train.json",
-            repo_root / "data" / "processed" / "task3_train.json",
-            repo_root / "data" / "processed" / "task3_synthetic_curated.json",
-            repo_root / "data" / "processed" / "task3_requested_levels.json",
-            repo_root / "data" / "raw" / "task3_feedback.json",
-        ]
-        # Also check if data/processed/task3 directory exists
-        proc_t3 = repo_root / "data" / "processed" / "task3"
-        if proc_t3.is_dir():
-            samples = []
-            for name in ["real-train.json", "synthetic-train.json"]:
-                sp = proc_t3 / name
-                if sp.exists():
-                    with open(sp, "r", encoding="utf-8-sig") as f:
-                        part_data = json.load(f)
-                    items = part_data.get("samples", part_data) if isinstance(part_data, dict) else part_data
-                    samples.extend(items)
-            if samples:
-                print(f"[DATA] Loaded {len(samples)} training samples from {proc_t3}")
-                return samples
+        # Fallback: any .jsonl or .json in directory (excluding public and manifest)
+        for sp in sorted(p.glob("*.jsonl")) + sorted(p.glob("*.json")):
+            if "manifest" in sp.name or "public" in sp.name or "levels" in sp.name:
+                continue
+            samples.extend(_load_records_from_file(sp))
+        if samples:
+            print(f"[DATA] Loaded {len(samples)} training samples from files in {p}")
+            return samples
+        raise FileNotFoundError(f"Directory {p} exists but contains no usable training data files.")
 
-        for c in candidates:
-            if c.exists():
-                p = c
-                break
+    # 2. If path is a specific file
+    if p.is_file():
+        samples = _load_records_from_file(p)
+        if samples:
+            print(f"[DATA] Loaded {len(samples)} training samples from file: {p}")
+            return samples
 
-    if not p.exists():
-        raise FileNotFoundError(f"Cannot find training dataset at {data_path} or canonical paths.")
+    # 3. Canonical fallback search
+    fallbacks = [
+        repo_root / "data" / "processed" / "task3",
+        repo_root / "data" / "processed" / "task3_train.json",
+        repo_root / "data" / "processed" / "task3_synthetic_curated.json",
+        repo_root / "data" / "raw" / "sample_dataset" / "task3_feedback.json",
+    ]
+    for c in fallbacks:
+        if c.is_dir():
+            try:
+                s = load_training_samples(str(c))
+                if s:
+                    return s
+            except Exception:
+                pass
+        elif c.is_file():
+            s = _load_records_from_file(c)
+            if s:
+                print(f"[DATA] Loaded {len(s)} training samples from fallback: {c}")
+                return s
 
-    with open(p, "r", encoding="utf-8-sig") as f:
-        data = json.load(f)
-
-    samples = data.get("samples", data) if isinstance(data, dict) else data
-    print(f"[DATA] Loaded {len(samples)} training samples from {p}")
-    return samples
+    raise FileNotFoundError(f"Cannot find training dataset at {data_path} or any canonical fallback paths.")
 
 
 def parse_args():

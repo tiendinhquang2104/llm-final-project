@@ -65,8 +65,8 @@ def extract_prompt_and_metadata(item: Dict[str, Any]) -> Dict[str, Any]:
     lvl = inp.get("target_feedback_level", "Level 2 - Chẩn đoán")
     clog = inp.get("compile_log", "")
     code = inp.get("student_code", "") or inp.get("code", "")
-    reqs = inp.get("problem_description", "") or inp.get("requirements", "")
-    gt_tax = item.get("output", {}).get("taxonomy_error", None)
+    reqs = inp.get("problem_description", "") or inp.get("requirements", "") or inp.get("statement", "")
+    gt_tax = item.get("output", {}).get("taxonomy_error", None) if isinstance(item.get("output"), dict) else (item.get("gold_taxonomy") or item.get("taxonomy_error"))
 
     # Standard Vietnamese Prompt for Task 3
     system_prompt = (
