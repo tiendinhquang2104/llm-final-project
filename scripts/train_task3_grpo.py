@@ -210,11 +210,11 @@ def main():
         )
         model = get_peft_model(base_model, lora_config)
 
-    # Enable gradient checkpointing to drastically cut VRAM
-    if hasattr(model, "gradient_checkpointing_enable"):
-        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    # Prepare model for gradient checkpointing during training
     if hasattr(base_model, "enable_input_require_grads"):
         base_model.enable_input_require_grads()
+    if hasattr(base_model.config, "use_cache"):
+        base_model.config.use_cache = True
 
     model.print_trainable_parameters()
 

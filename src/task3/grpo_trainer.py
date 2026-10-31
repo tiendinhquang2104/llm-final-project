@@ -41,8 +41,8 @@ class GRPOTrainingConfig:
     temperature: float = 0.8
     top_p: float = 0.95
     seed: int = 42
-    save_steps: int = 20
-    logging_steps: int = 5
+    save_steps: int = 10
+    logging_steps: int = 1
 
 
 def compute_group_advantages(rewards: Sequence[float], eps: float = 1e-4) -> Any:
@@ -159,8 +159,13 @@ class StandaloneGRPOTrainer:
             prompt_ids = prompt_inputs["input_ids"].to(self.model.device)
             prompt_len = prompt_ids.shape[1]
 
-            # 2. Sample G completions from current policy
+            # 2. Sample G completions from current policy (ENABLE FAST KV-CACHE)
             self.model.eval()
+            if hasattr(self.model, "gradient_checkpointing_disable"):
+                self.model.gradient_checkpointing_disable()
+            if hasattr(self.model.config, "use_cache"):
+                self.model.config.use_cache = True
+
             with torch.no_grad():
                 gen_out = self.model.generate(
                     prompt_ids,
@@ -170,6 +175,7 @@ class StandaloneGRPOTrainer:
                     max_new_tokens=cfg.max_new_tokens,
                     num_return_sequences=cfg.group_size,
                     pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
+                    use_cache=True,
                 )
 
             # 3. Clear generation cache and decode completions
@@ -198,8 +204,14 @@ class StandaloneGRPOTrainer:
             # 4. Compute Group Advantages
             advantages = compute_group_advantages(rewards).to(self.model.device)
 
-            # 5 & 6. Micro-batched Policy Log-Probs, Ref Log-Probs, and Backprop (Batch Size 1 per sequence)
+            # 5 & 6. Micro-batched Policy Log-Probs, Ref Log-Probs, and Backprop
+            # Switch to train mode: disable KV-cache and enable gradient checkpointing for minimal VRAM
             self.model.train()
+            if hasattr(self.model.config, "use_cache"):
+                self.model.config.use_cache = False
+            if hasattr(self.model, "gradient_checkpointing_enable"):
+                self.model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+
             step_loss_val = 0.0
 
             for i in range(cfg.group_size):
@@ -271,7 +283,8 @@ class StandaloneGRPOTrainer:
                     f"Loss: {accum_loss:.4f} | "
                     f"Mean Reward: {mean_reward:+.2f} | "
                     f"Compliance: {mean_compliance:+.2f} | "
-                    f"Level: {sample['target_feedback_level']}"
+                    f"Level: {sample['target_feedback_level']}",
+                    flush=True,
                 )
                 accum_loss = 0.0
 
@@ -293,4 +306,4 @@ class StandaloneGRPOTrainer:
         if hasattr(self.model, "save_pretrained"):
             self.model.save_pretrained(str(out_dir))
         self.tokenizer.save_pretrained(str(out_dir))
-        print(f"[GRPO] Calibrated adapter checkpoint saved to {out_dir}")
+        print(f"[GRPO] Calibrated adapter checkpoint saved to {out_dir}", flush=True)
