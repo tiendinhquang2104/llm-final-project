@@ -16,22 +16,14 @@ Engineered under DeepSeek-R1 / RLVR post-training best practices:
 from __future__ import annotations
 
 import json
+import math
 import re
+from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 from src.synth.taxonomy import LABEL_SPACE
 from src.task3.compliance import check as compliance_check
 from src.utils.json_extractor import extract_json_objects
-
-# Known phrases indicating language degeneration from overfitted adapters
-DEGENERATION_PATTERNS = [
-    re.compile(r"học em kỹ", re.IGNORECASE),
-    re.compile(r"gọi em làm em", re.IGNORECASE),
-    re.compile(r"bài tập em còn một chỗ", re.IGNORECASE),
-    re.compile(r"code chưa hoàn thiện\.\.\.", re.IGNORECASE),
-    re.compile(r"làm em nhé", re.IGNORECASE),
-    re.compile(r"chúc em làm tốt\.\s*chúc em làm tốt", re.IGNORECASE),
-]
 
 
 def parse_completion(text: str) -> Optional[Dict[str, Any]]:
@@ -268,33 +260,72 @@ def pedagogical_density_reward_func(
 
 
 # -----------------------------------------------------------------------------
-# Tier 5: Anti-Degeneration, N-gram Diversity & Action Directives
+# Tier 5: Statistical & Information-Theoretic Diversity (Anti-Degeneration)
 # -----------------------------------------------------------------------------
 def anti_degeneration_reward_func(completions: Sequence[str], **kwargs) -> List[float]:
-    """Penalizes repetitive n-grams and known adapter degeneration artifacts."""
+    """Penalizes language degeneration via statistical and information-theoretic metrics.
+
+    Instead of brittle regex heuristics, applies formal NLP criteria:
+    1. Consecutive sentence echoing (Jaccard similarity >= 0.60 -> -3.0).
+    2. Trigram cycle & attractor loop detection (max repetition >= 2 or Distinct-3 < 0.80 -> -2.5).
+    3. Bigram diversity ratio (Distinct-2 < 0.72 -> -2.0).
+    4. Type-Token Ratio (TTR < 0.60) & Shannon unigram entropy floor (H < 3.2 -> -2.0).
+    5. Clean, diverse text receives +1.0.
+    """
     rewards = []
     for c in completions:
         data = parse_completion(c)
         fb = data.get("feedback", "") if data else c
-
-        # Check corrupted phrases
-        corrupted = False
-        for pattern in DEGENERATION_PATTERNS:
-            if pattern.search(fb):
-                corrupted = True
-                break
-
-        if corrupted:
-            rewards.append(-3.0)  # Strict penalty for corrupted language
+        if not fb or not isinstance(fb, str):
+            rewards.append(-3.0)
             continue
 
-        # Check repetition: ratio of unique 3-grams to total 3-grams
-        words = fb.lower().split()
-        if len(words) >= 14:
-            trigrams = [tuple(words[i : i + 3]) for i in range(len(words) - 2)]
-            unique_ratio = len(set(trigrams)) / max(1, len(trigrams))
-            if unique_ratio < 0.70:
-                rewards.append(-2.0)  # High repetitive looping
+        words = [w for w in re.findall(r"\w+", fb.lower()) if w]
+        n_words = len(words)
+        if n_words < 5:
+            rewards.append(-2.0)
+            continue
+
+        # 1. Consecutive sentence / clause echoing (e.g. repeated greetings or instructions)
+        sentences = [re.findall(r"\w+", s.lower()) for s in re.split(r"[.!?\n;]+", fb) if s.strip()]
+        sentences = [s for s in sentences if len(s) >= 3]
+        has_sentence_echo = False
+        for i in range(len(sentences) - 1):
+            s1, s2 = set(sentences[i]), set(sentences[i + 1])
+            if s1 and s2:
+                jaccard = len(s1 & s2) / len(s1 | s2)
+                if jaccard >= 0.60:
+                    has_sentence_echo = True
+                    break
+        if has_sentence_echo:
+            rewards.append(-3.0)
+            continue
+
+        # 2. Trigram cycle & max multiplicity detection
+        if n_words >= 8:
+            trigrams = [tuple(words[i : i + 3]) for i in range(n_words - 2)]
+            counts = Counter(trigrams)
+            max_rep = counts.most_common(1)[0][1] if counts else 1
+            distinct_3 = len(counts) / max(1, len(trigrams))
+            if max_rep >= 2 or distinct_3 < 0.80:
+                rewards.append(-2.5)
+                continue
+
+        # 3. Bigram diversity ratio
+        if n_words >= 10:
+            bigrams = [tuple(words[i : i + 2]) for i in range(n_words - 1)]
+            distinct_2 = len(set(bigrams)) / max(1, len(bigrams))
+            if distinct_2 < 0.72:
+                rewards.append(-2.0)
+                continue
+
+        # 4. Type-Token Ratio (TTR) & Shannon unigram entropy
+        if n_words >= 12:
+            ttr = len(set(words)) / n_words
+            word_counts = Counter(words)
+            entropy = -sum((cnt / n_words) * math.log2(cnt / n_words) for cnt in word_counts.values())
+            if ttr < 0.60 or entropy < 3.2:
+                rewards.append(-2.0)
                 continue
 
         rewards.append(1.0)
