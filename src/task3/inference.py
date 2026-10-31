@@ -196,6 +196,8 @@ class HFBackend:
         }
 
     def generate(self, messages, config):
+        import gc
+
         inputs = self.tokenizer.apply_chat_template(
             messages, tokenize=True, add_generation_prompt=True, return_tensors="pt", return_dict=True
         ).to(self.model.device)
@@ -214,21 +216,25 @@ class HFBackend:
             options.update(temperature=config.get("temperature", 0.7), top_p=config.get("top_p", 0.9))
         self.torch.cuda.synchronize()
         start = time.perf_counter()
-        with self.torch.inference_mode():
-            outputs = self.model.generate(**inputs, **options)
-        self.torch.cuda.synchronize()
-        ids = outputs[0, inputs["input_ids"].shape[-1] :]
-        eos_ids = self.model.generation_config.eos_token_id
-        eos_ids = [eos_ids] if isinstance(eos_ids, int) else (eos_ids or [])
-        eos = bool(len(ids) and int(ids[-1]) in eos_ids)
-        reason = "eos" if eos else "length" if len(ids) >= options["max_new_tokens"] else "unknown"
-        text = self.tokenizer.decode(ids, skip_special_tokens=True)
-        length = len(ids)
-        latency = time.perf_counter() - start
-        del inputs, outputs
-        if self.torch.cuda.is_available():
-            self.torch.cuda.empty_cache()
-        return Generation(text, length, latency, reason, eos)
+        outputs = None
+        try:
+            with self.torch.inference_mode():
+                outputs = self.model.generate(**inputs, **options)
+            self.torch.cuda.synchronize()
+            ids = outputs[0, inputs["input_ids"].shape[-1] :]
+            eos_ids = self.model.generation_config.eos_token_id
+            eos_ids = [eos_ids] if isinstance(eos_ids, int) else (eos_ids or [])
+            eos = bool(len(ids) and int(ids[-1]) in eos_ids)
+            reason = "eos" if eos else "length" if len(ids) >= options["max_new_tokens"] else "unknown"
+            text = self.tokenizer.decode(ids, skip_special_tokens=True)
+            length = len(ids)
+            latency = time.perf_counter() - start
+            return Generation(text, length, latency, reason, eos)
+        finally:
+            del inputs, outputs
+            gc.collect()
+            if self.torch.cuda.is_available():
+                self.torch.cuda.empty_cache()
 
 
 def tokenizer_metadata(tokenizer):

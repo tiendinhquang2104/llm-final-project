@@ -19,7 +19,7 @@ from src.task3.diagnosis import parse_taxonomy_diagnosis, untrusted_diagnosis_me
 from src.task3.oracle_findings import oracle_finding_message, validate_oracle_scope
 from src.task3.generation_audit import inspect_generation
 from src.task3.inference import tokenizer_metadata
-from src.task3.prompts import RETRY_HINT, ContextTooLong, budget_prompt, exemplar_feedback, retry_hint, select_exemplars
+from src.task3.prompts import RETRY_HINT, ContextTooLong, budget_prompt, build_messages, exemplar_feedback, retry_hint, select_exemplars
 from src.task3.quality_review import quality_review_flags
 from src.task3.schema import validate_taxonomy
 from src.task3.strategy import (
@@ -863,7 +863,9 @@ def infer(
             try:
                 generated = backend.generate(prompt.messages, config)
             except (RuntimeError, ValueError) as exc:
-                if config.get("compact_retry_on_oom", False) and (prompt.log_budget > 500 or prompt.examples_used > 0):
+                if config.get("compact_retry_on_oom", False):
+                    import gc
+                    gc.collect()
                     if hasattr(getattr(backend, "torch", None), "cuda"):
                         backend.torch.cuda.empty_cache()
                     try:
@@ -871,8 +873,8 @@ def infer(
                             record,
                             taxonomy,
                             (),
-                            log_chars=400,
-                            report_chars=400,
+                            log_chars=300,
+                            report_chars=300,
                             additional_messages=item["additional_messages"],
                             system_addendum=item["system_addendum"],
                             prompt_policy_version=level_policy,
