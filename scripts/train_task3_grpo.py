@@ -114,6 +114,28 @@ def load_training_samples(data_path: str) -> list[dict]:
     raise FileNotFoundError(f"Cannot find training dataset at {data_path} or any canonical fallback paths.")
 
 
+def load_validation_samples(data_path: str) -> list[dict]:
+    """Load validation samples for tracking Dev Macro-F1 checkpointing."""
+    p = Path(data_path)
+    if not p.is_absolute():
+        p = repo_root / p
+    val_samples = []
+    if p.is_dir():
+        for name in [
+            "real-val.jsonl",
+            "synthetic-heldout.jsonl",
+            "real-val.json",
+            "synthetic-heldout.json",
+            "val.jsonl",
+            "val.json",
+        ]:
+            sp = p / name
+            val_samples.extend(_load_records_from_file(sp))
+    if val_samples:
+        print(f"[DATA] Loaded {len(val_samples)} validation samples for dev tracking from {p}")
+    return val_samples
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Task 3 RLVR + GRPO Trainer")
     parser.add_argument("--base-model", type=str, default="Qwen/Qwen2.5-Coder-7B-Instruct")
@@ -149,6 +171,7 @@ def main():
 
     # 1. Load Data
     train_samples = load_training_samples(args.train_data)
+    val_samples = load_validation_samples(args.train_data)
 
     # 2. Setup Config
     cfg = GRPOTrainingConfig(
@@ -226,6 +249,7 @@ def main():
         tokenizer=tokenizer,
         config=cfg,
         train_items=train_samples,
+        val_items=val_samples,
     )
 
     result = trainer.train()

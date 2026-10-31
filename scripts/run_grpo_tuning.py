@@ -29,35 +29,15 @@ from src.task3.rlvr_rewards import compute_composite_reward
 
 TRIALS = [
     {
-        "name": "trial1_g6_b002_lr8e6",
-        "description": "Balanced DeepSeek Target (G=6, LR=8e-6, beta=0.02)",
+        "name": "targeted_g6_b002_lr5e6_steps65",
+        "description": "Optimal RLVR Alignment with Dev Macro-F1 Checkpoint Selection (G=6, LR=5e-6, beta=0.02, steps=65)",
         "group_size": 6,
-        "learning_rate": 8e-6,
+        "learning_rate": 5e-6,
         "kl_beta": 0.02,
         "clip_range": 0.15,
-        "max_steps": 35,
+        "max_steps": 65,
         "gradient_accumulation_steps": 2,
-    },
-    {
-        "name": "trial2_g8_b0015_lr1e5",
-        "description": "High Diversity Exploration (G=8, LR=1e-5, beta=0.015)",
-        "group_size": 8,
-        "learning_rate": 1e-5,
-        "kl_beta": 0.015,
-        "clip_range": 0.20,
-        "max_steps": 30,
-        "gradient_accumulation_steps": 2,
-    },
-    {
-        "name": "trial3_g6_b003_lr6e6",
-        "description": "Conservative High-Precision (G=6, LR=6e-6, beta=0.03)",
-        "group_size": 6,
-        "learning_rate": 6e-6,
-        "kl_beta": 0.03,
-        "clip_range": 0.10,
-        "max_steps": 35,
-        "gradient_accumulation_steps": 4,
-    },
+    }
 ]
 
 

@@ -27,7 +27,11 @@ from src.task3.compliance import check
 from src.task3.submission import validate_submission, load_requested_levels
 
 DEFAULT_BENCHMARK = repo_root / "outputs" / "task3" / "gold_reference_public.predictions.json"
-DEFAULT_REQUESTED = repo_root / "data" / "processed" / "task3_requested_levels.json"
+DEFAULT_REQUESTED = (
+    repo_root / "data" / "processed" / "task3_requested_levels.json"
+    if (repo_root / "data" / "processed" / "task3_requested_levels.json").exists()
+    else repo_root / "data" / "raw" / "public_test_release" / "task3_requested_levels.json"
+)
 
 
 def evaluate_taxonomy(gold_pairs):

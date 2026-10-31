@@ -197,7 +197,14 @@ def ground_truth_taxonomy_reward_func(
     ground_truth_taxonomy: Sequence[Optional[List[str]]],
     **kwargs,
 ) -> List[float]:
-    """Awards F1 alignment reward when ground truth taxonomy is available."""
+    """Awards class-aware asymmetric F1 alignment reward when ground truth taxonomy is available.
+
+    Mitigates Macro-F1 distortions:
+    1. Severe penalty for False Positives on over-predicted rare labels (Lỗi nhập/xuất: -3.0, Lỗi hard-code: -3.0).
+    2. Penalty for False Negatives on under-recalled rare labels (Lỗi edge case: -2.5, Lỗi style: -2.0).
+    3. High reward bonus for True Positives on difficult rare labels (Lỗi edge case: +3.5, Lỗi nhập/xuất: +2.5).
+    4. Base multi-label F1 scaling (+2.5 * F1).
+    """
     rewards = []
     for c, gt_tax in zip(completions, ground_truth_taxonomy):
         if gt_tax is None:
@@ -208,19 +215,40 @@ def ground_truth_taxonomy_reward_func(
         pred_tax = set(data.get("taxonomy_error", [])) if data else set()
         gt_set = set(gt_tax)
 
-        # Penalize false prediction of Lỗi hard-code (since GT support is 0)
-        hard_code_penalty = -1.5 if "Lỗi hard-code" in pred_tax and "Lỗi hard-code" not in gt_set else 0.0
+        asymmetric_adj = 0.0
+
+        # 1. False Positive Penalties (Suppress over-prediction)
+        if "Lỗi nhập/xuất" in pred_tax and "Lỗi nhập/xuất" not in gt_set:
+            asymmetric_adj -= 3.0
+        if "Lỗi hard-code" in pred_tax and "Lỗi hard-code" not in gt_set:
+            asymmetric_adj -= 3.0
+
+        # 2. False Negative Penalties (Penalize missing rare bugs)
+        if "Lỗi edge case" in gt_set and "Lỗi edge case" not in pred_tax:
+            asymmetric_adj -= 2.5
+        if "Lỗi style" in gt_set and "Lỗi style" not in pred_tax:
+            asymmetric_adj -= 2.0
+
+        # 3. True Positive Bonuses (Incentivize precision on rare categories)
+        if "Lỗi edge case" in pred_tax and "Lỗi edge case" in gt_set:
+            asymmetric_adj += 3.5
+        if "Lỗi nhập/xuất" in pred_tax and "Lỗi nhập/xuất" in gt_set:
+            asymmetric_adj += 2.5
+        if "Lỗi vòng lặp" in pred_tax and "Lỗi vòng lặp" in gt_set:
+            asymmetric_adj += 2.0
+        if "Lỗi mảng/chuỗi" in pred_tax and "Lỗi mảng/chuỗi" in gt_set:
+            asymmetric_adj += 2.0
 
         if not pred_tax and not gt_set:
-            rewards.append(1.5 + hard_code_penalty)
+            rewards.append(1.5 + asymmetric_adj)
         elif not pred_tax or not gt_set:
-            rewards.append(0.0 + hard_code_penalty)
+            rewards.append(0.0 + asymmetric_adj)
         else:
             intersection = len(pred_tax & gt_set)
             prec = intersection / len(pred_tax)
             rec = intersection / len(gt_set)
             f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
-            rewards.append(3.0 * f1 + hard_code_penalty)
+            rewards.append(2.5 * f1 + asymmetric_adj)
     return rewards
 
 

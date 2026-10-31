@@ -112,12 +112,14 @@ class StandaloneGRPOTrainer:
         tokenizer: Any,
         config: GRPOTrainingConfig,
         train_items: List[Dict[str, Any]],
+        val_items: Optional[List[Dict[str, Any]]] = None,
     ):
         import torch
         self.model = model
         self.tokenizer = tokenizer
         self.config = config
         self.train_items = train_items
+        self.val_items = val_items or []
         self.optimizer = torch.optim.AdamW(
             filter(lambda p: p.requires_grad, self.model.parameters()),
             lr=config.learning_rate,
@@ -125,7 +127,7 @@ class StandaloneGRPOTrainer:
         )
 
     def train(self) -> Dict[str, Any]:
-        """Main GRPO training loop."""
+        """Main GRPO training loop with class-balanced sampling and best-checkpoint tracking."""
         import torch
         import torch.nn.functional as F
         self.model.train()
@@ -136,9 +138,31 @@ class StandaloneGRPOTrainer:
         history: List[Dict[str, float]] = []
         step = 0
         item_idx = 0
+
+        # Class-Balanced Sampling (Việc 3): Oversample rare categories to ensure strong gradient signal
+        sample_weights = []
+        for it in self.train_items:
+            out_tax = []
+            if isinstance(it.get("output"), dict):
+                out_tax = it["output"].get("taxonomy_error", [])
+            elif it.get("gold_taxonomy"):
+                out_tax = it["gold_taxonomy"]
+            elif it.get("taxonomy_error"):
+                out_tax = it["taxonomy_error"]
+
+            w = 1.0
+            if any(t in out_tax for t in ["Lỗi edge case", "Lỗi style", "Lỗi nhập/xuất"]):
+                w = 4.0
+            elif any(t in out_tax for t in ["Lỗi hàm", "Lỗi vòng lặp", "Lỗi mảng/chuỗi"]):
+                w = 2.5
+            sample_weights.append(w)
+
         random.seed(cfg.seed)
-        shuffled_indices = list(range(len(self.train_items)))
-        random.shuffle(shuffled_indices)
+        shuffled_indices = random.choices(range(len(self.train_items)), weights=sample_weights, k=max(1000, total_steps * 4))
+
+        best_val_macro_f1 = -1.0
+        best_step = -1
+        best_checkpoint_dir = Path(cfg.output_dir) / "best_checkpoint"
 
         self.optimizer.zero_grad()
         accum_loss = 0.0
@@ -295,10 +319,94 @@ class StandaloneGRPOTrainer:
             })
             step += 1
 
+            # Validation tracking every 5 steps (Việc 5)
+            if self.val_items and (step % 5 == 0 or step == total_steps):
+                val_macro_f1, val_severe = self._evaluate_validation(max_samples=25)
+                print(f"[VAL EVAL Step {step:03d}/{total_steps}] Val Macro-F1: {val_macro_f1:.4f} | Severe Leaks: {val_severe}", flush=True)
+                if val_macro_f1 > best_val_macro_f1 and val_severe == 0:
+                    best_val_macro_f1 = val_macro_f1
+                    best_step = step
+                    self.save_adapter(best_checkpoint_dir)
+                    print(f"[BEST MODEL] Step {step}: New Best Val Macro-F1 ({val_macro_f1:.4f}) saved to {best_checkpoint_dir}", flush=True)
+
             if step % cfg.save_steps == 0 or step == total_steps:
                 self.save_adapter(Path(cfg.output_dir))
 
-        return {"history": history, "final_reward": history[-1]["mean_reward"] if history else 0.0}
+        # Deploy best validation checkpoint if available (Việc 5)
+        if best_checkpoint_dir.exists() and any(best_checkpoint_dir.iterdir()):
+            import shutil
+            for item in best_checkpoint_dir.iterdir():
+                dest = Path(cfg.output_dir) / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, dest)
+            print(f"[GRPO] Automatically deployed best validated checkpoint from Step {best_step} (Val Macro-F1: {best_val_macro_f1:.4f}) to {cfg.output_dir}", flush=True)
+
+        return {"history": history, "final_reward": history[-1]["mean_reward"] if history else 0.0, "best_val_macro_f1": best_val_macro_f1}
+
+    def _evaluate_validation(self, max_samples: int = 25) -> Tuple[float, int]:
+        """Fast validation evaluation on a subset of heldout data."""
+        import torch
+        from src.synth.taxonomy import LABEL_SPACE
+        from src.task3.compliance import check as compliance_check
+        from src.task3.rlvr_rewards import parse_completion
+
+        self.model.eval()
+        eval_subset = self.val_items[:max_samples]
+        gold_map = {}
+        pred_map = {}
+        severe_leaks = 0
+
+        for it in eval_subset:
+            sample = extract_prompt_and_metadata(it)
+            sid = it.get("sample_id", str(len(gold_map)))
+            gold_tax = sample.get("ground_truth_taxonomy") or []
+            gold_map[sid] = gold_tax
+            lvl = sample.get("target_feedback_level", "Level 2")
+
+            prompt_str = sample["formatted_prompt"]
+            prompt_inputs = self.tokenizer(
+                prompt_str,
+                return_tensors="pt",
+                truncation=True,
+                max_length=self.config.max_prompt_length,
+            )
+            p_ids = prompt_inputs["input_ids"].to(self.model.device)
+
+            with torch.no_grad():
+                out_ids = self.model.generate(
+                    p_ids,
+                    do_sample=False,
+                    max_new_tokens=self.config.max_new_tokens,
+                    pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
+                    use_cache=True,
+                )
+            gen_text = self.tokenizer.decode(out_ids[0][p_ids.shape[1]:], skip_special_tokens=True)
+            data = parse_completion(gen_text)
+            pred_tax = data.get("taxonomy_error", []) if data else []
+            fb = data.get("feedback", "") if data else gen_text
+            pred_map[sid] = pred_tax
+
+            chk = compliance_check(fb, lvl, version=3)
+            if chk.severe and ("Level 1" in lvl or "Level 2" in lvl):
+                severe_leaks += 1
+
+        macro_sum = 0.0
+        for lbl in LABEL_SPACE:
+            tp, fp, fn = 0, 0, 0
+            for sid, g in gold_map.items():
+                p = pred_map.get(sid, [])
+                if lbl in g and lbl in p: tp += 1
+                elif lbl not in g and lbl in p: fp += 1
+                elif lbl in g and lbl not in p: fn += 1
+            prec = tp / (tp + fp) if (tp + fp) > 0 else (1.0 if fp == 0 else 0.0)
+            rec = tp / (tp + fn) if (tp + fn) > 0 else (1.0 if fn == 0 else 0.0)
+            f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else (1.0 if (tp == 0 and fp == 0 and fn == 0) else 0.0)
+            macro_sum += f1
+
+        macro_f1 = macro_sum / len(LABEL_SPACE)
+        return float(macro_f1), int(severe_leaks)
 
     def save_adapter(self, out_dir: Path):
         """Save the calibrated LoRA adapter."""
