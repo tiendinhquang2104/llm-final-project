@@ -124,6 +124,7 @@ def parse_args():
     parser.add_argument("--group-size", type=int, default=4)
     parser.add_argument("--learning-rate", type=float, default=1e-5)
     parser.add_argument("--kl-beta", type=float, default=0.04)
+    parser.add_argument("--clip-range", type=float, default=0.2)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=2)
     parser.add_argument("--max-prompt-length", type=int, default=1536)
     parser.add_argument("--max-new-tokens", type=int, default=256)
@@ -156,6 +157,7 @@ def main():
         group_size=args.group_size,
         max_steps=args.max_steps,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
+        clip_range=args.clip_range,
         kl_beta=args.kl_beta,
         max_prompt_length=args.max_prompt_length,
         max_new_tokens=args.max_new_tokens,
