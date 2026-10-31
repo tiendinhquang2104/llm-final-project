@@ -36,7 +36,7 @@ class GRPOTrainingConfig:
     gradient_accumulation_steps: int = 2
     clip_range: float = 0.2            # PPO / GRPO clip epsilon
     kl_beta: float = 0.04              # KL penalty weight beta
-    max_prompt_length: int = 2048
+    max_prompt_length: int = 1536
     max_new_tokens: int = 256
     temperature: float = 0.8
     top_p: float = 0.95
@@ -172,7 +172,10 @@ class StandaloneGRPOTrainer:
                     pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
                 )
 
-            # 3. Decode completions and evaluate with Verifiable Rewards
+            # 3. Clear generation cache and decode completions
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
             completions_text: List[str] = []
             rewards: List[float] = []
             reward_breakdowns: List[Dict[str, float]] = []
@@ -195,57 +198,64 @@ class StandaloneGRPOTrainer:
             # 4. Compute Group Advantages
             advantages = compute_group_advantages(rewards).to(self.model.device)
 
-            # 5. Compute Policy Log-Probs and Reference Log-Probs
+            # 5 & 6. Micro-batched Policy Log-Probs, Ref Log-Probs, and Backprop (Batch Size 1 per sequence)
             self.model.train()
-            # Forward pass with policy
-            all_prompt_ids = prompt_ids.repeat(cfg.group_size, 1)
-            target_ids = gen_out[:, prompt_len:].contiguous()
-            attention_mask = (gen_out != (self.tokenizer.pad_token_id or self.tokenizer.eos_token_id)).long()
+            step_loss_val = 0.0
 
-            logits = self.model(input_ids=gen_out, attention_mask=attention_mask).logits
-            gen_logits = logits[:, prompt_len - 1 : -1, :]
-            log_probs = F.log_softmax(gen_logits, dim=-1)
-            token_log_probs = log_probs.gather(dim=-1, index=target_ids.unsqueeze(-1)).squeeze(-1)
+            for i in range(cfg.group_size):
+                adv_i = advantages[i]
+                single_gen = gen_out[i : i + 1]  # Shape: (1, seq_len)
+                single_target = single_gen[:, prompt_len:].contiguous()
+                single_mask = (single_gen != (self.tokenizer.pad_token_id or self.tokenizer.eos_token_id)).long()
+                target_mask = (single_target != (self.tokenizer.pad_token_id or self.tokenizer.eos_token_id)).float()
 
-            # Reference log-probs using model.disable_adapter() (Zero additional VRAM!)
-            with torch.no_grad():
-                if hasattr(self.model, "disable_adapter"):
-                    with self.model.disable_adapter():
-                        ref_logits = self.model(input_ids=gen_out, attention_mask=attention_mask).logits
-                        ref_gen_logits = ref_logits[:, prompt_len - 1 : -1, :]
-                        ref_log_probs = F.log_softmax(ref_gen_logits, dim=-1)
-                        ref_token_log_probs = ref_log_probs.gather(dim=-1, index=target_ids.unsqueeze(-1)).squeeze(-1)
-                else:
-                    ref_token_log_probs = token_log_probs.detach()
+                if target_mask.sum() == 0:
+                    continue
 
-            # 6. GRPO Loss: Clipped surrogate objective + KL penalty
-            # Ratio of policy to old policy (for 1-step on-policy rollout, old is token_log_probs.detach())
-            old_log_probs = token_log_probs.detach()
-            ratio = torch.exp(token_log_probs - old_log_probs)
+                # Forward pass for single completion
+                logits_i = self.model(input_ids=single_gen, attention_mask=single_mask).logits
+                gen_logits_i = logits_i[:, prompt_len - 1 : -1, :]
+                log_probs_i = F.log_softmax(gen_logits_i, dim=-1)
+                token_log_probs_i = log_probs_i.gather(dim=-1, index=single_target.unsqueeze(-1)).squeeze(-1)
 
-            # Per-token mask (ignore padding tokens)
-            token_mask = (target_ids != (self.tokenizer.pad_token_id or self.tokenizer.eos_token_id)).float()
+                # Reference log-probs with adapter disabled
+                with torch.no_grad():
+                    if hasattr(self.model, "disable_adapter"):
+                        with self.model.disable_adapter():
+                            ref_logits_i = self.model(input_ids=single_gen, attention_mask=single_mask).logits
+                            ref_gen_logits_i = ref_logits_i[:, prompt_len - 1 : -1, :]
+                            ref_log_probs_i = F.log_softmax(ref_gen_logits_i, dim=-1)
+                            ref_token_log_probs_i = ref_log_probs_i.gather(dim=-1, index=single_target.unsqueeze(-1)).squeeze(-1)
+                    else:
+                        ref_token_log_probs_i = token_log_probs_i.detach()
 
-            # KL divergence per token (Schulman approximation)
-            kl_div = torch.exp(ref_token_log_probs - token_log_probs) - (ref_token_log_probs - token_log_probs) - 1.0
+                # On-policy rollout: old log-probs is detached current log-probs
+                old_log_probs_i = token_log_probs_i.detach()
+                ratio_i = torch.exp(token_log_probs_i - old_log_probs_i)
 
-            # Broadcast advantage (G,) to (G, seq_len)
-            adv_expanded = advantages.unsqueeze(-1).expand_as(ratio)
+                # KL divergence per token (Schulman approximation)
+                kl_i = torch.exp(ref_token_log_probs_i - token_log_probs_i) - (ref_token_log_probs_i - token_log_probs_i) - 1.0
 
-            # PPO / GRPO clip
-            surr1 = ratio * adv_expanded
-            surr2 = torch.clamp(ratio, 1.0 - cfg.clip_range, 1.0 + cfg.clip_range) * adv_expanded
-            surrogate_loss = -torch.min(surr1, surr2)
+                # Clipped surrogate objective
+                surr1_i = ratio_i * adv_i
+                surr2_i = torch.clamp(ratio_i, 1.0 - cfg.clip_range, 1.0 + cfg.clip_range) * adv_i
+                surrogate_loss_i = -torch.min(surr1_i, surr2_i)
 
-            # Total loss per token
-            token_loss = surrogate_loss + cfg.kl_beta * kl_div
-            # Average over valid completion tokens
-            loss = (token_loss * token_mask).sum() / (token_mask.sum() + 1e-6)
+                # Total loss per token
+                token_loss_i = surrogate_loss_i + cfg.kl_beta * kl_i
+                sample_loss = (token_loss_i * target_mask).sum() / (target_mask.sum() + 1e-6)
 
-            # Normalize by gradient accumulation
-            loss = loss / cfg.gradient_accumulation_steps
-            loss.backward()
-            accum_loss += loss.item()
+                # Backward pass immediately for this micro-batch sample
+                scaled_loss = sample_loss / (cfg.group_size * cfg.gradient_accumulation_steps)
+                scaled_loss.backward()
+                step_loss_val += sample_loss.item() / cfg.group_size
+
+                # Free tensors immediately
+                del logits_i, gen_logits_i, log_probs_i, token_log_probs_i, ref_token_log_probs_i
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+
+            accum_loss += step_loss_val
 
             if (step + 1) % cfg.gradient_accumulation_steps == 0 or (step + 1) == total_steps:
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)

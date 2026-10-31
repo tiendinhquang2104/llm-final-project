@@ -125,7 +125,7 @@ def parse_args():
     parser.add_argument("--learning-rate", type=float, default=1e-5)
     parser.add_argument("--kl-beta", type=float, default=0.04)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=2)
-    parser.add_argument("--max-prompt-length", type=int, default=2048)
+    parser.add_argument("--max-prompt-length", type=int, default=1536)
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--temperature", type=float, default=0.8)
     parser.add_argument("--device", type=str, default="cuda" if os.environ.get("CUDA_VISIBLE_DEVICES") != "" else "auto")
@@ -185,6 +185,7 @@ def main():
         args.base_model,
         quantization_config=bnb_config,
         device_map="auto",
+        attn_implementation="sdpa",
         trust_remote_code=True,
     )
 
@@ -208,6 +209,12 @@ def main():
             task_type="CAUSAL_LM",
         )
         model = get_peft_model(base_model, lora_config)
+
+    # Enable gradient checkpointing to drastically cut VRAM
+    if hasattr(model, "gradient_checkpointing_enable"):
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    if hasattr(base_model, "enable_input_require_grads"):
+        base_model.enable_input_require_grads()
 
     model.print_trainable_parameters()
 
