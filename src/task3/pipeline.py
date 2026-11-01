@@ -939,7 +939,12 @@ def infer(
                     retry_reasons.append("faulty_AllCorrect_contradiction")
                 if re.search(r"[\u0400-\u04ff\u3400-\u4dbf\u4e00-\u9fff]|P5\s+không\s+làm|câu\s+5:", generated.text, re.I):
                     retry_reasons.append("cjk_or_foreign_script")
-                if re.search(r"[\U00010000-\U0010ffff]|học em|hỏi em đi|em làm gì|chưa hoàn thiện|hẹn gặp lại", generated.text, re.I):
+                # Information-theoretic repetition and typography degradation check
+                gen_words = [w for w in re.findall(r"\w+", generated.text.lower()) if w]
+                std_chars = sum(1 for ch in generated.text if ch.isalnum() or ch.isspace() or ch in ".,!?:;\"'()-_/[]{}")
+                if len(generated.text) > 0 and (std_chars / len(generated.text)) < 0.90:
+                    retry_reasons.append("unnatural_colloquial_or_emoji")
+                elif len(gen_words) >= 10 and (Counter(gen_words).most_common(1)[0][1] / len(gen_words)) >= 0.28:
                     retry_reasons.append("unnatural_colloquial_or_emoji")
                 clauses = [c.strip() for c in generated.text.split(";") if len(c.strip()) > 25]
                 if len(clauses) != len(set(clauses)):

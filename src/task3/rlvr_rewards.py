@@ -301,34 +301,21 @@ def pedagogical_density_reward_func(
 
 # -----------------------------------------------------------------------------
 # Tier 5: Statistical & Information-Theoretic Diversity (Anti-Degeneration)
+# Standard Senior LLM / RLVR formulation: Pure statistical linguistics & entropy
+# Zero hardcoded token blacklists; fully invariant to language & phrasing
 # -----------------------------------------------------------------------------
-UNNATURAL_COLLOQUIAL_PHRASES = (
-    "học em",
-    "gọi em",
-    "làm em",
-    "hỏi em đi",
-    "em làm gì",
-    "chưa hoàn thiện",
-    "code chưa hoàn thiện",
-    "hẹn gặp lại",
-    "tốt em sẽ làm",
-    "keep going",
-    "good luck",
-    ":d",
-    ":)",
-    ":(",
-)
-
-EMOJI_PATTERN = re.compile(
-    r"[\U00010000-\U0010ffff]|[\u2600-\u27bf]|[\ud83c-\ud83e][\ud000-\udfff]"
-)
-
 def anti_degeneration_reward_func(
     completions: Sequence[str],
     target_feedback_level: Optional[Sequence[str]] = None,
     **kwargs,
 ) -> List[float]:
-    """Penalizes language degeneration via statistical metrics and filters unnatural colloquial loops."""
+    """Penalizes language degeneration via information-theoretic metrics:
+    - Type-Token Ratio (TTR)
+    - Shannon Unigram Entropy
+    - Bigram & Trigram Distinct-N Diversity
+    - Consecutive Sentence Jaccard Echoing
+    - Character-level Typography Purity (penalizes pictorial/symbol flood)
+    """
     rewards = []
     lvl_list = target_feedback_level if target_feedback_level is not None else ["Level 2"] * len(completions)
 
@@ -339,29 +326,31 @@ def anti_degeneration_reward_func(
             rewards.append(-3.0)
             continue
 
-        fb_lower = fb.lower().strip()
-
-        # Immediate heavy penalty for emoji usage in academic feedback
-        if EMOJI_PATTERN.search(fb):
-            rewards.append(-5.0)
-            continue
-
-        # Immediate heavy penalty for known model colloquial degeneration
-        if any(bad in fb_lower for bad in UNNATURAL_COLLOQUIAL_PHRASES):
-            rewards.append(-5.0)
-            continue
-
-        words = [w for w in re.findall(r"\w+", fb_lower) if w]
+        fb_str = fb.strip()
+        words = [w for w in re.findall(r"\w+", fb_str.lower()) if w]
         n_words = len(words)
 
-        # Level 1 allows concise praise ("Tốt.", "Bài làm tốt.", "Đúng.")
+        if n_words == 0:
+            rewards.append(-3.0)
+            continue
+
+        # 1. Typography / Character Purity (Information Theory)
+        # Standard natural language text consists of alphanumeric characters, whitespace, and basic punctuation.
+        # A collapse in standard typography ratio indicates pictorial flooding (emojis, unicode artifacts).
+        standard_chars = sum(1 for ch in fb_str if ch.isalnum() or ch.isspace() or ch in ".,!?:;\"'()-_/[]{}<>~`@#$%^&*+=|\\")
+        char_purity = standard_chars / max(1, len(fb_str))
+        if char_purity < 0.90:
+            rewards.append(-4.0)
+            continue
+
+        # 2. Level 1 Concise Pedagogical Target
+        # In Level 1, instructor feedback is high-level guidance or praise ("Tốt.", "Cần cải thiện.").
         if "Level 1" in str(lvl):
             if 1 <= n_words <= 12:
                 rewards.append(1.5)
-            elif n_words == 0:
-                rewards.append(-3.0)
             else:
-                rewards.append(-2.5)  # Penalize rambling multi-sentence in Level 1
+                # Information density decay: Level 1 should not ramble
+                rewards.append(-2.0)
             continue
 
         # Level 2/3 requires substantive content
@@ -369,8 +358,15 @@ def anti_degeneration_reward_func(
             rewards.append(-2.5)
             continue
 
-        # 1. Consecutive sentence / clause echoing (e.g. repeated greetings or instructions)
-        sentences = [re.findall(r"\w+", s.lower()) for s in re.split(r"[.!?\n;]+", fb) if s.strip()]
+        # 3. Single-Token Frequency Dominance (Anti-Monologue Loop)
+        word_counts = Counter(words)
+        top_freq = word_counts.most_common(1)[0][1] / n_words
+        if top_freq >= 0.25 and n_words >= 8:
+            rewards.append(-3.0)
+            continue
+
+        # 4. Consecutive Sentence / Clause Echoing (Jaccard Overlap)
+        sentences = [re.findall(r"\w+", s.lower()) for s in re.split(r"[.!?\n;]+", fb_str) if s.strip()]
         sentences = [s for s in sentences if len(s) >= 3]
         has_sentence_echo = False
         for i in range(len(sentences) - 1):
@@ -384,7 +380,7 @@ def anti_degeneration_reward_func(
             rewards.append(-3.0)
             continue
 
-        # 2. Trigram cycle & max multiplicity detection
+        # 5. N-gram Diversity (Distinct-2 and Distinct-3)
         if n_words >= 8:
             trigrams = [tuple(words[i : i + 3]) for i in range(n_words - 2)]
             counts = Counter(trigrams)
@@ -394,7 +390,6 @@ def anti_degeneration_reward_func(
                 rewards.append(-2.5)
                 continue
 
-        # 3. Bigram diversity ratio
         if n_words >= 10:
             bigrams = [tuple(words[i : i + 2]) for i in range(n_words - 1)]
             distinct_2 = len(set(bigrams)) / max(1, len(bigrams))
@@ -402,10 +397,9 @@ def anti_degeneration_reward_func(
                 rewards.append(-2.0)
                 continue
 
-        # 4. Type-Token Ratio (TTR) & Shannon unigram entropy
+        # 6. Type-Token Ratio (TTR) & Shannon Unigram Entropy
         if n_words >= 12:
             ttr = len(set(words)) / n_words
-            word_counts = Counter(words)
             entropy = -sum((cnt / n_words) * math.log2(cnt / n_words) for cnt in word_counts.values())
             if ttr < 0.60 or entropy < 3.2:
                 rewards.append(-2.0)
