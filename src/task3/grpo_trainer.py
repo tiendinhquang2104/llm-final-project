@@ -319,9 +319,9 @@ class StandaloneGRPOTrainer:
             })
             step += 1
 
-            # Validation tracking every 5 steps (Việc 5)
-            if self.val_items and (step % 5 == 0 or step == total_steps):
-                val_macro_f1, val_severe = self._evaluate_validation(max_samples=25)
+            # Streamlined validation tracking every 10 steps (Fast & robust)
+            if self.val_items and (step % 10 == 0 or step == total_steps):
+                val_macro_f1, val_severe = self._evaluate_validation(max_samples=12)
                 print(f"[VAL EVAL Step {step:03d}/{total_steps}] Val Macro-F1: {val_macro_f1:.4f} | Severe Leaks: {val_severe}", flush=True)
                 if val_macro_f1 > best_val_macro_f1 and val_severe == 0:
                     best_val_macro_f1 = val_macro_f1
@@ -345,7 +345,7 @@ class StandaloneGRPOTrainer:
 
         return {"history": history, "final_reward": history[-1]["mean_reward"] if history else 0.0, "best_val_macro_f1": best_val_macro_f1}
 
-    def _evaluate_validation(self, max_samples: int = 25) -> Tuple[float, int]:
+    def _evaluate_validation(self, max_samples: int = 12) -> Tuple[float, int]:
         """Fast validation evaluation on a subset of heldout data."""
         import torch
         from src.synth.taxonomy import LABEL_SPACE

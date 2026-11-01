@@ -29,13 +29,13 @@ from src.task3.rlvr_rewards import compute_composite_reward
 
 TRIALS = [
     {
-        "name": "targeted_g6_b002_lr5e6_steps65",
-        "description": "Optimal RLVR Alignment with Dev Macro-F1 Checkpoint Selection (G=6, LR=5e-6, beta=0.02, steps=65)",
-        "group_size": 6,
+        "name": "targeted_g4_b002_lr5e6_steps50",
+        "description": "Streamlined RLVR Alignment with Fast Validation & G=4 (G=4, LR=5e-6, beta=0.02, steps=50)",
+        "group_size": 4,
         "learning_rate": 5e-6,
         "kl_beta": 0.02,
         "clip_range": 0.15,
-        "max_steps": 65,
+        "max_steps": 50,
         "gradient_accumulation_steps": 2,
     }
 ]
