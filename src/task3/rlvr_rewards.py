@@ -306,8 +306,21 @@ UNNATURAL_COLLOQUIAL_PHRASES = (
     "học em",
     "gọi em",
     "làm em",
+    "hỏi em đi",
+    "em làm gì",
+    "chưa hoàn thiện",
     "code chưa hoàn thiện",
-    "chưa hoàn thiện.",
+    "hẹn gặp lại",
+    "tốt em sẽ làm",
+    "keep going",
+    "good luck",
+    ":d",
+    ":)",
+    ":(",
+)
+
+EMOJI_PATTERN = re.compile(
+    r"[\U00010000-\U0010ffff]|[\u2600-\u27bf]|[\ud83c-\ud83e][\ud000-\udfff]"
 )
 
 def anti_degeneration_reward_func(
@@ -328,20 +341,27 @@ def anti_degeneration_reward_func(
 
         fb_lower = fb.lower().strip()
 
+        # Immediate heavy penalty for emoji usage in academic feedback
+        if EMOJI_PATTERN.search(fb):
+            rewards.append(-5.0)
+            continue
+
         # Immediate heavy penalty for known model colloquial degeneration
         if any(bad in fb_lower for bad in UNNATURAL_COLLOQUIAL_PHRASES):
-            rewards.append(-4.0)
+            rewards.append(-5.0)
             continue
 
         words = [w for w in re.findall(r"\w+", fb_lower) if w]
         n_words = len(words)
 
-        # Level 1 allows short praise ("Tốt.", "Bài làm tốt.", "Đúng.")
+        # Level 1 allows concise praise ("Tốt.", "Bài làm tốt.", "Đúng.")
         if "Level 1" in str(lvl):
-            if n_words >= 1:
-                rewards.append(1.0)
+            if 1 <= n_words <= 12:
+                rewards.append(1.5)
+            elif n_words == 0:
+                rewards.append(-3.0)
             else:
-                rewards.append(-2.0)
+                rewards.append(-2.5)  # Penalize rambling multi-sentence in Level 1
             continue
 
         # Level 2/3 requires substantive content

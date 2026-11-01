@@ -860,8 +860,11 @@ def infer(
             feedback_calls += 1
             feedback_input_tokens += prompt.input_tokens
             call_started = time.perf_counter()
+            feedback_config = dict(config)
+            if level_of(record.target_feedback_level) == 1:
+                feedback_config.pop("min_new_tokens", None)
             try:
-                generated = backend.generate(prompt.messages, config)
+                generated = backend.generate(prompt.messages, feedback_config)
             except (RuntimeError, ValueError) as exc:
                 if config.get("compact_retry_on_oom", False):
                     import gc
@@ -881,7 +884,7 @@ def infer(
                         )
                         if active_retry_instruction:
                             compact_msgs[0]["content"] += "\n" + active_retry_instruction
-                        generated = backend.generate(compact_msgs, config)
+                        generated = backend.generate(compact_msgs, feedback_config)
                     except (RuntimeError, ValueError) as compact_exc:
                         exc = compact_exc
                         generated = None
@@ -936,6 +939,8 @@ def infer(
                     retry_reasons.append("faulty_AllCorrect_contradiction")
                 if re.search(r"[\u0400-\u04ff\u3400-\u4dbf\u4e00-\u9fff]|P5\s+không\s+làm|câu\s+5:", generated.text, re.I):
                     retry_reasons.append("cjk_or_foreign_script")
+                if re.search(r"[\U00010000-\U0010ffff]|học em|hỏi em đi|em làm gì|chưa hoàn thiện|hẹn gặp lại", generated.text, re.I):
+                    retry_reasons.append("unnatural_colloquial_or_emoji")
                 clauses = [c.strip() for c in generated.text.split(";") if len(c.strip()) > 25]
                 if len(clauses) != len(set(clauses)):
                     retry_reasons.append("cjk_or_foreign_script")

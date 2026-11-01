@@ -137,6 +137,8 @@ def retry_hint(violations, level, version=1):
             return "Bài làm đang có lỗi theo taxonomy_error nên KHÔNG được kết luận 'P1 đúng; P2 đúng; P3 đúng; P4 đúng'. Hãy chỉ rõ hàm nào (prob1/prob2/prob3/prob4) có lỗi hoặc chưa làm và nêu nguyên nhân cụ thể."
         if "cjk_or_foreign_script" in violations:
             return "Viết lại hoàn toàn bằng tiếng Việt chuẩn, không lặp lại mệnh đề và bỏ mọi ký tự ngoại ngữ."
+        if "unnatural_colloquial_or_emoji" in violations:
+            return "Viết ngắn gọn bằng tiếng Việt chuẩn mực sư phạm. Tuyệt đối không dùng emoji, biểu tượng cảm xúc hay các câu cảm thán lặp đi lặp lại."
         return retry_hint(violations, level, 2)
     if version != 2:
         raise ValueError("retry_policy_version must be 1, 2, 3 or 4")
