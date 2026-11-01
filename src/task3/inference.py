@@ -206,6 +206,8 @@ class HFBackend:
             "do_sample": config.get("do_sample", False),
             "pad_token_id": self.tokenizer.pad_token_id,
         }
+        if config.get("min_new_tokens") is not None:
+            options["min_new_tokens"] = int(config["min_new_tokens"])
         if config.get("repetition_penalty") is not None:
             options["repetition_penalty"] = float(config["repetition_penalty"])
         if config.get("no_repeat_ngram_size") is not None:

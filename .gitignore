@@ -62,6 +62,8 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/task3_requested_levels.json
+!data/processed/task2_base_taxonomy.json
 # Competition data (real student code, must not be published)
 data/public-test/
 data/public-test-*.zip

@@ -253,14 +253,15 @@ def ground_truth_taxonomy_reward_func(
 
 
 # -----------------------------------------------------------------------------
-# Tier 4: Length Floor & Anti-Hacking Verifier
+# -----------------------------------------------------------------------------
+# Tier 4: Length Floor & Anti-Hacking Verifier (Level-Aware)
 # -----------------------------------------------------------------------------
 def pedagogical_density_reward_func(
     completions: Sequence[str],
     target_feedback_level: Sequence[str],
     **kwargs,
 ) -> List[float]:
-    """Penalizes ultra-short (6-token) reward hacks and rambling over-verbose outputs."""
+    """Penalizes ultra-short (6-token) reward hacks for Level 2/3, while encouraging concise feedback for Level 1."""
     rewards = []
     for c, lvl in zip(completions, target_feedback_level):
         data = parse_completion(c)
@@ -268,50 +269,84 @@ def pedagogical_density_reward_func(
         words = fb.split()
         num_words = len(words)
 
-        # Anti-Reward-Hacking: Heavy penalty for ultra-short responses (< 15 words)
-        if num_words < 15:
-            rewards.append(-3.0)
-            continue
-        elif num_words < 22:
-            rewards.append(-0.5)
+        if "Level 1" in str(lvl):
+            # In Level 1, instructor feedback is high-level guidance or brief praise ("Tốt.", "Cần cải thiện.")
+            if 1 <= num_words <= 18:
+                rewards.append(1.5)  # Ideal concise pedagogical praise / gentle nudge
+            elif num_words == 0:
+                rewards.append(-3.0)
+            else:
+                rewards.append(-1.5)  # Penalize over-disclosure / rambling in Level 1
             continue
 
-        # Ideal pedagogical sweet spot: 25 to 85 words
-        if 25 <= num_words <= 85:
-            rewards.append(1.5)
-        elif 85 < num_words <= 125:
+        # For Level 2 & Level 3:
+        # Anti-Reward-Hacking: Heavy penalty for ultra-short responses (< 12 words)
+        if num_words < 12:
+            rewards.append(-3.0)
+            continue
+        elif num_words < 18:
+            rewards.append(-1.0)
+            continue
+
+        # Ideal pedagogical sweet spot for Level 2/3: 20 to 80 words
+        if 20 <= num_words <= 80:
+            rewards.append(2.0)
+        elif 80 < num_words <= 120:
             rewards.append(0.5)
         else:
-            # Overly verbose / rambling (> 125 words)
-            rewards.append(-1.0)
+            # Overly verbose / rambling (> 120 words)
+            rewards.append(-1.5)
     return rewards
 
 
 # -----------------------------------------------------------------------------
 # Tier 5: Statistical & Information-Theoretic Diversity (Anti-Degeneration)
 # -----------------------------------------------------------------------------
-def anti_degeneration_reward_func(completions: Sequence[str], **kwargs) -> List[float]:
-    """Penalizes language degeneration via statistical and information-theoretic metrics.
+UNNATURAL_COLLOQUIAL_PHRASES = (
+    "học em",
+    "gọi em",
+    "làm em",
+    "code chưa hoàn thiện",
+    "chưa hoàn thiện.",
+)
 
-    Instead of brittle regex heuristics, applies formal NLP criteria:
-    1. Consecutive sentence echoing (Jaccard similarity >= 0.60 -> -3.0).
-    2. Trigram cycle & attractor loop detection (max repetition >= 2 or Distinct-3 < 0.80 -> -2.5).
-    3. Bigram diversity ratio (Distinct-2 < 0.72 -> -2.0).
-    4. Type-Token Ratio (TTR < 0.60) & Shannon unigram entropy floor (H < 3.2 -> -2.0).
-    5. Clean, diverse text receives +1.0.
-    """
+def anti_degeneration_reward_func(
+    completions: Sequence[str],
+    target_feedback_level: Optional[Sequence[str]] = None,
+    **kwargs,
+) -> List[float]:
+    """Penalizes language degeneration via statistical metrics and filters unnatural colloquial loops."""
     rewards = []
-    for c in completions:
+    lvl_list = target_feedback_level if target_feedback_level is not None else ["Level 2"] * len(completions)
+
+    for c, lvl in zip(completions, lvl_list):
         data = parse_completion(c)
         fb = data.get("feedback", "") if data else c
         if not fb or not isinstance(fb, str):
             rewards.append(-3.0)
             continue
 
-        words = [w for w in re.findall(r"\w+", fb.lower()) if w]
+        fb_lower = fb.lower().strip()
+
+        # Immediate heavy penalty for known model colloquial degeneration
+        if any(bad in fb_lower for bad in UNNATURAL_COLLOQUIAL_PHRASES):
+            rewards.append(-4.0)
+            continue
+
+        words = [w for w in re.findall(r"\w+", fb_lower) if w]
         n_words = len(words)
+
+        # Level 1 allows short praise ("Tốt.", "Bài làm tốt.", "Đúng.")
+        if "Level 1" in str(lvl):
+            if n_words >= 1:
+                rewards.append(1.0)
+            else:
+                rewards.append(-2.0)
+            continue
+
+        # Level 2/3 requires substantive content
         if n_words < 5:
-            rewards.append(-2.0)
+            rewards.append(-2.5)
             continue
 
         # 1. Consecutive sentence / clause echoing (e.g. repeated greetings or instructions)
@@ -405,7 +440,7 @@ def compute_composite_reward(
     r_compiler = compiler_truth_reward_func(c_list, clog_list)[0]
     r_l1 = level1_policy_reward_func(c_list, lvl_list, clog_list)[0]
     r_density = pedagogical_density_reward_func(c_list, lvl_list)[0]
-    r_anti_degen = anti_degeneration_reward_func(c_list)[0]
+    r_anti_degen = anti_degeneration_reward_func(c_list, lvl_list)[0]
     r_l3 = level3_directive_reward_func(c_list, lvl_list)[0]
     r_gt_tax = ground_truth_taxonomy_reward_func(c_list, gt_list)[0]
 

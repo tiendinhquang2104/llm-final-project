@@ -388,6 +388,12 @@ class StandaloneGRPOTrainer:
             fb = data.get("feedback", "") if data else gen_text
             pred_map[sid] = pred_tax
 
+            # In-loop sanitizer consistent with production inference pipeline
+            if "Level 2" in lvl:
+                fb = re.sub(r"```[\s\S]*?```", "", fb).strip()
+                fb = re.sub(r"(?:^|\n)\s*(?:return\b[^\n]*;|\w+\s*=\s*[^\n]*;)", "", fb).strip()
+                fb = re.sub(r"\b(?:cout|cin)\s*(?:<<|>>)[^;\n]*;", "câu lệnh xuất nhập dữ liệu", fb).strip()
+
             chk = compliance_check(fb, lvl, version=3)
             if chk.severe and ("Level 1" in lvl or "Level 2" in lvl):
                 severe_leaks += 1
