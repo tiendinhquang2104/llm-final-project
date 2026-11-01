@@ -138,8 +138,8 @@ class HFChatBackend(LocalChatBackend):
         self.oom_error = getattr(torch, "OutOfMemoryError", None) or torch.cuda.OutOfMemoryError
         kw = {"device_map": "auto", "revision": revision}
         if torch.cuda.is_available():
-            kw["max_memory"] = {i: f"{max(1.0, torch.cuda.get_device_properties(i).total_memory / 2**30
-                                         - gpu_reserve_gb):.1f}GiB" for i in range(torch.cuda.device_count())}
+            gib = [torch.cuda.get_device_properties(i).total_memory / 2**30 for i in range(torch.cuda.device_count())]
+            kw["max_memory"] = {i: f"{max(1.0, g - gpu_reserve_gb):.1f}GiB" for i, g in enumerate(gib)}
         if load_in_4bit:
             from transformers import BitsAndBytesConfig
             kw["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
