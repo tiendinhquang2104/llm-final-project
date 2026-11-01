@@ -1,9 +1,10 @@
-"""Task 2, hướng E: run every submission on tests built from its statement, label with the teacher rules.
+"""Task 2, E2: run every submission on the test suite generated from its statement, label with the teacher rules.
 
-    python scripts/run_task2_exec.py [--model-preds outputs/task2/<system>/predictions.json] [--out outputs/task2/exec]
+    python scripts/gen_task2_tests.py --backend mlx|hf          # once: suites of every exam (local LLM)
+    python scripts/run_task2_exec.py [--model-preds outputs/task2/<system>/predictions.json] [--out outputs/task2/exec2]
 
-Steps: self-compile (src/task2/compile.py), run the execution oracle (src/task2/exec_oracle.py), turn the signals
-into labels (src/task2/exec_rules.py). Where the rules only know that the answer is wrong (not why), the cause labels
+Steps: self-compile (src/task2/compile.py), run the execution oracle (src/task2/exec_oracle.py) on the suites of
+--suites (written by scripts/gen_task2_tests.py), turn the signals into labels (src/task2/exec_rules.py). Where the rules only know that the answer is wrong (not why), the cause labels
 of another system's predictions are added (--model-preds, e.g. the F-cls predictions.json); where there is no signal
 at all (unknown exam, a harness that does not build with the submission) that system's labels are used as they are.
 
@@ -25,9 +26,10 @@ sys.path.insert(0, str(ROOT))
 
 from src.task2.cot_runner import load_with_compile  # noqa: E402
 from src.task2.evaluator import f1_scores, validate_predictions, write_submission  # noqa: E402
-from src.task2.exec_oracle import Oracle, env_compiler, write_results  # noqa: E402
+from src.task2.exec_oracle import Oracle, distrust_suites, env_compiler, write_results  # noqa: E402
 from src.task2.exec_rules import combine, rule_labels  # noqa: E402
 from src.task2.labels import LABELS  # noqa: E402
+from src.task2.test_gen import Suite  # noqa: E402
 from src.utils.config import load_config  # noqa: E402
 
 
@@ -46,8 +48,12 @@ def main() -> None:
     ap.add_argument("--model-preds", help="predictions.json of another system: causes of wrong answers + fallback")
     ap.add_argument("--ids", help="a predictions.json whose sample_ids are the ones to submit (default: all public)")
     ap.add_argument("--reference", help="reference labels (predictions.json format) for a trial score on public")
-    ap.add_argument("--out", default="outputs/task2/exec")
+    ap.add_argument("--suites", default="outputs/task2/_testgen/index.json", help="written by gen_task2_tests.py")
+    ap.add_argument("--out", default="outputs/task2/exec2")
     a = ap.parse_args()
+    index = json.loads((ROOT / a.suites).read_text(encoding="utf-8"))
+    suites = {eid: Suite.from_json(s) if s else None for eid, s in index.items()}
+    print(f"[exec] suites: {sum(s is not None for s in suites.values())}/{len(suites)} exams", flush=True)
     cfg = load_config(ROOT / a.config)
     ccfg, d = cfg.get("compile") or {}, cfg["data"]
     out = ROOT / a.out
@@ -61,12 +67,16 @@ def main() -> None:
     sets = {}
     for name, root in (("gold", d["gold_root"]), ("public", d["public_root"])):
         ds, cid = load_with_compile(ROOT / root, ccfg, "self", True, ROOT)
-        res = oracle.run(ds.samples, ds.exams)
+        res = oracle.run(ds.samples, ds.exams, suites)
+        dropped = distrust_suites(res, ds.samples)
+        if dropped:
+            print(f"[exec] {name}: suites not trusted (no submission passes the prerequisite): {dropped}", flush=True)
         sets[name] = (ds, res)
         write_results(res, out / f"signals_{name}.jsonl")
         print(f"[exec] {name}: {len(res)} samples, compiler={cid}", flush=True)
 
-    lines = ["# Task 2 — hướng E (execution oracle + teacher rules)", ""]
+    lines = ["# Task 2 — E2 (generated tests + execution oracle + teacher rules)", "",
+             "suites: " + ", ".join(f"{e}: {len(s.tests) if s else 0} tests" for e, s in suites.items()), ""]
     gds, gres = sets["gold"]
     gold = {s.sample_id: s.labels for s in gds.samples}
     codes = {s.sample_id: s.code for s in gds.samples}

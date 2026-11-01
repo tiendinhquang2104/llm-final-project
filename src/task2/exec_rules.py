@@ -8,12 +8,14 @@ single_problem (per test status):
 - a run that never ends -> Lỗi logic + Lỗi vòng lặp (S209)
 - right values, wrong spacing / letter case only -> Lỗi nhập/xuất (S205)
 - wrong values -> Lỗi logic (+ Lỗi nhập/xuất when the format is also off); the cause is left to the model
-multi_problem (per problem state, P1 is the prerequisite, G3):
-- P1 wrong: Lỗi hard-code when P1 is sized by a constant / opens a fixed file name / only reads the exam CSV right
-  (S108, S112), Lỗi hàm when it crashes on a stoi/stof conversion (S113, S114), else Lỗi logic (S105, S110)
-- P1 right: a problem that never ends -> Lỗi logic + Lỗi vòng lặp (S106, S107); else the first wrong problem decides:
-  the data structure built wrong (P2) or the age formula (P3 of the generals list) -> Lỗi thuật toán (S102, S104),
-  other wrong results -> Lỗi logic (S101). Problems left empty carry no label (G2).
+multi_problem (per problem state; the prerequisite problem of the grading_policy, G3, is the one the exam marks
+with is_prerequisite_for):
+- prerequisite wrong: Lỗi hard-code when it is sized by a constant / opens a fixed file name / only reads the exam
+  data file right (S108, S112), Lỗi hàm when it crashes on a stoi/stof conversion (S113, S114), else Lỗi logic
+  (S105, S110); the problems after it are not graded
+- prerequisite right: a problem that never ends -> Lỗi logic + Lỗi vòng lặp (S106, S107); else the first wrong
+  problem decides: the one building the data structure (right after the prerequisite) -> Lỗi thuật toán (S102),
+  later ones -> Lỗi logic (S101, S104). Problems left empty carry no label (G2).
 """
 from __future__ import annotations
 
@@ -66,21 +68,26 @@ def _single(r: ExecResult) -> RuleLabels:
 
 def _multi(r: ExecResult) -> RuleLabels:
     s = r.states
-    if s["P1"] != "ok":
-        if s["P1"] == "missing" and all(v == "missing" for v in s.values()):
+    pids = list(s)
+    # grading_policy: a prerequisite problem that is wrong means the problems after it are not graded (G3), so its
+    # own state decides the labels; the exam marks it with is_prerequisite_for (the first problem if it does not)
+    pre = next((p for p in pids if r.prereq.get(p)), pids[0])
+    if s[pre] != "ok":
+        if all(v == "missing" for v in s.values()):
             return RuleLabels([], False, "nothing done")
         if r.hardcode_size or r.hardcode_file or r.p1_variant_fail:
-            return RuleLabels(["Lỗi hard-code"], True, "P1 hard-coded")
-        if s["P1"] == "crash" and r.uses_stoi:
-            return RuleLabels(["Lỗi hàm"], False, "P1 crash with stoi")
-        return RuleLabels(["Lỗi logic"], False, f"P1 {s['P1']}")
-    rest = {p: s[p] for p in ("P2", "P3", "P4")}
+            return RuleLabels(["Lỗi hard-code"], True, f"{pre} hard-coded")
+        if s[pre] == "crash" and r.uses_stoi:
+            return RuleLabels(["Lỗi hàm"], False, f"{pre} crash with stoi")
+        return RuleLabels(["Lỗi logic"], False, f"{pre} {s[pre]}")
+    rest = {p: s[p] for p in pids if p != pre}
     if "timeout" in rest.values():
         return RuleLabels(["Lỗi logic", "Lỗi vòng lặp"], True, "infinite loop")
-    for p, v in rest.items():
+    for k, (p, v) in enumerate(rest.items()):
         if v in ("fail", "crash", "partial"):
-            algo = p == "P2" or (p == "P3" and r.kind == "generals_ll")
-            return RuleLabels(["Lỗi thuật toán" if algo else "Lỗi logic"], False, f"{p} {v}")
+            # the problem right after the prerequisite builds the data structure (S102): a wrong one is an
+            # algorithm fault; later ones are logic faults whose cause the model adds
+            return RuleLabels(["Lỗi thuật toán" if k == 0 else "Lỗi logic"], False, f"{p} {v}")
     return RuleLabels([], True, "all problems right or left empty")
 
 
