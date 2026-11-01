@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.task2.cls_data import (eval_records, label_counts, oversample, pos_weight, read_jsonl, sample_weights,  # noqa: E402
-                                train_records, write_jsonl)
+                                signal_dropout, train_records, write_jsonl)
 from src.training.task2_cls import (HubSync, env_info, predict, read_status, resolved_revision,  # noqa: E402
                                     train_run, write_status)
 from src.utils.config import load_config  # noqa: E402
@@ -67,6 +67,7 @@ def main() -> None:
 
     train = train_records(records, holdout, tcfg.get("use_gold", True), tcfg.get("use_mutants", True))
     train = oversample(train, int(tcfg.get("oversample_min", 0)), seed=int(cfg.get("seed", 42)))
+    train = signal_dropout(train, float(tcfg.get("signal_dropout", 0.0)), seed=int(cfg.get("seed", 42)))
     if a.limit_train:
         train = train[:a.limit_train]
     weights = sample_weights(train, tcfg.get("source_weight"))

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import random
+import zlib
 from collections import Counter
 from pathlib import Path
 
@@ -34,11 +35,12 @@ CLS_SYSTEM = {
 }
 
 
-def cls_messages(exam: dict, sample, pcfg: dict) -> list[dict]:
-    """System + user messages (no assistant turn): the classifier reads the last token of this conversation."""
+def cls_messages(exam: dict, sample, pcfg: dict, exec_text: str | None = None) -> list[dict]:
+    """System + user messages (no assistant turn): the classifier reads the last token of this conversation.
+    `exec_text`: the test-suite summary of src/task2/exec_summary.py, appended when given."""
     lang = prompt_lang(pcfg)
     user = "\n".join(x for x in [exam_text_lang(exam, lang), exam_requirements(exam, lang),
-                                  submission_text_lang(_view(sample, pcfg), pcfg, lang)] if x)
+                                  submission_text_lang(_view(sample, pcfg), pcfg, lang), exec_text] if x)
     return [{"role": "system", "content": CLS_SYSTEM[lang]}, {"role": "user", "content": user}]
 
 
@@ -46,12 +48,32 @@ def all_commented(code: str) -> bool:
     return strip_comments(code) == ALL_COMMENTED
 
 
-def record(exam: dict, sample, source: str, pcfg: dict, fold: str | None) -> dict:
+def record(exam: dict, sample, source: str, pcfg: dict, fold: str | None, exec_text: str | None = None,
+           no_signal_text: str | None = None) -> dict:
+    """With `exec_text` the record also keeps `messages_nosig` (the prompt with `no_signal_text` instead), which
+    training uses for a share of the rows (train.signal_dropout)."""
     labels = list(sample.labels) if sample.labels is not None else None
-    return {"id": sample.sample_id, "source": source, "exam_id": sample.exam_id, "exam_type": sample.exam_type,
-            "fold": fold, "labels": labels, "y": to_vector(labels) if labels is not None else None,
-            "compile_log": sample.compile_log, "all_commented": all_commented(sample.code),
-            "messages": cls_messages(exam, sample, pcfg)}
+    row = {"id": sample.sample_id, "source": source, "exam_id": sample.exam_id, "exam_type": sample.exam_type,
+           "fold": fold, "labels": labels, "y": to_vector(labels) if labels is not None else None,
+           "compile_log": sample.compile_log, "all_commented": all_commented(sample.code),
+           "messages": cls_messages(exam, sample, pcfg, exec_text)}
+    if exec_text is not None:
+        row["exec_text"] = exec_text
+        row["messages_nosig"] = cls_messages(exam, sample, pcfg, no_signal_text)
+    return row
+
+
+def signal_dropout(rows: list[dict], rate: float, seed: int = 42) -> list[dict]:
+    """A deterministic share `rate` of the rows that have an execution summary train on their no-signal prompt, so
+    the model also learns the submissions that have no test suite at inference."""
+    if rate <= 0:
+        return rows
+    out = []
+    for r in rows:
+        if "messages_nosig" in r and zlib.crc32(f"{seed}:{r['id']}".encode()) % 1000 < rate * 1000:
+            r = {**r, "messages": r["messages_nosig"]}
+        out.append(r)
+    return out
 
 
 # ---------------------------------------------------------------------------------------------- train views

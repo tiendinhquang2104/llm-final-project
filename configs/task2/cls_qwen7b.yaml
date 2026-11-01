@@ -13,6 +13,7 @@ prompt:                     # cùng phần hiển thị bài nộp như cot_spli
   strip_comments: true
   drop_blank_lines: true
   max_compile_log_chars: 800
+  exec_summary: true        # + tóm tắt chạy bộ test của đề (src/task2/exec_summary.py); cần scripts/gen_task2_tests.py chạy trước
 compile:
   run_examples: true        # đề stdin/stdout: chạy binary với ví dụ trong đề
 augment:
@@ -45,6 +46,7 @@ train:
   source_weight: {gold: 2.0, gold_mut: 2.0, synth: 1.0}   # code thật nặng hơn
   use_gold: true            # fold k: gold + mutant của đề khác vào train; final: tất cả
   use_mutants: true
+  signal_dropout: 0.25      # 25% bản ghi train đọc prompt 'không có bộ test' (như đề nhiều câu lúc suy luận)
   save_steps: 25            # checkpoint (adapter + optimizer + scheduler) để resume sau khi Kaggle timeout
   save_total_limit: 2
   logging_steps: 5
