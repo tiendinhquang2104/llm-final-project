@@ -1,0 +1,28 @@
+# TPU bfloat16 LoRA Configuration for Task 3
+extends: baseline.yaml
+experiment: tpu_bfloat16
+model_id: "Qwen/Qwen2.5-Coder-7B-Instruct"
+load_in_4bit: false
+precision: "bfloat16"
+torch_dtype: "bfloat16"
+attn_implementation: "sdpa"
+max_seq_length: 2048
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules:
+  - "q_proj"
+  - "k_proj"
+  - "v_proj"
+  - "o_proj"
+  - "gate_proj"
+  - "up_proj"
+  - "down_proj"
+optim: "adamw_torch"
+learning_rate: 0.00002
+lr_scheduler_type: "cosine"
+warmup_ratio: 0.03
+epochs: 1
+gradient_accumulation_steps: 4
+dataloader_drop_last: true
+device: "tpu"
