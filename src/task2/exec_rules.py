@@ -16,6 +16,11 @@ with is_prerequisite_for):
 - prerequisite right: a problem that never ends -> Lỗi logic + Lỗi vòng lặp (S106, S107); else the first wrong
   problem decides: the one building the data structure (right after the prerequisite) -> Lỗi thuật toán (S102),
   later ones -> Lỗi logic (S101, S104). Problems left empty carry no label (G2).
+- every run dies of a memory fault (SIGSEGV) -> + Lỗi mảng/chuỗi (S105; a fault on only some runs is not, S101 S104
+  S106 S112)
+- probe suites (no agreed answers, src/task2/test_gen.py): the prerequisite is judged by its record count on the
+  data file and its resized copies, later problems only by crashes and endless runs; when nothing goes wrong the
+  rules say nothing (None) and the model decides
 """
 from __future__ import annotations
 
@@ -44,9 +49,12 @@ def rule_labels(r: ExecResult, code: str = "") -> RuleLabels | None:
         return RuleLabels(["Lỗi style"], True, "whole file commented")
     if r.kind is None or not r.harness_ok:
         return None
-    if r.states:
-        return _multi(r)
-    return _single(r)
+    rl = _multi(r) if r.states else _single(r)
+    if rl is not None and r.all_segfault and "Lỗi mảng/chuỗi" not in rl.labels:
+        # every run dies of a memory fault: an array / string index or pointer error (S105); the run-based labels
+        # stay, the cause is still open for the model
+        rl = RuleLabels(rl.labels + ["Lỗi mảng/chuỗi"], False, rl.reason + " + memory fault on every run")
+    return rl
 
 
 def _includes_csv(code: str) -> bool:
@@ -85,9 +93,13 @@ def _multi(r: ExecResult) -> RuleLabels:
         return RuleLabels(["Lỗi logic", "Lỗi vòng lặp"], True, "infinite loop")
     for k, (p, v) in enumerate(rest.items()):
         if v in ("fail", "crash", "partial"):
+            if r.probe:  # no expected outputs: a crash says the problem is wrong, not which way
+                return RuleLabels(["Lỗi logic"], False, f"{p} {v} (probe)")
             # the problem right after the prerequisite builds the data structure (S102): a wrong one is an
             # algorithm fault; later ones are logic faults whose cause the model adds
             return RuleLabels(["Lỗi thuật toán" if k == 0 else "Lỗi logic"], False, f"{p} {v}")
+    if r.probe:  # the later problems ran without a fault, but nothing says their answers are right
+        return None
     return RuleLabels([], True, "all problems right or left empty")
 
 

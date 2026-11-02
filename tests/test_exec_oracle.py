@@ -243,3 +243,29 @@ def test_suite_nobody_passes_on_the_prerequisite_is_not_trusted():
     for i in range(5):
         res[f"s{i}"].kind = "multi_problem"
     assert distrust_suites(res, samples) == []
+
+
+def test_probe_suite_judges_record_counts_and_crashes_only(built, tmp_path):
+    comp, _, multi = built
+    probe = multi.as_probe()
+    assert [t.get("rows") for t in probe.tests if t["pid"] == "P1"] == [6, 2, 10]
+    assert all(t["expected"] is None for t in probe.tests) and not multi.probe
+    crash = ITEMS_OK.replace("while (head && head->item.name == name) head = head->next;",
+                             "Node* z = NULL; z->next = head;")
+    samples = [_sample("ok", MULTI, ITEMS_OK), _sample("fixed", MULTI, ITEMS_FIXED20),
+               _sample("loop", MULTI, ITEMS_P3_LOOP), _sample("crash", MULTI, crash)]
+    res = Oracle(comp, cache_dir=tmp_path).run(samples, {"T-ITEMS": MULTI}, {"T-ITEMS": probe})
+    assert res["ok"].probe and res["ok"].states == {"P1": "ok", "P2": "ran", "P3": "ran"}
+    assert rule_labels(res["ok"]) is None                       # nothing wrong seen, nothing known right
+    assert rule_labels(res["fixed"]).labels == ["Lỗi hard-code"]
+    assert rule_labels(res["loop"]).labels == ["Lỗi logic", "Lỗi vòng lặp"]
+    assert res["crash"].states["P3"] == "crash" and rule_labels(res["crash"]).labels == ["Lỗi logic"]
+
+
+def test_memory_fault_on_every_run_adds_the_array_label():
+    multi = dict(kind="multi_problem", prereq={"P1": ["P2"]}, states={"P1": "crash", "P2": "crash"})
+    rl = rule_labels(_res(**multi, all_segfault=True))
+    assert rl.labels == ["Lỗi logic", "Lỗi mảng/chuỗi"] and not rl.sure
+    assert rule_labels(_res(**multi)).labels == ["Lỗi logic"]
+    single = rule_labels(_res(statuses={"t0": "runtime_error"}, all_segfault=True))
+    assert single.labels == ["Lỗi logic", "Lỗi mảng/chuỗi"]

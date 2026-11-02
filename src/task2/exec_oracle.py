@@ -28,6 +28,9 @@ from src.task2.prompts_cot import ALL_COMMENTED, strip_comments
 from src.task2.test_gen import Suite, assemble, func_name, multi_header, prototypes
 
 
+SEGFAULT = (139, -11)  # 128 + SIGSEGV from the Docker shell, -SIGSEGV from subprocess
+
+
 # ---------------------------------------------------------------------------------------------- code analysis
 
 def function_bodies(code: str, protos: dict[str, str]) -> dict[str, str]:
@@ -96,17 +99,25 @@ class ExecResult:
     hardcode_file: bool = False
     uses_stoi: bool = False
     p1_variant_fail: bool = False           # multi: first problem right on the exam file, wrong on a resized copy
+    all_segfault: bool = False              # every run died of a memory fault (SIGSEGV): an index / pointer error
+    probe: bool = False                     # multi, probe suite: "ok" of the first problem = right record count;
+                                            # later problems are only "ran" / crash / timeout / missing
 
     def to_json(self) -> dict:
         return self.__dict__
 
 
-def _multi_status(actual: str, expected: str, rc: int | None, timeout: bool) -> str:
+def _multi_status(actual: str, test: dict, rc: int | None, timeout: bool) -> str:
     if timeout:
         return "timeout"
     if rc:
         return "crash"
-    return "pass" if multi_header(actual) == multi_header(expected) else "fail"
+    if "rows" in test:  # probe: the driver prints the record count first
+        got = (actual.split("\n", 1) + [""])[1].split()
+        return "pass" if got and got[0] == str(test["rows"]) else "fail"
+    if test.get("expected") is None:
+        return "ran"
+    return "pass" if multi_header(actual) == multi_header(test["expected"]) else "fail"
 
 
 def _problem_states(statuses: dict, groups: dict, missing: dict, pids: list[str]) -> tuple[dict, bool]:
@@ -117,6 +128,8 @@ def _problem_states(statuses: dict, groups: dict, missing: dict, pids: list[str]
             states[pid] = "missing"
         elif all(s == "pass" for s in st):
             states[pid] = "ok"
+        elif all(s == "ran" for s in st):
+            states[pid] = "ran"
         elif "timeout" in st:
             states[pid] = "timeout"
         elif any(s == "pass" for s in st):
@@ -189,9 +202,11 @@ class Oracle:
             r.hardcode_size = hardcode_size(first, suite.struct_names)
             r.hardcode_file = hardcode_file(first, exam.get("data_file"))
             r.prereq = dict(suite.prereq)
+            r.probe = suite.probe
         if runs is None:  # the driver (or the program) did not build: unknown, not the student's fault here
             r.harness_ok = False
             return
+        r.all_segfault = bool(runs) and all(run.get("returncode") in SEGFAULT and not run.get("timeout") for run in runs)
         if not multi:
             for t, run in zip(suite.tests, runs):
                 if run.get("timeout"):
@@ -203,8 +218,7 @@ class Oracle:
                 r.statuses[t["id"]], r.groups[t["id"]] = st, t["group"]
             return
         for t, run in zip(suite.tests, runs):
-            r.statuses[t["id"]] = _multi_status(run.get("actual", ""), t["expected"], run.get("returncode"),
-                                                run.get("timeout"))
+            r.statuses[t["id"]] = _multi_status(run.get("actual", ""), t, run.get("returncode"), run.get("timeout"))
             r.groups[t["id"]] = t["pid"]
         missing = {pid: is_missing(bodies.get(pid)) for pid in suite.pids}
         r.states, r.p1_variant_fail = _problem_states(r.statuses, r.groups, missing, suite.pids)
@@ -229,6 +243,20 @@ def distrust_suites(results: dict[str, ExecResult], samples, min_runs: int = 5) 
             for r in rs:
                 r.kind = None
     return bad
+
+
+def run_with_probe_fallback(oracle: "Oracle", samples, exams: dict, suites: dict) -> tuple[dict, list[str]]:
+    """oracle.run, then the multi-problem exams whose suite is not trusted (distrust_suites) are judged again on the
+    probe version of their suite (Suite.as_probe: record counts, crashes, endless runs); the runs are cached, so
+    nothing is executed twice. Returns the results and the exams that fell back."""
+    res = oracle.run(samples, exams, suites)
+    bad = distrust_suites(res, samples)
+    if bad:
+        probe = {e: suites[e].as_probe() for e in bad if suites.get(e) is not None and not suites[e].probe}
+        again = [s for s in samples if s.exam_id in probe]
+        if again:
+            res.update(oracle.run(again, exams, probe))
+    return res, bad
 
 
 def write_results(results: dict[str, ExecResult], path) -> None:

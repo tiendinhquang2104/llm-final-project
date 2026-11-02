@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.task2.cot_runner import load_with_compile  # noqa: E402
 from src.task2.evaluator import f1_scores, validate_predictions, write_submission  # noqa: E402
-from src.task2.exec_oracle import Oracle, distrust_suites, env_compiler, write_results  # noqa: E402
+from src.task2.exec_oracle import Oracle, env_compiler, run_with_probe_fallback, write_results  # noqa: E402
 from src.task2.exec_rules import combine, rule_labels  # noqa: E402
 from src.task2.labels import LABELS  # noqa: E402
 from src.task2.test_gen import Suite  # noqa: E402
@@ -67,10 +67,10 @@ def main() -> None:
     sets = {}
     for name, root in (("gold", d["gold_root"]), ("public", d["public_root"])):
         ds, cid = load_with_compile(ROOT / root, ccfg, "self", True, ROOT)
-        res = oracle.run(ds.samples, ds.exams, suites)
-        dropped = distrust_suites(res, ds.samples)
+        res, dropped = run_with_probe_fallback(oracle, ds.samples, ds.exams, suites)
         if dropped:
-            print(f"[exec] {name}: suites not trusted (no submission passes the prerequisite): {dropped}", flush=True)
+            print(f"[exec] {name}: suites not trusted (no submission passes the prerequisite), judged as probes: "
+                  f"{dropped}", flush=True)
         sets[name] = (ds, res)
         write_results(res, out / f"signals_{name}.jsonl")
         print(f"[exec] {name}: {len(res)} samples, compiler={cid}", flush=True)

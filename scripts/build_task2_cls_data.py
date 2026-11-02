@@ -58,7 +58,7 @@ def public_guard_corpus(public_samples, gold_samples, dup: float = 0.9):
 def exec_signals(ccfg: dict, suites_path: Path, bank_dir: Path):
     """A function (dataset, samples, name) -> {sample_id: ExecResult} running the samples on their exam's suite:
     the generated suites of --suites (gold / public exams), the problem bank's tests for the synthetic exams."""
-    from src.task2.exec_oracle import Oracle, distrust_suites, env_compiler
+    from src.task2.exec_oracle import Oracle, env_compiler, run_with_probe_fallback
     from src.task2.exec_summary import bank_suites
     from src.task2.test_gen import Suite
 
@@ -74,8 +74,7 @@ def exec_signals(ccfg: dict, suites_path: Path, bank_dir: Path):
     oracle = Oracle(compiler)
 
     def run(ds, samples, name):
-        res = oracle.run(samples, ds.exams, suites)
-        dropped = distrust_suites(res, samples)
+        res, dropped = run_with_probe_fallback(oracle, samples, ds.exams, suites)
         with_suite = sum(r.kind is not None for r in res.values())
         print(f"[exec] {name}: {with_suite}/{len(res)} samples ran on a suite"
               + (f"; suites not trusted: {dropped}" if dropped else ""), flush=True)

@@ -24,7 +24,7 @@ import json
 import re
 import textwrap
 from collections import Counter
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -272,9 +272,26 @@ class Suite:
     prereq: dict = field(default_factory=dict)           # pid -> pids not graded when it fails (grading_policy)
     struct_names: list[str] = field(default_factory=list)
     stats: dict = field(default_factory=dict)            # refs generated / kept, tests kept / dropped, ...
+    probe: bool = False                                  # multi without agreed answers: tests carry "rows" (the
+                                                         # record count the first problem must read) instead of an
+                                                         # expected output, and later problems are only watched for
+                                                         # crashes / endless runs
 
     def to_json(self) -> dict:
         return asdict(self)
+
+    def as_probe(self) -> "Suite":
+        """The same runs judged without expected outputs (see `probe`): the first problem by the record count of
+        the data file it reads, the others by crashes and endless runs."""
+        first = self.pids[0] if self.pids else None
+        tests = []
+        for t in self.tests:
+            row = {**t, "expected": None}
+            fname = t["stdin"].split("\n")[1] if t.get("pid") == first and "\n" in t["stdin"] else None
+            if fname in self.files:
+                row["rows"] = max(0, len(self.files[fname].rstrip("\n").split("\n")) - 1)
+            tests.append(row)
+        return replace(self, tests=tests, probe=True)
 
     @classmethod
     def from_json(cls, d: dict) -> "Suite":
@@ -481,7 +498,7 @@ class SuiteBuilder:
     def build(self, exam: dict, data_dir=None) -> Suite | None:
         key = hashlib.sha256(json.dumps([exam, getattr(self.llm, "model", "?"), getattr(self.llm, "revision", None),
                                          self.gen, self.k, self.k_multi, MIN_REFS_MULTI, REF_SINGLE, GEN_SINGLE, LIST_SINGLE, REPAIR_SINGLE, PLAN_MULTI, REF_MULTI, REPAIR, DRIVER_MULTI,
-                                         ARGS_MULTI, WRAPPER], sort_keys=True, default=str).encode()).hexdigest()[:12]
+                                         ARGS_MULTI, WRAPPER, "probe-v1"], sort_keys=True, default=str).encode()).hexdigest()[:12]
         path = self.cache / f"suite_{exam['exam_id']}_{key}.json"
         if path.exists():
             d = json.loads(path.read_text(encoding="utf-8"))
@@ -683,9 +700,25 @@ class SuiteBuilder:
                 refs[i], res[i] = code, r  # keep the latest attempt: its problem is the one to fix next
                 repaired += r[1] is None
         kept = [runs for runs, p in res if p is None]
+
+        def probe(why: str) -> Suite | None:
+            """No agreed answers: keep the cases the driver can judge without them. Needs one reference that passes
+            the data-file check with this driver (so the driver prints the record count right)."""
+            if not kept:
+                print(f"[testgen] {eid}: {why}; no reference passes the data-file check, no suite", flush=True)
+                return None
+            tests = [{**c, "expected": None, **({"rows": rows[c["stdin"].split(chr(10))[1]]} if k < n_first else {})}
+                     for k, c in enumerate(cases)]
+            out = Suite(eid, "multi_problem", *self._model_info(), tests=tests, driver=suite.driver, files=files,
+                        pids=pids, prereq=prereq, struct_names=structs, probe=True,
+                        stats={"refs": len(refs), "refs_kept": len(kept), "repaired": repaired, "probe": why,
+                               "cases": len(cases), "args": args})
+            print(f"[testgen] {eid}: {why}, probe suite (record counts, crashes, endless runs) {out.stats}",
+                  flush=True)
+            return out
+
         if len(kept) < MIN_REFS_MULTI:
-            print(f"[testgen] {eid}: {len(kept)} references pass the data-file check, no suite", flush=True)
-            return None
+            return probe(f"{len(kept)} references pass the data-file check")
         tests, dropped = [], 0
         for k, c in enumerate(cases):
             answer = _majority([r[k] for r in kept])
@@ -699,8 +732,7 @@ class SuiteBuilder:
         if sum(t["pid"] == pids[0] for t in tests) < n_first:
             # the prerequisite decides every label of a wrong submission: without an agreed answer on each copy of
             # the data file, a suite would judge right submissions wrong, so the exam gets no suite
-            print(f"[testgen] {eid}: no agreement on every {pids[0]} case, no suite ({suite.stats})", flush=True)
-            return None
+            return probe(f"no agreement on every {pids[0]} case")
         print(f"[testgen] {eid}: {suite.stats}", flush=True)
         return suite
 

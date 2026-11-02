@@ -56,7 +56,7 @@ def summary_text(r: ExecResult | None, lang: str = "vi") -> str:
         lines.append(t["nocompile"])
     elif r.all_commented:
         lines.append(t["commented"])
-    elif r.kind is None:
+    elif r.kind is None or r.probe:  # probe suites are not in the training data: the model sees "no suite"
         lines.append(t["none"])
     elif not r.harness_ok:
         lines.append(t["nobuild"])
