@@ -175,6 +175,7 @@ def level1_policy_reward_func(
             continue
 
         tax = data.get("taxonomy_error", [])
+        fb = data.get("feedback", "").strip()
         is_actually_failing = bool(clog and "error:" in clog.lower())
 
         if is_actually_failing:
@@ -184,11 +185,17 @@ def level1_policy_reward_func(
                 rewards.append(-1.0)
         else:
             # On non-compile error, Level 1 taxonomy MUST be empty []
-            if len(tax) == 0:
-                rewards.append(1.5)
-            else:
+            if len(tax) != 0:
                 # Guessing taxonomy on Level 1 collapses macro-F1 due to false positives
                 rewards.append(-2.5)
+                continue
+
+            # Factual Semantic Consistency: If code is clean (empty tax), penalize hallucinated bug claims
+            if fb and re.search(r"\b(?:chưa\s+(?:hoàn\s+thiện|đúng|tốt)|còn\s+(?:lỗi|vấn\s+đề|chỗ)|cần\s+sửa)\b", fb, re.IGNORECASE):
+                rewards.append(-3.0)  # Heavy penalty for hallucinating defects on correct code
+                continue
+
+            rewards.append(1.5)
     return rewards
 
 
@@ -343,11 +350,32 @@ def anti_degeneration_reward_func(
             rewards.append(-4.0)
             continue
 
-        # 2. Level 1 Concise Pedagogical Target
-        # In Level 1, instructor feedback is high-level guidance or praise ("Tốt.", "Cần cải thiện.").
+        # 2. Universal Token Diversity & Non-Redundancy (Length-Invariant)
+        # Any repeating word in a short phrase (<= 7 words) indicates degeneration loop (e.g. "gọi em làm em")
+        if n_words <= 7:
+            distinct_1 = len(set(words)) / n_words
+            if distinct_1 < 1.0:
+                rewards.append(-3.5)
+                continue
+            # Structural syntax sanity: transitive action verb + pronoun without subject (e.g. "học em...", "làm em...")
+            if n_words >= 2 and words[0] in {"học", "làm", "gọi", "viết", "code"} and words[1] in {"em", "bạn"}:
+                rewards.append(-3.0)
+                continue
+
+        # 3. Level 1 Concise Pedagogical Target
+        # In Level 1, instructor feedback is high-level guidance or concise praise
         if "Level 1" in str(lvl):
-            if 1 <= n_words <= 12:
-                rewards.append(1.5)
+            if 4 <= n_words <= 16:
+                counts = Counter(words)
+                entropy = -sum((cnt / n_words) * math.log2(cnt / n_words) for cnt in counts.values())
+                max_entropy = math.log2(n_words)
+                norm_entropy = entropy / max_entropy if max_entropy > 0 else 1.0
+                if norm_entropy < 0.85:
+                    rewards.append(-2.5)
+                else:
+                    rewards.append(1.5)
+            elif n_words < 4:
+                rewards.append(-2.0)
             else:
                 # Information density decay: Level 1 should not ramble
                 rewards.append(-2.0)

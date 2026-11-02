@@ -940,13 +940,26 @@ def infer(
                     retry_reasons.append("faulty_AllCorrect_contradiction")
                 if re.search(r"[\u0400-\u04ff\u3400-\u4dbf\u4e00-\u9fff]|P5\s+không\s+làm|câu\s+5:", generated.text, re.I):
                     retry_reasons.append("cjk_or_foreign_script")
-                # Information-theoretic repetition and typography degradation check
+                # Universal Information-Theoretic Repetition & Linguistic Quality Guard (Length-Invariant)
                 gen_words = [w for w in re.findall(r"\w+", generated.text.lower()) if w]
                 std_chars = sum(1 for ch in generated.text if ch.isalnum() or ch.isspace() or ch in ".,!?:;\"'()-_/[]{}")
                 if len(generated.text) > 0 and (std_chars / len(generated.text)) < 0.90:
                     retry_reasons.append("unnatural_colloquial_or_emoji")
-                elif len(gen_words) >= 10 and (Counter(gen_words).most_common(1)[0][1] / len(gen_words)) >= 0.28:
-                    retry_reasons.append("unnatural_colloquial_or_emoji")
+                if len(gen_words) > 0:
+                    # 1. On short completions (<= 7 words), any repeated token indicates mode collapse
+                    if len(gen_words) <= 7 and len(set(gen_words)) < len(gen_words):
+                        retry_reasons.append("unnatural_token_repetition")
+                    # 2. Structural syntax sanity: transitive verb + pronoun without subject (e.g. 'học em...', 'làm em...')
+                    elif len(gen_words) >= 2 and gen_words[0] in {"học", "làm", "gọi", "viết", "code"} and gen_words[1] in {"em", "bạn"}:
+                        retry_reasons.append("unnatural_syntax_inversion")
+                    # 3. On longer completions (>= 8 words), single-token concentration >= 28% indicates loop
+                    elif len(gen_words) >= 8 and (Counter(gen_words).most_common(1)[0][1] / len(gen_words)) >= 0.28:
+                        retry_reasons.append("unnatural_colloquial_or_emoji")
+                    # 4. Trigram repetition check
+                    if len(gen_words) >= 6:
+                        trigrams = [tuple(gen_words[i:i+3]) for i in range(len(gen_words) - 2)]
+                        if len(trigrams) != len(set(trigrams)):
+                            retry_reasons.append("repeating_ngram_loop")
                 clauses = [c.strip() for c in generated.text.split(";") if len(c.strip()) > 25]
                 if len(clauses) != len(set(clauses)):
                     retry_reasons.append("cjk_or_foreign_script")
