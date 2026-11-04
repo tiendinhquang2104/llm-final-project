@@ -440,7 +440,7 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
             raise ValueError("trace IDs must exactly match evaluation records")
         first_attempts = [
             next(
-                (attempt for attempt in trace_map[record.sample_id]["attempts"] if attempt.get("model_generated") is True),
+                (attempt for attempt in trace_map[record.sample_id].get("attempts", []) if attempt.get("model_generated") is True),
                 None,
             )
             for record in records
@@ -456,7 +456,7 @@ def evaluate(records, predictions, traces=(), taxonomy_source="gold", annotation
         applicable_plans = [plan for plan in plans if isinstance(plan, dict)]
         rejected_first = [attempt for attempt in first_generated if attempt.get("heuristic_compliance") is False]
         rescued = [trace for trace in traces if trace.get("raw_first_attempt_compliance") is False and not trace.get("fallback_used")]
-        model_success = [not flag and any(a.get("model_generated") and a.get("heuristic_compliance") is True for a in trace_map[record.sample_id]["attempts"]) for record, flag in zip(records, fallback_flags)]
+        model_success = [not flag and any(a.get("model_generated") and a.get("heuristic_compliance") is True for a in trace_map[record.sample_id].get("attempts", [])) for record, flag in zip(records, fallback_flags)]
         per_level_outcomes = {}
         for level in sorted(per_level):
             subset = [(record, trace_map[record.sample_id]) for record in records if int(record.target_feedback_level[6]) == level]

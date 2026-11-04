@@ -1,0 +1,43 @@
+extends: baseline.yaml
+experiment: mixed_balanced
+output_dir: checkpoints/task3/stage1_conservative
+min_free_vram_gib: 6
+attn_implementation: sdpa
+max_seq_length: 4096
+
+# 1. Expressive yet Regularized Adapter Capacity
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+# 2. Learning Rate & Decay Schedule
+learning_rate: 0.00002
+lr_scheduler_type: cosine
+warmup_ratio: 0.04
+max_grad_norm: 1.0
+optim: paged_adamw_8bit
+
+# 3. Epochs & Batch Size against Overfitting
+epochs: 2.0
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4
+source_weights:
+  real: 0.65
+  synthetic: 0.35
+
+# 4. Step-by-Step Validation & Best Checkpoint Preservation
+eval_strategy: steps
+save_strategy: steps
+eval_steps: 10
+save_steps: 10
+logging_steps: 1
+load_best_model_at_end: true
+save_total_limit: 2
+
+# 5. Pedagogical Constraints & Hardware Settings
+prompt_policy_version: 3
+attach_compiler_evidence: true
+cpp_standard: c++11
+ignore_competing_gpu_workload: true
+device_map: auto

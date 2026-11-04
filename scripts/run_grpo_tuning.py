@@ -101,7 +101,7 @@ def run_single_trial(trial_cfg: dict, args) -> dict:
     print("=" * 75 + "\n", flush=True)
 
     cmd = [
-        "python", "-u", "scripts/train_task3_grpo.py",
+        sys.executable, "-u", "scripts/train_task3_grpo.py",
         "--base-model", args.base_model,
         "--sft-adapter", args.sft_adapter,
         "--train-data", args.train_data,

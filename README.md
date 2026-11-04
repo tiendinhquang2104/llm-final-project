@@ -8,7 +8,7 @@ This repository provides an end-to-end pipeline designed for the LLM Grading Cha
 
 - **Task 1: Automated Rule & Rubric Scoring**: Combines deterministic prerequisite rule checks with LLM prompting pipelines to evaluate responses against structured rubrics.
 - **Task 2: Multi-label Error Classification**: Hướng 1 prompts an API LLM (Gemini/OpenAI) for the submission; Hướng 2 fine-tunes the CLM-8B heads (frozen Qwen3-8B, MLX locally / Kaggle GPU) on the 32 labelled samples plus bug-injection augmentation, evaluated by k-fold CV, with a linear-probe ablation. No labels are derived from the test set. See `docs/task2.md`.
-- **Task 3: Controlled Pedagogical Feedback**: Generates Vietnamese C++ feedback at Levels 1–4 using local Qwen2.5-Coder, with independent oracle/public modes, compliance checks and CUDA QLoRA training. See [docs/task3.md](docs/task3.md).
+- **Task 3: Controlled Pedagogical Feedback**: Generates Vietnamese C++ feedback at Levels 1–4 using local Qwen2.5-Coder-7B-Instruct, with independent oracle/public modes, compliance checks, QLoRA SFT, and GRPO RLVR training. See [README_TASK3.md](README_TASK3.md) and [docs/task3.md](docs/task3.md).
 
 ### Task 3: reproduce the fresh flows
 

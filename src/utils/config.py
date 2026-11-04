@@ -5,8 +5,6 @@ import copy
 import os
 from pathlib import Path
 
-import yaml
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -22,6 +20,7 @@ def deep_merge(base: dict, over: dict) -> dict:
 
 def load_config(path: str | Path) -> dict:
     """Load a YAML config; `extends: <relative path>` merges the parent config underneath."""
+    import yaml
     path = Path(path)
     cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if "extends" in cfg:

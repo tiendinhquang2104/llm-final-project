@@ -128,6 +128,7 @@ def run_main(argv=None):
     p.add_argument("--sample-ids", help="declared ordered subset for a mechanical pilot; never modifies data")
     p.add_argument("--context-limit", type=int, help="override context_limit in config")
     p.add_argument("--seed", type=int)
+    p.add_argument("--two-pass", action="store_true", help="enable Two-Pass Chaining: Pass 1 technical diagnosis -> Pass 2 pedagogical feedback")
     p.add_argument(
         "--prompt-strategy",
         choices=sorted(PROMPT_STRATEGIES),
@@ -138,6 +139,8 @@ def run_main(argv=None):
         p.error("synthetic-train requires --sample-ids for an explicitly declared train pilot")
     config = load_config(args.config)
     config = resolve_strategy_config(config, args.prompt_strategy)
+    if args.two_pass:
+        config["two_pass"] = True
     if args.context_limit is not None:
         config["context_limit"] = args.context_limit
     if args.adapter:
@@ -403,6 +406,14 @@ def train_main(argv=None):
     p.add_argument("--output-dir")
     p.add_argument("--max-steps", type=int)
     p.add_argument("--resume-from-checkpoint")
+    p.add_argument("--epochs", type=float, help="number of training epochs")
+    p.add_argument("--learning-rate", "--lr", type=float, help="learning rate (e.g. 2e-5)")
+    p.add_argument("--batch-size", type=int, help="per-device train batch size")
+    p.add_argument("--gradient-accumulation-steps", "--grad-accum", type=int, help="gradient accumulation steps")
+    p.add_argument("--real-weight", type=float, help="sampling weight for real data (e.g. 0.65)")
+    p.add_argument("--synth-weight", type=float, help="sampling weight for synthetic data (e.g. 0.35)")
+    p.add_argument("--lora-r", type=int, help="LoRA rank dimension")
+    p.add_argument("--lora-alpha", type=int, help="LoRA alpha scaling factor")
     group = p.add_mutually_exclusive_group()
     group.add_argument("--dry-run", action="store_true")
     group.add_argument(
@@ -417,9 +428,48 @@ def train_main(argv=None):
         config["experiment"] = args.experiment
     if args.output_dir:
         config["output_dir"] = args.output_dir
+    if args.epochs is not None:
+        config["epochs"] = args.epochs
+    if args.learning_rate is not None:
+        config["learning_rate"] = args.learning_rate
+    if args.batch_size is not None:
+        config["per_device_train_batch_size"] = args.batch_size
+    if args.gradient_accumulation_steps is not None:
+        config["gradient_accumulation_steps"] = args.gradient_accumulation_steps
+    if args.lora_r is not None:
+        config["lora_r"] = args.lora_r
+    if args.lora_alpha is not None:
+        config["lora_alpha"] = args.lora_alpha
+    if args.real_weight is not None or args.synth_weight is not None:
+        current_sw = config.get("source_weights", {})
+        rw = args.real_weight if args.real_weight is not None else current_sw.get("real", 0.65)
+        sw = args.synth_weight if args.synth_weight is not None else current_sw.get("synthetic", 0.35)
+        config["source_weights"] = {"real": rw, "synthetic": sw}
     if args.max_steps is not None and args.max_steps <= 0:
         p.error("--max-steps must be a positive optimizer-step count")
     from src.task3.train import run_training
+
+    out_path = Path(config.get("output_dir", "checkpoints/task3/qlora"))
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    # 1. Save resolved hyperparameters
+    hyperparameters = {
+        "experiment": config.get("experiment", "mixed_balanced"),
+        "epochs": config.get("epochs", 3.0),
+        "learning_rate": config.get("learning_rate", 2e-5),
+        "per_device_train_batch_size": config.get("per_device_train_batch_size", 1),
+        "gradient_accumulation_steps": config.get("gradient_accumulation_steps", 8),
+        "source_weights": config.get("source_weights", {"real": 0.65, "synthetic": 0.35}),
+        "lora_r": config.get("lora_r", 16),
+        "lora_alpha": config.get("lora_alpha", 32),
+        "lora_dropout": config.get("lora_dropout", 0.05),
+        "lr_scheduler_type": config.get("lr_scheduler_type", "cosine"),
+        "warmup_ratio": config.get("warmup_ratio", 0.04),
+        "optim": config.get("optim", "paged_adamw_8bit"),
+        "max_seq_length": config.get("max_seq_length", 4096),
+        "seed": config.get("seed", 42),
+    }
+    write_json(out_path / "hyperparameters.json", hyperparameters)
 
     result = run_training(
         config,
@@ -429,6 +479,22 @@ def train_main(argv=None):
         resume_from_checkpoint=args.resume_from_checkpoint,
         smoke_test=args.smoke_test,
     )
+
+    # 2. Save structured evaluation and summary metrics
+    train_loss = result.get("train_metrics", {}).get("train_loss")
+    eval_loss = result.get("validation_metrics", {}).get("eval_loss")
+    eval_metrics = {
+        "status": result.get("status"),
+        "train_loss": train_loss,
+        "eval_loss": eval_loss,
+        "generalization_gap": (eval_loss - train_loss) if (eval_loss is not None and train_loss is not None) else None,
+        "optimizer_steps": result.get("optimizer_steps"),
+        "wall_time_s": result.get("wall_time_s"),
+        "peak_vram_mib": (result.get("peak_gpu_memory_allocated_bytes", 0) / (1024 ** 2)),
+        "samples_per_second": result.get("samples_per_second"),
+        "adapter_path": str(out_path / "adapter"),
+    }
+    write_json(out_path / "eval_metrics.json", eval_metrics)
     print(
         json.dumps(
             {

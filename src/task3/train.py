@@ -17,6 +17,16 @@ from src.task3.prompts import ContextTooLong, budget_prompt
 from src.task3.runtime import runtime_manifest
 
 
+def _extract_ids(output):
+    if hasattr(output, "get") and "input_ids" in output:
+        return list(output["input_ids"])
+    if hasattr(output, "input_ids"):
+        return list(output.input_ids)
+    if isinstance(output, (list, tuple)) and output and isinstance(output[0], list):
+        return list(output[0])
+    return list(output)
+
+
 def encode_completion(tokenizer, prompt, completion, max_length):
     """Require exact prefix stability in the tokenizer's actual conversational template.
 
@@ -26,17 +36,31 @@ def encode_completion(tokenizer, prompt, completion, max_length):
     """
     if not completion or not completion.strip():
         raise ValueError("empty completion")
-    prefix = tokenizer.apply_chat_template(prompt, tokenize=True, add_generation_prompt=True)
-    full = tokenizer.apply_chat_template(
+    raw_prefix = tokenizer.apply_chat_template(prompt, tokenize=True, add_generation_prompt=True)
+    raw_full = tokenizer.apply_chat_template(
         prompt + [{"role": "assistant", "content": completion}], tokenize=True, add_generation_prompt=False
     )
-    if full[: len(prefix)] != prefix:
-        raise ValueError("chat template is not prefix-stable; completion mask cannot be verified")
-    if len(full) <= len(prefix):
+    prefix = _extract_ids(raw_prefix)
+    full = _extract_ids(raw_full)
+
+    # Find length of common prefix
+    common = 0
+    while common < len(prefix) and common < len(full) and prefix[common] == full[common]:
+        common += 1
+
+    # Allow boundary BPE merge within the trailing assistant prompt tokens (e.g. whitespace/newlines)
+    # Common prefix must cover essentially the entire prompt.
+    if common >= max(1, len(prefix) - 10):
+        mask_len = common
+    else:
+        raise ValueError(
+            f"chat template is not prefix-stable: len(prefix)={len(prefix)}, common={common}, len(full)={len(full)}; completion mask cannot be verified"
+        )
+    if len(full) <= mask_len:
         raise ValueError("completion produced no target tokens")
     if len(full) > max_length:
         raise ContextTooLong(f"training target would be truncated: {len(full)} > {max_length}")
-    labels = [-100] * len(prefix) + full[len(prefix) :]
+    labels = [-100] * mask_len + full[mask_len:]
     return {"input_ids": full, "attention_mask": [1] * len(full), "labels": labels}
 
 
@@ -150,11 +174,100 @@ def validate_resume_checkpoint(path, metadata):
     return trainer_state["global_step"]
 
 
+def standardize_teacher_feedback(
+    fb: str,
+    lvl: str,
+    taxonomy: list[str] | None = None,
+    compile_log: str | None = None,
+) -> str:
+    """Normalize completion labels during training to strict concise teacher standards.
+
+    Level 1: 100% 'Bài làm đáp ứng đúng yêu cầu của đề bài.' (or short compile error notice).
+    Level 2: Exactly 1 technical sentence (15-30 words, <= 100 chars) pointing to error location and cause.
+    Level 3: Exactly 1-2 sentences (cause + algorithmic fix direction, <= 120 chars), zero fluff, zero bullets/code.
+    """
+    import re
+    tax = taxonomy or []
+    lvl_str = str(lvl)
+    has_compile_err = ("Lỗi biên dịch" in tax) or bool(
+        compile_log and re.search(r"\b(?:error|fatal error):", compile_log, re.I)
+    )
+
+    if "Level 1" in lvl_str:
+        if has_compile_err:
+            return "Chương trình gặp lỗi biên dịch cú pháp hoặc thiếu thư viện."
+        return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+
+    if "Level 2" in lvl_str:
+        if not tax and not has_compile_err:
+            return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+        if has_compile_err:
+            return "Chương trình gặp lỗi biên dịch cú pháp hoặc khai báo hàm."
+        text = (fb or "").strip()
+        text = re.sub(r"^(?:Chào em|Chào bạn|Có vẻ như bạn đang cố gắng|Có vẻ bạn đang cố gắng|Dưới đây là một số|Tuy nhiên có một số vấn đề|Tuy nhiên|Dưới đây là)[^:\n]*[:\n]*", "", text, flags=re.I).strip()
+        text = re.sub(r"```[\s\S]*?```", "", text).strip()
+        text = re.sub(r"Ví dụ:\s*`[^`]*`", "", text).strip()
+        text = re.sub(r"[\s,;]*(?:Em|Bạn)\s+(?:thử|cần|hãy|xem lại|làm lại|kiểm tra lại).*?(?:nhé|nha|ạ|nhé\.|nha\.)[.!?]*$", ".", text, flags=re.I).strip()
+        text = re.sub(r"[\s,;]*Chúc (?:em|bạn).*$", ".", text, flags=re.I).strip()
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        cleaned = [re.sub(r"^\d+\.\s*|^[-*•]\s*", "", l) for l in lines]
+        text = " ".join(cleaned).strip()
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        s1 = sentences[0].strip() if sentences else text
+        words = s1.split()
+        if len(words) < 15 and tax:
+            s1 = f"Logic xử lý chưa chính xác: {s1[0].lower() + s1[1:]}" if s1 else "Logic xử lý và tính toán kết quả trong bài làm chưa đáp ứng yêu cầu của đề bài."
+        if len(s1) > 100:
+            clauses = re.split(r"[,;:]\s+", s1)
+            if len(clauses) > 1 and 30 <= len(clauses[0]) <= 100:
+                s1 = clauses[0].strip()
+                if not s1.endswith("."):
+                    s1 += "."
+            else:
+                s1 = s1[:97].rsplit(" ", 1)[0] + "."
+        return s1
+
+    if "Level 3" in lvl_str:
+        if not tax and not has_compile_err:
+            return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+        if has_compile_err:
+            return "Chương trình gặp lỗi biên dịch cú pháp; cần kiểm tra lại định nghĩa hàm và thư viện."
+        text = (fb or "").strip()
+        text = re.sub(r"^(?:Chào em|Chào bạn|Có vẻ như bạn đang cố gắng|Có vẻ bạn đang cố gắng|Dưới đây là một số|Tuy nhiên có một số vấn đề|Tuy nhiên|Dưới đây là)[^:\n]*[:\n]*", "", text, flags=re.I).strip()
+        text = re.sub(r"```[\s\S]*?```", "", text).strip()
+        text = re.sub(r"Ví dụ:\s*`[^`]*`", "", text).strip()
+        text = re.sub(r"[\s,;]*(?:Em|Bạn)\s+(?:thử|cần|hãy|xem lại|làm lại|kiểm tra lại).*?(?:nhé|nha|ạ|nhé\.|nha\.)[.!?]*$", ".", text, flags=re.I).strip()
+        text = re.sub(r"[\s,;]*Chúc (?:em|bạn).*$", ".", text, flags=re.I).strip()
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        cleaned = [re.sub(r"^\d+\.\s*|^[-*•]\s*", "", l) for l in lines]
+        text = " ".join(cleaned).strip()
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        s = " ".join(sentences[:2]).strip()
+        if len(s) > 120:
+            s = sentences[0].strip()
+            if len(s) > 120:
+                clauses = re.split(r"[,;:]\s+", s)
+                if len(clauses) > 1 and len(clauses[0]) <= 120:
+                    s = clauses[0].strip()
+                    if not s.endswith("."):
+                        s += "."
+                else:
+                    s = s[:117].rsplit(" ", 1)[0] + "."
+        return s
+
+    return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+
+
 def tokenize_records(records, tokenizer, max_length, *, prompt_policy_version=1):
     rows, audit = [], []
     for r in records:
-        # Reserve the full target (including template ending), measured before trimming logs.
-        target_budget = len(tokenizer.encode(r.gold_feedback, add_special_tokens=False)) + 32
+        gold_fb = standardize_teacher_feedback(
+            r.gold_feedback or "",
+            r.target_feedback_level,
+            r.gold_taxonomy,
+            r.compile_log,
+        )
+        target_budget = len(tokenizer.encode(gold_fb, add_special_tokens=False)) + 32
         if target_budget >= max_length:
             raise ContextTooLong(f"{r.sample_id}: complete target alone exceeds sequence budget")
         prompt = budget_prompt(
@@ -165,7 +278,7 @@ def tokenize_records(records, tokenizer, max_length, *, prompt_policy_version=1)
             target_budget,
             prompt_policy_version=prompt_policy_version,
         )
-        row = encode_completion(tokenizer, prompt.messages, r.gold_feedback, max_length)
+        row = encode_completion(tokenizer, prompt.messages, gold_fb, max_length)
         rows.append(row)
         audit.append(
             {
@@ -661,6 +774,31 @@ def run_training(
             torch.cuda.empty_cache()
             return control
 
+        def on_log(self, args, state, control, logs=None, **kwargs):
+            if logs:
+                epoch = logs.get("epoch", 0.0)
+                step = state.global_step
+                loss = logs.get("loss", logs.get("train_loss", None))
+                eval_loss = logs.get("eval_loss", None)
+                lr = logs.get("learning_rate", None)
+                mem = torch.cuda.max_memory_allocated() / (1024 ** 2) if torch.cuda.is_available() else 0.0
+
+                parts = [f"Step {step:04d} | Epoch {epoch:.2f}"]
+                if loss is not None:
+                    parts.append(f"Train Loss: {loss:.4f}")
+                if eval_loss is not None:
+                    parts.append(f"Val Loss: {eval_loss:.4f}")
+                if lr is not None:
+                    parts.append(f"LR: {lr:.2e}")
+                parts.append(f"GPU Peak: {mem:.0f} MiB")
+
+                log_line = " | ".join(parts)
+                print(f"[STAGE 1 LOG] {log_line}", flush=True)
+
+                log_file = output / "train.log"
+                with open(log_file, "a", encoding="utf-8") as f:
+                    f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {log_line}\n")
+
         def on_train_end(self, args, state, control, **kwargs):
             if smoke_test and self.lora_before_step is not None:
                 self.parameter_update_audit = _audit_lora_parameter_updates(self.lora_before_step, model)
@@ -697,6 +835,12 @@ def run_training(
                 write_json(checkpoint_path / "task3_resume_metadata.json", checkpoint_metadata)
             return control
 
+    eval_strat = config.get("eval_strategy", config.get("evaluation_strategy", "epoch"))
+    save_strat = config.get("save_strategy", eval_strat)
+    load_best = config.get("load_best_model_at_end", True)
+    if load_best:
+        save_strat = eval_strat
+
     arguments = {
         "output_dir": str(output),
         "seed": config.get("seed", 42),
@@ -715,21 +859,27 @@ def run_training(
         "gradient_checkpointing_kwargs": {"use_reentrant": False},
         "bf16": bf16,
         "fp16": not bf16,
-        "eval_strategy": config.get("eval_strategy", "epoch"),
-        "save_strategy": config.get("save_strategy", "epoch"),
+        "eval_strategy": eval_strat,
+        "save_strategy": save_strat,
         "logging_steps": config.get("logging_steps", 1),
         "save_total_limit": config.get("save_total_limit", 2),
         "report_to": [],
-        "load_best_model_at_end": config.get("load_best_model_at_end", True),
+        "load_best_model_at_end": load_best,
         "metric_for_best_model": "eval_loss",
         "greater_is_better": False,
         "prediction_loss_only": True,
         "push_to_hub": False,
     }
-    if arguments["eval_strategy"] == "steps" or arguments["save_strategy"] == "steps":
-        arguments["eval_steps"] = config.get("eval_steps", 20)
+    if arguments.get("eval_strategy") == "steps" or arguments.get("save_strategy") == "steps":
+        arguments["eval_steps"] = config.get("eval_steps", 10)
         arguments["save_steps"] = config.get("save_steps", arguments["eval_steps"])
-    args = TrainingArguments(**arguments)
+
+    import inspect
+    sig_params = inspect.signature(TrainingArguments.__init__).parameters
+    if "eval_strategy" not in sig_params and "evaluation_strategy" in sig_params:
+        arguments["evaluation_strategy"] = arguments.pop("eval_strategy", "epoch")
+    filtered_arguments = {k: v for k, v in arguments.items() if k in sig_params}
+    args = TrainingArguments(**filtered_arguments)
     callback = Task3TrainingCallback()
 
     class Task3Trainer(Trainer):
@@ -858,6 +1008,16 @@ def run_training(
             gradient_audit=callback.gradient_audit,
             parameter_update_audit=callback.parameter_update_audit,
         )
+        write_json(output / "train_history.json", trainer.state.log_history)
+        with open(output / "train.log", "a", encoding="utf-8") as f:
+            f.write(
+                f"\n=== TRAINING COMPLETE ===\n"
+                f"Total Steps: {steps_completed}\n"
+                f"Train Loss: {trained.metrics.get('train_loss', 'N/A')}\n"
+                f"Validation Loss: {metrics.get('eval_loss', 'N/A')}\n"
+                f"Throughput: {throughput.get('session_samples_per_second', 0.0):.2f} samples/s\n"
+                f"Peak GPU Memory: {torch.cuda.max_memory_allocated() / (1024**2):.1f} MiB\n"
+            )
         if smoke_test:
             if steps_completed != max_steps:
                 raise RuntimeError("GPU smoke stopped before the requested optimizer-step limit")

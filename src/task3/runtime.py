@@ -42,6 +42,18 @@ def runtime_manifest(config, tokenizer=None, *, backend=None):
                 "gpu_memory_bytes": torch.cuda.get_device_properties(0).total_memory,
                 "cuda_version": torch.version.cuda,
             }
+        else:
+            try:
+                import torch_xla.core.xla_model as xm
+
+                device = {
+                    "device": str(xm.xla_device()),
+                    "cuda": False,
+                    "tpu": True,
+                    "gpu_memory_bytes": None,
+                }
+            except Exception:
+                pass
     result = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "python": platform.python_version(),

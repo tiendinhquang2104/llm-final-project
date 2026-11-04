@@ -1,2 +1,0 @@
-extends: r15_common.yaml
-prompt_variant: zero_shot

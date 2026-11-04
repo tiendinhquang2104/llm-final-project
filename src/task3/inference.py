@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from dataclasses import dataclass
 from typing import Protocol
@@ -75,7 +76,21 @@ def load_tokenizer(config):
     return tokenizer
 
 
+def is_tpu_available() -> bool:
+    if os.environ.get("TPU_NAME") or os.environ.get("PJRT_DEVICE") == "TPU" or "TPU" in os.environ.get("KAGGLE_KERNEL_INTEGRATIONS", ""):
+        return True
+    try:
+        import torch_xla.core.xla_model as xm
+        return True
+    except Exception:
+        return False
+
+
 def _native_bf16_supported(torch, device=None):
+    if is_tpu_available():
+        return True
+    if not bool(torch.cuda.is_available()):
+        return False
     if not bool(torch.cuda.is_bf16_supported()):
         return False
     get_cap = getattr(torch.cuda, "get_device_capability", None)
@@ -89,16 +104,22 @@ def _native_bf16_supported(torch, device=None):
 
 
 def model_load_options(config, *, device_index, bf16_supported=None):
-    """Keep NF4 unchanged; unquantized inference explicitly requests BF16 on CUDA."""
+    """Keep NF4 unchanged; unquantized inference explicitly requests BF16 on CUDA/TPU."""
     import torch
-    from transformers import BitsAndBytesConfig
 
     options = {
-        "revision": config["revision"],
+        "revision": config.get("revision"),
         "trust_remote_code": False,
-        "device_map": {"": device_index},
     }
+    if is_tpu_available():
+        options["torch_dtype"] = torch.bfloat16
+        options["low_cpu_mem_usage"] = True
+        return options
+
+    options["device_map"] = {"": device_index}
     if config.get("load_in_4bit", True):
+        from transformers import BitsAndBytesConfig
+
         supported = _native_bf16_supported(torch, device_index) if bf16_supported is None else bf16_supported
         options["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
@@ -121,6 +142,16 @@ def inspect_model_precision(model, *, load_in_4bit):
         dtypes[str(parameter.dtype)] += parameter.numel()
         devices[str(parameter.device)] += parameter.numel()
     device_map = {key: str(value) for key, value in getattr(model, "hf_device_map", {}).items()}
+    if is_tpu_available():
+        return {
+            "actual_precision": "bf16",
+            "parameter_storage_elements_by_dtype": dict(dtypes),
+            "parameter_storage_elements_by_device": dict(devices),
+            "hf_device_map": device_map,
+            "is_loaded_in_4bit": False,
+            "quantized_compute_dtypes": [],
+            "resolved_model_revision": getattr(getattr(model, "config", None), "_commit_hash", None),
+        }
     if not devices or any(not device.startswith("cuda:") for device in devices):
         raise RuntimeError("Task 3 precision verification requires all parameters on CUDA; no CPU offload")
     if any(value in {"cpu", "disk", "meta"} for value in device_map.values()):
@@ -155,34 +186,60 @@ class HFBackend:
         set_seed(config.get("seed", 42))
         self.torch = torch
         self.tokenizer = tokenizer or load_tokenizer(config)
-        if not torch.cuda.is_available():
-            raise RuntimeError("local inference requires CUDA; use --dry-run for offline tests")
-        if torch.cuda.device_count() != 1:
-            raise RuntimeError("Task 3 inference requires exactly one visible CUDA device")
-        if not config.get("load_in_4bit", True) and not torch.cuda.is_bf16_supported():
-            raise RuntimeError("BF16 inference requires native BF16 support; no precision fallback")
-        torch.cuda.reset_peak_memory_stats()
+        self.is_tpu = is_tpu_available()
         started = time.perf_counter()
-        options = model_load_options(config, device_index=torch.cuda.current_device())
-        self.model = AutoModelForCausalLM.from_pretrained(config["model_id"], **options)
-        if config.get("load_in_4bit", True) and not _native_bf16_supported(torch):
-            for name, parameter in self.model.named_parameters():
-                if not parameter.requires_grad and any(target in name for target in ("lm_head", "embed_tokens")):
-                    parameter.data = parameter.data.to(torch.float16)
-            if hasattr(torch.cuda, "empty_cache"):
-                torch.cuda.empty_cache()
-        if config.get("adapter"):
-            from peft import PeftModel
 
-            self.model = PeftModel.from_pretrained(self.model, config["adapter"], is_trainable=False)
-        self.model.eval()
-        torch.cuda.synchronize()
-        self.load_latency_s = time.perf_counter() - started
-        self.precision_audit = inspect_model_precision(self.model, load_in_4bit=config.get("load_in_4bit", True))
-        if self.precision_audit["resolved_model_revision"] != config["revision"]:
+        if self.is_tpu:
+            import torch_xla.core.xla_model as xm
+
+            self.device = xm.xla_device()
+            options = model_load_options(config, device_index=None)
+            self.model = AutoModelForCausalLM.from_pretrained(config["model_id"], **options)
+            if config.get("adapter"):
+                from peft import PeftModel
+
+                self.model = PeftModel.from_pretrained(self.model, config["adapter"], is_trainable=False)
+            self.model = self.model.to(self.device)
+            self.model.eval()
+            xm.mark_step()
+            self.load_latency_s = time.perf_counter() - started
+            self.precision_audit = inspect_model_precision(self.model, load_in_4bit=False)
+        else:
+            if not torch.cuda.is_available():
+                raise RuntimeError("local inference requires CUDA or TPU; use --dry-run for offline tests")
+            if torch.cuda.device_count() != 1:
+                raise RuntimeError("Task 3 inference requires exactly one visible CUDA device")
+            if not config.get("load_in_4bit", True) and not torch.cuda.is_bf16_supported():
+                raise RuntimeError("BF16 inference requires native BF16 support; no precision fallback")
+            torch.cuda.reset_peak_memory_stats()
+            options = model_load_options(config, device_index=torch.cuda.current_device())
+            self.model = AutoModelForCausalLM.from_pretrained(config["model_id"], **options)
+            if config.get("load_in_4bit", True) and not _native_bf16_supported(torch):
+                for name, parameter in self.model.named_parameters():
+                    if not parameter.requires_grad and any(target in name for target in ("lm_head", "embed_tokens")):
+                        parameter.data = parameter.data.to(torch.float16)
+                if hasattr(torch.cuda, "empty_cache"):
+                    torch.cuda.empty_cache()
+            if config.get("adapter"):
+                from peft import PeftModel
+
+                self.model = PeftModel.from_pretrained(self.model, config["adapter"], is_trainable=False)
+            self.model.eval()
+            torch.cuda.synchronize()
+            self.load_latency_s = time.perf_counter() - started
+            self.precision_audit = inspect_model_precision(self.model, load_in_4bit=config.get("load_in_4bit", True))
+            self.device = self.model.device
+
+        if config.get("revision") and self.precision_audit.get("resolved_model_revision") and self.precision_audit["resolved_model_revision"] != config["revision"]:
             raise RuntimeError("Loaded model revision differs from the pinned revision")
 
     def runtime_metadata(self):
+        if self.is_tpu:
+            return {
+                **self.precision_audit,
+                "load_latency_s": self.load_latency_s,
+                "accelerator": "TPU",
+            }
         self.torch.cuda.synchronize()
         free, total = self.torch.cuda.mem_get_info()
         return {
@@ -200,7 +257,7 @@ class HFBackend:
 
         inputs = self.tokenizer.apply_chat_template(
             messages, tokenize=True, add_generation_prompt=True, return_tensors="pt", return_dict=True
-        ).to(self.model.device)
+        ).to(self.device)
         options = {
             "max_new_tokens": config.get("max_new_tokens", 512),
             "do_sample": config.get("do_sample", False),
@@ -216,13 +273,22 @@ class HFBackend:
             options["bad_words_ids"] = config["bad_words_ids"]
         if options["do_sample"]:
             options.update(temperature=config.get("temperature", 0.7), top_p=config.get("top_p", 0.9))
-        self.torch.cuda.synchronize()
+
+        if self.is_tpu:
+            import torch_xla.core.xla_model as xm
+            xm.mark_step()
+        elif self.torch.cuda.is_available():
+            self.torch.cuda.synchronize()
+
         start = time.perf_counter()
         outputs = None
         try:
             with self.torch.inference_mode():
                 outputs = self.model.generate(**inputs, **options)
-            self.torch.cuda.synchronize()
+            if self.is_tpu:
+                xm.mark_step()
+            elif self.torch.cuda.is_available():
+                self.torch.cuda.synchronize()
             ids = outputs[0, inputs["input_ids"].shape[-1] :]
             eos_ids = self.model.generation_config.eos_token_id
             eos_ids = [eos_ids] if isinstance(eos_ids, int) else (eos_ids or [])

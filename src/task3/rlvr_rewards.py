@@ -131,7 +131,7 @@ def compiler_truth_reward_func(
     compile_log: Sequence[str],
     **kwargs,
 ) -> List[float]:
-    """Verifies that 'Lỗi biên dịch' strictly matches actual compilation status."""
+    """Verifies that 'Lỗi biên dịch' strictly matches compiler reality without guessing."""
     rewards = []
     for c, clog in zip(completions, compile_log):
         data = parse_completion(c)
@@ -141,18 +141,26 @@ def compiler_truth_reward_func(
 
         tax = data.get("taxonomy_error", [])
         has_compile_error_label = "Lỗi biên dịch" in tax
-        is_actually_failing = bool(clog and "error:" in clog.lower())
 
-        if is_actually_failing:
+        clog_str = (clog or "").strip()
+        has_log_error = bool(clog_str and re.search(r"\b(?:error|fatal error):", clog_str, re.IGNORECASE))
+        has_log_success = bool(clog_str and not has_log_error)
+
+        if has_log_error:
+            # Code definitely failed to compile
             if has_compile_error_label:
-                rewards.append(1.5)   # Correctly identified compiler failure
+                rewards.append(2.0)   # Correctly identified compiler failure
             else:
-                rewards.append(-2.0)  # Missed obvious compiler error
-        else:
+                rewards.append(-2.5)  # Missed obvious compiler error
+        elif has_log_success:
+            # Code definitely compiled cleanly -> penalize hallucinating compile error
             if has_compile_error_label:
-                rewards.append(-2.0)  # Hallucinated compiler error on clean code
+                rewards.append(-2.5)  # Hallucinated compiler error on clean code
             else:
                 rewards.append(0.5)   # Correctly did not output compile error
+        else:
+            # Compile status is unknown (missing/empty log) -> Neutral, do not penalize unfairly
+            rewards.append(0.0)
     return rewards
 
 
@@ -160,11 +168,13 @@ def level1_policy_reward_func(
     completions: Sequence[str],
     target_feedback_level: Sequence[str],
     compile_log: Sequence[str],
+    ground_truth_taxonomy: Optional[Sequence[Optional[List[str]]]] = None,
     **kwargs,
 ) -> List[float]:
-    """Penalizes guessing taxonomy labels on Level 1 unless compilation failed."""
+    """Ensures Level 1 feedback remains pedagogically safe without penalizing valid taxonomy diagnosis."""
     rewards = []
-    for c, lvl, clog in zip(completions, target_feedback_level, compile_log):
+    gt_list = ground_truth_taxonomy if ground_truth_taxonomy is not None else [None] * len(completions)
+    for c, lvl, clog, gt_tax in zip(completions, target_feedback_level, compile_log, gt_list):
         data = parse_completion(c)
         if not data:
             rewards.append(0.0)
@@ -176,26 +186,25 @@ def level1_policy_reward_func(
 
         tax = data.get("taxonomy_error", [])
         fb = data.get("feedback", "").strip()
-        is_actually_failing = bool(clog and "error:" in clog.lower())
 
-        if is_actually_failing:
-            if tax == ["Lỗi biên dịch"]:
-                rewards.append(1.5)
-            else:
-                rewards.append(-1.0)
-        else:
-            # On non-compile error, Level 1 taxonomy MUST be empty []
-            if len(tax) != 0:
-                # Guessing taxonomy on Level 1 collapses macro-F1 due to false positives
-                rewards.append(-2.5)
+        # Factual Consistency: If ground truth taxonomy is known to be clean ([]), penalize claiming bugs
+        if gt_tax is not None and len(gt_tax) == 0:
+            if len(tax) > 0:
+                rewards.append(-2.0)  # Hallucinated taxonomy on clean code
                 continue
-
-            # Factual Semantic Consistency: If code is clean (empty tax), penalize hallucinated bug claims
             if fb and re.search(r"\b(?:chưa\s+(?:hoàn\s+thiện|đúng|tốt)|còn\s+(?:lỗi|vấn\s+đề|chỗ)|cần\s+sửa)\b", fb, re.IGNORECASE):
-                rewards.append(-3.0)  # Heavy penalty for hallucinating defects on correct code
+                rewards.append(-2.5)  # Hallucinated defects in feedback on clean code
                 continue
 
+        # If code has compiler failure, reward correct diagnosis
+        clog_str = (clog or "").strip()
+        has_compile_error = bool(clog_str and re.search(r"\b(?:error|fatal error):", clog_str, re.IGNORECASE))
+        if has_compile_error and "Lỗi biên dịch" in tax:
             rewards.append(1.5)
+            continue
+
+        # Safe Level 1 guidance reward
+        rewards.append(1.5)
     return rewards
 
 
@@ -204,14 +213,7 @@ def ground_truth_taxonomy_reward_func(
     ground_truth_taxonomy: Sequence[Optional[List[str]]],
     **kwargs,
 ) -> List[float]:
-    """Awards class-aware asymmetric F1 alignment reward when ground truth taxonomy is available.
-
-    Mitigates Macro-F1 distortions:
-    1. Severe penalty for False Positives on over-predicted rare labels (Lỗi nhập/xuất: -3.0, Lỗi hard-code: -3.0).
-    2. Penalty for False Negatives on under-recalled rare labels (Lỗi edge case: -2.5, Lỗi style: -2.0).
-    3. High reward bonus for True Positives on difficult rare labels (Lỗi edge case: +3.5, Lỗi nhập/xuất: +2.5).
-    4. Base multi-label F1 scaling (+2.5 * F1).
-    """
+    """Pure mathematical multi-label F1 alignment reward without manual heuristic distortion."""
     rewards = []
     for c, gt_tax in zip(completions, ground_truth_taxonomy):
         if gt_tax is None:
@@ -222,87 +224,114 @@ def ground_truth_taxonomy_reward_func(
         pred_tax = set(data.get("taxonomy_error", [])) if data else set()
         gt_set = set(gt_tax)
 
-        asymmetric_adj = 0.0
-
-        # 1. False Positive Penalties (Suppress over-prediction)
-        if "Lỗi nhập/xuất" in pred_tax and "Lỗi nhập/xuất" not in gt_set:
-            asymmetric_adj -= 3.0
-        if "Lỗi hard-code" in pred_tax and "Lỗi hard-code" not in gt_set:
-            asymmetric_adj -= 3.0
-
-        # 2. False Negative Penalties (Penalize missing rare bugs)
-        if "Lỗi edge case" in gt_set and "Lỗi edge case" not in pred_tax:
-            asymmetric_adj -= 2.5
-        if "Lỗi style" in gt_set and "Lỗi style" not in pred_tax:
-            asymmetric_adj -= 2.0
-
-        # 3. True Positive Bonuses (Incentivize precision on rare categories)
-        if "Lỗi edge case" in pred_tax and "Lỗi edge case" in gt_set:
-            asymmetric_adj += 3.5
-        if "Lỗi nhập/xuất" in pred_tax and "Lỗi nhập/xuất" in gt_set:
-            asymmetric_adj += 2.5
-        if "Lỗi vòng lặp" in pred_tax and "Lỗi vòng lặp" in gt_set:
-            asymmetric_adj += 2.0
-        if "Lỗi mảng/chuỗi" in pred_tax and "Lỗi mảng/chuỗi" in gt_set:
-            asymmetric_adj += 2.0
-
         if not pred_tax and not gt_set:
-            rewards.append(1.5 + asymmetric_adj)
+            rewards.append(2.0)  # Correctly clean
         elif not pred_tax or not gt_set:
-            rewards.append(0.0 + asymmetric_adj)
+            rewards.append(-1.0)  # Total mismatch (false alarm or complete omission)
         else:
             intersection = len(pred_tax & gt_set)
             prec = intersection / len(pred_tax)
             rec = intersection / len(gt_set)
             f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
-            rewards.append(2.5 * f1 + asymmetric_adj)
+            rewards.append(3.0 * f1 - 0.5)
     return rewards
 
 
 # -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# Tier 4: Length Floor & Anti-Hacking Verifier (Level-Aware)
+# Tier 4: Information-Theoretic Length Floor & Asymmetric Brevity Pressure
+# Pure mathematical formulation; zero hardcoded string heuristics.
 # -----------------------------------------------------------------------------
 def pedagogical_density_reward_func(
     completions: Sequence[str],
     target_feedback_level: Sequence[str],
     **kwargs,
 ) -> List[float]:
-    """Penalizes ultra-short (6-token) reward hacks for Level 2/3, while encouraging concise feedback for Level 1."""
+    """Continuous, asymmetric condition-aware pedagogical length verifier.
+
+    Enforces strict teacher standards:
+    - Level 1: 100% "Bài làm đáp ứng đúng yêu cầu của đề bài." or short compile error notice (<= 75 chars).
+    - Level 2: Exactly 1 technical sentence (15-30 words, <= 100 chars) pointing to root cause.
+    - Level 3: Exactly 1-2 sentences (cause + algorithmic fix direction, <= 120 chars), zero chatter/bullets/code.
+    """
     rewards = []
     for c, lvl in zip(completions, target_feedback_level):
         data = parse_completion(c)
-        fb = data.get("feedback", "") if data else c
+        raw_fb = data.get("feedback", "") if data else c
+        fb = (raw_fb if isinstance(raw_fb, str) else str(raw_fb)).strip()
         words = fb.split()
         num_words = len(words)
+        lvl_str = str(lvl)
+        fb_len = len(fb)
 
-        if "Level 1" in str(lvl):
-            # In Level 1, instructor feedback is high-level guidance or brief praise ("Tốt.", "Cần cải thiện.")
-            if 1 <= num_words <= 18:
-                rewards.append(1.5)  # Ideal concise pedagogical praise / gentle nudge
-            elif num_words == 0:
-                rewards.append(-3.0)
-            else:
-                rewards.append(-1.5)  # Penalize over-disclosure / rambling in Level 1
-            continue
-
-        # For Level 2 & Level 3:
-        # Anti-Reward-Hacking: Heavy penalty for ultra-short responses (< 12 words)
-        if num_words < 12:
+        if num_words == 0:
             rewards.append(-3.0)
             continue
-        elif num_words < 18:
-            rewards.append(-1.0)
-            continue
 
-        # Ideal pedagogical sweet spot for Level 2/3: 20 to 80 words
-        if 20 <= num_words <= 80:
-            rewards.append(2.0)
-        elif 80 < num_words <= 120:
-            rewards.append(0.5)
+        # Check for banned conversational greetings and pleasantries
+        has_chatter = bool(re.search(r"\b(chào em|chào bạn|em thử|em xem|nhé|nha|chúc em)\b", fb, re.I))
+        has_bullets = bool(re.search(r"^\s*[-*•]\s+|\n\s*[-*•]\s+|\b\d+\.\s+", fb))
+        has_code = "```" in fb
+
+        r = 0.0
+        if "Level 1" in lvl_str:
+            if fb == "Bài làm đáp ứng đúng yêu cầu của đề bài.":
+                r = 3.0
+            elif fb_len <= 75 and num_words <= 15:
+                r = 2.0
+            else:
+                r = max(-4.0, 1.0 - 0.1 * (fb_len - 75))
+
+        elif "Level 2" in lvl_str:
+            # Level 2 target: Exactly 1 technical sentence (15-30 words, <= 100 chars)
+            sentences = [s for s in re.split(r"(?<=[.!?])\s+", fb) if s.strip()]
+            num_sentences = len(sentences)
+
+            if fb_len <= 100 and 15 <= num_words <= 30 and num_sentences == 1 and not has_chatter and not has_bullets and not has_code:
+                r = 3.5  # Optimal reward for perfect teacher diagnosis
+            else:
+                r = 1.0
+                if fb_len > 100:
+                    r -= 0.15 * (fb_len - 100)
+                if num_words < 15:
+                    r -= 0.20 * (15 - num_words)
+                elif num_words > 30:
+                    r -= 0.25 * (num_words - 30)
+                if num_sentences > 1:
+                    r -= 1.5 * (num_sentences - 1)
+                if has_chatter:
+                    r -= 2.0
+                if has_bullets or has_code:
+                    r -= 3.0
+                r = max(-5.0, r)
+
+        elif "Level 3" in lvl_str:
+            # Level 3 target: 1-2 sentences (cause + algorithmic fix, <= 120 chars)
+            sentences = [s for s in re.split(r"(?<=[.!?])\s+", fb) if s.strip()]
+            num_sentences = len(sentences)
+
+            if fb_len <= 120 and 1 <= num_sentences <= 2 and not has_chatter and not has_bullets and not has_code:
+                r = 3.5  # Optimal reward for concise repair guidance
+            else:
+                r = 1.0
+                if fb_len > 120:
+                    r -= 0.15 * (fb_len - 120)
+                if num_sentences > 2:
+                    r -= 2.0 * (num_sentences - 2)
+                if has_chatter:
+                    r -= 2.5
+                if has_bullets or has_code:
+                    r -= 3.5
+                r = max(-5.0, r)
+
         else:
-            # Overly verbose / rambling (> 120 words)
-            rewards.append(-1.5)
+            # Level 4 or other
+            if 30 <= num_words <= 100:
+                r = 2.0
+            else:
+                r = max(-3.0, 2.0 - 0.05 * abs(num_words - 60))
+
+        rewards.append(r)
+
     return rewards
 
 
@@ -442,7 +471,7 @@ def level3_directive_reward_func(
     target_feedback_level: Sequence[str],
     **kwargs,
 ) -> List[float]:
-    """Ensures Level 3 feedback provides an explicit 'Hướng sửa:' directive."""
+    """Ensures Level 3 feedback provides algorithmic repair guidance concisely (<= 120 chars)."""
     rewards = []
     for c, lvl in zip(completions, target_feedback_level):
         if not str(lvl).startswith("Level 3"):
@@ -451,12 +480,28 @@ def level3_directive_reward_func(
 
         data = parse_completion(c)
         if not data:
-            rewards.append(-0.5)
+            rewards.append(-1.0)
             continue
 
-        fb = data.get("feedback", "")
-        if re.search(r"\bhướng sửa\s*:", fb, re.IGNORECASE) or re.search(r"\bgợi ý sửa\s*:", fb, re.IGNORECASE):
-            rewards.append(1.5)
+        fb = (data.get("feedback") or "").strip()
+        if not fb:
+            rewards.append(-2.0)
+            continue
+
+        # Check for algorithmic direction keywords (cần, nên, duyệt, kiểm tra, thay vì, cập nhật, lưu, dồn, etc.)
+        has_direction = bool(
+            re.search(
+                r"\b(?:cần|nên|hướng sửa|gợi ý|kiểm tra|cập nhật|thay vì|duyệt|dồn|sắp xếp|lưu|trả về|loại bỏ)\b",
+                fb,
+                re.IGNORECASE,
+            )
+        )
+        is_concise = len(fb) <= 120
+
+        if has_direction and is_concise:
+            rewards.append(2.0)
+        elif has_direction and not is_concise:
+            rewards.append(0.5)
         else:
             rewards.append(-1.5)
     return rewards
@@ -480,7 +525,7 @@ def compute_composite_reward(
     r_format = format_reward_func(c_list)[0]
     r_compliance = compliance_reward_func(c_list, lvl_list)[0]
     r_compiler = compiler_truth_reward_func(c_list, clog_list)[0]
-    r_l1 = level1_policy_reward_func(c_list, lvl_list, clog_list)[0]
+    r_l1 = level1_policy_reward_func(c_list, lvl_list, clog_list, ground_truth_taxonomy=gt_list)[0]
     r_density = pedagogical_density_reward_func(c_list, lvl_list)[0]
     r_anti_degen = anti_degeneration_reward_func(c_list, lvl_list)[0]
     r_l3 = level3_directive_reward_func(c_list, lvl_list)[0]

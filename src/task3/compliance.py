@@ -147,14 +147,14 @@ def check(feedback: str, level: str | int, semantic_check: Callable | None = Non
 
 def fallback(level, taxonomy=None):
     lvl = level_of(level)
-    if taxonomy is not None:
-        if lvl == 1:
-            return (
-                "Bài làm cần được rà soát và kiểm tra thêm theo yêu cầu của đề nhé."
-                if taxonomy
-                else "Bài làm đáp ứng yêu cầu của đề."
-            )
-        if lvl == 2:
+    if lvl == 1:
+        return (
+            "Bài làm cần được rà soát và kiểm tra thêm theo yêu cầu của đề nhé."
+            if (taxonomy and len(taxonomy) > 0)
+            else "Bài làm đáp ứng đúng yêu cầu của đề bài."
+        )
+    if lvl == 2:
+        if taxonomy:
             if "Lỗi biên dịch" in taxonomy:
                 return "Bài làm đang có lỗi cú pháp khiến chương trình chưa biên dịch được theo chuẩn C++11."
             if "Lỗi nhập/xuất" in taxonomy:
@@ -165,9 +165,20 @@ def fallback(level, taxonomy=None):
                 return "Cách truy cập chỉ số hoặc xử lý phần tử trên mảng/chuỗi trong bài làm đang phát sinh sai lệch."
             if "Lỗi hàm" in taxonomy:
                 return "Cách định nghĩa tham số hoặc giá trị trả về của hàm trong bài làm chưa khớp với yêu cầu của đề."
-            if taxonomy:
-                return "Logic xử lý và tính toán kết quả trong bài làm hiện chưa đáp ứng đúng yêu cầu của đề bài."
-            return "Bài làm xử lý đúng yêu cầu của đề bài."
-        if lvl == 3 and not taxonomy:
-            return "Bài làm chạy đúng yêu cầu của đề."
-    return "Chưa đủ cơ sở để đưa ra nhận xét cụ thể đáng tin cậy. Cảm ơn em đã chia sẻ bài làm."
+            return "Logic xử lý và tính toán kết quả trong bài làm hiện chưa đáp ứng đúng yêu cầu của đề bài."
+        return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+    if lvl == 3:
+        if taxonomy:
+            if "Lỗi biên dịch" in taxonomy:
+                return "Cần kiểm tra lại các lỗi cú pháp và khai báo kiểu dữ liệu theo chuẩn C++11 để chương trình biên dịch thành công."
+            if "Lỗi nhập/xuất" in taxonomy:
+                return "Hướng sửa: đối chiếu định dạng đọc/ghi dữ liệu với đặc tả của đề và điều chỉnh các luồng cin/cout phù hợp."
+            if "Lỗi vòng lặp" in taxonomy:
+                return "Hướng sửa: kiểm tra lại bước tăng/giảm biến đếm và điều kiện dừng của vòng lặp để tránh lặp vô hạn."
+            if "Lỗi mảng/chuỗi" in taxonomy:
+                return "Hướng sửa: kiểm tra lại phạm vi chỉ số truy cập mảng và cách xử lý ký tự kết thúc chuỗi."
+            if "Lỗi hàm" in taxonomy:
+                return "Hướng sửa: kiểm tra lại kiểu dữ liệu của tham số truyền vào và giá trị trả về của hàm cho đúng yêu cầu."
+            return "Hướng sửa: rà soát lại giải thuật và các trường hợp biên để xử lý kết quả chính xác theo yêu cầu đề bài."
+        return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+    return "Bài làm đáp ứng đúng yêu cầu của đề bài."

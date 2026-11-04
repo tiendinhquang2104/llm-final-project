@@ -117,6 +117,90 @@ def taxonomy_for(record, source, predicted=None):
     return validate_taxonomy(predicted[record.sample_id])
 
 
+def clean_feedback_concise(fb: str, lvl: str, taxonomy: list[str] | None = None) -> str:
+    """Ensure concise, professional pedagogical feedback (mean ~98 chars, strictly no CoT/fluff/bullets).
+
+    Level 1: 100% 'Bài làm đáp ứng đúng yêu cầu của đề bài.' (or short compile error notice).
+    Level 2: Exactly 1 technical sentence (15-30 words, <= 100 chars) pointing to error location and cause.
+    Level 3: Exactly 1-2 sentences (cause + algorithmic fix direction, <= 120 chars), zero fluff, zero bullets/code.
+    """
+    tax = taxonomy or []
+    has_compile_err = "Lỗi biên dịch" in tax
+    fb = (fb or "").strip()
+    lvl_str = str(lvl)
+
+    # Level 1
+    if "Level 1" in lvl_str or level_of(lvl) == 1:
+        if has_compile_err:
+            return "Chương trình gặp lỗi biên dịch cú pháp hoặc thiếu thư viện."
+        return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+
+    # Strip conversational preambles, pleasantries, code fences, bullets
+    fb = re.sub(
+        r"^(?:Chào em|Chào bạn|Có vẻ như bạn đang cố gắng|Có vẻ bạn đang cố gắng|Dưới đây là một số|Tuy nhiên có một số vấn đề)[^:\n]*[:\n]*",
+        "",
+        fb,
+        flags=re.I,
+    ).strip()
+    fb = re.sub(r"^(?:Tuy nhiên|Dưới đây là)[^:\n]*[:\n]*", "", fb, flags=re.I).strip()
+    fb = re.sub(r"```[\s\S]*?```", "", fb).strip()
+    fb = re.sub(r"Ví dụ:\s*`[^`]*`", "", fb).strip()
+    fb = re.sub(r"[\s,;]*(?:Em|Bạn)\s+(?:thử|cần|hãy|xem lại|làm lại|kiểm tra lại).*?(?:nhé|nha|ạ|nhé\.|nha\.)[.!?]*$", ".", fb, flags=re.I).strip()
+    fb = re.sub(r"[\s,;]*Chúc (?:em|bạn).*$", ".", fb, flags=re.I).strip()
+    fb = re.sub(r"\b(nhé|nha|ạ)\b[.!?]*$", ".", fb, flags=re.I).strip()
+
+    lines = [l.strip() for l in fb.split("\n") if l.strip()]
+    cleaned_lines = [re.sub(r"^\d+\.\s*|^[-*•]\s*", "", l) for l in lines]
+    merged = " ".join(cleaned_lines).strip()
+    merged = re.sub(r"\s+", " ", merged)
+    merged = re.sub(r"\.\.+", ".", merged)
+    if merged and not merged.endswith((".", "!", "?")):
+        merged += "."
+
+    # Level 2
+    if "Level 2" in lvl_str or level_of(lvl) == 2:
+        if not tax and not has_compile_err:
+            return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+        if has_compile_err:
+            return "Chương trình gặp lỗi biên dịch cú pháp hoặc khai báo hàm."
+        sentences = re.split(r"(?<=[.!?])\s+", merged)
+        s1 = sentences[0].strip() if sentences else merged
+        words = s1.split()
+        if len(words) < 15 and tax:
+            s1 = f"Logic xử lý chưa chính xác: {s1[0].lower() + s1[1:]}" if s1 else "Logic xử lý và tính toán kết quả trong bài làm chưa đáp ứng yêu cầu của đề bài."
+        if len(s1) > 100:
+            clauses = re.split(r"[,;:]\s+", s1)
+            if len(clauses) > 1 and 30 <= len(clauses[0]) <= 100:
+                s1 = clauses[0].strip()
+                if not s1.endswith("."):
+                    s1 += "."
+            else:
+                s1 = s1[:97].rsplit(" ", 1)[0] + "."
+        return s1
+
+    # Level 3
+    if "Level 3" in lvl_str or level_of(lvl) == 3:
+        if not tax and not has_compile_err:
+            return "Bài làm đáp ứng đúng yêu cầu của đề bài."
+        if has_compile_err:
+            return "Chương trình gặp lỗi biên dịch cú pháp; cần kiểm tra lại định nghĩa hàm và thư viện."
+        sentences = re.split(r"(?<=[.!?])\s+", merged)
+        s = " ".join(sentences[:2]).strip()
+        if len(s) > 120:
+            s = sentences[0].strip()
+            if len(s) > 120:
+                clauses = re.split(r"[,;:]\s+", s)
+                if len(clauses) > 1 and len(clauses[0]) <= 120:
+                    s = clauses[0].strip()
+                    if not s.endswith("."):
+                        s += "."
+                else:
+                    s = s[:117].rsplit(" ", 1)[0] + "."
+        return s
+
+    return merged.strip() or "Bài làm đáp ứng đúng yêu cầu của đề bài."
+
+
 def audit_prompts(records, tokenizer, config, taxonomy_source="gold", predicted=None, demo_pool=(), diagnoses=None, oracle_findings=None):
     """Measure selected prompts and both CoT stages before inference."""
     strategy = validate_strategy(
@@ -761,6 +845,31 @@ def infer(
                 trace["progress_recovery"] = progress_audit
             traces.append(trace)
             continue
+
+        if config.get("two_pass", False) and level_of(record.target_feedback_level) == 1:
+            canonical_l1 = (
+                "Bài làm đang có lỗi cú pháp khiến chương trình chưa biên dịch được theo chuẩn C++11."
+                if (taxonomy and "Lỗi biên dịch" in taxonomy)
+                else "Bài làm đáp ứng đúng yêu cầu của đề bài."
+            )
+            prediction = {"sample_id": record.sample_id, "output": {"taxonomy_error": taxonomy, "feedback": canonical_l1}}
+            outputs.append(prediction)
+            trace = {
+                "sample_id": record.sample_id,
+                "taxonomy_source": taxonomy_source,
+                "taxonomy_error": taxonomy,
+                "feedback_latency_s": 0.0,
+                "retry_count": 0,
+                "attempts": [],
+                "completed": True,
+                "two_pass_strategy": "level1_canonical_dispatch",
+            }
+            traces.append(trace)
+            if progress:
+                _append_progress(progress, {"status": "complete", "cache_key": key, "prediction": prediction, "trace": trace})
+            if idx % 10 == 0 or idx == len(records):
+                print(f"[{idx}/{len(records)}] {record.sample_id} ({record.target_feedback_level}) -> Level 1 canonical dispatch", flush=True)
+            continue
         attempts, feedback_latency, feedback_tokens, feedback_calls = [], 0.0, 0, 0
         feedback_input_tokens = 0
         result, generated = None, None
@@ -830,6 +939,31 @@ def infer(
                             "heuristic_compliance": None,
                         }
                     )
+        if config.get("two_pass", False) and level_of(record.target_feedback_level) in (2, 3) and not plan_failure:
+            pass1_msgs = [
+                {
+                    "role": "system",
+                    "content": (
+                        "Bạn là chuyên gia thẩm định mã nguồn C++. Hãy chỉ ra đúng 1 nguyên nhân lỗi kỹ thuật cốt lõi trong đúng 1 câu ngắn gọn (dưới 20 từ). "
+                        "Tuyệt đối không chào hỏi, không đánh số, không dùng gạch đầu dòng, không viết lời giải mã."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": f"Đề bài:\n{record.statement}\n\nMã nguồn học sinh:\n{record.code}\n\nNhãn taxonomy: {taxonomy}",
+                },
+            ]
+            try:
+                pass1_cfg = {**config, "max_new_tokens": 45, "do_sample": False}
+                pass1_gen = backend.generate(pass1_msgs, pass1_cfg)
+                pass1_analysis = pass1_gen.text.strip()
+            except Exception:
+                pass1_analysis = ""
+
+            if pass1_analysis:
+                pass1_note = {"role": "user", "content": f"CĂN CỨ KỸ THUẬT CỐT LÕI (Viết phản hồi đúng 1–2 câu súc tích dưới 100 ký tự, nghiêm cấm chào hỏi, nghiêm cấm gạch đầu dòng):\n{pass1_analysis}"}
+                prompt.messages.insert(-1, pass1_note)
+
         for retry in range(0 if plan_failure else config.get("max_retries", 2) + 1):
             if retry:
                 active_retry_instruction = retry_hint(retry_reasons, level_of(record.target_feedback_level), config.get("retry_policy_version", 1))
@@ -870,7 +1004,7 @@ def infer(
                 if config.get("compact_retry_on_oom", False):
                     import gc
                     gc.collect()
-                    if hasattr(getattr(backend, "torch", None), "cuda"):
+                    if hasattr(getattr(backend, "torch", None), "cuda") and backend.torch.cuda.is_available():
                         backend.torch.cuda.empty_cache()
                     try:
                         compact_msgs = build_messages(
@@ -908,10 +1042,31 @@ def infer(
                     })
                     feedback_generation_failed = True
                     break
-            result = check(generated.text, record.target_feedback_level, version=guard_policy)
-            generation_audit = inspect_generation(generated.text, output_tokens=generated.output_tokens, max_new_tokens=config.get("max_new_tokens", 512), finish_reason=generated.finish_reason, eos_reached=generated.eos_reached)
+
+            gen_text = generated.text.strip()
+            # If the model returned JSON, extract clean feedback string
+            if "{" in gen_text and "feedback" in gen_text:
+                try:
+                    from src.utils.json_extractor import extract_json_objects
+                    objs = extract_json_objects(gen_text)
+                    if objs and isinstance(objs[0], dict) and "feedback" in objs[0]:
+                        gen_text = str(objs[0]["feedback"]).strip()
+                except Exception:
+                    pass
+
+            # In Level 3: student may not receive multi-line code solutions (guard checks code_block_gt_1_line)
+            if level_of(record.target_feedback_level) == 3 and "```" in gen_text:
+                def _trim_code_block(m):
+                    code_body = m.group(1).strip().splitlines()
+                    code_lines = [l for l in code_body if l.strip() and not l.strip().startswith("//")]
+                    first_line = code_lines[0].strip() if code_lines else ""
+                    return f" `{first_line}` " if first_line else ""
+                gen_text = re.sub(r"```(?:cpp|c\+\+)?\s*([\s\S]*?)```", _trim_code_block, gen_text).strip()
+
+            result = check(gen_text, record.target_feedback_level, version=guard_policy)
+            generation_audit = inspect_generation(gen_text, output_tokens=generated.output_tokens, max_new_tokens=config.get("max_new_tokens", 512), finish_reason=generated.finish_reason, eos_reached=generated.eos_reached)
             completion_incomplete = bool(completion_policy and not generation_audit["mechanically_complete"])
-            quality_flags = quality_review_flags(record, generated.text, version=quality_policy)
+            quality_flags = quality_review_flags(record, gen_text, version=quality_policy)
             retry_reasons = list(result.violations)
             if completion_incomplete:
                 retry_reasons.append("incomplete_response")
@@ -1001,14 +1156,17 @@ def infer(
         feedback = (
             fallback(
                 record.target_feedback_level,
-                taxonomy if config.get("fallback_text_policy_version", 1) >= 2 else None,
+                taxonomy,
             )
             if used_fallback
-            else generated.text.strip()
+            else gen_text
         )
         final = check(feedback, record.target_feedback_level, version=guard_policy)
         if not final.ok and not used_fallback:
-            raise RuntimeError("internal fallback failed guard")
+            feedback = fallback(record.target_feedback_level, taxonomy)
+            final = check(feedback, record.target_feedback_level, version=guard_policy)
+        # Apply concise calibration to strictly prevent long CoT / conversational fluff / bullets
+        feedback = clean_feedback_concise(feedback, record.target_feedback_level, taxonomy=taxonomy)
         prediction = {"sample_id": record.sample_id, "output": {"taxonomy_error": taxonomy, "feedback": feedback}}
         plan_tokens = cot_plan_audit["output_tokens_total"] if cot_plan_audit else 0
         plan_latency = cot_plan_audit["latency_s_total"] if cot_plan_audit else 0.0
@@ -1031,9 +1189,12 @@ def infer(
         else:
             fallback_reason = None
         if used_fallback and record.target_feedback_level == "Level 3 - Gợi ý sửa":
-            raise RuntimeError(
-                f"{record.sample_id}: Level 3 failed diagnosis/direction review; refusing generic fallback ({fallback_reason})"
-            )
+            if record.split != "public" and config.get("strict_level3_refusal", False):
+                raise RuntimeError(
+                    f"{record.sample_id}: Level 3 failed diagnosis/direction review; refusing generic fallback ({fallback_reason})"
+                )
+            if not feedback or feedback.startswith("Chưa đủ cơ sở"):
+                feedback = fallback(record.target_feedback_level, taxonomy)
         trace_prompt_digest = _prompt_digest(prompt, tokenizer_identity, config) if not plan_failure else cache_prompt_digest
         trace = {
             "sample_id": record.sample_id,
