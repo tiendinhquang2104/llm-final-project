@@ -370,13 +370,29 @@ def anti_degeneration_reward_func(
             rewards.append(-3.0)
             continue
 
-        # 1. Typography / Character Purity (Information Theory)
-        # Standard natural language text consists of alphanumeric characters, whitespace, and basic punctuation.
-        # A collapse in standard typography ratio indicates pictorial flooding (emojis, unicode artifacts).
+        # 1. Typography / Character Purity & Unicode Script Integrity (Information Theory)
+        # Rejects non-Latin script hallucinations (CJK, Cyrillic, Hangul) from Alibaba multilingual base model.
+        if re.search(r"[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0400-\u04ff]", fb_str):
+            rewards.append(-5.0)
+            continue
+
         standard_chars = sum(1 for ch in fb_str if ch.isalnum() or ch.isspace() or ch in ".,!?:;\"'()-_/[]{}<>~`@#$%^&*+=|\\")
         char_purity = standard_chars / max(1, len(fb_str))
         if char_purity < 0.90:
             rewards.append(-4.0)
+            continue
+
+        # 1b. Structural Syntax & Sentence Boundary Integrity (Language-Agnostic)
+        # Penalizes completions cutting off on a colon/comma or trailing colon-punctuation stubs (e.g. ":.", ":,")
+        clean_end = fb_str.rstrip(".!? ")
+        if clean_end.endswith((":", ",", ";", "->", "=>")) or re.search(r":\s*[:.,;!]", fb_str):
+            rewards.append(-3.0)
+            continue
+
+        # 1c. Acoustic Echo / Stuttering across Colons (Language-Agnostic)
+        # Penalizes prefix duplication like "Header: header..." (e.g. "X: X...")
+        if re.search(r"^([^:]{4,30}):\s*\1\b", fb_str, re.IGNORECASE):
+            rewards.append(-3.0)
             continue
 
         # 2. Universal Token Diversity & Non-Redundancy (Length-Invariant)

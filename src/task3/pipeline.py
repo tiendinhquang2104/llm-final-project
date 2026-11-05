@@ -117,52 +117,74 @@ def taxonomy_for(record, source, predicted=None):
     return validate_taxonomy(predicted[record.sample_id])
 
 
-def clean_feedback_concise(fb: str, lvl: str, taxonomy: list[str] | None = None) -> str:
-    """Ensure concise, professional pedagogical feedback (mean ~98 chars, strictly no CoT/fluff/bullets).
+def strip_structural_preamble(text: str) -> str:
+    """Strips conversational preambles and prompt metadata based on structural syntax.
 
+    Operates purely on formal discourse grammar without static word blacklists:
+    1. Strips prompt target level metadata headers (e.g. 'Level 3 - Gợi ý sửa:' or 'Level 2:').
+    2. Strips leading numbering (1., 1), 2)) or bullet symbols (-, *, +, •).
+    3. Strips short label preambles preceding a colon before an independent sentence.
+    """
+    cleaned = (text or "").strip()
+
+    # Strip prompt target level metadata headers
+    cleaned = re.sub(r"^Level\s+\d\s*(?:-\s*[^:\n]+)?[:\s]+", "", cleaned, flags=re.IGNORECASE).strip()
+
+    # Strip leading numbering (1., 1), 2)) or bullet symbols (-, *, +, •)
+    cleaned = re.sub(r"^\s*(?:\d+[\.)]|[-*•+])\s+", "", cleaned).strip()
+    cleaned = re.sub(r":\s*[-*•+]\s+", ": ", cleaned).strip()
+
+    while True:
+        match = re.match(r"^([^.:\n]{2,65}):\s+([A-ZÀ-Ỹ0-9].+)$", cleaned)
+        if match:
+            prefix, body = match.group(1), match.group(2)
+            # Retain code-grounded prefixes (e.g. function calls `func()` or scope resolution `::`)
+            if "()" not in prefix and "::" not in prefix:
+                cleaned = body.strip()
+                continue
+        break
+    return cleaned
+
+
+def clean_feedback_concise(fb: str, lvl: str, taxonomy: list[str] | None = None) -> str:
+    """Ensures concise, natural pedagogical feedback without rigid static string overrides.
+
+    Operates strictly on sentence boundary grammar, structural formatting, and character integrity:
     Level 1: 100% 'Bài làm đáp ứng đúng yêu cầu của đề bài.' (or short compile error notice).
-    Level 2: Exactly 1 technical sentence (15-30 words, <= 100 chars) pointing to error location and cause.
-    Level 3: Exactly 1-2 sentences (cause + algorithmic fix direction, <= 120 chars), zero fluff, zero bullets/code.
+    Level 2: Exactly 1 technical sentence identifying root cause without truncation.
+    Level 3: Exactly 1-2 sentences with cause and actionable algorithmic repair guidance.
     """
     tax = taxonomy or []
     has_compile_err = "Lỗi biên dịch" in tax
-    fb = (fb or "").strip()
+    has_errors = bool(tax or has_compile_err)
     lvl_str = str(lvl)
 
     # Level 1
     if "Level 1" in lvl_str or level_of(lvl) == 1:
         if has_compile_err:
-            return "Chương trình gặp lỗi biên dịch cú pháp hoặc thiếu thư viện."
+            return "Bài làm đang có lỗi cú pháp khiến chương trình chưa biên dịch được theo chuẩn C++11."
+        if tax:
+            return "Bài làm chưa chính xác, em cần rà soát lại nhé."
         return "Bài làm đáp ứng đúng yêu cầu của đề bài."
 
-    # Strip conversational preambles, pleasantries, code fences, bullets
-    fb = re.sub(
-        r"^(?:Chào em|Chào bạn|Có vẻ như bạn đang cố gắng|Có vẻ bạn đang cố gắng|Dưới đây là một số|Tuy nhiên có một số vấn đề)[^:\n]*[:\n]*",
-        "",
-        fb,
-        flags=re.I,
-    ).strip()
-    fb = re.sub(r"^(?:Tuy nhiên|Dưới đây là)[^:\n]*[:\n]*", "", fb, flags=re.I).strip()
+    # Strip conversational preambles and structural artifacts
+    fb = strip_structural_preamble(fb or "")
+
+    # Clean code fences, markdown syntax
     fb = re.sub(r"```[\s\S]*?```", "", fb).strip()
     fb = re.sub(r"Ví dụ:\s*`[^`]*`", "", fb).strip()
-    fb = re.sub(r"[\s,;]*(?:Em|Bạn)\s+(?:thử|cần|hãy|xem lại|làm lại|kiểm tra lại).*?(?:nhé|nha|ạ|nhé\.|nha\.)[.!?]*$", ".", fb, flags=re.I).strip()
-    fb = re.sub(r"[\s,;]*Chúc (?:em|bạn).*$", ".", fb, flags=re.I).strip()
-    fb = re.sub(r"\b(nhé|nha|ạ)\b[.!?]*$", ".", fb, flags=re.I).strip()
 
-    # Eradicate foreign multilingual / CJK script leaks (Qwen multi-lingual artifacts)
+    # Eradicate foreign multilingual / CJK script leaks from base model
     fb = re.sub(r"[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0400-\u04ff]+", "dẫn đến phát sinh lỗi ngoài phạm vi cho phép", fb).strip()
 
-    # Normalize grading harness loanwords into standard academic Vietnamese
+    # Normalize grading harness loanwords into academic Vietnamese
     fb = re.sub(r"\bgrading\b", "kiểm tra các hàm tiếp theo", fb, flags=re.I).strip()
-
-    # Strip prompt target level metadata headers
-    fb = re.sub(r"^Level\s+\d\s*(?:-\s*[^:\n]+)?[:\s]+", "", fb, flags=re.IGNORECASE).strip()
 
     lines = [l.strip() for l in fb.split("\n") if l.strip()]
     cleaned_lines = [re.sub(r"^\s*(?:\d+[\.)]|[-*•+])\s*", "", l) for l in lines]
     merged = " ".join(cleaned_lines).strip()
     merged = re.sub(r"\s+", " ", merged)
-    merged = re.sub(r"\.\.+", ".", merged)
+    merged = strip_structural_preamble(merged)
 
     # Sanitize colon-stub artifacts (:.) and trailing colons
     merged = re.sub(r":\s*\.+$", ".", merged)
@@ -181,51 +203,46 @@ def clean_feedback_concise(fb: str, lvl: str, taxonomy: list[str] | None = None)
     if merged and not merged.endswith((".", "!", "?")):
         merged += "."
 
+    # Extract complete sentences to preserve grammatical integrity (never slice mid-sentence)
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", merged) if s.strip()]
+    if not sentences:
+        return "Bài làm đáp ứng đúng yêu cầu của đề bài." if not has_errors else "Logic xử lý và tính toán kết quả trong bài làm hiện chưa đáp ứng đúng yêu cầu của đề bài."
+
     # Level 2
     if "Level 2" in lvl_str or level_of(lvl) == 2:
-        if not tax and not has_compile_err:
+        if not has_errors:
             return "Bài làm đáp ứng đúng yêu cầu của đề bài."
         if has_compile_err:
             return "Chương trình gặp lỗi biên dịch cú pháp hoặc khai báo hàm."
-        sentences = re.split(r"(?<=[.!?])\s+", merged)
-        s1 = sentences[0].strip() if sentences else merged
-        words = s1.split()
-        if len(words) < 15 and tax and not s1.lower().startswith("logic xử lý"):
-            s1 = f"Logic xử lý chưa chính xác: {s1[0].lower() + s1[1:]}" if s1 else "Logic xử lý và tính toán kết quả trong bài làm chưa đáp ứng yêu cầu của đề bài."
-        # Eliminate stuttering prefix if present
-        m_stutter = re.match(r"^([^:]{4,40}):\s*(.+)$", s1)
-        if m_stutter:
-            p_s, b_s = m_stutter.group(1).strip(), m_stutter.group(2).strip()
-            if b_s.lower().startswith(p_s.lower()):
-                s1 = b_s[0].upper() + b_s[1:]
-        if len(s1) > 100:
-            clauses = re.split(r"[,;:]\s+", s1)
-            if len(clauses) > 1 and 30 <= len(clauses[0]) <= 100:
-                s1 = clauses[0].strip()
-                if not s1.endswith("."):
-                    s1 += "."
-            else:
-                s1 = s1[:97].rsplit(" ", 1)[0] + "."
+
+        s1 = sentences[0]
+        if not s1.endswith((".", "!", "?")):
+            s1 += "."
+
+        # If exceptionally long (> 140 chars), truncate strictly at clause boundary (comma/semicolon)
+        if len(s1) > 140:
+            sub = s1[:135]
+            last_clause = max(sub.rfind(","), sub.rfind(";"))
+            if last_clause > 40:
+                s1 = sub[:last_clause].strip() + "."
         return s1
 
     # Level 3
     if "Level 3" in lvl_str or level_of(lvl) == 3:
-        if not tax and not has_compile_err:
+        if not has_errors:
             return "Bài làm đáp ứng đúng yêu cầu của đề bài."
         if has_compile_err:
             return "Chương trình gặp lỗi biên dịch cú pháp; cần kiểm tra lại định nghĩa hàm và thư viện."
-        sentences = re.split(r"(?<=[.!?])\s+", merged)
+
         s = " ".join(sentences[:2]).strip()
-        if len(s) > 120:
-            s = sentences[0].strip()
-            if len(s) > 120:
-                clauses = re.split(r"[,;:]\s+", s)
-                if len(clauses) > 1 and len(clauses[0]) <= 120:
-                    s = clauses[0].strip()
-                    if not s.endswith("."):
-                        s += "."
-                else:
-                    s = s[:117].rsplit(" ", 1)[0] + "."
+        if not s.endswith((".", "!", "?")):
+            s += "."
+
+        # If two sentences exceed length limit, preserve the first complete sentence
+        if len(s) > 150 and len(sentences) > 1:
+            s = sentences[0]
+            if not s.endswith((".", "!", "?")):
+                s += "."
         return s
 
     return merged.strip() or "Bài làm đáp ứng đúng yêu cầu của đề bài."
@@ -888,6 +905,8 @@ def infer(
                 "sample_id": record.sample_id,
                 "taxonomy_source": taxonomy_source,
                 "taxonomy_error": taxonomy,
+                "output_tokens": 0,
+                "latency_s": 0.0,
                 "feedback_latency_s": 0.0,
                 "retry_count": 0,
                 "attempts": [],
