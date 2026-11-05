@@ -144,7 +144,12 @@ def run_main(argv=None):
     if args.context_limit is not None:
         config["context_limit"] = args.context_limit
     if args.adapter:
-        config["adapter"] = args.adapter
+        ad_path = Path(args.adapter)
+        if not ad_path.exists() and (ad_path.parent / "adapter_config.json").is_file():
+            ad_path = ad_path.parent
+        if (ad_path / "adapter").is_dir() and not (ad_path / "adapter_config.json").is_file():
+            ad_path = ad_path / "adapter"
+        config["adapter"] = str(ad_path)
     if args.seed is not None:
         config["seed"] = args.seed
     if args.split == "public" and args.taxonomy_source == "gold":

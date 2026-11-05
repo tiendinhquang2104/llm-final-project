@@ -149,11 +149,35 @@ def clean_feedback_concise(fb: str, lvl: str, taxonomy: list[str] | None = None)
     fb = re.sub(r"[\s,;]*Chúc (?:em|bạn).*$", ".", fb, flags=re.I).strip()
     fb = re.sub(r"\b(nhé|nha|ạ)\b[.!?]*$", ".", fb, flags=re.I).strip()
 
+    # Eradicate foreign multilingual / CJK script leaks (Qwen multi-lingual artifacts)
+    fb = re.sub(r"[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0400-\u04ff]+", "dẫn đến phát sinh lỗi ngoài phạm vi cho phép", fb).strip()
+
+    # Normalize grading harness loanwords into standard academic Vietnamese
+    fb = re.sub(r"\bgrading\b", "kiểm tra các hàm tiếp theo", fb, flags=re.I).strip()
+
+    # Strip prompt target level metadata headers
+    fb = re.sub(r"^Level\s+\d\s*(?:-\s*[^:\n]+)?[:\s]+", "", fb, flags=re.IGNORECASE).strip()
+
     lines = [l.strip() for l in fb.split("\n") if l.strip()]
-    cleaned_lines = [re.sub(r"^\d+\.\s*|^[-*•]\s*", "", l) for l in lines]
+    cleaned_lines = [re.sub(r"^\s*(?:\d+[\.)]|[-*•+])\s*", "", l) for l in lines]
     merged = " ".join(cleaned_lines).strip()
     merged = re.sub(r"\s+", " ", merged)
     merged = re.sub(r"\.\.+", ".", merged)
+
+    # Sanitize colon-stub artifacts (:.) and trailing colons
+    merged = re.sub(r":\s*\.+$", ".", merged)
+    merged = re.sub(r":\s*[:.,;!]+", ".", merged)
+    merged = re.sub(r"[:\s,;]+$", "", merged).strip()
+
+    # Deduplicate prefix stuttering / acoustic echoing across colons ('X: X...')
+    m_echo = re.match(r"^([^:]{4,40}):\s*(.+)$", merged)
+    if m_echo:
+        prefix_part, body_part = m_echo.group(1).strip(), m_echo.group(2).strip()
+        if body_part.lower().startswith(prefix_part.lower()):
+            merged = body_part[0].upper() + body_part[1:]
+        elif not body_part or body_part in {".", "!"}:
+            merged = prefix_part
+
     if merged and not merged.endswith((".", "!", "?")):
         merged += "."
 
@@ -166,8 +190,14 @@ def clean_feedback_concise(fb: str, lvl: str, taxonomy: list[str] | None = None)
         sentences = re.split(r"(?<=[.!?])\s+", merged)
         s1 = sentences[0].strip() if sentences else merged
         words = s1.split()
-        if len(words) < 15 and tax:
+        if len(words) < 15 and tax and not s1.lower().startswith("logic xử lý"):
             s1 = f"Logic xử lý chưa chính xác: {s1[0].lower() + s1[1:]}" if s1 else "Logic xử lý và tính toán kết quả trong bài làm chưa đáp ứng yêu cầu của đề bài."
+        # Eliminate stuttering prefix if present
+        m_stutter = re.match(r"^([^:]{4,40}):\s*(.+)$", s1)
+        if m_stutter:
+            p_s, b_s = m_stutter.group(1).strip(), m_stutter.group(2).strip()
+            if b_s.lower().startswith(p_s.lower()):
+                s1 = b_s[0].upper() + b_s[1:]
         if len(s1) > 100:
             clauses = re.split(r"[,;:]\s+", s1)
             if len(clauses) > 1 and 30 <= len(clauses[0]) <= 100:
