@@ -105,11 +105,21 @@ def predict_public(dataset: Dataset, cfg: dict, backend, out_root: str | Path,
                    demo_dataset: Dataset | None = None, demo_ids: list[str] | None = None,
                    selected_ids: list[str] | None = None) -> dict:
     inspect_public(dataset)
+    return grade_release(dataset, cfg, backend, Path(out_root) / "public", demo_dataset, demo_ids, selected_ids)
+
+
+def grade_release(dataset: Dataset, cfg: dict, backend, out_root: str | Path,
+                  demo_dataset: Dataset | None = None, demo_ids: list[str] | None = None,
+                  selected_ids: list[str] | None = None, tag: str = "public") -> dict:
+    """Grade every sample of a release with the API pipeline; resumable (one checkpoint per sample).
+
+    Writes <out_root>/<provider>/<model>/<experiment>/<release_key>/predictions.json once all samples are graded.
+    """
     by_id = dataset.by_id()
     expected_ids = sorted(by_id)
     chosen = selected_ids or expected_ids
     if len(chosen) != len(set(chosen)) or set(chosen) - set(expected_ids):
-        raise ValueError("Selected public IDs contain duplicates or unknown IDs")
+        raise ValueError("Selected IDs contain duplicates or unknown IDs")
     pool = [demo_dataset.by_id()[i] for i in (demo_ids or [])] if demo_dataset else []
     pipe = Task1Pipeline(dataset, backend, cfg, pool)
     model_info = backend.info()
@@ -118,7 +128,7 @@ def predict_public(dataset: Dataset, cfg: dict, backend, out_root: str | Path,
     safe_model = re.sub(r"[^A-Za-z0-9._-]+", "-", model)
     release_key = _digest({"exams": dataset.exams,
                            "samples": [(s.sample_id, s.code, s.compile_log, s.test_report) for s in dataset.samples]})[:12]
-    out_dir = Path(out_root) / "public" / provider / safe_model / cfg["name"] / release_key
+    out_dir = Path(out_root) / provider / safe_model / cfg["name"] / release_key
     cache_dir = out_dir / "checkpoints"
     cache_dir.mkdir(parents=True, exist_ok=True)
     submission_path = out_dir / "predictions.json"
@@ -145,9 +155,11 @@ def predict_public(dataset: Dataset, cfg: dict, backend, out_root: str | Path,
     ledger_dir.mkdir(exist_ok=True)
     errors = []
     stopped = None
-    for sid in chosen:
-        if sid in done:
-            continue
+    todo = [sid for sid in chosen if sid not in done]
+    started, n_new = time.time(), 0
+    print(f"[{tag}] {len(chosen) - len(todo)}/{len(chosen)} already done (checkpoint) | to grade: {len(todo)}",
+          flush=True)
+    for sid in todo:
         before = len(getattr(backend, "ledger", []))
         try:
             _, preds = pipe.run([by_id[sid]])
@@ -179,13 +191,19 @@ def predict_public(dataset: Dataset, cfg: dict, backend, out_root: str | Path,
             for entry in new_ledger:
                 _write_atomic(ledger_dir / f"{uuid.uuid4().hex[:16]}.json",
                               {"recorded_at": time.time(), **entry})
+        n_new += 1
+        elapsed = time.time() - started
+        left = len(todo) - n_new
+        eta = elapsed / n_new * left
+        print(f"[{tag}] {sum(1 for x in chosen if x in done)}/{len(chosen)} done | {left} left | errors {len(errors)} "
+              f"| {elapsed / 60:.1f} min elapsed, ~{eta / 60:.0f} min to go", flush=True)
     missing = sorted(set(expected_ids) - set(done))
     usage_entries = _usage_entries(ledger_dir)
     usage_tmp = out_dir / "usage.jsonl.tmp"
     usage_tmp.write_text("".join(json.dumps(entry, ensure_ascii=False) + "\n"
                                  for entry in usage_entries), encoding="utf-8")
     os.replace(usage_tmp, out_dir / "usage.jsonl")
-    report = {"provider": provider, "model": model, "experiment": cfg["name"],
+    report = {"provider": provider, "model": model, "experiment": cfg["name"], "out_dir": str(out_dir),
               "release_key": release_key, "source_commit": _source_commit(),
               "expected": len(expected_ids), "completed": len(done),
               "missing_ids": missing, "errors": errors, "stopped": stopped,

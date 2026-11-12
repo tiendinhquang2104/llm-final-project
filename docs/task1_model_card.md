@@ -17,6 +17,8 @@
 - **Gold:** 32 bài giảng viên chấm (đề EX01 nhiều câu, EX02 một câu), split cố định seed 42: 26 train / 6 validation.
 - **Silver:** bài tổng hợp từ `generate-dataset.zip`, nhãn do rulebook gán sau khi chạy code. Sau kiểm tra còn 422/462
   bài (bị loại vì trùng code, mâu thuẫn `exec_report`, trùng gold/public). Bài heldout không được dùng để train.
+- **Silver v3 (distillation):** cùng các bài silver, nhưng nhãn do hướng API (Gemini 3.5 Flash Lite, e2 + rule) chấm lại
+  (`scripts/distill_task1_silver.py`). Chi phí API (request, token) ghi trong `distill_manifest.json`.
 - **Không dùng** input của public/private test để sinh nhãn hay chọn tham số.
 
 ## Kết quả (6 bài gold validation)
@@ -33,7 +35,7 @@ Public test (360 bài, 6 đề mới) không có nhãn: chỉ có điểm leader
 |---|---|
 | Train | Kaggle 1× Tesla T4 16 GB, fp16; thời gian `…`; VRAM đỉnh `…` GB |
 | Dự đoán 360 bài | `…` giây, `…` token sinh ra, VRAM đỉnh `…` GB (`run_info.json`) |
-| Chi phí | Không tốn phí API (GPU miễn phí của Kaggle) |
+| Chi phí | Train/dự đoán: GPU miễn phí của Kaggle. v3: gán nhãn silver bằng API `…` request, `…` token input / `…` token output, `…` USD (`distill_manifest.json`) |
 | Chạy lại | `bash run.sh --task1-finetune --gold-root … --public-root … --silver-root … --work-dir …` trên máy có GPU ≥ 8–16 GB |
 
 ## Giới hạn

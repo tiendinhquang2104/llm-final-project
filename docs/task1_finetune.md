@@ -46,6 +46,31 @@ So sánh điểm với hướng API trên cùng 6 bài gold validation:
 bash run.sh --task1-compare --api-runs outputs/task1 --finetune <work-dir>/qlora/training_summary.json
 ```
 
+## v3: silver được API chấm lại (distillation)
+
+Hướng API (Gemini 3.5 Flash Lite, e2 zero-shot structured + rule) đạt QWK **0.8707** trên public, còn adapter v1 đạt
+0.7188. Ở v3, API đóng vai "giáo viên" chấm lại 462 bài silver. Rubric cuối cùng (sau rule câu tiên quyết, compile
+gate, làm tròn) thay cho nhãn của bộ sinh dữ liệu, rồi train adapter như cũ. Đề có cho phép dùng LLM thương mại qua API
+để huấn luyện, nhưng **phải báo cáo chi phí**.
+
+- **Chỉ chấm đề tổng hợp `SYN-*`.** Script từ chối mọi đề khác, nên input của public/private test không bao giờ được gán
+  nhãn. Gold vẫn giữ điểm của giảng viên. Nhãn generator không xuất hiện trong prompt (zero-shot).
+- **Chạy dần theo quota.** Có checkpoint từng bài: hết quota thì chạy lại đúng lệnh cũ vào hôm sau. 462 bài ≈ 1 ngày
+  free tier (500 request/ngày; `max_requests_per_run: 480`).
+
+```bash
+python scripts/distill_task1_silver.py --preflight
+python scripts/distill_task1_silver.py --limit 3
+python scripts/distill_task1_silver.py
+```
+
+Kết quả là `data/synth/v1_api/` (gitignored), bản sao của silver với nhãn API. Thư mục có thêm `distill_manifest.json`
+ghi model giáo viên, cấu hình prompt, **số request và token** (chi phí cần báo cáo), độ khớp với nhãn generator và phân
+bố điểm. Lượt train ghi nguồn nhãn vào `silver_manifest.json` (`labels.source = api_teacher`).
+
+Train: dùng `--silver-root data/synth/v1_api` (máy có GPU), hoặc trên Kaggle tải zip của `data/synth/v1_api` lên dataset
+private và để `SILVER = 'api'` trong notebook (`'generator'` = nhãn gốc như v1).
+
 ## Chạy trên Kaggle (`kaggle/task1_finetune.ipynb`)
 
 ### 1. Chuẩn bị (một lần)

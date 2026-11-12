@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 
 from src.data.loader import DIM_MAX, DIMENSIONS, Dataset, Sample
+from src.task1.compile_signal import ERROR, UNKNOWN, compile_verdict, release_has_logs, sample_log
 from src.task1.prerequisite_rules import RuleConfig, apply_rules, clamp_rubric, policy_from_exam
 from src.task1.prompts import build_messages, select_demos
 from src.task1.scorer import aggregate, parse_output, round_half_up
@@ -54,6 +55,7 @@ class Task1Pipeline:
         self.policies = {eid: policy_from_exam(e, (cfg.get("policy_overrides") or {}).get(eid))
                          for eid, e in dataset.exams.items()}
         self._by_id = dataset.by_id()
+        self.logs_informative = release_has_logs(dataset.samples)
 
         self.csv_headers = {}
         for exam_id, (display_name, filename) in PUBLIC_CSV.items():
@@ -75,7 +77,7 @@ class Task1Pipeline:
             "template": self.prompt_cfg.get("template", "structured"),
             "demos": [d.sample_id for d in demos],
             "messages": build_messages(exam, sample, demos, self.prompt_cfg,
-                                        self.csv_headers.get(sample.exam_id, "")),
+                                        self.csv_headers.get(sample.exam_id, ""), self.logs_informative),
         }
 
     def infer(self, samples: list[Sample]) -> list[dict]:
@@ -128,7 +130,9 @@ class Task1Pipeline:
                     "problems": {}, "rationale": "", "rubric_llm": None, "total_llm": None,
                     "rubric": None, "total_score": None, "rule_trace": []}
         rubric_llm = clamp_rubric(rubric)
-        final, total, trace = apply_rules(rubric, statuses, self.policies[sample.exam_id], rule_cfg)
+        verdict = compile_verdict(*sample_log(sample, self.logs_informative))
+        final, total, trace = apply_rules(rubric, statuses, self.policies[sample.exam_id], rule_cfg,
+                                          compile_ok=None if verdict == UNKNOWN else verdict != ERROR)
         # Teacher scores are integers on every dimension: round a fractional answer half up (counted in trace).
         rounded = {d: round_half_up(float(v)) for d, v in final.items()}
         if rounded != final:

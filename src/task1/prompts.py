@@ -108,10 +108,15 @@ def exam_block(exam: dict, policy_in_prompt: bool, csv_header: str = "") -> str:
     return s
 
 
-def submission_block(sample: Sample, cfg: dict) -> str:
+def submission_block(sample: Sample, cfg: dict, logs_informative: bool = False) -> str:
+    if cfg.get("compile_signal", False):  # verdict decided in code from the g++ log (src/task1/compile_signal.py)
+        from src.task1.compile_signal import compile_section, sample_log
+        log = compile_section(*sample_log(sample, logs_informative))
+    else:
+        log = clean_compile_log(sample.compile_log)
     s = (
         f"## BÀI NỘP {sample.sample_id}\n```cpp\n{number_lines(sample.code, cfg.get('max_code_chars', 12000))}\n```\n\n"
-        f"### compile_log\n```\n{clean_compile_log(sample.compile_log)}\n```\n"
+        f"### compile_log\n```\n{log}\n```\n"
     )
     if cfg.get("use_test_report", True) and sample.test_report is not None:
         s += f"\n### test_report\n{format_test_report(sample.test_report)}\n"
@@ -155,7 +160,7 @@ def output_instruction(exam: dict, template: str) -> str:
 
 
 def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict,
-                   csv_header: str = "") -> list[dict]:
+                   csv_header: str = "", logs_informative: bool = False) -> list[dict]:
     template = cfg.get("template", "structured")
     policy_in_prompt = cfg.get("policy_in_prompt", False)
     system = SYSTEM_PLAIN if template == "plain" else SYSTEM_STRUCTURED
@@ -163,7 +168,7 @@ def build_messages(exam: dict, sample: Sample, demos: list[Sample], cfg: dict,
         x for x in [
             exam_block(exam, policy_in_prompt, csv_header),
             demo_block(demos, cfg, sample.exam_id),
-            submission_block(sample, cfg),
+            submission_block(sample, cfg, logs_informative),
             output_instruction(exam, template),
         ] if x
     )

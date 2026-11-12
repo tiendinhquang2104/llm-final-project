@@ -164,8 +164,13 @@ def prepare_silver_task1(
     with path.open("w", encoding="utf-8") as stream:
         for rec in accepted:
             stream.write(rec.model_dump_json() + "\n")
+    distill = root / "distill_manifest.json"  # written by scripts/distill_task1_silver.py (QLoRA v3)
+    labels = json.loads(distill.read_text(encoding="utf-8")) if distill.is_file() else None
     manifest = {
-        "source": str(root), "n_source_task1": len(rows), "n_accepted": len(accepted),
+        "source": str(root),
+        "labels": ({"source": "api_teacher", "teacher": labels["teacher"], "cost": labels["cost"]}
+                   if labels else {"source": "generator"}),
+        "n_source_task1": len(rows), "n_accepted": len(accepted),
         "n_excluded": len(excluded), "excluded": excluded,
         "n_heldout_not_read": len(heldout_ids),
         "n_task3_only_not_read": len(task3_only_ids),
