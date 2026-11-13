@@ -97,6 +97,21 @@ Thay đổi (`configs/task1/lora_7b.yaml`, nhánh gold-only giữ nguyên):
 Thời gian ước tính trên T4 tăng khoảng 1–1,5 giờ so với v3 (giai đoạn silver dài gấp đôi, đánh giá 47 bài × 7 checkpoint).
 Notebook có thêm cell tải model trước, thử lại tối đa 5 lần, để lỗi CDN Hugging Face (HTTP 500) không làm hỏng lượt chạy.
 
+**Kết quả v4 trên public:** QWK **0.7955**, MAE 1.66 (v3: 0.7096 / 1.94; v1: 0.7188 / 2.03).
+
+| Phiên bản | QWK | MAE | compilable | io_format | logic | edge_case | complexity | code_quality |
+|---|---|---|---|---|---|---|---|---|
+| v1 (nhãn generator) | 0.7188 | 2.03 | 0.909 | 0.817 | 0.595 | 0.622 | 0.805 | 0.768 |
+| v3 (nhãn API, cách train cũ) | 0.7096 | 1.94 | 0.909 | 0.796 | 0.686 | 0.720 | 0.781 | 0.747 |
+| **v4 (nhãn API, train mới)** | **0.7955** | **1.66** | 0.909 | 0.881 | 0.598 | 0.637 | 0.851 | 0.820 |
+| API e7 (giáo viên) | 0.8759 | 1.12 | 0.909 | 0.878 | 0.723 | 0.808 | 0.866 | 0.814 |
+
+- Checkpoint được chọn là **checkpoint silver epoch 2**: chạy thêm gold sau silver không cải thiện. Trên 41 bài silver giữ lại,
+  QWK đạt 0.874 (gold-only: 0.340), trong khi trên 6 bài gold val hai nhánh gần như bằng nhau (0.428 so với 0.430).
+- Số tổ hợp rubric trên public tăng từ 6 lên 14, và tổ hợp `1,0,0,0,0,0` giảm từ 97 xuống 27 bài.
+- Lỗi còn lại: model chấm cao (lệch trung bình +0.52 so với API, cho tổng 7 tới 73 lần trong khi API là 17), nên
+  `logic` và `edge_case` vẫn thấp hơn API rõ rệt.
+
 ## Chạy trên Kaggle (`kaggle/task1_finetune.ipynb`)
 
 ### 1. Chuẩn bị (một lần)
