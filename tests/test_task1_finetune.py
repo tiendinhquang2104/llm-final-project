@@ -15,6 +15,7 @@ from src.task1.finetune import (
     evaluate_generations,
     load_task1_splits,
     parse_generated_score,
+    split_silver_validation,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -121,3 +122,32 @@ def test_best_epoch_uses_qwk_then_mae():
         {"epoch": 3, "metrics": {"qwk": 0.8, "mae": 1.2}},
     ]
     assert best_epoch(results)["epoch"] == 3
+
+
+def test_best_epoch_prefers_selection_metrics_over_gold_only():
+    results = [
+        {"epoch": 1, "metrics": {"qwk": 0.9, "mae": 1.0}, "selection_metrics": {"qwk": 0.5, "mae": 2.0}},
+        {"epoch": 2, "metrics": {"qwk": 0.4, "mae": 3.0}, "selection_metrics": {"qwk": 0.7, "mae": 1.5}},
+    ]
+    assert best_epoch(results)["epoch"] == 2
+
+
+def _silver(sample_id, exam_id):
+    rec = record(sample_id=sample_id, split="silver")
+    return rec.model_copy(update={"exam_id": exam_id})
+
+
+def test_split_silver_validation_is_per_exam_deterministic_and_disjoint():
+    recs = [_silver(f"SYN-A-{i:04d}", "SYN-A") for i in range(20)]
+    recs += [_silver(f"SYN-B-{i:04d}", "SYN-B") for i in range(3)]
+    recs += [_silver("SYN-C-0000", "SYN-C")]
+    train, val = split_silver_validation(recs, 0.1, seed=42)
+    again_train, again_val = split_silver_validation(recs, 0.1, seed=42)
+    assert [r.sample_id for r in val] == [r.sample_id for r in again_val]
+    assert {r.sample_id for r in train}.isdisjoint(r.sample_id for r in val)
+    assert len(train) + len(val) == len(recs)
+    held = {}
+    for r in val:
+        held[r.exam_id] = held.get(r.exam_id, 0) + 1
+    assert held == {"SYN-A": 2, "SYN-B": 1}  # single-sample exam stays in training
+    assert split_silver_validation(recs, 0.0, seed=42) == (recs, [])

@@ -194,10 +194,44 @@ def evaluate_generations(records: list[ChatMLRecord], raw_by_id: dict[str, str])
     return metrics, details
 
 
+def _selection_metrics(result: dict) -> dict:
+    """Metrics used to pick a checkpoint: gold + held-out silver validation when available, else gold only."""
+    return result.get("selection_metrics") or result["metrics"]
+
+
 def best_epoch(results: list[dict]) -> dict:
     if not results:
         raise ValueError("No checkpoint evaluation results")
-    return max(results, key=lambda r: (r["metrics"]["qwk"], -r["metrics"]["mae"], -r["epoch"]))
+    return max(results, key=lambda r: (_selection_metrics(r)["qwk"], -_selection_metrics(r)["mae"], -r["epoch"]))
+
+
+def split_silver_validation(
+    records: list[ChatMLRecord], ratio: float, seed: int
+) -> tuple[list[ChatMLRecord], list[ChatMLRecord]]:
+    """Hold out `ratio` of the silver records of every exam (at least one when ratio > 0) for checkpoint selection.
+
+    Six gold validation samples are too few to choose between checkpoints; the API-relabelled silver held-out set
+    measures agreement with the teacher, which is what the student is trained to imitate. Deterministic per seed.
+    """
+    if ratio <= 0:
+        return list(records), []
+    import random
+
+    by_exam: dict[str, list[ChatMLRecord]] = {}
+    for rec in records:
+        by_exam.setdefault(rec.exam_id or "", []).append(rec)
+    rng = random.Random(seed)
+    held: set[str] = set()
+    for exam_id in sorted(by_exam):
+        group = sorted(by_exam[exam_id], key=lambda r: r.sample_id)
+        if len(group) < 2:
+            continue  # keep single-sample exams for training
+        rng.shuffle(group)
+        k = min(len(group) - 1, max(1, round(len(group) * ratio)))
+        held.update(r.sample_id for r in group[:k])
+    train = [r for r in records if r.sample_id not in held]
+    val = [r for r in records if r.sample_id in held]
+    return train, val
 
 
 def load_silver_records(path: str | Path, gold_records: list[ChatMLRecord], *, expected: int | None = None) -> list[ChatMLRecord]:
@@ -224,9 +258,10 @@ def load_silver_records(path: str | Path, gold_records: list[ChatMLRecord], *, e
 
 
 def choose_variant(gold_only: dict, silver_then_gold: dict) -> dict:
-    """Select by gold-validation QWK, then MAE; exact ties keep gold-only."""
-    gold_key = (gold_only["metrics"]["qwk"], -gold_only["metrics"]["mae"])
-    silver_key = (silver_then_gold["metrics"]["qwk"], -silver_then_gold["metrics"]["mae"])
+    """Select by validation QWK, then MAE (gold + held-out silver when available); exact ties keep gold-only."""
+    g, s = _selection_metrics(gold_only), _selection_metrics(silver_then_gold)
+    gold_key = (g["qwk"], -g["mae"])
+    silver_key = (s["qwk"], -s["mae"])
     return silver_then_gold if silver_key > gold_key else gold_only
 
 

@@ -9,12 +9,18 @@ data:
 output_dir: outputs/task1/qwen25_coder7b_qlora_silver_gold
 training:
   max_length: 4096
-  epochs: 3
-  silver_epochs: 1
+  epochs: 3                     # gold-only arm
   batch_size: 1
   gradient_accumulation_steps: 4
-  learning_rate: 0.0001
-  silver_learning_rate: 0.00005
+  learning_rate: 0.0001         # gold-only arm
+  # silver_then_gold arm (v4). v3 (1 silver epoch at 5e-5, then 3 gold epochs at 1e-4) collapsed onto 6 rubric
+  # patterns on public: silver was underfit and the 26-sample gold pass overwrote it.
+  silver_epochs: 2
+  silver_learning_rate: 0.0001
+  silver_gold_replay: 2         # copies of the gold train set mixed into the silver stage
+  gold_after_silver_epochs: 2
+  gold_after_silver_learning_rate: 0.00003
+  silver_val_ratio: 0.1         # silver held out per exam; joins gold val for checkpoint selection
   warmup_ratio: 0.1
   lora_r: 16
   lora_alpha: 32

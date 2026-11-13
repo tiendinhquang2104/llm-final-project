@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 from src.task1.finetune import (
     best_epoch, choose_variant, encode_inference_prompt, encode_training_record,
-    evaluate_generations, load_silver_records, load_task1_splits,
+    evaluate_generations, load_silver_records, load_task1_splits, split_silver_validation,
 )
 
 
@@ -70,22 +70,32 @@ def run(args: argparse.Namespace) -> dict:
     )
     if not silver_manifest.get("gold_public_overlap_checked"):
         raise ValueError("Silver source was not checked against gold/public")
+    training = cfg["training"]
+    # A held-out slice of silver joins the 6 gold validation samples for checkpoint selection.
+    silver_train, silver_val = split_silver_validation(
+        silver, float(training.get("silver_val_ratio", 0.0)), int(cfg["seed"])
+    )
 
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
-    training = cfg["training"]
     max_length = int(training["max_length"])
     max_new_tokens = int(cfg["generation"]["max_new_tokens"])
     gold_rows = [encode_training_record(rec, tokenizer, max_length) for rec in gold_train]
-    silver_rows = [encode_training_record(rec, tokenizer, max_length) for rec in silver]
-    prompt_sizes = [len(encode_inference_prompt(rec, tokenizer, max_length)) for rec in gold_val]
+    silver_rows = [encode_training_record(rec, tokenizer, max_length) for rec in silver_train]
+    # Gold replay inside the silver stage: the student keeps seeing the real exams (weights, prerequisites)
+    # while it learns the teacher's finer score distribution, instead of a later gold-only pass overwriting it.
+    gold_replay = int(training.get("silver_gold_replay", 0))
+    silver_stage_rows = silver_rows + gold_rows * gold_replay
+    prompt_sizes = [len(encode_inference_prompt(rec, tokenizer, max_length)) for rec in gold_val + silver_val]
     if max(prompt_sizes) + max_new_tokens > max_length:
-        raise ValueError("Gold validation prompt plus generation budget exceeds max_length")
+        raise ValueError("Validation prompt plus generation budget exceeds max_length")
     preflight = {
         "model": model_name, "gold_train_records": len(gold_train),
-        "gold_val_records": len(gold_val), "silver_train_records": len(silver),
+        "gold_val_records": len(gold_val), "silver_train_records": len(silver_train),
+        "silver_val_records": len(silver_val), "silver_gold_replay": gold_replay,
+        "silver_stage_records": len(silver_stage_rows),
         "max_gold_tokens": max(row["total_tokens"] for row in gold_rows),
         "max_silver_tokens": max(row["total_tokens"] for row in silver_rows),
         "max_val_prompt_tokens": max(prompt_sizes), "max_length": max_length,
@@ -104,7 +114,7 @@ def run(args: argparse.Namespace) -> dict:
     if not torch.cuda.is_available():
         raise RuntimeError("QLoRA training requires a Colab CUDA GPU")
     done = {p.name for p in output.iterdir()} - {"smoke"} if output.exists() else set()
-    clash = {"all": done - {"training_config.json", "silver_manifest.json", "source_manifest.json"},
+    clash = {"all": done - {"training_config.json", "silver_manifest.json", "source_manifest.json", "silver_split.json"},
              "gold_only": done & {"gold_only"}, "silver_then_gold": done & {"silver_then_gold"},
              "select": done & {"best_adapter", "training_summary.json"}}[args.stage]
     if clash:
@@ -114,6 +124,10 @@ def run(args: argparse.Namespace) -> dict:
     _write(output / "silver_manifest.json", silver_manifest)
     if args.source_manifest:
         shutil.copy2(args.source_manifest, output / "source_manifest.json")
+    _write(output / "silver_split.json", {
+        "seed": cfg["seed"], "silver_val_ratio": training.get("silver_val_ratio", 0.0),
+        "train_ids": [r.sample_id for r in silver_train], "val_ids": [r.sample_id for r in silver_val],
+    })
 
     quantization = BitsAndBytesConfig(
         load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_use_double_quant=True,
@@ -202,39 +216,47 @@ def run(args: argparse.Namespace) -> dict:
         del baseline_model
         clear_gpu()
 
+    gold_after_epochs = int(training.get("gold_after_silver_epochs", training["epochs"]))
+    gold_after_lr = float(training.get("gold_after_silver_learning_rate", training["learning_rate"]))
     if args.stage in ("all", "silver_then_gold"):
         silver_model = fresh_model()
         silver_ckpts = train_stage(
-            silver_model, silver_rows, output / "silver_then_gold" / "silver",
+            silver_model, silver_stage_rows, output / "silver_then_gold" / "silver",
             epochs=int(training["silver_epochs"]), lr=float(training["silver_learning_rate"]),
         )
         silver_gold_ckpts = train_stage(
             silver_model, gold_rows, output / "silver_then_gold" / "gold",
-            epochs=int(training["epochs"]), lr=float(training["learning_rate"]),
-        )
+            epochs=gold_after_epochs, lr=gold_after_lr,
+        ) if gold_after_epochs > 0 else []
         del silver_model
         clear_gpu()
 
     if args.stage in ("gold_only", "silver_then_gold"):
         return {"stage": args.stage, "output": str(output), "data": preflight}
     if args.stage == "select":  # arms were trained by earlier processes: read their checkpoints from disk
-        n_gold, n_silver = (1, 1) if args.smoke else (int(training["epochs"]), int(training["silver_epochs"]))
+        if args.smoke:
+            n_gold, n_silver, n_after = 1, 1, int(gold_after_epochs > 0)
+        else:
+            n_gold, n_silver, n_after = int(training["epochs"]), int(training["silver_epochs"]), gold_after_epochs
         baseline_ckpts = _checkpoints(output / "gold_only" / "gold")
         silver_ckpts = _checkpoints(output / "silver_then_gold" / "silver")
         silver_gold_ckpts = _checkpoints(output / "silver_then_gold" / "gold")
-        if (len(baseline_ckpts), len(silver_ckpts), len(silver_gold_ckpts)) != (n_gold, n_silver, n_gold):
+        if (len(baseline_ckpts), len(silver_ckpts), len(silver_gold_ckpts)) != (n_gold, n_silver, n_after):
             raise RuntimeError("--stage select needs both arms trained first (gold_only, silver_then_gold)")
 
-    eval_records = gold_val[:1] if args.smoke else gold_val
+    gold_eval = gold_val[:1] if args.smoke else gold_val
+    silver_eval = silver_val[:1] if args.smoke else silver_val
+    eval_records = gold_eval + silver_eval
     eval_base = load_base()
     eval_base.config.use_cache = True
     eval_model = None
     previous_adapter = None
 
-    def evaluate_arm(name: str, checkpoints: list[Path]) -> dict:
+    def evaluate_arm(name: str, checkpoints: list[tuple[str, Path]]) -> dict:
+        """Evaluate every candidate checkpoint of an arm; `epoch` numbers them in training order."""
         nonlocal eval_model, previous_adapter
         results = []
-        for epoch, checkpoint in enumerate(checkpoints, 1):
+        for epoch, (stage, checkpoint) in enumerate(checkpoints, 1):
             adapter_name = f"{name}_{epoch}"
             if eval_model is None:
                 eval_model = PeftModel.from_pretrained(
@@ -260,22 +282,42 @@ def run(args: argparse.Namespace) -> dict:
                 raw_by_id[rec.sample_id] = tokenizer.decode(
                     generated[0][len(ids):], skip_special_tokens=True
                 )
-            metrics, details = evaluate_generations(eval_records, raw_by_id)
+            # `metrics` stays gold-validation only (comparable with the API runs and earlier adapters);
+            # checkpoint selection uses gold + held-out silver (`selection_metrics`).
+            metrics, details = evaluate_generations(
+                gold_eval, {r.sample_id: raw_by_id[r.sample_id] for r in gold_eval}
+            )
+            result = {"variant": name, "epoch": epoch, "stage": stage, "checkpoint": str(checkpoint),
+                      "metrics": metrics}
             epoch_dir = output / name / f"epoch_{epoch}"
             _write(epoch_dir / "metrics.json", metrics)
             _write(epoch_dir / "validation_predictions.json", details)
-            results.append({
-                "variant": name, "epoch": epoch, "checkpoint": str(checkpoint), "metrics": metrics
-            })
-            print(f"{name} epoch {epoch}: QWK={metrics['qwk']:.4f} MAE={metrics['mae']:.4f}", flush=True)
+            line = f"{name} #{epoch} ({stage}): gold QWK={metrics['qwk']:.4f} MAE={metrics['mae']:.4f}"
+            if silver_eval:
+                silver_metrics, silver_details = evaluate_generations(
+                    silver_eval, {r.sample_id: raw_by_id[r.sample_id] for r in silver_eval}
+                )
+                selection_metrics, _ = evaluate_generations(eval_records, raw_by_id)
+                result["silver_val_metrics"] = silver_metrics
+                result["selection_metrics"] = selection_metrics
+                _write(epoch_dir / "silver_val_metrics.json", silver_metrics)
+                _write(epoch_dir / "silver_validation_predictions.json", silver_details)
+                _write(epoch_dir / "selection_metrics.json", selection_metrics)
+                line += (f" | silver-val QWK={silver_metrics['qwk']:.4f}"
+                         f" | selection QWK={selection_metrics['qwk']:.4f} MAE={selection_metrics['mae']:.4f}")
+            results.append(result)
+            print(line, flush=True)
         selected = best_epoch(results)
         _write(output / name / "validation_report.json", {
             "selected": selected, "all_epochs": results
         })
         return selected
 
-    baseline_best = evaluate_arm("gold_only", baseline_ckpts)
-    silver_best = evaluate_arm("silver_then_gold", silver_gold_ckpts)
+    baseline_best = evaluate_arm("gold_only", [("gold", c) for c in baseline_ckpts])
+    # Silver-stage checkpoints are candidates too: the gold pass after silver may overwrite what silver taught.
+    silver_best = evaluate_arm(
+        "silver_then_gold", [("silver", c) for c in silver_ckpts] + [("gold", c) for c in silver_gold_ckpts]
+    )
     chosen = choose_variant(baseline_best, silver_best)
     del eval_model, eval_base
     clear_gpu()
@@ -291,7 +333,10 @@ def run(args: argparse.Namespace) -> dict:
     tokenizer.save_pretrained(best_dir)
     summary = {
         "model": model_name, "seed": cfg["seed"], "selected_variant": chosen["variant"],
-        "selected_epoch": chosen["epoch"], "selected_metrics": chosen["metrics"],
+        "selected_epoch": chosen["epoch"], "selected_stage": chosen.get("stage"),
+        "selected_metrics": chosen["metrics"],
+        "selection": "gold val + held-out silver val" if silver_eval else "gold val",
+        "selected_selection_metrics": chosen.get("selection_metrics"),
         "gold_only_best": baseline_best, "silver_then_gold_best": silver_best,
         "silver_stage_checkpoint": str(silver_ckpts[-1]), "data": preflight,
         "versions": {
