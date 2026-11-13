@@ -80,3 +80,7 @@ outputs/*
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Synthetic silver data (generate-dataset.zip) and its unpacked copies: never commit
+data/synth/*
+generate-dataset/

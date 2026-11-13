@@ -18,6 +18,7 @@ import re
 from dataclasses import dataclass, field
 
 from src.data.loader import DIM_MAX, DIMENSIONS
+from src.task1.score import from_cents, to_cents
 
 STATUSES = ("correct", "partial", "wrong", "runtime_error", "not_attempted")
 STATUS_CREDIT = {"correct": 1.0, "partial": 0.5, "wrong": 0.0, "runtime_error": 0.0, "not_attempted": 0.0}
@@ -48,6 +49,10 @@ class RuleConfig:
     prerequisite: bool = True
     prereq_strict: bool = False  # treat "partial" on a prerequisite as a failure
     compile_gate: bool = True
+    compile_from_log: bool = False  # compilable is set from the g++ log verdict when the release ships logs
+    # Not compilable and the statement has no "0 points" clause: the teacher still gives code_quality = 1
+    # (EX02: 3/3 samples). Only applied together with a log verdict.
+    quality_point_when_not_compilable: bool = False
 
     @classmethod
     def from_dict(cls, d: dict | None) -> "RuleConfig":
@@ -57,9 +62,14 @@ class RuleConfig:
 
 def _statement_zeroes_on_compile_error(statement: str) -> bool:
     """True when the statement says a non-compiling submission gets 0 points overall."""
-    for line in statement.splitlines():
-        low = line.lower()
+    lines = [line.lower() for line in statement.splitlines()]
+    for i, low in enumerate(lines):
         if "0 điểm" in low and "không biên dịch" in low:
+            return True
+        # English exams: "The following submissions will be marked with a 0 score:" + bullet "UNCOMPILABLE submission"
+        if re.search(r"\b(0|zero) scores?\b", low) and any(
+                re.search(r"uncompil|not compil|(fail|unable)\w* to compile|compil\w* error", nxt)
+                for nxt in lines[i:i + 8]):
             return True
     return False
 
@@ -108,17 +118,11 @@ def normalize_status(value: object) -> str | None:
     return aliases.get(s)
 
 
-def clamp_rubric(rubric: dict) -> dict[str, int]:
+def clamp_rubric(rubric: dict) -> dict[str, int | float]:
     out = {}
     for dim in DIMENSIONS:
         v = rubric.get(dim, 0)
-        try:
-            v = float(v)
-        except (TypeError, ValueError):
-            v = 0.0
-        if math.isnan(v):
-            v = 0.0
-        out[dim] = int(min(max(math.floor(v + 0.5), 0), DIM_MAX[dim]))
+        out[dim] = from_cents(to_cents(v, DIM_MAX[dim]))
     return out
 
 
@@ -136,11 +140,19 @@ def apply_rules(
     problem_status: dict[str, str] | None,
     policy: ExamPolicy,
     cfg: RuleConfig | None = None,
-) -> tuple[dict[str, int], int, list[str]]:
-    """Return (final_rubric, total_score, trace). Pure function — no I/O, no model calls."""
+    compile_ok: bool | None = None,
+) -> tuple[dict[str, int | float], int | float, list[str]]:
+    """Return (final_rubric, total_score, trace). Pure function — no I/O, no model calls.
+
+    compile_ok: verdict of the compile log (None = no log information: the model's `compilable` is kept).
+    """
     cfg = cfg or RuleConfig()
     trace: list[str] = []
-    r = clamp_rubric(rubric) if cfg.clamp else {d: int(rubric.get(d, 0)) for d in DIMENSIONS}
+    r = clamp_rubric(rubric)
+    from_log = cfg.compile_from_log and compile_ok is not None
+    if from_log and r["compilable"] != int(compile_ok):
+        trace.append(f"compile_log:compilable:{r['compilable']}->{int(compile_ok)}")
+        r["compilable"] = int(compile_ok)
     statuses = {pid: s for pid, s in (problem_status or {}).items() if s is not None}
 
     if cfg.prerequisite and policy.prerequisites:
@@ -179,5 +191,9 @@ def apply_rules(
             if r[dim] != 0:
                 trace.append(f"compile_zero:{dim}:{r[dim]}->0")
                 r[dim] = 0
+        if (from_log and cfg.quality_point_when_not_compilable and r["code_quality"] == 0
+                and "code_quality" not in policy.zero_on_not_compilable):
+            trace.append("compile_quality:code_quality:0->1")
+            r["code_quality"] = 1
 
-    return r, sum(r.values()), trace
+    return r, from_cents(sum(to_cents(r[d], DIM_MAX[d]) for d in DIMENSIONS)), trace

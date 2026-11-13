@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import sys
 import types
 from pathlib import Path
@@ -24,7 +25,8 @@ def test_timeout_falls_back_to_hidden_input_once():
     colab.userdata = userdata
     google = types.ModuleType("google")
     google.colab = colab
-    source = _secret_cell().replace("RUN_LIVE = False", "RUN_LIVE = True")
+    source = re.sub(r"^PROVIDERS = .*", "PROVIDERS = ('gemini', 'openai')", _secret_cell(), flags=re.M)
+    source = source.replace("RUN_LIVE = False", "RUN_LIVE = True")
     with mock.patch.dict(sys.modules, {"google": google, "google.colab": colab}), \
             mock.patch.dict(os.environ, {"GEMINI_API_KEY": "", "OPENAI_API_KEY": ""}), \
             mock.patch("getpass.getpass", side_effect=["test-gemini", "test-openai"]) as hidden:
@@ -36,8 +38,8 @@ def test_timeout_falls_back_to_hidden_input_once():
 
 
 def test_selected_provider_only_requires_its_key():
-    source = _secret_cell().replace("RUN_LIVE = False", "RUN_LIVE = True")
-    source = source.replace("PROVIDERS = ('gemini', 'openai')", "PROVIDERS = ('openai',)")
+    source = re.sub(r"^PROVIDERS = .*", "PROVIDERS = ('openai',)", _secret_cell(), flags=re.M)
+    source = source.replace("RUN_LIVE = False", "RUN_LIVE = True")
     with mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test-openai", "GEMINI_API_KEY": ""}), \
             mock.patch("getpass.getpass") as hidden:
         exec(compile(source, "secret-cell", "exec"), {"os": os})

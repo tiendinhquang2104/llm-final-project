@@ -13,17 +13,19 @@ openai:
 
 gemini:
   # Model served by the Gemini API: gemma-4-26b-a4b-it, gemma-4-31b-it, gemini-3.1-flash-lite, gemini-3.8-flash, ...
-  model: gemma-4-26b-a4b-it
+  model: gemini-3.5-flash-lite
   # Client-side throttling — keep below the model's limits in AI Studio (https://aistudio.google.com/rate-limit).
   #   gemma-4-*:              30 RPM / 16K TPM / 14.4K RPD  -> rpm 25, tpm 15000 (TPM is the bottleneck)
   #   gemini-3.x-flash-lite:  15 RPM / 250K TPM / 500 RPD   -> rpm 12, tpm 0
   #   gemini-3.x-flash:        5 RPM / 250K TPM / 20 RPD    -> rpm 4,  tpm 0
-  rpm: 8
-  tpm: 15000                  # input tokens/minute, estimated client-side (0 = off)
-  max_requests_per_run: 150   # hard cap per invocation
+  rpm: 12
+  tpm: 0                      # input tokens/minute, estimated client-side (0 = off; RPM-only throttle)
+  max_requests_per_run: 480   # hard cap per invocation (360 public + parse-retry buffer)
   concurrency: 2
   timeout: 180
   json_mode: true             # auto-disabled if the model rejects it
+  # Optional billing estimate: set input_usd_per_million, output_usd_per_million,
+  # and price_checked_date after checking your Gemini billing tier. If omitted, USD is unknown.
   # thinking_off / thinking_on: optional thinkingConfig overrides; default is chosen per model family
   # (Gemini 3: low/high, Gemma 4: minimal/high, Gemini 2.5: thinkingBudget 0/-1).
 
@@ -32,10 +34,12 @@ run:
   test_sample_ids: [EX01-S106]
   experiments:                # file names in configs/task1/ (without .yaml)
     - e1_zero_shot_plain
+    - e2_zero_shot_structured     # zero-shot structured: same conditions as the unseen public exams
     - e3_few_shot_structured
   run_final: false            # zero-shot and few-shot baseline only; enable for submission run
-  predict_file: null          # e.g. task1_grading.json -> outputs/task1/predictions/task1_predictions.json
-  predict_root: null          # folder of the dev/test set (exams.json + submissions/); null = training data folder
+  predict_file: null          # optional legacy trigger; prefer --predict-only --predict-root
+  predict_root: null          # extracted public release root (exams.json + submissions/)
+  predict_experiment: e7_compile_signal  # e2 + compile verdict from the g++ log: best public QWK (0.8759; e2 0.8707)
   use_cache: true             # reuse raw model outputs already obtained (no new API calls)
 
 output_dir: outputs/task1

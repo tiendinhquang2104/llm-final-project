@@ -17,7 +17,8 @@ class CostLimitReached(RuntimeError):
 def response_schema(exam: dict, template: str = "structured") -> dict:
     rubric = {
         "type": "object",
-        "properties": {d: {"type": "integer", "minimum": 0, "maximum": DIM_MAX[d]} for d in DIMENSIONS},
+        "properties": {d: {"type": "number", "minimum": 0, "maximum": DIM_MAX[d], "multipleOf": 0.01}
+                       for d in DIMENSIONS},
         "required": DIMENSIONS,
         "additionalProperties": False,
     }
@@ -130,6 +131,7 @@ class OpenAIBackend(Backend):
             "output_tokens": output_tokens,
             "cost_usd": billed if usage is not None else None,
             "usage_missing": usage is None,
+            "estimated_reserve_usd": reserve if usage is None else None,
         })
         return (getattr(response, "output_text", "") or "") if getattr(response, "status", "completed") == "completed" else ""
 

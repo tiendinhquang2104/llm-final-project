@@ -4,27 +4,43 @@ from __future__ import annotations
 import math
 
 from src.data.loader import DIM_MAX, DIMENSIONS, Dataset, Sample
+from src.task1.compile_signal import ERROR, UNKNOWN, compile_verdict, release_has_logs, sample_log
 from src.task1.prerequisite_rules import RuleConfig, apply_rules, clamp_rubric, policy_from_exam
 from src.task1.prompts import build_messages, select_demos
-from src.task1.scorer import aggregate, parse_output
+from src.task1.scorer import aggregate, parse_output, round_half_up
+from src.task1.score import to_cents
 
 RETRY_MSG = (
     "Câu trả lời trên không phải JSON hợp lệ theo schema yêu cầu. "
     "Hãy trả về DUY NHẤT một object JSON hợp lệ, không thêm chữ nào khác."
 )
 
+PUBLIC_CSV = {"Class01-Test1": ("generals.csv", "50-best-european-generals-cleaned-first-20.csv"),
+              "Class01-Test2": ("generals.csv", "50-best-european-generals-cleaned-first-20.csv"),
+              "Class02-Test1": ("battles.csv", "50-european-battles-first-20.csv")}
 
-def valid_parsed(parsed, exam_type: str) -> bool:
-    """Accept only an in-range rubric and a P1 verdict where prerequisite rules need it."""
+
+def valid_parsed(parsed, exam_type: str, template: str = "structured") -> bool:
+    """Accept only an in-range rubric and a P1 verdict where prerequisite rules need it.
+
+    The plain template asks for the six scores only (no per-problem status), so it never has a P1 verdict.
+    """
     if not parsed.ok or not parsed.rubric:
         return False
     if any(not isinstance(parsed.rubric.get(d), (int, float))
            or isinstance(parsed.rubric[d], bool)
            or not math.isfinite(parsed.rubric[d])
-           or int(parsed.rubric[d]) != parsed.rubric[d]
-           or not 0 <= parsed.rubric[d] <= DIM_MAX[d] for d in DIMENSIONS):
+           or not _valid_score(parsed.rubric[d], DIM_MAX[d]) for d in DIMENSIONS):
         return False
-    return exam_type != "multi_problem" or bool(parsed.problems.get("P1"))
+    return exam_type != "multi_problem" or template == "plain" or bool(parsed.problems.get("P1"))
+
+
+def _valid_score(value: object, maximum: int) -> bool:
+    try:
+        to_cents(value, maximum)
+        return True
+    except ValueError:
+        return False
 
 
 class Task1Pipeline:
@@ -39,18 +55,29 @@ class Task1Pipeline:
         self.policies = {eid: policy_from_exam(e, (cfg.get("policy_overrides") or {}).get(eid))
                          for eid, e in dataset.exams.items()}
         self._by_id = dataset.by_id()
+        self.logs_informative = release_has_logs(dataset.samples)
+
+        self.csv_headers = {}
+        for exam_id, (display_name, filename) in PUBLIC_CSV.items():
+            if exam_id in dataset.exams:
+                path = dataset.root / "data_files" / filename
+                if not path.is_file():
+                    raise FileNotFoundError(f"Missing public exam data file: {path}")
+                self.csv_headers[exam_id] = f"{display_name}: {path.read_text(encoding='utf-8-sig').splitlines()[0]}"
 
     # -- inference ---------------------------------------------------------------------------------
     def build_request(self, sample: Sample) -> dict:
         exam = self.ds.exams[sample.exam_id]
         k = int(self.prompt_cfg.get("few_shot_k", 0))
-        demos = select_demos(self.demo_pool, sample, k, self.prompt_cfg.get("demo_strategy", "spread"))
+        demos = select_demos(self.demo_pool, sample, k, self.prompt_cfg.get("demo_strategy", "spread"),
+                             self.prompt_cfg.get("demo_fallback", "none"))
         return {
             "sample": sample,
             "exam": exam,
             "template": self.prompt_cfg.get("template", "structured"),
             "demos": [d.sample_id for d in demos],
-            "messages": build_messages(exam, sample, demos, self.prompt_cfg),
+            "messages": build_messages(exam, sample, demos, self.prompt_cfg,
+                                        self.csv_headers.get(sample.exam_id, ""), self.logs_informative),
         }
 
     def infer(self, samples: list[Sample]) -> list[dict]:
@@ -59,7 +86,7 @@ class Task1Pipeline:
         outs = self.backend.generate(reqs, self.gen_cfg)
         records = []
         for q, texts in zip(reqs, outs):
-            records.append({"sample_id": q["sample"].sample_id, "exam_type": q["sample"].exam_type,
+            records.append({"sample_id": q["sample"].sample_id, "exam_type": q["sample"].exam_type, "template": q.get("template", "structured"),
                             "demos": q["demos"], "outputs": texts,
                             "retry_outputs": []})
         n_retry = int(self.cfg.get("retry_on_parse_fail", 1))
@@ -87,7 +114,7 @@ class Task1Pipeline:
 
     # -- post-processing (pure; can be re-run with different rule configs) -------------------------
     def _valid(self, parsed, sample: Sample) -> bool:
-        return valid_parsed(parsed, sample.exam_type)
+        return valid_parsed(parsed, sample.exam_type, self.prompt_cfg.get("template", "structured"))
 
     def postprocess(self, record: dict, rule_cfg: RuleConfig | None = None) -> dict:
         rule_cfg = rule_cfg or self.rule_cfg
@@ -103,7 +130,14 @@ class Task1Pipeline:
                     "problems": {}, "rationale": "", "rubric_llm": None, "total_llm": None,
                     "rubric": None, "total_score": None, "rule_trace": []}
         rubric_llm = clamp_rubric(rubric)
-        final, total, trace = apply_rules(rubric, statuses, self.policies[sample.exam_id], rule_cfg)
+        # Teacher scores are integers on every dimension: round a fractional answer half up BEFORE the rules, so the
+        # compile gate and prerequisite rule see the score that is submitted (compilable 0.4 -> 0 must zero the rest).
+        rounded = {d: round_half_up(float(v)) for d, v in rubric_llm.items()}
+        round_trace = [f"round:{d}:{rubric_llm[d]}->{rounded[d]}" for d in rubric_llm if rounded[d] != rubric_llm[d]]
+        verdict = compile_verdict(*sample_log(sample, self.logs_informative))
+        final, total, trace = apply_rules(rounded, statuses, self.policies[sample.exam_id], rule_cfg,
+                                          compile_ok=None if verdict == UNKNOWN else verdict != ERROR)
+        trace = round_trace + trace
         return {
             "sample_id": sample.sample_id,
             "exam_id": sample.exam_id,

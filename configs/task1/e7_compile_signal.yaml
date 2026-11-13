@@ -1,0 +1,11 @@
+extends: base.yaml
+name: e7_compile_signal
+description: e2 (zero-shot structured) + compile verdict decided in code from the g++ log. Compiler error <=> compilable 0;
+  warnings and a missing main are graded normally; code_quality point kept when the statement has no "0 points" clause.
+prompt:
+  template: structured
+  few_shot_k: 0
+  compile_signal: true
+rules:
+  compile_from_log: true
+  quality_point_when_not_compilable: true

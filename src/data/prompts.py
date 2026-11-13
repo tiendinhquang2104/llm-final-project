@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from src.data.schema import ChatMLRecord, TaskId, UnifiedSample
@@ -61,7 +62,47 @@ def _format_test_report(test_report: list[dict[str, Any]] | None) -> str:
     return "\n".join(lines)
 
 
-def _shared_context(sample: UnifiedSample, *, include_taxonomy: bool = False) -> str:
+# The organizer's compile logs in the labelled sample are cut at 2000 characters; a release can ship longer ones
+# (one public multi_problem log is ~16K tokens of cascading errors). Same cut everywhere, so a prompt never
+# depends on where the log came from.
+COMPILE_LOG_MAX_CHARS = 2000
+
+
+_DIAGNOSTIC = re.compile(r"^\S+:\d+:\d+: (fatal error|error|warning|note):")
+_LINKER = re.compile(r"(^/usr/bin/ld|undefined reference|collect2: error|ld returned)")
+# Warnings-only log == compiled fine. Shown exactly like an absent log, the only form seen in training (the
+# current gold and silver ship no compile_log at all).
+NO_COMPILE_ERROR = "(không có compile log)"
+
+
+def compile_errors_only(log: str) -> str:
+    """Keep compiler errors (with their source excerpt) and linker errors; drop warnings/notes.
+
+    A log made only of warnings means the code compiles (the teacher grades e.g. `main()` without a type as
+    compilable), but a long block of text in the prompt otherwise reads as a failed build.
+    """
+    kept, keep = [], False
+    for line in log.splitlines():
+        m = _DIAGNOSTIC.match(line)
+        if m:
+            keep = m.group(1) in ("error", "fatal error")
+        elif _LINKER.search(line):
+            keep = True
+        elif line.startswith(("student.cpp: In ", "In file included")):
+            keep = False  # context header; the error line that follows carries its own location
+        if keep:
+            kept.append(line)
+    return "\n".join(kept).strip()
+
+
+def _compile_log_text(log: str | None) -> str:
+    if not log or not log.strip():
+        return "(không có compile log)"
+    errors = compile_errors_only(log.strip())
+    return errors[:COMPILE_LOG_MAX_CHARS] if errors else NO_COMPILE_ERROR
+
+
+def _shared_context(sample: Any, *, include_taxonomy: bool = False) -> str:
     """Build the user-visible context. NEVER includes teacher feedback."""
     parts = [
         f"exam_id: {sample.exam_id}",
@@ -78,7 +119,7 @@ def _shared_context(sample: UnifiedSample, *, include_taxonomy: bool = False) ->
         "```",
         "",
         "## Compile log",
-        (sample.compile_log.strip() if sample.compile_log else "(rỗng / biên dịch OK)"),
+        _compile_log_text(sample.compile_log),
         "",
         "## Test report (public)",
         _format_test_report(sample.test_report),
@@ -105,24 +146,25 @@ def messages_to_chatml(messages: list[dict[str, str]]) -> str:
     return "\n".join(chunks) + "\n"
 
 
-def build_task1_messages(sample: UnifiedSample) -> tuple[list[dict[str, str]], str]:
+def build_task1_prompt(sample: Any) -> list[dict[str, str]]:
+    """System + user messages only: the exact inference prompt of the Task 1 adapter (no label needed)."""
     user = (
         _shared_context(sample)
         + "\n\nHãy chấm điểm và trả về JSON đúng schema:\n"
         '{"rubric":{"compilable":0|1,"io_format":0|1,"logic":0-4,'
         '"edge_case":0-2,"complexity":0|1,"code_quality":0|1},"total_score":0-10}'
     )
+    return [{"role": "system", "content": SYSTEM_TASK1}, {"role": "user", "content": user}]
+
+
+def build_task1_messages(sample: Any) -> tuple[list[dict[str, str]], str]:
+    prompt = build_task1_prompt(sample)
     target_obj = {
-        "rubric": sample.rubric.model_dump(),
+        "rubric": sample.rubric.model_dump() if hasattr(sample.rubric, "model_dump") else sample.rubric,
         "total_score": sample.total_score,
     }
     target = json.dumps(target_obj, ensure_ascii=False, separators=(",", ":"))
-    messages = [
-        {"role": "system", "content": SYSTEM_TASK1},
-        {"role": "user", "content": user},
-        {"role": "assistant", "content": target},
-    ]
-    return messages, target
+    return prompt + [{"role": "assistant", "content": target}], target
 
 
 def build_task2_messages(sample: UnifiedSample) -> tuple[list[dict[str, str]], str]:

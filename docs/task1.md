@@ -1,5 +1,8 @@
 # Task 1 — Chấm điểm theo rubric (Hướng 1: Prompting qua API)
 
+> **Hướng 2 — fine-tune QLoRA** (Qwen2.5-Coder-7B, adapter riêng của Task 1, gold + silver, dự đoán public test, chạy trên
+> Kaggle): xem [`docs/task1_finetune.md`](task1_finetune.md).
+
 Chấm 6 chiều rubric (`compilable 0-1, io_format 0-1, logic 0-4, edge_case 0-2, complexity 0-1, code_quality 0-1`,
 tổng 0–10) cho bài C++ bằng **Gemini API hoặc OpenAI Responses API** qua cùng một prompt, rule và evaluator.
 
@@ -79,7 +82,25 @@ python scripts/run_task1.py --provider openai
 | `e4_few_shot_thinking` | + thinking mode (CoT) |
 | `e5_policy_in_prompt` | ablation: chính sách đề ghi trong prompt, **tắt** rule code |
 | `e6_self_consistency` | n=5 mẫu, T=0.7, median từng chiều + bỏ phiếu trạng thái |
+| `e7_compile_signal` | e2 + kết luận biên dịch quyết định bằng code từ log g++ (`src/task1/compile_signal.py`): có lỗi compiler ⇔ `compilable = 0`; warning hay thiếu `main` vẫn chấm bình thường. **Cấu hình dự đoán mặc định** (`run.yaml: predict_experiment`) |
 | `final` | pipeline cuối (hiện = e3 + full rules) |
+
+### Kết quả public leaderboard — `gemini-3.5-flash-lite`, 328 bài của 6 đề mới
+
+Đề public không có trong train nên dùng cấu hình zero-shot (e2/e7); few-shot e3 cần bài mẫu cùng đề.
+
+| Config | QWK | MAE | compilable | io_format | logic | edge_case | complexity | code_quality |
+|---|---|---|---|---|---|---|---|---|
+| e2 zero-shot structured + rule | 0.8707 | 1.16 | 0.902 | 0.893 | 0.726 | 0.808 | 0.875 | 0.808 |
+| **e7** = e2 + compile signal | **0.8759** | **1.12** | 0.909 | 0.878 | 0.723 | 0.808 | 0.866 | 0.814 |
+
+e7 hơn e2 chủ yếu ở `compilable` và `code_quality`; 99/328 bài public có `compile_log`. Hướng fine-tune (QLoRA v4,
+QWK 0.7955) xem [`task1_finetune.md`](task1_finetune.md).
+
+```bash
+python scripts/run_task1.py --provider gemini --data-dir <sample_dataset> --splits-dir data/splits \
+  --predict-only --predict-root <public_test_release> --preflight   # mặc định --predict-experiment e7_compile_signal
+```
 
 ### Kết quả lịch sử — `gemma-4-26b-a4b-it`, 19 bài val trên split 13/19
 

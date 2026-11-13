@@ -52,6 +52,11 @@ class TestPrerequisiteRule(unittest.TestCase):
         self.assertEqual(total, 2)
         self.assertTrue(any(t.startswith("prereq:P1=wrong") for t in trace))
 
+    def test_prereq_wrong_zeroes_fractional_dependents(self):
+        scores = {**FULL, "logic": 3.75, "edge_case": 1.25}
+        r, total, _ = apply_rules(scores, {**OK4, "P1": "wrong"}, self.pol)
+        self.assertEqual((r["logic"], r["edge_case"], total), (0, 0, 2))
+
     def test_each_fail_status_triggers(self):
         for st in ("wrong", "runtime_error", "not_attempted"):
             with self.subTest(st=st):
@@ -109,14 +114,17 @@ class TestCompileGate(unittest.TestCase):
 
 class TestClampAndDerive(unittest.TestCase):
     def test_clamp(self):
-        r = clamp_rubric({"compilable": 3, "io_format": -1, "logic": 2.6, "edge_case": "x", "complexity": 1})
-        self.assertEqual(r, {"compilable": 1, "io_format": 0, "logic": 3, "edge_case": 0, "complexity": 1,
-                             "code_quality": 0})
+        r = clamp_rubric({"compilable": 1, "io_format": 0.01, "logic": 2.6, "edge_case": 0,
+                          "complexity": 1, "code_quality": 0})
+        self.assertEqual(r["logic"], 2.6)
+        self.assertEqual(r["io_format"], 0.01)
+        with self.assertRaises(ValueError):
+            clamp_rubric({**r, "logic": 2.601})
 
     def test_total_is_sum_of_dims(self):
-        _, total, _ = apply_rules({"compilable": 1, "io_format": 1, "logic": 9, "edge_case": 2, "complexity": 1,
+        _, total, _ = apply_rules({"compilable": 1, "io_format": 1, "logic": 3.75, "edge_case": 2, "complexity": 1,
                                    "code_quality": 1}, OK4, policy_from_exam(EXAMS["EX01"]))
-        self.assertEqual(total, 10)
+        self.assertEqual(total, 9.75)
 
     def test_derive_logic_weighted(self):
         w = {"P1": 2.5, "P2": 2.5, "P3": 2.5, "P4": 2.5}

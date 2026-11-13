@@ -24,7 +24,7 @@ llm-grading-challenge/
 ├── run.sh
 ├── configs/
 │   ├── base.yaml
-│   ├── task1/ (base.yaml, e1..e6 experiments, final.yaml, run.yaml)
+│   ├── task1/ (base.yaml, e1..e7 experiments, final.yaml, run.yaml, lora_7b.yaml)
 │   ├── task2/ (baseline_api.yaml, lora.yaml)
 │   └── task3/ (baseline_api.yaml, lora.yaml)
 ├── data/
@@ -34,7 +34,8 @@ llm-grading-challenge/
 │   └── README.md
 ├── src/
 │   ├── data/ (loader, schema, preprocessing, validation)
-│   ├── task1/ (prompts, scorer, prerequisite_rules, evaluator, pipeline, experiment)
+│   ├── task1/ (prompts, scorer, prerequisite_rules, compile_signal, evaluator, pipeline, experiment,
+│   │          public_predict, finetune, silver_data)
 │   ├── task2/ (prompts, dataset, model, train, inference, threshold, evaluator)
 │   ├── task3/ (prompts, dataset, model, train, inference, compliance, evaluator)
 │   ├── llm/ (Gemini and OpenAI API backends)
@@ -45,6 +46,9 @@ llm-grading-challenge/
 │   ├── prepare_data.py
 │   ├── create_split.py
 │   ├── run_task1.py           (+ audit_task1_labels.py, compare_task1_runs.py)
+│   ├── run_task1_finetune.py  (QLoRA: train_task1.py, predict_task1_finetuned.py, prepare_task1_silver.py)
+│   ├── distill_task1_silver.py (API relabels synthetic silver)
+│   ├── archive_submission.py  (local leaderboard log)
 │   ├── run_task2.py
 │   ├── run_task3.py
 │   ├── evaluate.py
