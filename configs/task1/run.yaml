@@ -39,7 +39,7 @@ run:
   run_final: false            # zero-shot and few-shot baseline only; enable for submission run
   predict_file: null          # optional legacy trigger; prefer --predict-only --predict-root
   predict_root: null          # extracted public release root (exams.json + submissions/)
-  predict_experiment: e2_zero_shot_structured  # zero-shot structured on six unseen public exams
+  predict_experiment: e7_compile_signal  # e2 + compile verdict from the g++ log: best public QWK (0.8759; e2 0.8707)
   use_cache: true             # reuse raw model outputs already obtained (no new API calls)
 
 output_dir: outputs/task1

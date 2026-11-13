@@ -130,14 +130,14 @@ class Task1Pipeline:
                     "problems": {}, "rationale": "", "rubric_llm": None, "total_llm": None,
                     "rubric": None, "total_score": None, "rule_trace": []}
         rubric_llm = clamp_rubric(rubric)
+        # Teacher scores are integers on every dimension: round a fractional answer half up BEFORE the rules, so the
+        # compile gate and prerequisite rule see the score that is submitted (compilable 0.4 -> 0 must zero the rest).
+        rounded = {d: round_half_up(float(v)) for d, v in rubric_llm.items()}
+        round_trace = [f"round:{d}:{rubric_llm[d]}->{rounded[d]}" for d in rubric_llm if rounded[d] != rubric_llm[d]]
         verdict = compile_verdict(*sample_log(sample, self.logs_informative))
-        final, total, trace = apply_rules(rubric, statuses, self.policies[sample.exam_id], rule_cfg,
+        final, total, trace = apply_rules(rounded, statuses, self.policies[sample.exam_id], rule_cfg,
                                           compile_ok=None if verdict == UNKNOWN else verdict != ERROR)
-        # Teacher scores are integers on every dimension: round a fractional answer half up (counted in trace).
-        rounded = {d: round_half_up(float(v)) for d, v in final.items()}
-        if rounded != final:
-            trace = trace + [f"round:{d}:{final[d]}->{rounded[d]}" for d in final if rounded[d] != final[d]]
-            final, total = rounded, sum(rounded.values())
+        trace = round_trace + trace
         return {
             "sample_id": sample.sample_id,
             "exam_id": sample.exam_id,

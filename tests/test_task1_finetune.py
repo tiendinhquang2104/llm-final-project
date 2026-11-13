@@ -20,10 +20,10 @@ from src.task1.finetune import (
 
 ROOT = Path(__file__).resolve().parents[1]
 RUBRIC = {
-    "compilable": 1, "io_format": 1, "logic": 2.25,
-    "edge_case": 1.5, "complexity": 1, "code_quality": 1,
+    "compilable": 1, "io_format": 1, "logic": 2,
+    "edge_case": 1, "complexity": 1, "code_quality": 1,
 }
-TARGET = json.dumps({"rubric": RUBRIC, "total_score": 7.75})
+TARGET = json.dumps({"rubric": RUBRIC, "total_score": 7})
 
 
 def record(sample_id="S1", split="train", task="task1", prompt="Grade C++ code"):
@@ -99,16 +99,22 @@ def test_generated_json_decimal_sum_and_metrics():
     rec = record("S2", "val")
     pred, json_ok, strict_ok = parse_generated_score(TARGET)
     assert (json_ok, strict_ok) == (True, True)
-    assert pred["total_score"] == 7.75
-    wrong_total = json.dumps({"rubric": RUBRIC, "total_score": 7.5})
+    assert pred["total_score"] == 7
+    wrong_total = json.dumps({"rubric": RUBRIC, "total_score": 6})
     corrected, json_ok, strict_ok = parse_generated_score(wrong_total)
-    assert json_ok and not strict_ok and corrected["total_score"] == 7.75
+    assert json_ok and not strict_ok and corrected["total_score"] == 7
+    # A fractional answer is rounded half up (gold labels and the submission validator are integer-only) and counted
+    # as non-strict, instead of failing the whole submission.
+    fractional = json.dumps({"rubric": {**RUBRIC, "logic": 2.5, "edge_case": 1.49}, "total_score": 7.99})
+    rounded, json_ok, strict_ok = parse_generated_score(fractional)
+    assert json_ok and not strict_ok
+    assert rounded["rubric"]["logic"] == 3 and rounded["rubric"]["edge_case"] == 1 and rounded["total_score"] == 8
     assert parse_generated_score("not json") == (None, False, False)
     fenced, json_ok, strict_ok = parse_generated_score("```json\n" + TARGET + "\n```")  # instruct-model habit
     assert (json_ok, strict_ok) == (True, True) and fenced == pred
     assert parse_generated_score("```\n" + TARGET + "\n```")[0] == pred
     assert parse_generated_score("Here:\n```json\n" + TARGET + "\n```") == (None, False, False)  # extra prose
-    invalid_step = json.dumps({"rubric": {**RUBRIC, "logic": 2.255}, "total_score": 7.755})
+    invalid_step = json.dumps({"rubric": {**RUBRIC, "logic": 2.255}, "total_score": 7.255})
     assert parse_generated_score(invalid_step) == (None, True, False)
     metrics, details = evaluate_generations([rec], {"S2": TARGET})
     assert metrics["mae"] == 0 and metrics["valid_output_rate"] == 1

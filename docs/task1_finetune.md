@@ -8,11 +8,11 @@ Mỗi task có **một adapter LoRA riêng**. Tài liệu này mô tả adapter 
 | Bước | File | Nội dung |
 |---|---|---|
 | Gold | `scripts/prepare_data.py` → `task1_{train,val}.jsonl` | 32 bài giảng viên chấm, split cố định 26/6 (`data/splits/`) |
-| Silver | `scripts/prepare_task1_silver.py`, `src/task1/silver_data.py` | 462 bài tổng hợp (`generate-dataset.zip`). Loại bài trùng code, mâu thuẫn với `exec_report`, trùng gold/public → **422 bài**. `heldout/` và các ID chỉ có ở Task 3 không bao giờ được đọc. `exec_report` chỉ dùng để kiểm tra chất lượng, không vào prompt |
+| Silver | `scripts/prepare_task1_silver.py`, `src/task1/silver_data.py` | 462 bài tổng hợp (`generate-dataset.zip`). Loại bài trùng code, mâu thuẫn với `exec_report`, trùng gold/public → **422 bài** với nhãn generator, **418 bài** với nhãn API (v3+; bộ lọc chạy trên nhãn mới). Từ v4, 10% mỗi đề (41 bài) giữ lại để chọn checkpoint, còn 377 bài train. `heldout/` và các ID chỉ có ở Task 3 không bao giờ được đọc. `exec_report` chỉ dùng để kiểm tra chất lượng, không vào prompt |
 | Prompt | `src/data/prompts.py` (`build_task1_prompt`) | Cùng một prompt cho train, đánh giá và dự đoán: đề + code + compile log + test report; **không có `feedback`** |
 | Train | `scripts/train_task1.py`, `configs/task1/lora_7b.yaml` | QLoRA 4-bit NF4, r 16 / alpha 32, loss chỉ tính trên phần JSON trả lời. Hai nhánh cùng seed: **gold-only** (3 epoch trên 26 gold, lr 1e-4) và **silver → gold** (v4: 2 epoch silver trộn 2 bản gold, lr 1e-4, rồi 2 epoch gold lr 3e-5; xem [v4](#v4-sửa-cách-train-sau-khi-v3-bị-mode-collapse)) |
 | Chọn adapter | `src/task1/finetune.py` | Mỗi checkpoint (cả checkpoint cuối giai đoạn silver) được đánh giá trên **6 bài gold val + 10% silver giữ lại theo từng đề** (QWK, rồi MAE). Chọn checkpoint tốt nhất của mỗi nhánh, rồi chọn nhánh tốt hơn; hòa thì giữ gold-only → `best_adapter/`. `metrics` trong báo cáo vẫn là gold val để so được với hướng API |
-| Dự đoán | `scripts/predict_task1_finetuned.py` | `best_adapter` + greedy decoding trên 360 bài public. Checkpoint theo batch nên chạy lại sẽ tiếp tục từ chỗ dở. Kiểm tra định dạng trước khi ghi `task1_predictions.json` |
+| Dự đoán | `scripts/predict_task1_finetuned.py` | `best_adapter` + greedy decoding trên 328 bài public. Checkpoint theo batch nên chạy lại sẽ tiếp tục từ chỗ dở. Kiểm tra định dạng trước khi ghi `task1_predictions.json` |
 
 **Đầu ra của model** là `{"rubric": {...}, "total_score": n}`. `total_score` luôn được tính lại bằng tổng 6 chiều.
 Bài nào model trả JSON hỏng thì nhận điểm trung vị rubric của các bài gold cùng dạng đề, có đánh dấu
@@ -120,31 +120,37 @@ Notebook có thêm cell tải model trước, thử lại tối đa 5 lần, đ�
 3. **Dữ liệu:** repo đang public, nên notebook **không chứa ID file Drive** (theo quy định không phát tán dữ liệu). Chọn
    một trong hai cách:
    - **Kaggle Dataset private (khuyến nghị):** Kaggle → Datasets → New Dataset → tải lên
-     `public-test-cham-diem-phan-hoi-files.zip` và `generate-dataset.zip`, đặt **Private**. Notebook tự tìm theo tên file.
+     `public-test-cham-diem-phan-hoi-files.zip` và silver: `v1_api.zip` (zip của `data/synth/v1_api`, nhãn API, dùng với
+     `SILVER = 'api'`) và/hoặc `generate-dataset.zip` (nhãn generator, `SILVER = 'generator'`), đặt **Private**.
+     Notebook nhận diện từng bộ theo nội dung (`distill_manifest.json` đánh dấu silver API), không theo tên file.
    - **Kaggle Secrets:** trong notebook, Add-ons → Secrets, thêm `TASK1_GOLD_PUBLIC_ZIP_ID` và `TASK1_SILVER_ZIP_ID`
      (ID file trên Drive; file phải có quyền xem qua link). Notebook tải bằng `gdown`.
 
 ### 2. Tạo notebook
 1. Kaggle → **Code → New Notebook → File → Import Notebook** → chọn `kaggle/task1_finetune.ipynb`.
 2. Panel **Settings:** Accelerator **GPU T4 x2**, **Internet On**. Nếu dùng dataset riêng: **Add Input → Datasets**.
+3. Khi code notebook đổi (ví dụ cell tải model của v4), **import lại** file notebook: code `scripts/` luôn clone mới từ
+   GitHub, nhưng các cell của notebook thì không.
 
 ### 3. Chạy thử (`MODE = 'smoke'`, mặc định)
 **Run All**, khoảng 15–25 phút (phần lớn là tải model khoảng 15 GB). Trong output phải thấy:
-- dữ liệu: gold 26/6 và silver 422/462;
-- preflight: `max_gold_tokens`, `max_silver_tokens`, `max_val_prompt_tokens` đều nhỏ hơn 4096;
+- dữ liệu: `silver labels: api -> .../v1_api`, gold 26/6;
+- `base model: ...` (cell tải model, thử lại tối đa 5 lần);
+- preflight: `silver_train_records: 377`, `silver_val_records: 41`, `silver_stage_records: 429` (với `SILVER = 'generator'`
+  silver sau lọc là 422 thay vì 418); `max_gold_tokens`, `max_silver_tokens`, `max_val_prompt_tokens` đều nhỏ hơn 4096;
 - smoke: train xong, có `error_analysis.md`, và dự đoán 6 bài public in ra `submission -> ...`.
 
 ### 4. Chạy đầy đủ (`MODE = 'full'`)
 Đổi `MODE = 'full'` → **Save Version → Save & Run All**. Notebook chạy nền, có thể đóng tab. Ước tính trên 1 T4
-(cần đo lại):
+(cấu hình v4, cần đo lại từ `run_info.json`):
 
 | Giai đoạn | Thời gian |
 |---|---|
-| Train gold-only (3 × 26) + silver (422) + gold sau silver (3 × 26) | ~1,5–3 giờ |
-| Đánh giá 6 epoch × 6 bài val | ~15–30 phút |
-| Dự đoán 360 bài public (batch 4) | ~40–90 phút |
+| Train gold-only (3 × 26) + silver (2 × 429) + gold sau silver (2 × 26) | ~2,5–4 giờ |
+| Đánh giá 7 checkpoint × 47 bài (6 gold val + 41 silver val) | ~30–60 phút |
+| Dự đoán 328 bài public (batch 4) | ~40–90 phút |
 
-Toàn bộ khoảng 3–5 giờ, nằm trong giới hạn 12 giờ mỗi phiên. Quota GPU của Kaggle là khoảng 30 giờ mỗi tuần.
+Toàn bộ khoảng 4–6,5 giờ, nằm trong giới hạn 12 giờ mỗi phiên. Quota GPU của Kaggle là khoảng 30 giờ mỗi tuần.
 
 ### 5. Lấy kết quả
 Version → tab **Output** → `task1_qlora/full/`:
@@ -152,10 +158,10 @@ Version → tab **Output** → `task1_qlora/full/`:
 | File | Dùng để |
 |---|---|
 | `best_adapter/` | **Adapter Task 1** (khoảng 160 MB) + tokenizer. Tải về `checkpoints/task1_qlora/best_adapter/` (git bỏ qua `checkpoints/*`) hoặc lưu thành Kaggle Dataset private |
-| `training_summary.json` | Nhánh và epoch được chọn, QWK/MAE của cả hai nhánh, phiên bản thư viện |
+| `training_summary.json` | Nhánh, checkpoint (`selected_epoch`, `selected_stage`) được chọn; QWK/MAE gold val (`metrics`), silver val và tập chọn (`selection_metrics`) của cả hai nhánh; phiên bản thư viện |
 | `error_analysis.md` | Bài lệch ≥ 2 điểm hoặc trả JSON hỏng, kèm các chiều chấm sai: dùng cho phần phân tích lỗi |
 | `gold_only/`, `silver_then_gold/` | `validation_report.json`, `epoch_*/metrics.json` (gold val), `epoch_*/silver_val_metrics.json`, `epoch_*/selection_metrics.json`: dùng cho bảng ablation. Trong `silver_then_gold/`, `epoch_1..2` là checkpoint silver, `epoch_3..4` là checkpoint gold |
-| `public_predictions/task1_predictions.json` | **File nộp** 360 bài, đã kiểm tra định dạng |
+| `public_predictions/task1_predictions.json` | **File nộp** 328 bài, đã kiểm tra định dạng |
 | `public_predictions/run_info.json` | GPU, VRAM, thời gian, số token, số bài fallback: dùng cho phần phần cứng và chi phí |
 
 Điền các số này vào [`docs/task1_model_card.md`](task1_model_card.md).

@@ -156,16 +156,19 @@ def parse_generated_score(text: str) -> tuple[dict[str, Any] | None, bool, bool]
         cents = {d: to_cents(rubric[d], DIM_MAX[d]) for d in DIMENSIONS}
     except ValueError:
         return None, True, False
-    total_cents = sum(cents.values())
-    prediction = {
-        "rubric": {d: from_cents(cents[d]) for d in DIMENSIONS},
-        "total_score": from_cents(total_cents),
-    }
+    raw_total_cents = sum(cents.values())
+    # Teacher scores (and the submission validator) are integers on every dimension: round a fractional answer half
+    # up, as the API pipeline does, instead of letting one such output fail the whole submission.
+    rounded = {d: (cents[d] + 50) // 100 for d in DIMENSIONS}
+    prediction = {"rubric": rounded, "total_score": sum(rounded.values())}
     try:
         raw_total = to_cents(obj["total_score"], 10)
     except (KeyError, ValueError):
         raw_total = None
-    strict_valid = set(obj) == {"rubric", "total_score"} and raw_total == total_cents
+    strict_valid = (
+        set(obj) == {"rubric", "total_score"} and raw_total == raw_total_cents
+        and all(c % 100 == 0 for c in cents.values())
+    )
     return prediction, True, strict_valid
 
 

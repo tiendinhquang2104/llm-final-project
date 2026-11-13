@@ -88,7 +88,7 @@ def main() -> None:
     ap.add_argument("--smoke", action="store_true", help="Run one validation sample per selected experiment")
     ap.add_argument("--predict-only", action="store_true", help="Predict the unlabeled public release (328 samples)")
     ap.add_argument("--predict-root", help="Extracted public release, or its parent directory")
-    ap.add_argument("--predict-experiment", default="e2_zero_shot_structured")
+    ap.add_argument("--predict-experiment", default="e7_compile_signal")
     ap.add_argument("--predict-ids", help="Comma-separated public sample IDs for a smoke run")
     a = ap.parse_args()
     load_dotenv()
@@ -146,7 +146,7 @@ def main() -> None:
             cfg = prepare(name, settings, provider)
             results[cfg["name"]] = run_experiment(cfg, ds, split, backend, out, use_cache=run.get("use_cache", True))
         if run.get("predict_file") and not run.get("test_mode"):
-            cfg = prepare(run.get("predict_experiment", "e2_zero_shot_structured"), settings, provider)
+            cfg = prepare(run.get("predict_experiment", "e7_compile_signal"), settings, provider)
             pred_root = Path(run["predict_root"]) if run.get("predict_root") else data_root
             public_ds, _ = public_preflight(pred_root, cfg, ds, split["train"])
             result = predict_public(public_ds, cfg, backend, out, ds, split["train"])

@@ -124,10 +124,18 @@ def run(args: argparse.Namespace) -> dict:
     _write(output / "silver_manifest.json", silver_manifest)
     if args.source_manifest:
         shutil.copy2(args.source_manifest, output / "source_manifest.json")
-    _write(output / "silver_split.json", {
+    split = {
         "seed": cfg["seed"], "silver_val_ratio": training.get("silver_val_ratio", 0.0),
         "train_ids": [r.sample_id for r in silver_train], "val_ids": [r.sample_id for r in silver_val],
-    })
+    }
+    split_file = output / "silver_split.json"
+    # Stages run as separate processes: the held-out silver set must stay the one the arms were trained without.
+    if split_file.exists():
+        if json.loads(split_file.read_text(encoding="utf-8")) != split:
+            raise RuntimeError(f"Silver train/val split differs from {split_file}: seed, silver_val_ratio or the "
+                               "silver input changed between stages; use a fresh output directory")
+    else:
+        _write(split_file, split)
 
     quantization = BitsAndBytesConfig(
         load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_use_double_quant=True,

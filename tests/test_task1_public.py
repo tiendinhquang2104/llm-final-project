@@ -52,6 +52,20 @@ def test_structured_pipeline_rounds_fractional_answers(tmp_path):
     assert preds[0]["rubric"]["logic"] == 4 and preds[0]["rubric"]["io_format"] == 0  # half up, 0.01 -> 0
     assert preds[0]["total_score"] == 5 and any(t.startswith("round:") for t in preds[0]["rule_trace"])
 
+    class LowCompileBackend(FakeBackend):
+        def generate(self, requests, gen):
+            self.calls += 1
+            return [[json.dumps({"problems": [{"pid": "P1", "status": "correct"}],
+                                 "rubric": {"compilable": 0.4, "io_format": 1, "logic": 3, "edge_case": 2,
+                                            "complexity": 1, "code_quality": 1}})]]
+
+    # Rounding happens before the rules: compilable 0.4 -> 0 must go through the compile gate like a model 0.
+    _, preds = Task1Pipeline(ds, LowCompileBackend(), cfg).run([sample])
+    rubric = preds[0]["rubric"]
+    assert rubric["compilable"] == 0 and rubric["logic"] == 0 and rubric["io_format"] == 0
+    assert preds[0]["total_score"] == sum(rubric.values())
+    assert preds[0]["rule_trace"][0] == "round:compilable:0.4->0"
+
 
 def synthetic_public(root: Path) -> Dataset:
     data_files = root / "data_files"
